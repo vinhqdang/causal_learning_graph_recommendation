@@ -455,8 +455,8 @@ the imputation itself. Extending the propagation to five hops
 (Theorem~\ref{thm:khop}) adds a further $+0.0018$ (nDCG@20 $0.6402$; $p=0.11$
 against three hops), and the 5-hop variant beats every trained baseline with
 $p<0.01$. As a sensitivity check, lowering the learning rate of MF, LightGCN and
-NAVIP to $10^{-3}$ changed their validation score on split~0 by at most $0.002$
-and never raised their test score. On Coat, five hops neither help nor hurt.
+NAVIP to $10^{-3}$ raised the split-0 validation score only for MF (by $0.002$),
+lowered it for LightGCN and NAVIP, and never raised the test score. On Coat, five hops neither help nor hurt.
 On Coat, DRUP significantly outperforms MF, IPS-MF,
 DR-MF, LightGCN and NAVIP, and ties with DR-LightGCN. It is, however,
 significantly \emph{below} the additive imputation model ($-0.014$) and the
