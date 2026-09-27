@@ -1,0 +1,29 @@
+\begin{tabular}{lccc}
+\toprule
+Method & \multicolumn{3}{c}{metrics (Coat: nDCG@5, Recall@5, nDCG@10; KuaiRec: nDCG@20, Recall@20, nDCG@50)}\\
+\midrule
+\multicolumn{4}{l}{\textit{Coat}}\\
+Popularity & 0.5367$\pm$0.0095 & 0.6441$\pm$0.0093 & 0.6599$\pm$0.0086\\
+Imputation only & \textbf{0.5662$\pm$0.0095} & \textbf{0.6736$\pm$0.0120} & \textbf{0.6787$\pm$0.0071}\\
+MF & 0.4619$\pm$0.0224 & 0.5666$\pm$0.0213 & 0.6056$\pm$0.0178\\
+IPS-MF & 0.4569$\pm$0.0234 & 0.5579$\pm$0.0241 & 0.6049$\pm$0.0178\\
+DR-MF & 0.5357$\pm$0.0141 & 0.6473$\pm$0.0162 & 0.6575$\pm$0.0113\\
+LightGCN & 0.5077$\pm$0.0173 & 0.6036$\pm$0.0216 & 0.6403$\pm$0.0109\\
+NAVIP-LightGCN & 0.4994$\pm$0.0199 & 0.5979$\pm$0.0246 & 0.6329$\pm$0.0129\\
+DR-LightGCN & 0.5560$\pm$0.0241 & 0.6565$\pm$0.0254 & 0.6725$\pm$0.0165\\
+Linear LightGCN (logged graph) & 0.5571$\pm$0.0100 & 0.6461$\pm$0.0094 & \underline{0.6745$\pm$0.0076}\\
+IPS adjacency (NAVIP-style) & 0.5438$\pm$0.0186 & 0.6403$\pm$0.0152 & 0.6641$\pm$0.0138\\
+IPS adjacency + WC & 0.5438$\pm$0.0186 & 0.6403$\pm$0.0152 & 0.6641$\pm$0.0138\\
+DR adjacency & \underline{0.5586$\pm$0.0124} & \underline{0.6728$\pm$0.0143} & 0.6737$\pm$0.0088\\
+\textbf{DRUP (ours)} & 0.5526$\pm$0.0134 & 0.6637$\pm$0.0157 & 0.6720$\pm$0.0108\\
+\midrule
+\multicolumn{4}{l}{\textit{KuaiRec}}\\
+Popularity & 0.5766$\pm$0.0023 & 0.1656$\pm$0.0016 & 0.4610$\pm$0.0019\\
+Imputation only & 0.6215$\pm$0.0014 & 0.1867$\pm$0.0020 & 0.5112$\pm$0.0013\\
+Linear LightGCN (logged graph) & 0.6036$\pm$0.0028 & 0.1815$\pm$0.0016 & 0.4985$\pm$0.0024\\
+IPS adjacency (NAVIP-style) & 0.5954$\pm$0.0022 & 0.1829$\pm$0.0015 & 0.4892$\pm$0.0017\\
+IPS adjacency + WC & 0.5954$\pm$0.0022 & 0.1829$\pm$0.0015 & 0.4892$\pm$0.0017\\
+DR adjacency & \underline{0.6318$\pm$0.0017} & \underline{0.1927$\pm$0.0023} & \underline{0.5144$\pm$0.0019}\\
+\textbf{DRUP (ours)} & \textbf{0.6326$\pm$0.0018} & \textbf{0.1929$\pm$0.0025} & \textbf{0.5147$\pm$0.0015}\\
+\bottomrule
+\end{tabular}

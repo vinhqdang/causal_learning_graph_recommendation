@@ -221,3 +221,8 @@ __marimo__/
 data/raw/
 *.zip
 __pycache__/
+paper/*.aux
+paper/*.log
+paper/*.bbl
+paper/*.blg
+paper/*.out

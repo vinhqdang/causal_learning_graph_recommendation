@@ -338,9 +338,10 @@ def main():
                     sigma = 0.0
                 else:
                     Gd, k, sigma = fat.dp_item_operator(W, C, eps, 1e-5, R, generator=g)
-                best = max(ranks, key=lambda rk: utility(fat.low_rank_denoise(Gd, rk), pval))
+                comps = fat.spectral_components(Gd, max(r_ for r_ in ranks if r_))
+                best = max(ranks, key=lambda rk: utility(fat.low_rank_denoise(Gd, rk, comps), pval))
                 chosen_r.append(best)
-                vals.append(utility(fat.low_rank_denoise(Gd, best), ptest))
+                vals.append(utility(fat.low_rank_denoise(Gd, best, comps), ptest))
             res[str(eps)] = {"ndcg": float(np.mean(vals)), "std": float(np.std(vals)), "sigma": sigma,
                              "ranks": chosen_r}
             print("privacy eps", eps, res[str(eps)], flush=True)

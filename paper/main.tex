@@ -1,0 +1,543 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{adjustbox}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{assumption}{Assumption}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\tW}{\tilde W}
+\newcommand{\tY}{\tilde Y}
+
+\title{Walk-Unbiased Doubly Robust Graph Propagation:\\
+Provably Fair, Transparent, Accountable and Private Recommendation from Exposure-Biased Logs}
+\author{Quang-Vinh Dang\\
+British University Vietnam, Hung Yen, Vietnam\\
+\texttt{vinh.dq4@buv.edu.vn} \quad ORCID: 0000-0002-3877-8024}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Graph-based recommenders propagate preferences along multi-hop walks of the
+logged user--item graph. This graph is filtered by the platform's own exposure
+policy, so propagation amplifies exposure bias. Recent debiasing methods
+reweight the edges of this graph by inverse propensities or impute missing
+edges with doubly robust (DR) estimates. We show that these corrections are
+still biased once propagation spans more than one hop. A walk that revisits an
+edge squares that edge's estimate, and the squared inverse propensity inflates
+exactly the rarely exposed edges that debiasing is meant to recover. We derive
+the exact bias and a lower bound that grows as the inverse of the propensity
+clip. Because outcomes are binary, the fix is simple: every repeated edge is
+replaced by its unbiased idempotent counterpart. The resulting operator,
+\emph{DRUP} (Doubly Robust, walk-Unbiased Propagation), is exactly unbiased and
+edge-wise doubly robust for propagation over the counterfactual full-exposure
+graph, and it costs no more than the uncorrected operator. The same structure
+gives DRUP provable properties beyond accuracy:
+(i) variance, clipping-bias and concentration bounds;
+(ii) exposure invariance, a causal item-fairness guarantee that the expected
+score does not depend on interventions on an item's exposure, whereas logged-graph
+propagation amplifies exposure and uncorrected DR propagation over-corrects it;
+(iii) scores that are affine in each user's own interactions, which yields exact
+Shapley attributions and provably minimal counterfactual explanations;
+(iv) closed-form certificates against injected fake profiles; and
+(v) a single public item operator whose Gaussian release makes the whole
+recommender jointly differentially private.
+On Coat and KuaiRec, whose test sets are random or fully observed, DRUP needs no
+training. Its accuracy matches or exceeds trained MF, LightGCN, NAVIP and DR
+baselines, and every guarantee is verified empirically.
+\end{abstract}
+
+\noindent\textbf{Keywords:} causal recommendation; graph neural networks; doubly robust estimation;
+exposure bias; fairness; explainability; certified robustness; differential privacy.
+
+%======================================================================
+\section{Introduction}
+%======================================================================
+
+Graph-based recommender systems (GBRs) represent users and items as nodes and
+logged interactions as edges. They score a user--item pair by aggregating
+signals along multi-hop walks~\cite{he2020lightgcn,shen2021gfcf}. The logged
+graph, however, is not the preference graph. An edge exists only if the platform
+\emph{exposed} the item and the user then responded. A recent survey of causal
+learning in GBRs~\cite{yu2026survey} traces four open challenges to this gap:
+out-of-distribution generalisation, dynamic preferences, fairness and
+interpretability. All four arise because message passing propagates
+correlations of the observational graph rather than causal preference
+structure. The same survey lists the lack of theoretical guarantees,
+scalability and privacy as open directions.
+
+Two families of fixes exist. \emph{Loss-level} debiasing (IPS, DR) reweights
+the training objective~\cite{schnabel2016,wang2019drjl,saito2020unbiased} but
+leaves the propagation operator biased. \emph{Propagation-level} debiasing
+reweights edges by inverse propensities during neighbour
+aggregation~\cite{kim2022navip,dpaa2026}. We show that the second family is
+itself biased for multi-hop propagation. The root cause is elementary. The
+edge estimate $W_e=O_eY_e/p_e$ is unbiased for the potential outcome $Y_e$, but
+a walk that traverses $e$ twice contributes $W_e^2$, and
+$\E[W_e^2]=Y_e/p_e\neq Y_e$. Walks with repeated edges are not rare corner
+cases. They include every back-and-forth step $u\to j\to u$ that makes LightGCN
+self-reinforcing. Their bias is largest precisely where the propensity is
+smallest.
+
+\paragraph{Contributions.}
+\begin{enumerate}
+\item We identify the \emph{repeated-walk bias} of inverse-propensity and DR
+graph propagation. We give its exact form and a lower bound that is unbounded as
+propensities vanish (Theorem~\ref{thm:lower}).
+\item We propose DRUP. Using $Y_e^2=Y_e$, DRUP replaces each repeated edge by
+its idempotent unbiased counterpart. The resulting 3-hop operator is exactly
+unbiased and edge-wise doubly robust for propagation over the counterfactual
+full-exposure graph (Theorem~\ref{thm:unbiased}). It has the cost of one item
+Gram matrix, needs no training, and factorises into a public item operator plus
+per-user local corrections.
+\item We prove variance, clipping-bias and concentration bounds
+(Theorem~\ref{thm:var}).
+\item We show that the same structure yields provable \emph{FAT+P}
+properties:
+causal item fairness via exposure invariance (Theorem~\ref{thm:fair});
+exact attributions and optimal counterfactual explanations
+(Proposition~\ref{prop:affine}, Theorem~\ref{thm:cf});
+certified robustness to injected profiles (Theorem~\ref{thm:robust});
+and joint differential privacy (Theorem~\ref{thm:dp}).
+\item We evaluate DRUP on Coat~\cite{schnabel2016}, whose test set is a random
+sample, and on KuaiRec~\cite{gao2022kuairec}, whose test matrix is fully
+observed. We compare it with trained and training-free baselines and verify each
+guarantee: by Monte Carlo, by a real-data intervention on exposure, by brute
+force, and against realised attacks.
+\end{enumerate}
+
+%======================================================================
+\section{Related work}
+%======================================================================
+
+\paragraph{Causal and debiased recommendation.}
+Inverse propensity scoring~\cite{schnabel2016} and doubly robust
+learning~\cite{wang2019drjl} are the standard tools for MNAR feedback. Causal
+embeddings disentangle interest from conformity~\cite{zheng2021dice}. The survey
+of~\cite{yu2026survey} organises causal GBRs by challenge. None of these
+methods analyses the bias of the \emph{propagation operator} beyond one hop.
+
+\paragraph{Debiased message passing.}
+NAVIP~\cite{kim2022navip} applies inverse-propensity weights with Laplacian
+normalisation inside LightGCN aggregation. DPAA~\cite{dpaa2026} learns
+popularity-aware aggregation weights. Both are unbiased for a single
+aggregation step at most. Theorem~\ref{thm:lower} shows that stacking such
+steps reintroduces a bias of order $1/p$.
+
+\paragraph{Linear graph filters.}
+LightGCN is a polynomial filter of the normalised adjacency, and closed-form
+filters are competitive with it~\cite{shen2021gfcf}. DRUP is a closed-form
+filter on a debiased operator. Its linearity is what makes exact explanations,
+certificates and DP releases possible.
+
+\paragraph{Explanations, robustness and privacy.}
+GNNExplainer~\cite{ying2019gnnexplainer} and CF-GNNExplainer~\cite{lucic2022cfgnn}
+approximate explanations by optimising on a surrogate. PORE~\cite{jia2023pore}
+certifies recommenders against poisoning by ensembling. Differentially private
+recommenders release noisy item covariances~\cite{mcsherry2009netflix}.
+DRUP gives exact explanations, closed-form certificates and a joint-DP
+guarantee~\cite{hsu2014matchings} for one and the same scoring rule.
+
+%======================================================================
+\section{Problem setting}
+%======================================================================
+
+Users $u\in[m]$, items $i\in[n]$ and pairs $e=(u,i)$ carry a binary potential
+outcome $Y_e$ and an exposure $O_e\sim\mathrm{Bernoulli}(p_e)$. The log reveals
+$O$ and $O\odot Y$.
+
+\begin{assumption}[Unconfoundedness]\label{as:unconf}
+Given the propensities, the exposures $O_e$ are mutually independent and
+independent of $Y$.
+\end{assumption}
+
+\begin{assumption}[Fixed nuisances]\label{as:fixed}
+The propensity estimate $\hat p$, the imputation $\hat Y\in[0,1]^{m\times n}$
+and the edge weights $C$ do not depend on $O$. This holds with cross-fitting or
+with nuisances estimated on a vetted historical log. We use
+$C_{ui}=d_u^{-\alpha}d_i^{-(1-\alpha)}$ with degrees taken from $\hat Y$.
+\end{assumption}
+
+With $\tY=C\odot Y$, the target is propagation over the full-exposure graph:
+\begin{equation}
+F^*=a\,\tY+b\,T^*,\qquad T^*=\tY\tY^\top\tY .
+\end{equation}
+This is the linear LightGCN / graph-filter score one would compute if every
+item had been shown to every user.
+
+%======================================================================
+\section{DRUP}
+%======================================================================
+
+\paragraph{Edge estimates.}
+With clipped propensities $\bar p=\max(\hat p,\tau)$,
+\begin{equation}
+W^{\mathrm{IPS}}_e=\frac{O_eY_e}{\bar p_e},\qquad
+W^{\mathrm{DR}}_e=\hat Y_e+\frac{O_e(Y_e-\hat Y_e)}{\bar p_e}.
+\end{equation}
+Both have mean $Y_e$ when $\bar p=p$.
+
+\paragraph{Idempotent walk correction.}
+Let $\tW=C\odot W$ and $\Delta=\tW\odot\tW-C\odot C\odot W$, with row sums $r$
+and column sums $\kappa$. The corrected 3-hop operator is
+\begin{equation}\label{eq:drup}
+\hat T=\tW\tW^\top\tW-\tW\odot(r\mathbf 1^\top-\Delta)-\tW\odot(\mathbf 1\kappa^\top-\Delta)
+-(\tW^{\odot3}-C^{\odot3}\odot W).
+\end{equation}
+The three corrections handle walks $u\!-\!j\!-\!v\!-\!i$ with $v=u$, with $j=i$,
+and with both. In each case every repeated factor $\tW_e^k$ is replaced by
+$C_e^kW_e$. The DRUP score is $s=a\tW+b\hat T$ with global constants $a,b$.
+
+\paragraph{Public-operator form.}
+Define the diagonal-corrected item Gram matrix
+$G=\tW^\top\tW-\diag(\tW^\top\tW)+\diag(\mathbf 1^\top(C\odot C\odot W))$.
+Then
+\begin{equation}\label{eq:local}
+\hat T_{u\cdot}=\tilde w_uG-\tilde w_u\odot(r_u\mathbf 1^\top-2\delta_u)-(\tilde w_u^{\odot3}-c_u^{\odot3}\odot w_u),
+\end{equation}
+where $\delta_u=\tilde w_u^{\odot2}-c_u^{\odot2}\odot w_u$. Equation~\eqref{eq:local}
+matches~\eqref{eq:drup} to machine precision. $G$ is the only object shared
+across users (Algorithm~\ref{alg:drup}).
+
+\begin{algorithm}[t]
+\caption{DRUP (training-free)}\label{alg:drup}
+\begin{algorithmic}[1]
+\Require log $(O,O\odot Y)$; hyper-parameters $\tau,\alpha,\lambda,b/a$
+\State fit propensities $\hat p$ (logistic exposure model) and imputation $\hat Y$ (IPS-weighted additive ridge)
+\State $\bar p\gets\max(\hat p,\tau)$; \ $W\gets\hat Y+O\odot(Y-\hat Y)/\bar p$
+\State $C\gets d_u^{-\alpha}d_i^{-(1-\alpha)}$ with $d$ from $\hat Y$
+\State $G\gets\tW^\top\tW-\diag(\tW^\top\tW)+\diag(\mathbf 1^\top(C\odot C\odot W))$ \Comment{public operator}
+\For{each user $u$ (locally)}
+\State $\hat T_{u\cdot}\gets$ Eq.~\eqref{eq:local}; \ $s_u\gets a\,\tilde w_u+b\,\hat T_{u\cdot}$; rank unexposed items by $s_u$
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Complexity.}
+One $n\times n$ Gram product and $O(mn)$ reductions, i.e., the cost of the
+uncorrected operator. On KuaiRec (7{,}176 users, 10{,}728 items, 10.3M exposures)
+one configuration takes under a minute on four CPU cores.
+
+%======================================================================
+\section{Theory}
+%======================================================================
+
+Full proofs are in Appendix~\ref{app:proofs}. Let $\varepsilon_e=|Y_e-\hat Y_e|$.
+
+\begin{theorem}[Edge-wise double robustness]\label{thm:unbiased}
+Under Assumptions~\ref{as:unconf}--\ref{as:fixed}, let
+$\delta_e=(p_e/\bar p_e-1)(Y_e-\hat Y_e)$. Then $\E[\hat T_{ui}]$ equals $T^*_{ui}$
+with every $Y_e$ replaced by $Y_e+\delta_e$. In particular, if every edge has a
+correct propensity or a correct imputation, then $\E[s]=F^*$.
+\end{theorem}
+
+\begin{theorem}[Repeated-walk bias of uncorrected propagation]\label{thm:lower}
+With correct propensities and a candidate $(u,i)$ with $O_{ui}=0$, the
+uncorrected DR propagation $\tW\tW^\top\tW$ has conditional bias
+\[
+C_{ui}\hat Y_{ui}\,(R_u+K_i)-C_{ui}^3\hat Y_{ui}(1-\hat Y_{ui}^2),\qquad
+K_i=\sum_{v\neq u}C_{vi}^2\,\tfrac{1-p_{vi}}{p_{vi}}\,\varepsilon_{vi}^2,
+\]
+and $R_u$ is the analogous sum over the user's own edges. The within-user
+ranking bias $C_{ui}\hat Y_{ui}K_i$ satisfies
+$K_i\ge(1/\max_vp_{vi}-1)\sum_{v\neq u}C_{vi}^2\varepsilon_{vi}^2$. It therefore
+diverges as the item's propensities vanish, and it is $\Omega(1/\tau)$ under
+clipping. DRUP's bias is zero.
+\end{theorem}
+
+\begin{theorem}[Variance, clipping and concentration]\label{thm:var}
+Let $\Lambda_e(u,i)$ be the $C$-weighted mass of the walks from $u$ to $i$
+through edge $e$, and let $B=\max(1,1/\tau)$. Then
+(a) $\Var(W_e)\le\varepsilon_e^2/\tau$;
+(b) $\Var(\hat T_{ui})\le\frac{(1+1/\tau)^2}{\tau}\sum_e\varepsilon_e^2\Lambda_e(u,i)^2$;
+(c) $|\E\hat T_{ui}-T^*_{ui}|\le3\bar\delta(1+\bar\delta)^2\sum_{j,v}C_{uj}C_{vj}C_{vi}$ with
+$\bar\delta=\max_e(1-p_e/\tau)_+\varepsilon_e$;
+(d) $\Pr(|\hat T_{ui}-\E\hat T_{ui}|\ge t)\le2\exp(-2t^2/\sum_ec_e^2)$ with
+$c_e=\varepsilon_eB^2\Lambda_e(u,i)/\tau$.
+\end{theorem}
+
+The variance scales with the imputation error $\varepsilon^2$, not with $Y^2$
+as for IPS, and the clip $\tau$ trades variance against a clipping bias that
+vanishes when $\hat Y$ is accurate.
+
+\begin{definition}[Exposure elasticity]
+For an intervention $do(p_{\cdot i}\leftarrow\pi p_{\cdot i})$ on item $i$'s
+exposure mechanism, $\eta_i=\partial\log\E[s_{ui}]/\partial\log\pi$.
+\end{definition}
+
+\begin{theorem}[Exposure invariance: causal item fairness]\label{thm:fair}
+Under Assumptions~\ref{as:unconf}--\ref{as:fixed} and $\pi p\ge\tau$, DRUP has
+$\eta_i=0$, so items with equal potential outcomes receive equal expected
+scores whatever their exposure history. Logged-graph propagation has
+$\eta_i\ge1$ (popularity amplification). Uncorrected DR propagation has
+$\eta_i<0$ whenever $\hat Y_{ui}K_i>0$ (over-correction).
+\end{theorem}
+
+\begin{proposition}[Affine in the user's own data]\label{prop:affine}
+Fix $u$ and a candidate $i$ with $O_{ui}=0$, and let $G^{(-u)}$ be $G$ without
+$u$'s own contribution. Then
+$s_{ui}=\mathrm{const}+\sum_{j\neq i}\big(c_{uj}G^{(-u)}_{ji}+c_{ui}w_{ui}c_{uj}^2\big)w_{uj}$.
+Hence un-logging interaction $j$ changes $s_{ui}$ by exactly
+$\phi_j=a_j(w_{uj}-\hat Y_{uj})$. Removal effects add up over any subset, the
+$\phi_j$ are the exact Shapley values, and completeness holds exactly.
+\end{proposition}
+
+\begin{theorem}[Optimal minimal counterfactual explanation]\label{thm:cf}
+For candidates $i,k$ with $s_{ui}>s_{uk}$, sorting $g_j=\phi^{(i)}_j-\phi^{(k)}_j$ in
+decreasing order and removing interactions until the cumulative sum exceeds the
+margin yields a minimum-cardinality set whose removal makes $k$ outrank $i$.
+If the positive $g_j$ do not sum above the margin, no such set exists. The
+cost is $O(n+d_u\log d_u)$.
+\end{theorem}
+
+\begin{theorem}[Certified robustness to injected profiles]\label{thm:robust}
+With frozen nuisances, one injected user $v$ changes $u$'s 3-hop score of item
+$k$ by $\Delta_k=x_k(D+a_kc_{vk})-a_kx_k^2$, where $a=\tilde w_u$, $x=c_v\odot w_v$
+and $D=\langle a,x\rangle$. If $v$ logs at most $L$ interactions with arbitrary
+items, labels and propensities $\ge\tau$, then $D$ and $x_k$ lie in closed-form
+intervals. $\Delta_k$ is linear in $D$ and quadratic in $x_k$, so its extremes
+$[\underline\Delta_k,\overline\Delta_k]$ over this box are exact. Item $t$
+provably stays out of $u$'s top-$K$ against any $F$ such users if
+$s_{ut}+F\overline\Delta_t$ is below the $(K{+}1)$-th largest value of
+$s_{uk}+F\underline\Delta_k$. With unclipped IPS, the influence of a single
+interaction is unbounded.
+\end{theorem}
+
+\begin{theorem}[Joint differential privacy]\label{thm:dp}
+Scale each user row so that $\|\tilde w_v\|_2\le R$ and
+$\|c_v^{\odot2}\odot w_v\|_2\le R^2$. Releasing $G$ plus symmetric Gaussian noise with
+$\sigma=2R^2\sqrt{2\ln(1.25/\delta)}/\epsilon$ is $(\epsilon,\delta)$-DP under adding
+or removing one user. Scoring by~\eqref{eq:local} uses only the release and the
+user's own row, so the recommender is $(\epsilon,\delta)$-jointly
+DP~\cite{hsu2014matchings}. Post-processing such as low-rank denoising is free.
+\end{theorem}
+
+%======================================================================
+\section{Experiments}
+%======================================================================
+
+\subsection{Setup}
+\paragraph{Data.}
+\emph{Coat}~\cite{schnabel2016} has 290 users and 300 items. Training
+consists of 6{,}960 self-selected (MNAR) ratings. Testing uses 16 ratings per
+user on random items (MAR), and we rank only items the user never rated. The
+dataset ships propensities; we also fit our own exposure model, with the same
+conclusions. \emph{KuaiRec}~\cite{gao2022kuairec} provides the big matrix
+(7{,}176 users, 10{,}728 items, 10.3M logged views) as the MNAR log and a fully
+observed small matrix (1{,}411 users, 3{,}327 items, 99.6\% dense) as the test
+set. We rank all never-logged small-matrix items. Positives are ratings $\ge4$
+(Coat) and watch ratio $\ge2$ (KuaiRec).
+
+\paragraph{Protocol.}
+Hyper-parameters are chosen on a validation part of the unbiased data: 30\% of
+each user's test items for Coat, 30\% of the test users for KuaiRec. We report
+the held-out remainder, averaged over 10 (Coat) or 5 (KuaiRec) random splits;
+trained baselines use 10 and 3 splits. The baselines are popularity,
+imputation only, and MF / IPS-MF / DR-MF / LightGCN / NAVIP-LightGCN /
+DR-LightGCN trained with early stopping. The training-free propagation family
+shares one scoring form and differs only in its operator: logged graph (linear
+LightGCN), IPS adjacency (NAVIP-style), IPS with walk correction (WC), DR
+adjacency, and DRUP.
+
+\subsection{Monte-Carlo verification}
+Table~\ref{tab:mc} uses a synthetic MNAR model with known propensities,
+20{,}000 replications for bias and 3{,}000 for elasticity. The uncorrected IPS
+and DR operators have relative biases of 2.4 and 1.9. With the walk correction,
+bias disappears: the fraction of entries with $|z|>3$ matches the 0.27\% expected
+by chance, and RMSE drops about fivefold. Elasticity follows
+Theorem~\ref{thm:fair}: $+1.78$ for the logged graph, $-0.19$ for DR adjacency,
+and $\approx0$ for DRUP.
+
+\begin{table}[t]\centering\small
+\caption{Monte-Carlo check of Theorems~\ref{thm:unbiased}, \ref{thm:lower} and \ref{thm:fair}.}\label{tab:mc}
+\input{tables/mc.tex}
+\end{table}
+
+\subsection{Accuracy}
+\begin{table}[t]\centering\small
+\caption{Accuracy on unbiased test data (mean$\pm$std over splits). Best in bold, second underlined.}\label{tab:acc}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/accuracy.tex}
+\end{adjustbox}
+\end{table}
+
+Table~\ref{tab:acc} reports accuracy. DRUP needs no training, yet it is on par
+with the best trained baselines on Coat and is the most accurate method on
+KuaiRec. On these data the walk correction changes accuracy only marginally
+relative to DR adjacency; the correction matters for bias, fairness and
+certification, not for top-$K$ accuracy. As predicted by
+Theorem~\ref{thm:lower}, IPS+WC and IPS coincide on unexposed candidates at three
+hops, because the factor $W_{ui}=0$ hides the IPS bias.
+
+\subsection{Fairness}
+\begin{table}[t]\centering\small
+\caption{Fairness. ECB is the partial correlation between an item's mean rank and its log exposure, controlling for its true like rate. The user gap is the nDCG gap between user groups (gender on Coat, activity on KuaiRec). The last column is the rank shift of items whose exposures were thinned by a real $do(p\leftarrow p/2)$; 0 means exposure invariance.}\label{tab:fair}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/fat.tex}
+\end{adjustbox}
+\end{table}
+
+Table~\ref{tab:fair} tests Theorem~\ref{thm:fair} on real data. We thin the
+logged exposures of a random half of the items with probability $1/2$, which
+is an intervention with a known propensity change. Logged-graph and
+(clipped) IPS propagation demote the thinned items, i.e., they punish
+under-exposure. DRUP's rank shift is statistically indistinguishable from zero.
+The NDCG gap between user groups is also smaller for the DR-based operators.
+\emph{Limitation:} exposure invariance is a causal guarantee, not a
+distributional one. When true quality is concentrated, DRUP's top-$K$ lists
+are also concentrated, and its Gini and PRU are higher than those of the
+logged graph on Coat. The accuracy--concentration frontier in
+Table~\ref{tab:frontier} makes this trade-off explicit. Combining DRUP with an
+exposure-constrained re-ranker is left for future work.
+
+\begin{table}[t]\centering\small
+\caption{Best nDCG reachable by each operator under a cap on the Gini coefficient of top-$K$ exposure (over the whole hyper-parameter grid).}\label{tab:frontier}
+\input{tables/frontier.tex}
+\end{table}
+
+\subsection{Transparency}
+\begin{table}[t]\centering\small
+\caption{Exact explanations (Prop.~\ref{prop:affine}, Thm.~\ref{thm:cf}) on 200 random test users.}\label{tab:explain}
+\input{tables/explain.tex}
+\end{table}
+
+Attributions recomputed against full re-propagation are exact to machine
+precision, both for completeness and for additivity over random subsets
+(Table~\ref{tab:explain}). Minimal counterfactual explanations are small, and
+where none exists the explanation is itself informative. On Coat the top
+recommendation of most users cannot be overturned by removing any subset of
+their own interactions: it is driven by population-level evidence, which DRUP
+can certify.
+
+\subsection{Accountability: certified robustness}
+\begin{table}[t]\centering\small
+\caption{Injection attack: $F$ fake users log a low-popularity target item and the most popular items. Left: realised hit rate of the target in real users' top-$K$. Right: fraction of real users for whom Theorem~\ref{thm:robust} certifies that the target cannot enter the top-$K$ against \emph{any} $F$ profiles of that size. No certificate was violated.}\label{tab:attack}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/attack.tex}
+\end{adjustbox}
+\end{table}
+
+Table~\ref{tab:attack} shows that clipping plus imputation-based degrees
+make DRUP the only operator with non-trivial certificates. The certificate
+was never violated by a realised attack, and brute force over all small
+profiles confirms that the bound is valid and reaches 62--67\% of the true
+worst case. Empirically, DR adjacency with attacker-controlled degrees can be
+harder to push at intermediate budgets, because the fake user's large DR
+weights inflate its own degree. That protection is uncertifiable, since the
+attacker can choose a profile that avoids it.
+
+\subsection{Privacy}
+\begin{table}[t]\centering\small
+\caption{nDCG of jointly DP DRUP ($\delta=10^{-5}$). The denoising rank is chosen on validation data.}\label{tab:privacy}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/privacy.tex}
+\end{adjustbox}
+\end{table}
+
+Table~\ref{tab:privacy} shows the privacy--utility curve. Coat has only 290
+users, so meaningful privacy costs accuracy there. KuaiRec, with 25 times more
+users, supports much smaller $\epsilon$.
+
+%======================================================================
+\section{Discussion and limitations}
+%======================================================================
+DRUP relies on unconfoundedness and on nuisances that are fixed or cross-fitted,
+the standard assumptions of IPS/DR estimation. The exact correction is derived
+for up to three hops (and for the item Gram operator). Higher orders need the
+same idempotent rule, but the number of repetition patterns grows. The fairness
+guarantee concerns causal exposure invariance, not parity of outcomes. The
+privacy analysis treats the low-dimensional nuisances as public. Beyond
+accuracy, DRUP turns a graph recommender into an object whose bias, fairness,
+explanations, robustness and privacy can be stated and checked.
+
+\bibliographystyle{abbrvnat}
+\bibliography{refs}
+
+\appendix
+\section{Proofs}\label{app:proofs}
+
+\paragraph{Theorem~\ref{thm:unbiased}.}
+After the correction every walk contributes $\prod_{e\in\mathrm{distinct}}C_e^{k_e}W_e$.
+The $W_e$ are independent (Assumption~\ref{as:unconf}, fixed nuisances), so
+$\E\prod W_e=\prod\E W_e$ with $\E W_e=\hat Y_e+p_e(Y_e-\hat Y_e)/\bar p_e=Y_e+\delta_e$.
+The target monomial is $\prod C_e^{k_e}Y_e^{k_e}=\prod C_e^{k_e}Y_e$ because
+$Y_e\in\{0,1\}$. \qed
+
+\paragraph{Theorem~\ref{thm:lower}.}
+The naive operator contains, for $v=u$, $j\ne i$, the terms
+$\tW_{uj}^2\tW_{ui}$; for $j=i$, $v\ne u$, the terms $\tW_{ui}\tW_{vi}^2$; and
+$\tW_{ui}^3$. Conditionally on $O_{ui}=0$ we have $W_{ui}=\hat Y_{ui}$. By
+independence, $\E[W_e^2]=Y_e+\Var(W_e)$ with
+$\Var(W_e)=\frac{1-p_e}{p_e}(Y_e-\hat Y_e)^2$, while the corrected replacement has
+mean $Y_e$. Summing the excesses gives the formula. The lower bound uses
+$(1-p)/p\ge1/\max p-1$. \qed
+
+\paragraph{Theorem~\ref{thm:var}.}
+(a) $\Var(W_e)=p_e(1-p_e)\varepsilon_e^2/\bar p_e^2$. If $p_e\ge\tau$ this is at
+most $(1/\tau-1)\varepsilon_e^2$; otherwise it is at most $p_e\varepsilon_e^2/\tau^2<\varepsilon_e^2/\tau$.
+(b) $\hat T_{ui}$ is multilinear in independent variables and therefore affine
+in each $W_e$. The Efron--Stein inequality~\cite{efron1981jackknife} gives
+$\Var(\hat T)\le\sum_e\E[(\partial_e\hat T)^2]\Var(W_e)$. The derivative
+$\partial_e\hat T$ is a sum, over the walks through $e$, of $C$-weights times at
+most two other independent $W_f$ with $\|W_f\|_2^2\le1+1/\tau$. Minkowski's
+inequality then bounds $\|\partial_e\hat T\|_2\le(1+1/\tau)\Lambda_e$.
+(c) By Theorem~\ref{thm:unbiased}, the bias is at most
+$\sum|\kappa_{\mathrm{walk}}|[\prod(Y_f+|\delta_f|)-\prod Y_f]\le((1+\bar\delta)^3-1)M_{ui}$,
+and $|\delta_e|=(1-p_e/\tau)_+\varepsilon_e$.
+(d) Changing $O_e$ moves $W_e$ by at most $\varepsilon_e/\tau$, and
+$|\partial_e\hat T|\le B^2\Lambda_e$. Apply McDiarmid's inequality~\cite{mcdiarmid1989}. \qed
+
+\paragraph{Theorem~\ref{thm:fair}.}
+DRUP: by Theorem~\ref{thm:unbiased}, $\E[s]=F^*$, which does not depend on $\pi$.
+Logged graph: $\E[O_eY_e]=p_eY_e$, so each 3-hop monomial containing
+$k\ge1$ edges incident to $i$ scales as $\pi^k$. Uncorrected DR: by
+Theorem~\ref{thm:lower}, $\E[s]=F^*+C_{ui}\hat Y_{ui}K_i(\pi)+\dots$, and
+$K_i(\pi)$ is strictly decreasing in $\pi$. \qed
+
+\paragraph{Proposition~\ref{prop:affine} and Theorem~\ref{thm:cf}.}
+Substitute $G=G^{(-u)}+\tilde w_u^\top\tilde w_u-\diag(\tilde w_u^2)+\diag(c_u^2w_u)$
+into~\eqref{eq:local}. The terms $\tilde w_{ui}\sum_j\tilde w_{uj}^2$ cancel
+against the local correction, leaving $\tilde w_{ui}\sum_jc_{uj}^2w_{uj}$, and
+every remaining term involving $w_{uj}$ ($j\neq i$) is linear. Additive games
+have Shapley values equal to their individual effects. For
+Theorem~\ref{thm:cf}, the margin after removing $S$ is
+$s_{ui}-s_{uk}-\sum_{j\in S}g_j$, so minimising $|S|$ under
+$\sum_Sg_j>$ margin selects the largest $g_j$. \qed
+
+\paragraph{Theorem~\ref{thm:robust}.}
+Adding row $v$ adds $\mathrm{contrib}_v$ to $G$ and leaves $u$'s local terms
+unchanged. Then $\Delta=\tilde w_u\,\mathrm{contrib}_v=(a\cdot x)x-a\odot x^2+a\odot c_v\odot x$.
+Logged DR entries satisfy
+$w\in[\hat Y-\hat Y/\tau,\hat Y+(1-\hat Y)/\tau]$ for any label and any $p\ge\tau$,
+and unlogged ones equal $\hat Y$. $D$ is maximised (minimised) by assigning the
+$L$ slots to the largest positive (negative) deviations. For fixed $x_k$ the
+function is linear in $D$, so it attains its extremes at the ends of the $D$
+interval. For fixed $D$ it is a quadratic in $x_k$, whose extremes over an interval
+lie at the ends or at the clamped vertex. Effects add over fake users. For
+unclipped IPS, $|W_e|=1/p_e$ is unbounded. \qed
+
+\paragraph{Theorem~\ref{thm:dp}.}
+$\|\mathrm{contrib}_v\|_F\le\|\tilde w_v\tilde w_v^\top-\diag(\tilde w_v^2)\|_F+\|c_v^2w_v\|_2\le R^2+R^2$,
+so the $\ell_2$-sensitivity of the upper triangle is at most $2R^2$, and the
+Gaussian mechanism~\cite{dwork2014algorithmic} applies. Each user's output is a
+function of the DP release and their own data, which gives joint DP by the
+billboard lemma~\cite{hsu2014matchings}. \qed
+
+\end{document}

@@ -179,15 +179,27 @@ def dp_item_operator(W, C, epsilon, delta, R, generator=None):
     return G + N, k.squeeze(1), sigma
 
 
-def low_rank_denoise(G, rank):
+def spectral_components(G, max_rank=128):
+    """Leading eigen-pairs (by |eigenvalue|) of a symmetric matrix. Exact
+    eigh for small n, randomized (Halko et al.) for large n."""
+    n = G.shape[0]
+    if n <= 2000:
+        evals, evecs = torch.linalg.eigh(G)
+        idx = torch.argsort(evals.abs(), descending=True)[:max_rank]
+        return evals[idx], evecs[:, idx]
+    U, S, V = torch.svd_lowrank(G, q=max_rank + 10, niter=4)
+    sign = torch.sign((U * V).sum(0))          # symmetric: eigval = sign * sigma
+    idx = torch.argsort(S, descending=True)[:max_rank]
+    return (S * sign)[idx], U[:, idx]
+
+
+def low_rank_denoise(G, rank, comps=None):
     """Post-processing (free under DP): keep the ``rank`` eigen-components of
     the symmetric noisy operator with the largest |eigenvalue|."""
     if rank is None or rank >= G.shape[0]:
         return G
-    evals, evecs = torch.linalg.eigh(G)
-    idx = torch.argsort(evals.abs(), descending=True)[:rank]
-    V = evecs[:, idx]
-    return (V * evals[idx]) @ V.T
+    evals, V = comps if comps is not None else spectral_components(G, rank)
+    return (V[:, :rank] * evals[:rank]) @ V[:, :rank].T
 
 
 # --------------------------------------------------------------------------
