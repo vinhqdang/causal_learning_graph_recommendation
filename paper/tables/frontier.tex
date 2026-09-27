@@ -1,10 +1,17 @@
-\begin{tabular}{llccccc}
+\begin{tabular}{llcccc}
 \toprule
-Data & Method & Gini$\le$0.3 & $\le$0.4 & $\le$0.5 & $\le$0.6 & any\\
+Data & Method & \multicolumn{4}{c}{Gini cap}\\
 \midrule
-Coat & Obs & -- & 0.4917 & 0.4917 & 0.4917 & 0.4917\\
-Coat & IPS & -- & 0.4864 & 0.4864 & 0.4864 & 0.4864\\
-Coat & DR & -- & 0.4090 & 0.4487 & 0.4733 & 0.4853\\
-Coat & DRUP & -- & 0.3786 & 0.4416 & 0.4848 & 0.4902\\
+ & & $\le$0.4 & $\le$0.5 & $\le$0.6 & none\\
+Coat & Obs & 0.4917 & 0.4917 & 0.4917 & 0.4917\\
+Coat & IPS & 0.4864 & 0.4864 & 0.4864 & 0.4864\\
+Coat & DR & 0.4090 & 0.4487 & 0.4733 & 0.4853\\
+Coat & DRUP & 0.3786 & 0.4416 & 0.4848 & 0.4902\\
+\midrule
+ & & $\le$0.97 & $\le$0.98 & $\le$0.99 & none\\
+KuaiRec & Obs & 0.3543 & 0.3543 & 0.3543 & 0.6026\\
+KuaiRec & IPS & 0.5398 & 0.5745 & 0.5950 & 0.5950\\
+KuaiRec & DR & -- & 0.3394 & 0.4633 & 0.6324\\
+KuaiRec & DRUP & -- & -- & -- & 0.6328\\
 \bottomrule
 \end{tabular}

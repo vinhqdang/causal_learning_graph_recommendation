@@ -1,0 +1,23 @@
+/home/user/causal_learning_graph_recommendation/experiments/../drup/fat.py:275: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
+  rho = spearmanr(S[r, items], item_pop[items]).correlation
+fairness Obs {'ndcg@20': 0.6026, 'PRU': 0.8454, 'ECB': 0.8301, 'gini@20': 0.9906, 'coverage@20': 0.1524, 'group_gap': 0.008, 'group0': 0.6065, 'group1': 0.5985}
+fairness IPS {'ndcg@20': 0.595, 'PRU': 0.7558, 'ECB': 0.5713, 'gini@20': 0.9832, 'coverage@20': 0.278, 'group_gap': 0.0023, 'group0': 0.5961, 'group1': 0.5939}
+fairness DR {'ndcg@20': 0.6324, 'PRU': 0.8305, 'ECB': 0.418, 'gini@20': 0.9939, 'coverage@20': 0.0081, 'group_gap': 0.0116, 'group0': 0.6382, 'group1': 0.6266}
+fairness DRUP {'ndcg@20': 0.6334, 'PRU': 0.831, 'ECB': 0.4183, 'gini@20': 0.9939, 'coverage@20': 0.0069, 'group_gap': 0.0129, 'group0': 0.6398, 'group1': 0.6269}
+intervene Obs -0.13422787178715825 +- 0.0008911495198562697
+intervene IPS -0.02903794033565188 +- 0.001071865758598374
+intervene DR 0.0005729148188138189 +- 0.0007230516173435213
+intervene DRUP 0.0004596167113910865 +- 0.0007675113009637151
+explain {"max_rel_error_completeness_additivity": 3.254671582908486e-06, "deletion_rank_of_top1": {"DRUP-attribution": {"1": 0.01, "2": 0.025, "3": 0.035, "5": 0.03, "10": 0.055}, "random": {"1": 0.0, "2": 0.0, "3": 0.005, "5": 0.005, "10": 0.01}, "item-similarity": {"1": 0.0, "2": 0.0, "3": 0.0, "5": 0.0, "10": 0.005}}, "minimal_cf_size_mean": 24.4, "minimal_cf_size_median": 15.5, "frac_no_cf": 0.45}
+attack Obs {"hit@K": {"0": 0.0015591778880226792, "5": 0.0015591778880226792, "20": 0.0015591778880226792, "50": 0.0022678951098511696, "100": 0.02693125442948264, "200": 0.28773919206236714}, "certified_frac": {"0": 0.9984408221119774, "5": 0.0, "20": 0.0, "50": 0.0, "100": 0.0, "200": 0.0}, "certificate_violations": 0, "tau": 1.0, "max_rel_bound_excess": 0.0}
+attack IPS {"hit@K": {"0": 0.0015591778880226792, "5": 0.0015591778880226792, "20": 0.0015591778880226792, "50": 0.004961020552799433, "100": 0.0891566265060241, "200": 0.4851878100637846}, "certified_frac": {"0": 0.9984408221119774, "5": 0.0, "20": 0.0, "50": 0.0, "100": 0.0, "200": 0.0}, "certificate_violations": 0, "tau": 0.2, "max_rel_bound_excess": 0.0}
+attack DR {"hit@K": {"0": 0.0, "5": 0.0, "20": 0.0, "50": 0.0, "100": 0.0, "200": 0.13493975903614458}, "certified_frac": {"0": 1.0, "5": 0.0, "20": 0.0, "50": 0.0, "100": 0.0, "200": 0.0}, "certificate_violations": 0, "tau": 0.2, "max_rel_bound_excess": -3.986452504242131e-05}
+attack DRUP {"hit@K": {"0": 0.0, "5": 0.0, "20": 0.0, "50": 0.0, "100": 0.0, "200": 0.132388377037562}, "certified_frac": {"0": 1.0, "5": 0.0, "20": 0.0, "50": 0.0, "100": 0.0, "200": 0.0}, "certificate_violations": 0, "tau": 0.2, "max_rel_bound_excess": -3.570968478786248e-05}
+privacy eps 0.5 {'ndcg': 0.053609946049472036, 'std': 0.0020357480312936196, 'sigma': 0.019897947428363393, 'ranks': [None, None, None]}
+privacy eps 1.0 {'ndcg': 0.08259196767505748, 'std': 0.005112273283374017, 'sigma': 0.009948973714181696, 'ranks': [None, None, None]}
+privacy eps 2.0 {'ndcg': 0.147321023444959, 'std': 0.0142182711491506, 'sigma': 0.004974486857090848, 'ranks': [None, None, 64]}
+privacy eps 4.0 {'ndcg': 0.5569076211417049, 'std': 0.014134250542470033, 'sigma': 0.002487243428545424, 'ranks': [4, 8, 16]}
+privacy eps 8.0 {'ndcg': 0.6127333456905721, 'std': 0.0118135505900232, 'sigma': 0.001243621714272712, 'ranks': [4, 8, 4]}
+privacy eps 16.0 {'ndcg': 0.6289964483068103, 'std': 0.001875614677576643, 'sigma': 0.000621810857136356, 'ranks': [32, 64, 4]}
+privacy eps inf {'ndcg': 0.6345797543068653, 'std': 0.0, 'sigma': 0.0, 'ranks': [None]}
+privacy reference 0.632519467366631 pop 0.5766377806164276

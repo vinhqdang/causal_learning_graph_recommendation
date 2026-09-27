@@ -14,6 +14,38 @@ logged graph. Its properties are proved in `docs/THEORY.md`:
 | Accountability | Certified bound on the effect of any F injected fake profiles (Thm 7) | `run_fat.py --sections attack` |
 | Privacy | One public item operator plus local scoring gives (ε,δ)-joint DP (Thm 8) | `run_fat.py --sections privacy` |
 
+## Main results
+
+Accuracy on unbiased test data (mean over splits):
+
+| | Coat nDCG@5 | KuaiRec nDCG@20 |
+|---|---|---|
+| MF / IPS-MF / DR-MF | 0.462 / 0.457 / 0.536 | 0.625 / 0.623 / 0.610 |
+| LightGCN / NAVIP / DR-LightGCN | 0.508 / 0.499 / 0.556 | 0.629 / 0.625 / 0.616 |
+| imputation only | 0.566 | 0.622 |
+| DR adjacency (no walk correction) | 0.559 | 0.632 |
+| **DRUP (training-free)** | 0.553 | **0.633** |
+
+DRUP is accuracy-competitive with trained models, but it is not the most
+accurate method on Coat (see `paper/tables/significance.tex`). Its contribution
+is the guarantees:
+
+- The corrected estimators are unbiased (relative |bias| 0.02 against 1.9–2.4
+  without the correction), and exposure elasticity is +0.005 (logged graph
+  +1.78, DR adjacency −0.19).
+- Under a real exposure intervention on KuaiRec, DRUP's rank shift is
+  +0.0005 ± 0.0008, against −0.134 for the logged graph. The exposure-conditional
+  bias drops from 0.83 to 0.42.
+- Explanations are exact (error 1e-15). Minimal counterfactual explanations
+  exist for 18% (Coat) and 55% (KuaiRec) of top recommendations.
+- No attack with up to 100 fake users placed the target in any KuaiRec
+  top-20. On Coat, 100% of users are certified against one fake profile.
+- Joint DP: nDCG@20 is 0.613 at ε=8 and 0.629 at ε=16 on KuaiRec (non-private 0.633).
+
+Limitations: the item-side guarantee is causal, not distributional (DRUP's
+top-K lists are concentrated when quality is). Certificates are vacuous for
+KuaiRec-sized catalogs. Nuisances are assumed fixed or cross-fitted.
+
 ## Layout
 
 ```

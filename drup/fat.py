@@ -129,7 +129,8 @@ def logged_weight_range(yh, tau, kind):
     return torch.zeros_like(yh), torch.ones_like(yh)
 
 
-def fake_user_effect_bounds(wt_u, c_lo, c_hi, yh_v, tau, n_logged, kind, corrected=True):
+def fake_user_effect_bounds(wt_u, c_lo, c_hi, yh_v, tau, n_logged, kind, corrected=True,
+                            return_unlogged=False):
     """Box-exact bounds on the change of the un-normalised 3-hop scores of the
     users in ``wt_u`` (rows, n) caused by ONE injected user who logs at most
     ``n_logged`` interactions with arbitrary items, labels and propensities
@@ -144,6 +145,9 @@ def fake_user_effect_bounds(wt_u, c_lo, c_hi, yh_v, tau, n_logged, kind, correct
     lie in [c_lo, c_hi] (exactly known when degrees come from the imputation).
     Without the walk correction (Obs / IPS / DR adjacency) the injected row
     enters as Delta_k = D x_k (set corrected=False).
+    With return_unlogged=True, also returns the bounds for items the fake user
+    does not log (x_k pinned), which tighten certificates because a profile
+    can log at most n_logged items.
     """
     wl, wh = logged_weight_range(yh_v, tau, kind)
     unl = yh_v if kind == "DR" else torch.zeros_like(yh_v)
@@ -163,16 +167,31 @@ def fake_user_effect_bounds(wt_u, c_lo, c_hi, yh_v, tau, n_logged, kind, correct
     dec = torch.topk((u_lo - l_lo).clamp_min(0), kk, dim=1).values.sum(1, keepdim=True)
     D_lo = u_lo.sum(1, keepdim=True) - dec
     D_hi = u_hi.sum(1, keepdim=True) + inc
+    if return_unlogged:
+        # item k NOT logged by the fake user: x_k is pinned to its unlogged value
+        ulo, uhi = _box_extremes(a, D_lo, D_hi, ux_lo[None, :].expand_as(a), ux_hi[None, :].expand_as(a),
+                                 c_lo, c_hi, corrected)
     x_lo = torch.minimum(ux_lo, lx_lo)[None, :].expand_as(a)
     x_hi = torch.maximum(ux_hi, lx_hi)[None, :].expand_as(a)
-    ck = c_hi[None, :].expand_as(a)  # the a_k c_vk x_k term: bound both c ends
+    best_lo, best_hi = _box_extremes(a, D_lo, D_hi, x_lo, x_hi, c_lo, c_hi, corrected)
+    if return_unlogged:
+        return best_lo, best_hi, ulo, uhi
+    return best_lo, best_hi
+
+
+def _box_extremes(a, D_lo, D_hi, x_lo, x_hi, c_lo, c_hi, corrected):
+    """Exact extremes of Delta = x (D + a c) - a x^2 (or x D) over the box."""
     best_hi = torch.full_like(a, -float("inf"))
     best_lo = torch.full_like(a, float("inf"))
     for D in (D_lo.expand_as(a), D_hi.expand_as(a)):
-        for cc in (c_lo[None, :].expand_as(a), ck):
-            safe_a = torch.where(a.abs() > 1e-300, a, torch.full_like(a, 1e-300))
-            vert = ((D + a * cc) / (2 * safe_a)).clamp(min=x_lo, max=x_hi)
-            for x in (x_lo, x_hi, vert):
+        for cc in (c_lo[None, :].expand_as(a), c_hi[None, :].expand_as(a)):
+            cands = (x_lo, x_hi)
+            if corrected:
+                # vertex of the quadratic; where a_k == 0 the function is linear
+                nz = a.abs() > torch.finfo(a.dtype).tiny
+                vert = torch.where(nz, (D + a * cc) / (2 * torch.where(nz, a, torch.ones_like(a))), x_lo)
+                cands = (x_lo, x_hi, torch.maximum(torch.minimum(vert, x_hi), x_lo))
+            for x in cands:
                 val = x * (D + a * cc) - a * x * x if corrected else x * D
                 best_hi = torch.maximum(best_hi, val)
                 best_lo = torch.minimum(best_lo, val)

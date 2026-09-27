@@ -103,6 +103,14 @@ def main():
         qc[items] += 1
     quality = np.where(qc > 0, qa / np.maximum(qc, 1), 0.0)
     out = {"dataset": a.dataset, "configs": cfgs}
+    path = f"results/fat_{a.dataset}_{a.prop}.json"
+
+    def save():
+        """Merge this run's sections into the result file (after every section)."""
+        merged = json.load(open(path)) if os.path.exists(path) else {}
+        merged.update(out)
+        with open(path, "w") as f:
+            json.dump(merged, f, indent=1)
 
     # Only one model is kept in memory at a time (KuaiRec matrices are large).
     cache = {}
@@ -140,6 +148,7 @@ def main():
             }
             print("fairness", mth, {k: round(v, 4) for k, v in res[mth].items()}, flush=True)
         out["fairness"] = {"groups": gname, "results": res}
+        save()
 
     if "intervene" in a.sections:
         res = {mth: [] for mth in METHODS}
@@ -172,6 +181,7 @@ def main():
                             for mth, v in res.items()}
         for mth in METHODS:
             print("intervene", mth, out["intervene"][mth]["mean"], "+-", out["intervene"][mth]["std"], flush=True)
+        save()
 
     M = get_model("DRUP")
     W, C, Yhat = M["W"], M["C"], M["Yhat"]
@@ -237,6 +247,7 @@ def main():
             "frac_no_cf": no_cf / len(users),
         }
         print("explain", json.dumps(out["explain"]), flush=True)
+        save()
 
     if "attack" in a.sections:
         res = {}
@@ -249,7 +260,7 @@ def main():
         targets = elig[int(0.1 * len(elig)): int(0.1 * len(elig)) + 5]
         L = 20 if a.dataset == "coat" else 50
         fillers = np.argsort(-item_pop)[:L]
-        budgets = [0, 1, 5, 10, 20, 50] if a.dataset == "coat" else [0, 5, 20, 50, 100, 200]
+        budgets = [0, 1, 2, 5, 10, 20, 50] if a.dataset == "coat" else [0, 1, 2, 5, 20, 50, 100, 200]
         unexp_of = {uu: torch.nonzero(O[uu] == 0).flatten() for uu, _, _ in test}
         for mth in METHODS:
             Mm = get_model(mth)
@@ -298,10 +309,11 @@ def main():
                     c_lo, c_hi = torch.zeros(n, dtype=dt), di ** (-(1 - alpha))
                 else:            # degree from the imputation: c_v known exactly
                     c_lo = c_hi = c_v
-                blo, bhi = fat.fake_user_effect_bounds(
-                    wt_u, c_lo, c_hi, yh_v, tau, L + 1, kind, corrected=Mm["correct"])
+                blo, bhi, ulo, uhi = fat.fake_user_effect_bounds(
+                    wt_u, c_lo, c_hi, yh_v, tau, L + 1, kind, corrected=Mm["correct"],
+                    return_unlogged=True)
                 sc3 = (1.0 if bm >= 1e3 else bm) / cm3
-                blo, bhi = blo * sc3, bhi * sc3
+                blo, bhi, ulo = blo * sc3, bhi * sc3, ulo * sc3
                 # sanity: the realised single-profile effect lies inside the bound
                 # (relative tolerance for float32 round-off)
                 eff = dS3 * sc3
@@ -322,10 +334,20 @@ def main():
                         in_top = bool(s_att[r, t] >= kth)
                         hits.append(in_top)
                         # certificate: t cannot enter top-K under ANY b fake profiles
-                        lo = s_clean[r, unexp] + b * blo[r, unexp]
-                        kth_lo = torch.topk(lo, K + 1).values
-                        # K+1-th lower score: at least K competitors other than t
-                        certified = bool(s_clean[r, t] + b * bhi[r, t] < kth_lo[-1])
+                        # b fake users log at most b*(L+1) items; every other
+                        # competitor keeps its unlogged-state lower bound. The
+                        # (K+1+b(L+1))-th largest such bound leaves >= K
+                        # competitors (other than t) above it whatever the attack.
+                        # Two valid certificates; t is certified if either holds.
+                        up_t = s_clean[r, t] + b * bhi[r, t]
+                        # (i) every competitor at its worst-case (logged) lower bound
+                        lo_any = s_clean[r, unexp] + b * blo[r, unexp]
+                        certified = bool(up_t < torch.topk(lo_any, K + 1).values[-1])
+                        # (ii) at most b(L+1) competitors can be logged by the fakes
+                        need = K + 1 + b * (L + 1)
+                        if not certified and need <= len(unexp):
+                            lo_unl = s_clean[r, unexp] + b * ulo[r, unexp]
+                            certified = bool(up_t < torch.topk(lo_unl, need).values[-1])
                         certs.append(certified)
                         if certified and in_top:
                             viol += 1
@@ -337,6 +359,7 @@ def main():
                         "max_rel_bound_excess": max_excess}
             print("attack", mth, json.dumps(res[mth]), flush=True)
         out["attack"] = {"K": K, "L": L, "targets": targets.tolist(), "results": res}
+        save()
 
     if "privacy" in a.sections:
         # The rank of the post-processing denoiser is chosen on a validation
@@ -376,13 +399,7 @@ def main():
                                                ptest, (kn,), row_of)[f"ndcg@{kn}"]}
         print("privacy reference", out["privacy"]["non_private_ndcg"], "pop", out["privacy"]["pop_ndcg"])
 
-    path = f"results/fat_{a.dataset}_{a.prop}.json"
-    if os.path.exists(path):          # sections can be run separately and merged
-        old = json.load(open(path))
-        old.update(out)
-        out = old
-    with open(path, "w") as f:
-        json.dump(out, f, indent=1)
+    save()
 
 
 if __name__ == "__main__":

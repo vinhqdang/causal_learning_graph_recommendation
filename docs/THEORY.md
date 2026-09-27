@@ -208,7 +208,12 @@ Checks:
 - Real-data intervention (`run_fat.py --sections intervene`). A random half of
   the items has its logged exposures thinned with probability 1/2, a known
   $do(p\leftarrow p/2)$, and we measure the shift in the treated items' mean
-  within-user rank. Results are in `results/fat_*.json`.
+  within-user rank:
+
+  | | logged graph | IPS | DR | DRUP |
+  |---|---|---|---|---|
+  | KuaiRec | −0.134 | −0.029 | +0.0006 | **+0.0005 ± 0.0008** |
+  | Coat | −0.058 | −0.059 | −0.003 | **+0.0006 ± 0.011** |
 
 User side. Theorem 1 holds for every user separately. Less active users are
 therefore not systematically under-scored in expectation; the remaining
@@ -272,9 +277,21 @@ out of $u$'s top-$K$ against any $F$ fake profiles if
 $$
 s_{ut}+F\,\overline\Delta_t<\big(K{+}1\big)\text{-th largest of }\{s_{uk}+F\,\underline\Delta_k\}.
 $$
-The bound is attack-agnostic. It is valid by construction, and is checked against
-brute force in `fat.fake_user_effect_bounds`, where it reaches 62–67% of the
-worst case. It is also checked against the realised attack in `run_fat.py`.
+The bound is attack-agnostic. It is valid by construction and is checked against
+brute force (float32 and float64, logged and unlogged items), where it
+reaches 62–67% of the worst case. It is also checked against the realised
+attack in `run_fat.py`, with no violation.
+
+A second valid certificate uses the fact that $F$ profiles can log at most
+$F\cdot L$ items. Every other competitor keeps its unlogged bound, so the
+threshold becomes the $(K{+}1{+}FL)$-th largest of those bounds. We certify if
+either certificate holds.
+
+On Coat (300 items), DRUP certifies 100% of users against one 21-interaction
+profile, 99.6% against two and 21% against five. On KuaiRec (10,728 items,
+51-interaction profiles), the worst case over victim-tailored profiles is
+vacuous even for $F=1$, although no realised attack with up to 100 fake users
+reached any real user's top-20.
 
 *Lower bound for unclipped IPS.* With $\tau\to0$ a single fake interaction on
 an item with propensity $p$ moves $W$ by $1/p$, so its influence is unbounded.

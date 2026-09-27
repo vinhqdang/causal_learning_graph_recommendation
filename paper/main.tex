@@ -415,16 +415,31 @@ Section~5.
 
 Table~\ref{tab:fair} tests Theorem~\ref{thm:fair} on real data. We thin the
 logged exposures of a random half of the items with probability $1/2$, which
-is an intervention with a known propensity change. Logged-graph and
-(clipped) IPS propagation demote the thinned items, i.e., they punish
-under-exposure. DRUP's rank shift is statistically indistinguishable from zero.
-The NDCG gap between user groups is also smaller for the DR-based operators.
-\emph{Limitation:} exposure invariance is a causal guarantee, not a
-distributional one. When true quality is concentrated, DRUP's top-$K$ lists
-are also concentrated, and its Gini and PRU are higher than those of the
-logged graph on Coat. The accuracy--concentration frontier in
-Table~\ref{tab:frontier} makes this trade-off explicit. Combining DRUP with an
-exposure-constrained re-ranker is left for future work.
+is an intervention with a known propensity change, and re-run each method.
+Logged-graph propagation demotes the thinned items strongly: their mean
+within-user rank shifts by $-0.134$ on KuaiRec and $-0.058$ on Coat. In other
+words, it punishes under-exposure. Clipped IPS demotes them less on KuaiRec
+($-0.029$) and as much on Coat ($-0.059$), where clipping at $\tau=0.2$ makes it
+almost identical to the logged graph. DRUP's shift is $+0.0005\pm0.0008$ on
+KuaiRec and $+0.0006\pm0.011$ on Coat, i.e., zero within noise, as
+Theorem~\ref{thm:fair} predicts. The uncorrected DR adjacency is also close to
+zero on these data. Its over-correction ($\eta=-0.19$ in
+Table~\ref{tab:mc}) scales with $(1-p)/p\cdot\varepsilon^2$
+(Theorem~\ref{thm:lower}), and the validation-selected clip and an accurate
+imputation keep it small here. The exposure-conditional bias ECB (KuaiRec,
+where item quality is known from the fully observed matrix) drops from
+$0.830$ (logged graph) and $0.571$ (IPS) to $0.418$ (DRUP). The nDCG gap between
+men and women on Coat shrinks from $0.112$ to $0.079$. On KuaiRec, the gap
+between active and inactive users is small for every method ($\le0.013$).
+
+\emph{Limitation.} Exposure invariance is a causal guarantee, not a
+distributional one. When true quality is concentrated, DRUP's top-$K$ lists are
+concentrated too, with higher Gini and PRU than the logged graph. The
+accuracy--concentration frontier (Table~\ref{tab:frontier}) makes this
+trade-off explicit. On Coat, DRUP reaches only 0.379 nDCG@5 under a Gini cap
+of 0.4, while the logged graph reaches 0.492. On KuaiRec, IPS keeps 0.575 at
+Gini $\le0.98$, while every DRUP configuration in our grid exceeds 0.99. Combining DRUP with an exposure-constrained re-ranker is
+left for future work.
 
 \begin{table}[t]\centering\small
 \caption{Best nDCG reachable by each operator under a cap on the Gini coefficient of top-$K$ exposure (over the whole hyper-parameter grid).}\label{tab:frontier}
@@ -437,30 +452,60 @@ exposure-constrained re-ranker is left for future work.
 \input{tables/explain.tex}
 \end{table}
 
-Attributions recomputed against full re-propagation are exact to machine
-precision, both for completeness and for additivity over random subsets
-(Table~\ref{tab:explain}). Minimal counterfactual explanations are small, and
-where none exists the explanation is itself informative. On Coat the top
-recommendation of most users cannot be overturned by removing any subset of
-their own interactions: it is driven by population-level evidence, which DRUP
-can certify.
+Attributions recomputed against full re-propagation are exact up to
+floating-point precision: $1.3\times10^{-15}$ on Coat (float64) and
+$3\times10^{-6}$ on KuaiRec (float32), for completeness as well as for
+additivity over random subsets (Table~\ref{tab:explain}). Removing the
+interactions with the largest attributions moves the top item further down
+than random or similarity-based removal. This holds for every removal budget
+on KuaiRec and for up to five removals on Coat, and it shows that the
+attributions are faithful. The absolute rank changes are small, because top
+recommendations rest largely on population-level evidence. Theorem~\ref{thm:cf} also answers a question
+approximate explainers cannot: whether any counterfactual explanation exists
+at all. On Coat, 82\% of the top recommendations cannot be overturned by
+removing any subset of the user's own interactions. On KuaiRec the figure is
+45\%, and the minimal explanation has a median size of 15.5 interactions.
+These recommendations are driven by population-level evidence, and DRUP
+certifies that they are.
 
 \subsection{Accountability: certified robustness}
 \begin{table}[t]\centering\small
 \caption{Injection attack: $F$ fake users log a low-popularity target item and the most popular items. Left: realised hit rate of the target in real users' top-$K$. Right: fraction of real users for whom Theorem~\ref{thm:robust} certifies that the target cannot enter the top-$K$ against \emph{any} $F$ profiles of that size. No certificate was violated.}\label{tab:attack}
 \begin{adjustbox}{max width=\textwidth}
-\input{tables/attack.tex}
+\input{tables/attack_coat.tex}
+\end{adjustbox}
+
+\medskip
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/attack_kuairec.tex}
 \end{adjustbox}
 \end{table}
 
-Table~\ref{tab:attack} shows that clipping plus imputation-based degrees
-make DRUP the only operator with non-trivial certificates. The certificate
-was never violated by a realised attack, and brute force over all small
-profiles confirms that the bound is valid and reaches 62--67\% of the true
-worst case. Empirically, DR adjacency with attacker-controlled degrees can be
-harder to push at intermediate budgets, because the fake user's large DR
-weights inflate its own degree. That protection is uncertifiable, since the
-attacker can choose a profile that avoids it.
+Table~\ref{tab:attack} reports the attack. Empirically, the DR-based
+operators are the hardest to manipulate. On KuaiRec, 100 fake users (1.4\% of
+the user base) never place the target in any real user's top-20 under DR or
+DRUP, while they already do so for 2.7\% (logged graph) and 8.9\% (IPS) of
+users. At 200 fake users the rates are 13\% for DR and DRUP, against 29\% and
+49\%. On Coat, DRUP resists up to 10 fake users, while the logged graph and
+IPS are breached at 5--10.
+
+The certificates of Theorem~\ref{thm:robust} were never violated, and
+brute-force enumeration confirms the bounds in float32 and float64. They are
+informative when catalogs are small. On Coat, DRUP is the only operator with
+non-trivial certificates: 100\% of users are certified against one
+21-interaction fake profile, 99.6\% against two and 21\% against five. The
+reason is that degrees taken from the imputation make the fake user's
+normalisation known, whereas degrees taken from $W$ are attacker-controlled
+and void the certificate. On KuaiRec the worst-case certificate is vacuous
+even for $F=1$. With 10{,}728 items, a profile of 51 interactions tailored to
+a single victim can in the worst case shift scores by more than the gap between
+a low-popularity target and the top-20 boundary. The realised attacks stay far
+below this worst case. Tighter certificates for large catalogs, for instance
+under bounded profile norms, are an open problem. At intermediate budgets the
+uncorrected DR adjacency with attacker-controlled degrees is sometimes harder
+to push than DRUP, because the fake user's large DR weights inflate its own
+degree. That protection cannot be certified, because an attacker can design a
+profile that avoids it.
 
 \subsection{Privacy}
 \begin{table}[t]\centering\small
@@ -470,9 +515,12 @@ attacker can choose a profile that avoids it.
 \end{adjustbox}
 \end{table}
 
-Table~\ref{tab:privacy} shows the privacy--utility curve. Coat has only 290
-users, so meaningful privacy costs accuracy there. KuaiRec, with 25 times more
-users, supports much smaller $\epsilon$.
+Table~\ref{tab:privacy} shows the privacy--utility curve. On KuaiRec
+(7{,}176 users), jointly DP DRUP reaches nDCG@20 of $0.613$ at $\epsilon=8$ and
+$0.629$ at $\epsilon=16$. The non-private value is $0.633$, trained LightGCN reaches
+$0.629$ and popularity $0.577$. On Coat, with only 290 users, the
+same guarantee costs considerably more accuracy. Useful privacy needs a
+large user base, as expected for user-level DP.
 
 %======================================================================
 \section{Discussion and limitations}

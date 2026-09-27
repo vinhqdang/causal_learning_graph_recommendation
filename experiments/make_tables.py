@@ -97,26 +97,27 @@ def fat_table():
 
 
 def attack_table():
-    out = []
+    """One sub-table per dataset (their attack budgets differ)."""
+    blocks = []
     for ds, prop, title in [("coat", "given", "Coat"), ("kuairec", "pop", "KuaiRec")]:
         f = load(f"fat_{ds}_{prop}.json")
         if not f or "attack" not in f:
             continue
         res = f["attack"]["results"]
         budgets = list(next(iter(res.values()))["hit@K"].keys())
-        out.append(f"\\multicolumn{{{1 + 2 * len(budgets)}}}{{l}}{{\\textit{{{title}}} (K={f['attack']['K']}, profile size {f['attack']['L'] + 1})}}\\\\")
-        out.append("Method & " + " & ".join(f"$F$={b}" for b in budgets) + " & " + " & ".join(f"$F$={b}" for b in budgets) + "\\\\")
+        nb = len(budgets)
+        out = ["\\begin{tabular}{l" + "c" * (2 * nb) + "}", "\\toprule",
+               f"\\multicolumn{{{1 + 2 * nb}}}{{l}}{{\\textit{{{title}}}: $K$={f['attack']['K']}, "
+               f"fake profile size {f['attack']['L'] + 1}}}\\\\",
+               f" & \\multicolumn{{{nb}}}{{c}}{{hit rate of target in top-$K$ $\\downarrow$}} & "
+               f"\\multicolumn{{{nb}}}{{c}}{{certified fraction $\\uparrow$}}\\\\",
+               "$F$ & " + " & ".join(budgets) + " & " + " & ".join(budgets) + "\\\\", "\\midrule"]
         for mth, r in res.items():
             out.append(mth + " & " + " & ".join(f"{r['hit@K'][b]:.3f}" for b in budgets) + " & "
                        + " & ".join(f"{r['certified_frac'][b]:.3f}" for b in budgets) + "\\\\")
-        out.append("\\midrule")
-    if not out:
-        return ""
-    ncol = out[1].count("&") + 1
-    hdr = ["\\begin{tabular}{l" + "c" * (ncol - 1) + "}", "\\toprule",
-           f" & \\multicolumn{{{(ncol - 1) // 2}}}{{c}}{{hit rate of target in top-$K$ $\\downarrow$}} & "
-           f"\\multicolumn{{{(ncol - 1) // 2}}}{{c}}{{certified fraction $\\uparrow$}}\\\\", "\\midrule"]
-    return "\n".join(hdr + out[:-1] + ["\\bottomrule", "\\end{tabular}"]) + "\n"
+        out += ["\\bottomrule", "\\end{tabular}"]
+        blocks.append("\n".join(out))
+    return blocks
 
 
 def explain_privacy_table():
@@ -143,14 +144,20 @@ def explain_privacy_table():
 
 
 def frontier_table():
-    lines = ["\\begin{tabular}{llccccc}", "\\toprule",
-             "Data & Method & Gini$\\le$0.3 & $\\le$0.4 & $\\le$0.5 & $\\le$0.6 & any\\\\", "\\midrule"]
+    """Best nDCG under Gini caps, recomputed from the stored grid points with
+    dataset-specific caps (KuaiRec lists are far more concentrated)."""
+    caps = {"coat": [0.4, 0.5, 0.6, 1.0], "kuairec": [0.97, 0.98, 0.99, 1.0]}
+    lines = ["\\begin{tabular}{llcccc}", "\\toprule", "Data & Method & \\multicolumn{4}{c}{Gini cap}\\\\", "\\midrule"]
     for ds, prop, title in [("coat", "given", "Coat"), ("kuairec", "pop", "KuaiRec")]:
         f = load(f"frontier_{ds}_{prop}.json")
         if not f:
             continue
-        for mth, s in f["summary"].items():
-            cells = [("--" if s[c] is None else f"{s[c]:.4f}") for c in ["0.3", "0.4", "0.5", "0.6", "1.0"]]
+        lines.append(f" & & " + " & ".join(f"$\\le${c}" if c < 1 else "none" for c in caps[ds]) + "\\\\")
+        for mth, pts in f["points"].items():
+            cells = []
+            for c in caps[ds]:
+                v = max([p["ndcg"] for p in pts if p["gini"] <= c], default=None)
+                cells.append("--" if v is None else f"{v:.4f}")
             lines.append(f"{title} & {mth} & " + " & ".join(cells) + "\\\\")
         lines.append("\\midrule")
     lines = lines[:-1] + ["\\bottomrule", "\\end{tabular}"]
@@ -160,7 +167,9 @@ def frontier_table():
 def main():
     os.makedirs(OUT, exist_ok=True)
     tabs = {"accuracy": accuracy_table(), "mc": mc_table(), "fat": fat_table(),
-            "attack": attack_table(), "frontier": frontier_table()}
+            "frontier": frontier_table()}
+    for name, blk in zip(["attack_coat", "attack_kuairec"], attack_table()):
+        tabs[name] = blk + "\n"
     tabs["explain"], tabs["privacy"] = explain_privacy_table()
     for k, v in tabs.items():
         with open(os.path.join(OUT, f"{k}.tex"), "w") as f:
