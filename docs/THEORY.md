@@ -113,6 +113,34 @@ With unbiased estimators, $|z|>3$ occurs 0.27% of the time by chance, which is
 what the corrected estimators show. The correction also removes the
 $1/p^2$ terms that dominate the variance, so RMSE drops about 5×.
 
+### 3.1 Any number of hops
+
+**Theorem 1′ (exact K-hop correction).** Fix an odd $K$. A $K$-hop walk
+$u=U_0\!-\!J_1\!-\!U_1\!-\cdots-\!U_r\!-\!J_{r+1}=i$ with $r=(K-1)/2$ repeats an
+edge only through coincidences among its index variables. Encode the
+coincidences as an equality pattern $\pi=(\pi_U,\pi_J)$, a pair of set
+partitions of $\{U_0,\dots,U_r\}$ and $\{J_1,\dots,J_{r+1}\}$. The pattern fixes
+the multiplicity $k_e$ of every distinct edge. Let
+$F^{\text{corr}}_\pi=\prod_eC_e^{k_e}W_e$ and $F^{\text{plug}}_\pi=\prod_e\tilde W_e^{k_e}$. The estimator
+$$
+\hat T^{(K)}=\tilde W(\tilde W^\top\tilde W)^r+\sum_{\pi:\ \exists k_e>1}\ \sum_{\sigma\ge\pi}\mu(\pi,\sigma)\big(g^{\text{corr}}_\pi(\sigma)-g^{\text{plug}}_\pi(\sigma)\big)
+$$
+is exactly unbiased for $(\tilde Y\tilde Y^\top)^r\tilde Y$ under A1–A2. Here
+$g_\pi(\sigma)$ is the unconstrained sum of $F_\pi$ over assignments that are
+constant on the blocks of $\sigma$, computed as one tensor contraction, and
+$\mu(\pi,\sigma)=\prod_{B\in\sigma}(-1)^{b_B-1}(b_B-1)!$ is the Möbius function of
+the partition lattice, with $b_B$ the number of $\pi$-blocks inside $B$.
+
+*Proof.* Möbius inversion turns the "at least $\sigma$" sums into "exactly
+$\pi$" sums, so each walk is counted once, under its own pattern. For that
+walk the corrected term uses $\prod C_e^{k_e}W_e$, which has mean
+$\prod C_e^{k_e}Y_e=\prod\tilde Y_e^{k_e}$ by independence and $Y^k=Y$. ∎
+
+The number of contraction terms is 5, 99 and 2,790 for $K=3,5,7$. Checks
+(`drup/khop.py`): the $K=3$ case reproduces the closed form of Section 2 to
+$7\times10^{-15}$; $K=5$ matches brute-force enumeration of all walks to
+$10^{-13}$; the Monte-Carlo check is in `results/mc_unbiasedness_K5.json`.
+
 ## 4. Lower bound on the bias of uncorrected propagation
 
 **Theorem 2.** Take correct propensities, $\tau\le\min p$, and a candidate
@@ -319,6 +347,38 @@ released $G$, such as low-rank denoising, is free.
 *Caveat.* The nuisances ($\hat p,\hat Y$, item degrees) are treated as public.
 They are $O(m+n)$ statistics and can be released with a small extra budget.
 Our experiments do not privatise them.
+
+## 9b. Exposure-constrained allocation with a causal utility guarantee
+
+The causal guarantee of Theorem 4 does not bound how concentrated the top-$K$
+lists are. We add a re-ranker (`drup/rerank.py`). Among feasible allocations
+$\mathcal X=\{x\in\{0,1\}^{R\times N}:\sum_ix_{ui}=K,\ \sum_ux_{ui}\le\mathrm{cap}_i\}$
+(candidates only), it maximises $\sum x_{ui}s_{ui}$. This is a bipartite
+$b$-matching: its constraint matrix is totally unimodular, so the LP has an
+integral optimum and zero duality gap. We minimise the Lagrangian dual
+$D(\lambda)=\sum_u\mathrm{top}_K(s_u-\lambda)+\langle\lambda,\mathrm{cap}\rangle$ by
+projected subgradient steps, take top-$K$ under the prices, and repair the
+remaining violations greedily.
+
+**Theorem 9.** Let $\hat x$ be the returned allocation, $\Gamma=D(\lambda)-\sum\hat x s\ge0$
+the certified gap, and $U(x)=\sum x_{ui}F^*_{ui}$ the full-exposure utility.
+(a) Every cap holds, so each item's share is at most $\max\mathrm{cap}/R$
+and at least $RK/\max\mathrm{cap}$ items are recommended.
+(b) Deterministically,
+$U(\hat x)\ge\max_{x\in\mathcal X}U(x)-\Gamma-2\max_{x\in\mathcal X}|\langle x,s-F^*\rangle|$.
+(c) For DRUP, $\mathbb E s=F^*$ and Theorem 3(d) apply. With probability at least
+$1-\delta$, $|s_{ui}-F^*_{ui}|\le t_\delta=\sqrt{\tfrac12\max_{ui}\sum_ec_e^2\log(2RN/\delta)}$
+for all entries (up to the clipping bias of Theorem 3(c)), hence
+$U(\hat x)\ge\mathrm{OPT}-\Gamma-2RKt_\delta$. For logged-graph propagation,
+$s$ concentrates around the exposure-weighted $F^*(P\odot Y)$ instead
+(Theorem 4). The extra term $2\max_x|\langle x,\mathbb Es-F^*\rangle|$ does
+not vanish, so the constrained re-ranker then optimises popularity-weighted
+utility.
+
+*Proof.* (a) is feasibility. For (b), write
+$U(\hat x)=\langle\hat x,s\rangle-\langle\hat x,s-F^*\rangle\ge\langle x^*,s\rangle-\Gamma-\langle\hat x,s-F^*\rangle$
+and $\langle x^*,s\rangle=U(x^*)+\langle x^*,s-F^*\rangle$. (c) follows from a union
+bound over the $RN$ entries and $\|x\|_1=RK$. ∎
 
 ---
 

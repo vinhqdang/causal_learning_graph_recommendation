@@ -77,3 +77,36 @@ def baseline_imputation(O, Y, P, lam=5.0, iters=20, ips=True):
 
 def clip_propensity(P, floor):
     return P.clamp(min=floor, max=1.0)
+
+
+def lowrank_imputation(O, Y, P, rank=32, lam=10.0, ridge=5.0, iters=8, chunk=512, seed=0):
+    """Personalised imputation Yhat = clip(mu + b_u + b_i + U V^T, 0, 1).
+
+    The additive part is baseline_imputation; the low-rank residual is fitted
+    by inverse-propensity-weighted alternating least squares on the logged
+    pairs (weights O / P), processed in user / item chunks so that no
+    (m, n, rank) tensor is ever materialised. Any fixed imputation keeps the
+    DR edge estimates unbiased (Theorem 1); a more accurate one lowers their
+    variance (Theorem 3), and a personalised one makes the 1-hop DR term
+    personalised.
+    """
+    g = torch.Generator().manual_seed(seed)
+    base = baseline_imputation(O, Y, P, lam=ridge)
+    Wt = O / P
+    Rz = O * (Y - base)                               # residual on logged pairs
+    m, n = O.shape
+    dt = O.dtype
+    U = 0.01 * torch.randn(m, rank, generator=g, dtype=torch.float64).to(dt)
+    V = 0.01 * torch.randn(n, rank, generator=g, dtype=torch.float64).to(dt)
+    eye = torch.eye(rank, dtype=dt)
+
+    def solve(Wm, Rm, F, out):
+        for s in range(0, Wm.shape[0], chunk):
+            w = Wm[s:s + chunk]                       # (c, n)
+            A = torch.einsum("cn,nk,nl->ckl", w, F, F) + lam * eye
+            b = (w * Rm[s:s + chunk]) @ F             # (c, k)
+            out[s:s + chunk] = torch.linalg.solve(A, b.unsqueeze(-1)).squeeze(-1)
+    for _ in range(iters):
+        solve(Wt, Rz, V, U)
+        solve(Wt.T, Rz.T, U, V)
+    return (base + U @ V.T).clamp(0.0, 1.0)

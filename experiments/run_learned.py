@@ -49,6 +49,9 @@ def main():
     ap.add_argument("--floor", type=float, default=0.05)
     ap.add_argument("--pairs_per_epoch", type=int, default=None)
     ap.add_argument("--threads", type=int, default=4)
+    ap.add_argument("--patience", type=int, default=5)
+    ap.add_argument("--tune_first_split", action="store_true",
+                    help="grid-search on split 0 only, then reuse the best config on all splits")
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
     torch.set_num_threads(a.threads)
@@ -77,16 +80,19 @@ def main():
         kind, loss = METHODS[name]
         t0 = time.time()
         per_split, chosen = [], []
+        grid = list(itertools.product(a.lrs, a.wds))
         for sidx, (val, tst) in enumerate(splits):
             best = (-1, None, None)
-            for lr, wd in itertools.product(a.lrs, a.wds):
+            if a.tune_first_split and sidx > 0:
+                grid = [(chosen[0]["lr"], chosen[0]["wd"])]
+            for lr, wd in grid:
                 torch.manual_seed(sidx)
                 model = build(kind, m, n, a.dim, O, Y, P)
 
                 def vf(mod):
                     return evaluate(mod.full_scores(rows), val, ks, row_of)[key]
                 v = train(model, O, Y, P, Yhat, loss, lr, wd, a.epochs, a.batch, vf,
-                          pairs_per_epoch=a.pairs_per_epoch, seed=sidx)
+                          patience=a.patience, pairs_per_epoch=a.pairs_per_epoch, seed=sidx)
                 if v > best[0]:
                     with torch.no_grad():
                         best = (v, {"lr": lr, "wd": wd}, evaluate(model.full_scores(rows), tst, ks, row_of))

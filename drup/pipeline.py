@@ -6,8 +6,16 @@ those selected by experiments/run_filters.py (alpha, floor, lam, deg, beta).
 
 import torch
 
-from .estimation import baseline_imputation, clip_propensity
+from .estimation import baseline_imputation, clip_propensity, lowrank_imputation
 from .propagation import degree_weights, edge_estimate, three_hop
+
+
+def impute(O, Y, P, cfg):
+    """Outcome imputation: additive ('add', default) or low-rank ('lr')."""
+    if cfg.get("imp", "add") == "lr":
+        return lowrank_imputation(O, Y, P, rank=cfg.get("rank", 32), lam=cfg.get("lr_lam", 10.0),
+                                  ridge=cfg["lam"])
+    return baseline_imputation(O, Y, P, lam=cfg["lam"])
 
 
 def build(O, Y, P_raw, method, cfg):
@@ -16,7 +24,7 @@ def build(O, Y, P_raw, method, cfg):
         Yhat = None
     else:
         P = clip_propensity(P_raw, cfg["floor"])
-        Yhat = baseline_imputation(O, Y, P, lam=cfg["lam"]) if method.startswith("DR") else None
+        Yhat = impute(O, Y, P, cfg) if method.startswith("DR") else None
     W = edge_estimate(O, Y, P, Yhat)
     D = Yhat if cfg.get("deg", "W") == "Yhat" and Yhat is not None else None
     C = degree_weights(W, cfg["alpha"], D=D)

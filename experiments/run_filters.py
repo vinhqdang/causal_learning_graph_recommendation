@@ -26,11 +26,14 @@ import torch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from drup.data import load_coat, split_test  # noqa: E402
-from drup.estimation import baseline_imputation, clip_propensity, popularity_propensity  # noqa: E402
+from drup.estimation import clip_propensity, popularity_propensity  # noqa: E402
+from drup.pipeline import impute  # noqa: E402
 from drup.metrics import evaluate  # noqa: E402
+from drup.khop import khop  # noqa: E402
 from drup.propagation import degree_weights, edge_estimate, three_hop  # noqa: E402
 
 BETAS = [0.0, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 1e3]
+GAMMAS = [0.03, 0.1, 0.3, 1.0, 3.0]          # weight of the 5-hop term
 
 
 def unit(x):
@@ -45,15 +48,24 @@ def propagate(O, Y, P, Yhat, alpha, correct, rows, deg="W"):
     return unit(s1), unit(s3)
 
 
+def propagate5(O, Y, P, Yhat, alpha, correct, rows, deg="W"):
+    W = edge_estimate(O, Y, P, Yhat)
+    C = degree_weights(W, alpha, D=Yhat if deg == "Yhat" else None)
+    s1 = (C * W)[rows]
+    s3 = three_hop(W, C, rows=rows, correct=correct)
+    s5 = khop(W, C, 5, rows=rows, correct=correct)
+    return unit(s1), unit(s3), unit(s5)
+
+
 def configs(method, a):
     if method in ("Pop", "Impute"):
-        grid = {"lam": a.lams} if method == "Impute" else {}
+        grid = {"lam": a.lams, "imp": a.imps} if method == "Impute" else {}
     elif method == "Obs":
         grid = {"alpha": a.alphas}
     elif method.startswith("IPS"):
         grid = {"alpha": a.alphas, "floor": a.floors}
     else:
-        grid = {"alpha": a.alphas, "floor": a.floors, "lam": a.lams, "deg": a.degs}
+        grid = {"alpha": a.alphas, "floor": a.floors, "lam": a.lams, "deg": a.degs, "imp": a.imps}
     keys = list(grid)
     for vals in itertools.product(*[grid[k] for k in keys]):
         yield dict(zip(keys, vals))
@@ -67,15 +79,22 @@ def score_bank(d, method, cfg, P_raw, rows):
         return [(dict(cfg), s)]
     if method == "Impute":
         P = clip_propensity(P_raw, 0.05)
-        return [(dict(cfg), baseline_imputation(O, Y, P, lam=cfg["lam"])[rows])]
+        return [(dict(cfg), impute(O, Y, P, cfg)[rows])]
     if method == "Obs":
         s1, s3 = propagate(O, Y, torch.ones_like(O), None, cfg["alpha"], False, rows)
     else:
         P = clip_propensity(P_raw, cfg["floor"])
         Yhat = None
         if method.startswith("DR"):
-            Yhat = baseline_imputation(O, Y, P, lam=cfg["lam"])
-        correct = method in ("IPS+WC", "DRUP")
+            Yhat = impute(O, Y, P, cfg)
+        correct = method in ("IPS+WC", "DRUP", "DRUP-5hop")
+        if method.endswith("5hop"):
+            s1, s3, s5 = propagate5(O, Y, P, Yhat, cfg["alpha"], correct, rows, cfg.get("deg", "W"))
+            out = []
+            for b in BETAS[:-1]:
+                for gm in GAMMAS:
+                    out.append((dict(cfg, beta=b, gamma=gm), s1 + b * s3 + gm * s5))
+            return out
         s1, s3 = propagate(O, Y, P, Yhat, cfg["alpha"], correct, rows, cfg.get("deg", "W"))
     out = []
     for b in BETAS:
@@ -94,6 +113,7 @@ def main():
     ap.add_argument("--floors", type=float, nargs="+", default=[0.01, 0.02, 0.05, 0.1, 0.2])
     ap.add_argument("--lams", type=float, nargs="+", default=[1.0, 5.0, 20.0])
     ap.add_argument("--degs", nargs="+", default=["W", "Yhat"])
+    ap.add_argument("--imps", nargs="+", default=["add"], help="imputation: add | lr")
     ap.add_argument("--methods", nargs="+",
                     default=["Pop", "Impute", "Obs", "IPS", "IPS+WC", "DR", "DRUP"])
     ap.add_argument("--dtype", default="float64")

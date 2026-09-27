@@ -1,0 +1,20 @@
+  MF split 0: val 0.6318 test 0.6289 {'lr': 0.003, 'wd': 0.0001}
+  MF split 1: val 0.6336 test 0.6284 {'lr': 0.003, 'wd': 0.0001}
+  MF split 2: val 0.6270 test 0.6343 {'lr': 0.003, 'wd': 0.0001}
+  MF split 3: val 0.6348 test 0.6292 {'lr': 0.003, 'wd': 0.0001}
+  MF split 4: val 0.6239 test 0.6389 {'lr': 0.003, 'wd': 0.0001}
+MF           ndcg@10=0.6783±0.0040  ndcg@20=0.6320±0.0041  ndcg@50=0.5101±0.0050  recall@10=0.1125±0.0015  recall@20=0.1925±0.0022  recall@50=0.2670±0.0040   [1159s]
+  IPS-MF split 0: val 0.6304 test 0.6259 {'lr': 0.003, 'wd': 0.0001}
+  IPS-MF split 1: val 0.6305 test 0.6255 {'lr': 0.003, 'wd': 0.0001}
+  IPS-MF split 2: val 0.6259 test 0.6316 {'lr': 0.003, 'wd': 0.0001}
+  IPS-MF split 3: val 0.6309 test 0.6281 {'lr': 0.003, 'wd': 0.0001}
+  IPS-MF split 4: val 0.6241 test 0.6323 {'lr': 0.003, 'wd': 0.0001}
+IPS-MF       ndcg@10=0.6756±0.0037  ndcg@20=0.6287±0.0028  ndcg@50=0.5077±0.0024  recall@10=0.1125±0.0014  recall@20=0.1913±0.0018  recall@50=0.2661±0.0026   [2279s]
+  DR-MF split 0: val 0.6239 test 0.6170 {'lr': 0.003, 'wd': 1e-05}
+  DR-MF split 1: val 0.6245 test 0.6167 {'lr': 0.003, 'wd': 1e-05}
+  DR-MF split 2: val 0.6127 test 0.6196 {'lr': 0.003, 'wd': 1e-05}
+  DR-MF split 3: val 0.6239 test 0.6200 {'lr': 0.003, 'wd': 1e-05}
+  DR-MF split 4: val 0.6157 test 0.6221 {'lr': 0.003, 'wd': 1e-05}
+DR-MF        ndcg@10=0.6701±0.0085  ndcg@20=0.6191±0.0020  ndcg@50=0.5044±0.0026  recall@10=0.1106±0.0018  recall@20=0.1878±0.0016  recall@50=0.2647±0.0030   [1645s]
+/home/user/causal_learning_graph_recommendation/experiments/../drup/learned.py:44: UserWarning: Sparse invariant checks are implicitly disabled. Memory errors (e.g. SEGFAULT) will occur when operating on a sparse tensor which violates the invariants, but checks incur performance overhead. To silence this warning, explicitly opt in or out. See `torch.sparse.check_sparse_tensor_invariants.__doc__` for guidance.  (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/Context.cpp:848.)
+  self.A = torch.sparse_coo_tensor(idx, torch.cat([val, val]), (m + n, m + n)).coalesce()

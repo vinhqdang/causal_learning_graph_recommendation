@@ -20,7 +20,8 @@ import sys
 import torch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from drup.propagation import edge_estimate, three_hop  # noqa: E402
+from drup.khop import khop  # noqa: E402
+from drup.propagation import edge_estimate  # noqa: E402
 
 
 def main():
@@ -29,8 +30,14 @@ def main():
     ap.add_argument("--n", type=int, default=40)
     ap.add_argument("--reps", type=int, default=20000)
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--out", default="results/mc_unbiasedness.json")
+    ap.add_argument("--K", type=int, default=3, help="number of hops (odd)")
+    ap.add_argument("--out", default=None)
     a = ap.parse_args()
+    a.out = a.out or ("results/mc_unbiasedness.json" if a.K == 3 else f"results/mc_unbiasedness_K{a.K}.json")
+    K = a.K
+
+    def three_hop(W, C, correct=True):   # K-hop propagation (name kept for K = 3)
+        return khop(W, C, K, correct=correct)
 
     g = torch.Generator().manual_seed(a.seed)
     dt = torch.float64
