@@ -26,8 +26,36 @@ def user_contribution(w_u, c_u):
     return torch.outer(wt, wt) - torch.diag(wt * wt) + torch.diag(c_u * c_u * w_u)
 
 
-def leave_one_out_operator(G_corr, w_u, c_u):
-    return G_corr - user_contribution(w_u, c_u)
+class LeaveOneOut:
+    """Implicit leave-one-out operator G^(-u) = G - contrib(w_u^orig).
+
+    Never materialises an (n, n) matrix: products with G^(-u) cost one
+    mat-vec with the public G plus O(n) corrections, which makes exact
+    explanations cheap even with ~10^4 items. ``self[:, i]`` returns a column.
+    """
+
+    def __init__(self, G, w_u, c_u):
+        self.G, self.c = G, c_u
+        self.wt = c_u * w_u
+        self.d = c_u * c_u * w_u
+
+    def rmatvec(self, x):                  # x @ G^(-u)
+        wt = self.wt
+        return x @ self.G - ((x @ wt) * wt - x * wt * wt + x * self.d)
+
+    def column(self, i):
+        col = self.G[:, i] - self.wt * self.wt[i]
+        col = col.clone()
+        col[i] = col[i] + self.wt[i] ** 2 - self.d[i]
+        return col
+
+    def __getitem__(self, idx):
+        _, i = idx
+        return self.column(i)
+
+
+def leave_one_out_operator(G, w_u, c_u):
+    return LeaveOneOut(G, w_u, c_u)
 
 
 def exact_three_hop(w_u, c_u, G_loo):
@@ -35,9 +63,12 @@ def exact_three_hop(w_u, c_u, G_loo):
     re-inserting the user's own contribution into the operator. Equals a full
     recomputation of drup.propagation.three_hop with that row (C fixed)."""
     wt = c_u * w_u
-    delta = wt * wt - c_u * c_u * w_u
-    G = G_loo + user_contribution(w_u, c_u)
-    return wt @ G - wt * (delta.sum() - 2 * delta) - (wt ** 3 - c_u ** 3 * w_u)
+    d = c_u * c_u * w_u
+    delta = wt * wt - d
+    base = G_loo.rmatvec(wt) if isinstance(G_loo, LeaveOneOut) else wt @ G_loo
+    # wt @ contrib(w_u) = (wt.wt) wt - wt*wt^2 + wt*d
+    own = (wt @ wt) * wt - wt * wt * wt + wt * d
+    return base + own - wt * (delta.sum() - 2 * delta) - (wt ** 3 - c_u ** 3 * w_u)
 
 
 def affine_coefficients(i, w_u, c_u, G_loo):

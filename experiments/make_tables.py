@@ -170,3 +170,35 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def significance():
+    """Paired t-tests of DRUP against every baseline on the splits both share."""
+    from scipy.stats import ttest_rel
+    rows = []
+    for ds, prop, met, title in [("coat", "given", "ndcg@5", "Coat"), ("kuairec", "pop", "ndcg@20", "KuaiRec")]:
+        fl, le = load(f"filters_{ds}_{prop}.json"), load(f"learned_{ds}_{prop}.json")
+        if fl is None:
+            continue
+        drup = [r[met] for r in fl["results"]["DRUP"]["per_split"]]
+        allres = dict(fl["results"])
+        if le:
+            allres.update(le["results"])
+        for mth, r in allres.items():
+            if mth == "DRUP":
+                continue
+            other = [x[met] for x in r["per_split"]]
+            k = min(len(drup), len(other))
+            diff = sum(d - o for d, o in zip(drup[:k], other[:k])) / k
+            p = ttest_rel(drup[:k], other[:k]).pvalue if k > 1 else float("nan")
+            rows.append(f"{title} & {mth} & {k} & {diff:+.4f} & {p:.3g}\\\\")
+        rows.append("\\midrule")
+    return "\n".join(["\\begin{tabular}{llccc}", "\\toprule",
+                      "Data & baseline & splits & mean diff. (DRUP $-$ baseline) & $p$ (paired $t$)\\\\",
+                      "\\midrule"] + rows[:-1] + ["\\bottomrule", "\\end{tabular}"]) + "\n"
+
+
+if __name__ == "__main__":
+    with open(os.path.join(OUT, "significance.tex"), "w") as f:
+        f.write(significance())
+    print(open(os.path.join(OUT, "significance.tex")).read())

@@ -60,8 +60,9 @@ Shapley attributions and provably minimal counterfactual explanations;
 (v) a single public item operator whose Gaussian release makes the whole
 recommender jointly differentially private.
 On Coat and KuaiRec, whose test sets are random or fully observed, DRUP needs no
-training. Its accuracy matches or exceeds trained MF, LightGCN, NAVIP and DR
-baselines, and every guarantee is verified empirically.
+training. It is accuracy-competitive with trained MF, LightGCN, NAVIP and DR
+baselines (best on KuaiRec, tied with the best trained model on Coat), and
+every guarantee is verified empirically.
 \end{abstract}
 
 \noindent\textbf{Keywords:} causal recommendation; graph neural networks; doubly robust estimation;
@@ -348,13 +349,17 @@ set. We rank all never-logged small-matrix items. Positives are ratings $\ge4$
 \paragraph{Protocol.}
 Hyper-parameters are chosen on a validation part of the unbiased data: 30\% of
 each user's test items for Coat, 30\% of the test users for KuaiRec. We report
-the held-out remainder, averaged over 10 (Coat) or 5 (KuaiRec) random splits;
-trained baselines use 10 and 3 splits. The baselines are popularity,
-imputation only, and MF / IPS-MF / DR-MF / LightGCN / NAVIP-LightGCN /
-DR-LightGCN trained with early stopping. The training-free propagation family
-shares one scoring form and differs only in its operator: logged graph (linear
-LightGCN), IPS adjacency (NAVIP-style), IPS with walk correction (WC), DR
-adjacency, and DRUP.
+the held-out remainder, averaged over 10 (Coat) or 5 (KuaiRec) random splits.
+Trained baselines are popularity, imputation only, and MF / IPS-MF / DR-MF /
+LightGCN / NAVIP-LightGCN / DR-LightGCN with 64-dimensional embeddings,
+pointwise losses and early stopping on the validation part. On Coat they use
+10 splits and a grid over learning rate and weight decay. On KuaiRec, because
+of our CPU-only budget, they use 3 splits, one learning rate
+($10^{-2}$), one weight decay ($10^{-4}$) and at most 15 epochs, so their
+KuaiRec numbers should be read as lower bounds. The training-free propagation
+family shares one scoring form and differs only in its operator: the logged
+graph (linear LightGCN), IPS adjacency (NAVIP-style), IPS with the walk
+correction (WC), DR adjacency, and DRUP.
 
 \subsection{Monte-Carlo verification}
 Table~\ref{tab:mc} uses a synthetic MNAR model with known propensities,
@@ -378,13 +383,27 @@ and $\approx0$ for DRUP.
 \end{adjustbox}
 \end{table}
 
-Table~\ref{tab:acc} reports accuracy. DRUP needs no training, yet it is on par
-with the best trained baselines on Coat and is the most accurate method on
-KuaiRec. On these data the walk correction changes accuracy only marginally
-relative to DR adjacency; the correction matters for bias, fairness and
-certification, not for top-$K$ accuracy. As predicted by
-Theorem~\ref{thm:lower}, IPS+WC and IPS coincide on unexposed candidates at three
-hops, because the factor $W_{ui}=0$ hides the IPS bias.
+Table~\ref{tab:acc} reports accuracy and Table~\ref{tab:sig} the paired
+$t$-tests over shared splits. DRUP needs no training. On KuaiRec it has the
+highest nDCG@20 (0.6326). It is significantly better than the imputation
+model, logged-graph and IPS propagation, DR-MF and DR-LightGCN, and it is
+ahead of LightGCN, MF and NAVIP by margins that are not significant with three
+splits. On Coat it significantly outperforms MF, IPS-MF, DR-MF, LightGCN and
+NAVIP and ties with DR-LightGCN. It is, however, significantly \emph{below}
+the imputation-only model ($-0.014$) and the uncorrected DR adjacency
+($-0.006$). With 290 users and 16 random ratings each, the additive imputation
+already captures most of the recoverable signal. The walk correction therefore
+does not buy top-$K$ accuracy. It buys unbiasedness, exposure invariance and
+certifiability. As predicted by Theorem~\ref{thm:lower}, IPS+WC coincides with
+IPS on unexposed candidates at three hops, because the factor $W_{ui}=0$ hides
+the IPS bias. We do not claim a large accuracy gain. The claim is that DRUP is
+accuracy-competitive with trained models while adding the guarantees of
+Section~5.
+
+\begin{table}[t]\centering\small
+\caption{Paired $t$-tests of DRUP against each baseline (nDCG@5 on Coat, nDCG@20 on KuaiRec).}\label{tab:sig}
+\input{tables/significance.tex}
+\end{table}
 
 \subsection{Fairness}
 \begin{table}[t]\centering\small

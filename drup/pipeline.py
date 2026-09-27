@@ -51,3 +51,13 @@ def scores(M, rows, consts=None):
     if beta >= 1e3:
         return s3
     return s1 + beta * s3
+
+
+def scores_with_consts(M, rows):
+    """scores(M, rows, scale_constants(M, rows)) with a single propagation."""
+    s1, s3 = raw_parts(M, rows)
+    c1 = float(s1.abs().mean().clamp_min(1e-12))
+    c3 = float(s3.abs().mean().clamp_min(1e-12))
+    beta = M["cfg"].get("beta", 1.0)
+    S = s3 / c3 if beta >= 1e3 else s1 / c1 + beta * s3 / c3
+    return S, (c1, c3)

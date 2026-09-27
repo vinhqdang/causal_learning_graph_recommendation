@@ -117,7 +117,7 @@
   }
  },
  "explain": {
-  "max_rel_error_completeness_additivity": 1.3403264363287854e-15,
+  "max_rel_error_completeness_additivity": 1.3403264363287852e-15,
   "deletion_rank_of_top1": {
    "DRUP-attribution": {
     "1": 0.04,
@@ -127,11 +127,11 @@
     "10": 0.035
    },
    "random": {
-    "1": 0.005,
-    "2": 0.02,
-    "3": 0.03,
+    "1": 0.01,
+    "2": 0.01,
+    "3": 0.01,
     "5": 0.03,
-    "10": 0.035
+    "10": 0.04
    },
    "item-similarity": {
     "1": 0.005,
@@ -174,7 +174,8 @@
      "50": 0.0
     },
     "certificate_violations": 0,
-    "tau": 1.0
+    "tau": 1.0,
+    "max_rel_bound_excess": 0.0
    },
    "IPS": {
     "hit@K": {
@@ -194,7 +195,8 @@
      "50": 0.0
     },
     "certificate_violations": 0,
-    "tau": 0.2
+    "tau": 0.2,
+    "max_rel_bound_excess": 0.0
    },
    "DR": {
     "hit@K": {
@@ -214,7 +216,8 @@
      "50": 0.0
     },
     "certificate_violations": 0,
-    "tau": 0.2
+    "tau": 0.2,
+    "max_rel_bound_excess": -0.05276786078824646
    },
    "DRUP": {
     "hit@K": {
@@ -234,7 +237,8 @@
      "50": 0.0
     },
     "certificate_violations": 0,
-    "tau": 0.2
+    "tau": 0.2,
+    "max_rel_bound_excess": -0.018552155258073393
    }
   }
  },

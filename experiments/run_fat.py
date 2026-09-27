@@ -15,6 +15,7 @@ Sections (all on the unbiased test users):
 
 import argparse
 import collections
+import gc
 import json
 import os
 import sys
@@ -27,7 +28,7 @@ from drup import fat  # noqa: E402
 from drup.data import load_coat  # noqa: E402
 from drup.estimation import popularity_propensity  # noqa: E402
 from drup.metrics import evaluate  # noqa: E402
-from drup.pipeline import build, scale_constants, scores  # noqa: E402
+from drup.pipeline import build, scores_with_consts  # noqa: E402
 from drup.propagation import item_gram, local_three_hop  # noqa: E402
 
 METHODS = ["Obs", "IPS", "DR", "DRUP"]
@@ -103,9 +104,18 @@ def main():
     quality = np.where(qc > 0, qa / np.maximum(qc, 1), 0.0)
     out = {"dataset": a.dataset, "configs": cfgs}
 
-    models = {mth: build(O, Y, P_raw, mth, cfgs[mth]) for mth in METHODS}
-    consts = {mth: scale_constants(models[mth], rows) for mth in METHODS}
-    S = {mth: scores(models[mth], rows, consts[mth]) for mth in METHODS}
+    # Only one model is kept in memory at a time (KuaiRec matrices are large).
+    cache = {}
+
+    def get_model(mth):
+        if mth not in cache:
+            cache.clear()
+            gc.collect()
+            cache[mth] = build(O, Y, P_raw, mth, cfgs[mth])
+        return cache[mth]
+    S, consts = {}, {}
+    for mth in METHODS:
+        S[mth], consts[mth] = scores_with_consts(get_model(mth), rows)
 
     if "fairness" in a.sections:
         res = {}
@@ -141,9 +151,12 @@ def main():
             O2 = O * thin
             # Known intervention: propensity of treated items is halved.
             P2 = torch.where(treated[None, :], P_raw * 0.5, P_raw)
+            cache.clear()
+            gc.collect()
             for mth in METHODS:
                 M2 = build(O2, Y, P2, mth, cfgs[mth])
-                S2 = scores(M2, rows, scale_constants(M2, rows))
+                S2 = scores_with_consts(M2, rows)[0]
+                del M2
                 a0, c0 = within_user_rank(S[mth], test, row_of, n)
                 a1, c1 = within_user_rank(S2, test, row_of, n)
                 ok = c0 > 0
@@ -152,12 +165,15 @@ def main():
                 shift = (a1[tr].sum() / c1[tr].sum() - a0[tr].sum() / c0[tr].sum()) \
                     - (a1[ct].sum() / c1[ct].sum() - a0[ct].sum() / c0[ct].sum())
                 res[mth].append(float(shift))
+                del S2
+            del O2, P2, thin, keep
+            gc.collect()
         out["intervene"] = {mth: {"mean": float(np.mean(v)), "std": float(np.std(v)), "all": v}
                             for mth, v in res.items()}
         for mth in METHODS:
             print("intervene", mth, out["intervene"][mth]["mean"], "+-", out["intervene"][mth]["std"], flush=True)
 
-    M = models["DRUP"]
+    M = get_model("DRUP")
     W, C, Yhat = M["W"], M["C"], M["Yhat"]
     G = item_gram(W, C, correct=True)
     beta = M["cfg"]["beta"]
@@ -236,7 +252,7 @@ def main():
         budgets = [0, 1, 5, 10, 20, 50] if a.dataset == "coat" else [0, 5, 20, 50, 100, 200]
         unexp_of = {uu: torch.nonzero(O[uu] == 0).flatten() for uu, _, _ in test}
         for mth in METHODS:
-            Mm = models[mth]
+            Mm = get_model(mth)
             Wm, Cm, Pm = Mm["W"], Mm["C"], Mm["P"]
             cm1, cm3 = consts[mth]
             bm = Mm["cfg"].get("beta", 1.0)
@@ -251,6 +267,7 @@ def main():
             hit = {b: [] for b in budgets}
             cert = {b: [] for b in budgets}
             viol = 0
+            max_excess = -float("inf")
             for t in targets:
                 t = int(t)
                 o_v = torch.zeros(n, dtype=dt)
@@ -269,7 +286,9 @@ def main():
                 wt_v = c_v * w_v
                 wt_u = Cr * Wr
                 if Mm["correct"]:
-                    dS3 = wt_u @ fat.user_contribution(w_v, c_v)   # ONE fake user
+                    # ONE fake user: wt_u @ contrib(w_v) without forming (n, n)
+                    dS3 = (wt_u @ wt_v)[:, None] * wt_v[None, :] - wt_u * (wt_v * wt_v)[None, :] \
+                        + wt_u * (c_v * c_v * w_v)[None, :]
                 else:
                     dS3 = (wt_u @ wt_v)[:, None] * wt_v[None, :]
                 # certified bounds for ANY profile with <= L+1 logged items
@@ -284,7 +303,12 @@ def main():
                 sc3 = (1.0 if bm >= 1e3 else bm) / cm3
                 blo, bhi = blo * sc3, bhi * sc3
                 # sanity: the realised single-profile effect lies inside the bound
-                assert bool(((dS3 * sc3) <= bhi + 1e-9).all() and ((dS3 * sc3) >= blo - 1e-9).all())
+                # (relative tolerance for float32 round-off)
+                eff = dS3 * sc3
+                scale_b = float(torch.maximum(bhi.abs().max(), blo.abs().max()))
+                excess = float(torch.maximum((eff - bhi).max(), (blo - eff).max()))
+                max_excess = max(max_excess, excess / max(scale_b, 1e-30))
+                assert excess <= 1e-4 * scale_b, (mth, excess, scale_b)
                 for b in budgets:
                     s_att = s_clean + b * dS3 * sc3
                     hits, certs = [], []
@@ -309,7 +333,8 @@ def main():
                     cert[b].append(float(np.mean(certs)))
             res[mth] = {"hit@K": {str(b): float(np.mean(v)) for b, v in hit.items()},
                         "certified_frac": {str(b): float(np.mean(v)) for b, v in cert.items()},
-                        "certificate_violations": viol, "tau": tau}
+                        "certificate_violations": viol, "tau": tau,
+                        "max_rel_bound_excess": max_excess}
             print("attack", mth, json.dumps(res[mth]), flush=True)
         out["attack"] = {"K": K, "L": L, "targets": targets.tolist(), "results": res}
 
@@ -351,7 +376,12 @@ def main():
                                                ptest, (kn,), row_of)[f"ndcg@{kn}"]}
         print("privacy reference", out["privacy"]["non_private_ndcg"], "pop", out["privacy"]["pop_ndcg"])
 
-    with open(f"results/fat_{a.dataset}_{a.prop}.json", "w") as f:
+    path = f"results/fat_{a.dataset}_{a.prop}.json"
+    if os.path.exists(path):          # sections can be run separately and merged
+        old = json.load(open(path))
+        old.update(out)
+        out = old
+    with open(path, "w") as f:
         json.dump(out, f, indent=1)
 
 

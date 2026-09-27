@@ -1,6 +1,0 @@
-/home/user/causal_learning_graph_recommendation/experiments/../drup/fat.py:240: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
-  rho = spearmanr(S[r, items], item_pop[items]).correlation
-fairness Obs {'ndcg@20': 0.6026, 'PRU': 0.8454, 'ECB': 0.8301, 'gini@20': 0.9906, 'coverage@20': 0.1524, 'group_gap': 0.008, 'group0': 0.6065, 'group1': 0.5985}
-fairness IPS {'ndcg@20': 0.595, 'PRU': 0.7558, 'ECB': 0.5713, 'gini@20': 0.9832, 'coverage@20': 0.278, 'group_gap': 0.0023, 'group0': 0.5961, 'group1': 0.5939}
-fairness DR {'ndcg@20': 0.6324, 'PRU': 0.8305, 'ECB': 0.418, 'gini@20': 0.9939, 'coverage@20': 0.0081, 'group_gap': 0.0116, 'group0': 0.6382, 'group1': 0.6266}
-fairness DRUP {'ndcg@20': 0.6334, 'PRU': 0.831, 'ECB': 0.4183, 'gini@20': 0.9939, 'coverage@20': 0.0069, 'group_gap': 0.0129, 'group0': 0.6398, 'group1': 0.6269}
