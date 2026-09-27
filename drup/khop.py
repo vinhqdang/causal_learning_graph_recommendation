@@ -132,8 +132,14 @@ def _contract(factors, su, si, mats, rows):
         M = mats[k]
         ops.append(M[rows] if ul == "a" else M)
         subs.append(ul + il)
-    expr = ",".join(subs) + "->ab"
-    return torch.einsum(expr, *ops)
+    # Factors on the same index pair are multiplied elementwise first:
+    # einsum path search handles such repeated operands badly (it can build
+    # a (rows, m, n) intermediate for 'ac,dc,dc,db->ab').
+    merged = {}
+    for sub, op in zip(subs, ops):
+        merged[sub] = op if sub not in merged else merged[sub] * op
+    expr = ",".join(merged) + "->ab"
+    return torch.einsum(expr, *merged.values())
 
 
 def plugin_khop(Wt, K, rows=None):

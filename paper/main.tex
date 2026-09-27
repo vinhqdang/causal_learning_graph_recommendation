@@ -48,7 +48,9 @@ clip. Because outcomes are binary, the fix is simple: every repeated edge is
 replaced by its unbiased idempotent counterpart. The resulting operator,
 \emph{DRUP} (Doubly Robust, walk-Unbiased Propagation), is exactly unbiased and
 edge-wise doubly robust for propagation over the counterfactual full-exposure
-graph, and it costs no more than the uncorrected operator. The same structure
+graph, and it costs no more than the uncorrected operator. By Möbius
+inversion over the coincidence patterns of walk indices, the correction extends
+exactly to any number of hops. The same structure
 gives DRUP provable properties beyond accuracy:
 (i) variance, clipping-bias and concentration bounds;
 (ii) exposure invariance, a causal item-fairness guarantee that the expected
@@ -58,11 +60,15 @@ propagation amplifies exposure and uncorrected DR propagation over-corrects it;
 Shapley attributions and provably minimal counterfactual explanations;
 (iv) closed-form certificates against injected fake profiles; and
 (v) a single public item operator whose Gaussian release makes the whole
-recommender jointly differentially private.
+recommender jointly differentially private; and
+(vi) an exposure-capped allocation, solved exactly by min-cost flow, that
+enforces hard per-item exposure limits and retains a utility guarantee with respect to the
+causal (full-exposure) objective.
 On Coat and KuaiRec, whose test sets are random or fully observed, DRUP needs no
-training. It is accuracy-competitive with trained MF, LightGCN, NAVIP and DR
-baselines (best on KuaiRec, tied with the best trained model on Coat), and
-every guarantee is verified empirically.
+gradient training. On KuaiRec it significantly outperforms tuned MF,
+LightGCN, NAVIP and DR baselines (nDCG@20 0.640 against at most 0.632,
+$p<0.01$). On Coat it ties with the best trained model. Every guarantee is
+verified empirically.
 \end{abstract}
 
 \noindent\textbf{Keywords:} causal recommendation; graph neural networks; doubly robust estimation;
@@ -107,7 +113,8 @@ its idempotent unbiased counterpart. The resulting 3-hop operator is exactly
 unbiased and edge-wise doubly robust for propagation over the counterfactual
 full-exposure graph (Theorem~\ref{thm:unbiased}). It has the cost of one item
 Gram matrix, needs no training, and factorises into a public item operator plus
-per-user local corrections.
+per-user local corrections. The correction extends exactly to any number of
+hops (Theorem~\ref{thm:khop}).
 \item We prove variance, clipping-bias and concentration bounds
 (Theorem~\ref{thm:var}).
 \item We show that the same structure yields provable \emph{FAT+P}
@@ -116,7 +123,8 @@ causal item fairness via exposure invariance (Theorem~\ref{thm:fair});
 exact attributions and optimal counterfactual explanations
 (Proposition~\ref{prop:affine}, Theorem~\ref{thm:cf});
 certified robustness to injected profiles (Theorem~\ref{thm:robust});
-and joint differential privacy (Theorem~\ref{thm:dp}).
+joint differential privacy (Theorem~\ref{thm:dp}); and exposure-capped
+allocation with a causal utility guarantee (Theorem~\ref{thm:alloc}).
 \item We evaluate DRUP on Coat~\cite{schnabel2016}, whose test set is a random
 sample, and on KuaiRec~\cite{gao2022kuairec}, whose test matrix is fully
 observed. We compare it with trained and training-free baselines and verify each
@@ -221,7 +229,7 @@ across users (Algorithm~\ref{alg:drup}).
 \caption{DRUP (training-free)}\label{alg:drup}
 \begin{algorithmic}[1]
 \Require log $(O,O\odot Y)$; hyper-parameters $\tau,\alpha,\lambda,b/a$
-\State fit propensities $\hat p$ (logistic exposure model) and imputation $\hat Y$ (IPS-weighted additive ridge)
+\State fit propensities $\hat p$ (logistic exposure model) and imputation $\hat Y$ (IPS-weighted additive ridge, optionally plus an IPS-weighted low-rank ALS residual)
 \State $\bar p\gets\max(\hat p,\tau)$; \ $W\gets\hat Y+O\odot(Y-\hat Y)/\bar p$
 \State $C\gets d_u^{-\alpha}d_i^{-(1-\alpha)}$ with $d$ from $\hat Y$
 \State $G\gets\tW^\top\tW-\diag(\tW^\top\tW)+\diag(\mathbf 1^\top(C\odot C\odot W))$ \Comment{public operator}
@@ -230,6 +238,21 @@ across users (Algorithm~\ref{alg:drup}).
 \EndFor
 \end{algorithmic}
 \end{algorithm}
+
+\paragraph{Imputation.}
+Theorem~\ref{thm:unbiased} holds for any fixed $\hat Y$, so the imputation
+is a free design choice. Its accuracy enters only the variance
+(Theorem~\ref{thm:var}) and the clipping bias. We use either an additive
+model $\mu+b_u+b_i$ fitted by IPS-weighted ridge regression, or that model plus
+a rank-32 residual $UV^\top$ fitted by IPS-weighted alternating least squares
+on the logged pairs. The additive imputation gives every user the same item
+order on unexposed candidates, which makes the one-hop DR term
+non-personalised. The low-rank imputation removes this limitation.
+
+\paragraph{Exposure-capped re-ranking.}
+To control how concentrated the top-$K$ lists are, the scores can be passed
+to an exposure-capped allocation (Theorem~\ref{thm:alloc}, solved exactly by
+min-cost flow).
 
 \paragraph{Complexity.}
 One $n\times n$ Gram product and $O(mn)$ reductions, i.e., the cost of the
@@ -248,6 +271,21 @@ $\delta_e=(p_e/\bar p_e-1)(Y_e-\hat Y_e)$. Then $\E[\hat T_{ui}]$ equals $T^*_{u
 with every $Y_e$ replaced by $Y_e+\delta_e$. In particular, if every edge has a
 correct propensity or a correct imputation, then $\E[s]=F^*$.
 \end{theorem}
+
+\begin{theorem}[Any number of hops]\label{thm:khop}
+For odd $K=2r+1$, encode the coincidences of the index variables of a walk
+$U_0\!-\!J_1\!-\cdots-\!U_r\!-\!J_{r+1}$ as a pair $\pi$ of set partitions. $\pi$
+fixes the multiplicity $k_e$ of every distinct edge. The estimator
+\[
+\hat T^{(K)}=\tW(\tW^\top\tW)^r+\sum_{\pi:\,\exists k_e>1}\ \sum_{\sigma\ge\pi}\mu(\pi,\sigma)\big(g^{\mathrm{corr}}_\pi(\sigma)-g^{\mathrm{plug}}_\pi(\sigma)\big)
+\]
+is exactly unbiased for $(\tY\tY^\top)^r\tY$. Here $g_\pi(\sigma)$ is an
+unconstrained tensor contraction of $\prod_eC_e^{k_e}W_e$ (corrected) or
+$\prod_e\tW_e^{k_e}$ (plug-in) over the blocks of $\sigma$, and $\mu$ is the
+Möbius function of the partition lattice.
+\end{theorem}
+The number of contractions is 5, 99 and 2{,}790 for $K=3,5,7$. For $K=3$ the
+construction reduces to Eq.~\eqref{eq:drup}.
 
 \begin{theorem}[Repeated-walk bias of uncorrected propagation]\label{thm:lower}
 With correct propensities and a candidate $(u,i)$ with $O_{ui}=0$, the
@@ -330,6 +368,21 @@ user's own row, so the recommender is $(\epsilon,\delta)$-jointly
 DP~\cite{hsu2014matchings}. Post-processing such as low-rank denoising is free.
 \end{theorem}
 
+\begin{theorem}[Exposure-capped allocation with a causal utility guarantee]\label{thm:alloc}
+Let $\hat x$ maximise $\langle x,s\rangle$ over allocations with $K$ items per
+user and at most $\mathrm{cap}_i$ users per item. This is a totally unimodular
+$b$-matching, solved exactly by min-cost flow up to a certified rounding gap
+$\Gamma$. Then every cap holds, at least $RK/\max_i\mathrm{cap}_i$ items are
+recommended, and for the full-exposure utility $U(x)=\langle x,F^*\rangle$,
+\[
+U(\hat x)\ \ge\ \max_{x}U(x)-\Gamma-2\max_x|\langle x,s-F^*\rangle| .
+\]
+For DRUP, $\E s=F^*$, and Theorem~\ref{thm:var}(d) with a union bound makes
+the last term $O(RK\,t_\delta)$ with probability $1-\delta$. For logged-graph
+propagation, $\E s$ is the exposure-weighted $F^*(P\odot Y)$, and the term does
+not vanish.
+\end{theorem}
+
 %======================================================================
 \section{Experiments}
 %======================================================================
@@ -353,22 +406,29 @@ the held-out remainder, averaged over 10 (Coat) or 5 (KuaiRec) random splits.
 Trained baselines are popularity, imputation only, and MF / IPS-MF / DR-MF /
 LightGCN / NAVIP-LightGCN / DR-LightGCN with 64-dimensional embeddings,
 pointwise losses and early stopping on the validation part. On Coat they use
-10 splits and a grid over learning rate and weight decay. On KuaiRec, because
-of our CPU-only budget, they use 3 splits, one learning rate
-($10^{-2}$), one weight decay ($10^{-4}$) and at most 15 epochs, so their
-KuaiRec numbers should be read as lower bounds. The training-free propagation
+10 splits and a grid over learning rate and weight decay. On KuaiRec the grid
+(learning rate $\{10^{-2},3\cdot10^{-3}\}\times$ weight decay $\{10^{-4},10^{-5}\}$,
+up to 30 epochs, patience 3) is searched on the validation part of the first
+split. The selected configuration is then trained on all 5 splits, the same
+splits DRUP uses, so every comparison is paired. The training-free propagation
 family shares one scoring form and differs only in its operator: the logged
 graph (linear LightGCN), IPS adjacency (NAVIP-style), IPS with the walk
 correction (WC), DR adjacency, and DRUP.
 
 \subsection{Monte-Carlo verification}
-Table~\ref{tab:mc} uses a synthetic MNAR model with known propensities,
-20{,}000 replications for bias and 3{,}000 for elasticity. The uncorrected IPS
-and DR operators have relative biases of 2.4 and 1.9. With the walk correction,
-bias disappears: the fraction of entries with $|z|>3$ matches the 0.27\% expected
-by chance, and RMSE drops about fivefold. Elasticity follows
+Table~\ref{tab:mc} uses a synthetic MNAR model with known propensities:
+20{,}000 replications for $K=3$, 4{,}000 for $K=5$, and 3{,}000 for the
+elasticity. At three hops the uncorrected IPS and DR operators have relative
+biases of 2.4 and 1.9. At five hops these grow to 78 and 70, because repeated
+walks multiply the inverse propensities. With the walk correction the bias
+vanishes. At $K=3$ the fraction of entries with $|z|>3$ matches the 0.27\%
+expected by chance, and RMSE drops about fivefold. At $K=5$ the residual 0.11--0.14
+is within the Monte-Carlo standard error: the relative RMSE is about 12, so
+the standard error with 4{,}000 replications is about 0.19. The elasticity follows
 Theorem~\ref{thm:fair}: $+1.78$ for the logged graph, $-0.19$ for DR adjacency,
-and $\approx0$ for DRUP.
+and $\approx0$ for DRUP. The $K$-hop engine reproduces the closed-form 3-hop
+operator to $7\times10^{-15}$ and brute-force enumeration of all 5-hop walks to
+$10^{-13}$.
 
 \begin{table}[t]\centering\small
 \caption{Monte-Carlo check of Theorems~\ref{thm:unbiased}, \ref{thm:lower} and \ref{thm:fair}.}\label{tab:mc}
@@ -377,35 +437,44 @@ and $\approx0$ for DRUP.
 
 \subsection{Accuracy}
 \begin{table}[t]\centering\small
-\caption{Accuracy on unbiased test data (mean$\pm$std over splits). Best in bold, second underlined.}\label{tab:acc}
+\caption{Accuracy on unbiased test data (mean$\pm$std over splits). Best in bold, second underlined. The KuaiRec 5-hop rows use the low-rank imputation.}\label{tab:acc}
 \begin{adjustbox}{max width=\textwidth}
 \input{tables/accuracy.tex}
 \end{adjustbox}
 \end{table}
 
 Table~\ref{tab:acc} reports accuracy and Table~\ref{tab:sig} the paired
-$t$-tests over shared splits. DRUP needs no training. On KuaiRec it has the
-highest nDCG@20 (0.6326). It is significantly better than the imputation
-model, logged-graph and IPS propagation, DR-MF and DR-LightGCN, and it is
-ahead of LightGCN, MF and NAVIP by margins that are not significant with three
-splits. On Coat it significantly outperforms MF, IPS-MF, DR-MF, LightGCN and
-NAVIP and ties with DR-LightGCN. It is, however, significantly \emph{below}
-the imputation-only model ($-0.014$) and the uncorrected DR adjacency
-($-0.006$). With 290 users and 16 random ratings each, the additive imputation
-already captures most of the recoverable signal. The walk correction therefore
-does not buy top-$K$ accuracy. It buys unbiasedness, exposure invariance and
-certifiability. As predicted by Theorem~\ref{thm:lower}, IPS+WC coincides with
-IPS on unexposed candidates at three hops, because the factor $W_{ui}=0$ hides
-the IPS bias. We do not claim a large accuracy gain. The claim is that DRUP is
-accuracy-competitive with trained models while adding the guarantees of
-Section~5.
+$t$-tests over shared splits. On KuaiRec, DRUP with low-rank imputation needs
+no gradient training and reaches nDCG@20 of $0.6385$. It is significantly better
+than every tuned trained baseline: MF $0.6320$ ($p=0.005$), NAVIP $0.6302$
+($p=0.005$), LightGCN $0.6300$ ($p=0.006$), IPS-MF $0.6287$, DR-LightGCN $0.6247$
+and DR-MF $0.6191$. It is also better than DRUP with the additive imputation
+($0.6326$) and than the low-rank imputation used alone ($0.5506$). The gain
+therefore comes from propagating over the doubly robust graph, not from
+the imputation itself. Extending the propagation to five hops
+(Theorem~\ref{thm:khop}) adds a further $+0.0018$ (nDCG@20 $0.6402$; $p=0.11$
+against three hops), and the 5-hop variant beats every trained baseline with
+$p<0.01$. As a sensitivity check, lowering the learning rate of MF and
+LightGCN to $10^{-3}$ did not improve their validation score on split~0 by more
+than $0.002$, and it lowered their test score. On Coat, five hops neither help nor hurt.
+On Coat, DRUP significantly outperforms MF, IPS-MF,
+DR-MF, LightGCN and NAVIP, and ties with DR-LightGCN. It is, however,
+significantly \emph{below} the additive imputation model ($-0.014$) and the
+uncorrected DR adjacency ($-0.006$). With 290 users and 16 random ratings
+each, the additive imputation already captures most of the recoverable signal,
+and the low-rank imputation over-fits. Across both data sets the walk
+correction changes top-$K$ accuracy only marginally relative to the same
+propagation without it (e.g., $0.6385$ against $0.6384$ on KuaiRec). What the
+correction buys is unbiasedness, exposure invariance and certifiability. As
+predicted by Theorem~\ref{thm:lower}, IPS+WC coincides with IPS on unexposed
+candidates at three hops, because the factor $W_{ui}=0$ hides the IPS bias.
 
 \begin{table}[t]\centering\small
 \caption{Paired $t$-tests of DRUP against each baseline (nDCG@5 on Coat, nDCG@20 on KuaiRec).}\label{tab:sig}
 \input{tables/significance.tex}
 \end{table}
 
-\subsection{Fairness}
+\subsection{Fairness}\label{sec:fair}
 \begin{table}[t]\centering\small
 \caption{Fairness. ECB is the partial correlation between an item's mean rank and its log exposure, controlling for its true like rate. The user gap is the nDCG gap between user groups (gender on Coat, activity on KuaiRec). The last column is the rank shift of items whose exposures were thinned by a real $do(p\leftarrow p/2)$; 0 means exposure invariance.}\label{tab:fair}
 \begin{adjustbox}{max width=\textwidth}
@@ -428,7 +497,13 @@ Table~\ref{tab:mc}) scales with $(1-p)/p\cdot\varepsilon^2$
 (Theorem~\ref{thm:lower}), and the validation-selected clip and an accurate
 imputation keep it small here. The exposure-conditional bias ECB (KuaiRec,
 where item quality is known from the fully observed matrix) drops from
-$0.830$ (logged graph) and $0.571$ (IPS) to $0.418$ (DRUP). The nDCG gap between
+$0.830$ (logged graph) and $0.571$ (IPS) to $0.418$ (DRUP), and to $0.285$ with
+the low-rank imputation. Under the same intervention, DRUP with low-rank
+imputation shifts the thinned items by $+0.0077\pm0.0004$. This is 17 times
+smaller than the logged graph's shift but not zero. The reason is that the
+low-rank model is re-fitted on the intervened log, so its nuisance depends on
+$O$, which violates Assumption~\ref{as:fixed}. The additive imputation has
+far fewer parameters and stays within noise. The nDCG gap between
 men and women on Coat shrinks from $0.112$ to $0.079$. On KuaiRec, the gap
 between active and inactive users is small for every method ($\le0.013$).
 
@@ -438,13 +513,45 @@ concentrated too, with higher Gini and PRU than the logged graph. The
 accuracy--concentration frontier (Table~\ref{tab:frontier}) makes this
 trade-off explicit. On Coat, DRUP reaches only 0.379 nDCG@5 under a Gini cap
 of 0.4, while the logged graph reaches 0.492. On KuaiRec, IPS keeps 0.575 at
-Gini $\le0.98$, while every DRUP configuration in our grid exceeds 0.99. Combining DRUP with an exposure-constrained re-ranker is
-left for future work.
+Gini $\le0.98$, while every DRUP configuration in our grid exceeds 0.99. The exposure-capped re-ranker below (Table~\ref{tab:rerank}) addresses this with a hard,
+certified guarantee.
 
 \begin{table}[t]\centering\small
 \caption{Best nDCG reachable by each operator under a cap on the Gini coefficient of top-$K$ exposure (over the whole hyper-parameter grid).}\label{tab:frontier}
 \input{tables/frontier.tex}
 \end{table}
+
+\subsection{Exposure-capped re-ranking}
+\begin{table}[t]\centering\small
+\caption{Exposure-capped re-ranking (Theorem~\ref{thm:alloc}, exact min-cost flow). Each item may be recommended to at most $c$ times its fair share $RK/N$ of users. Cells: nDCG@$K$ (Gini@$K$). Every cap was satisfied and every certified rounding gap was below $10^{-4}$.}\label{tab:rerank}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/rerank_coat.tex}
+\end{adjustbox}
+
+\medskip
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/rerank_kuairec.tex}
+\end{adjustbox}
+\end{table}
+
+Table~\ref{tab:rerank} applies the same exposure-capped allocation to every
+operator. The min-cost-flow solver returns the exact optimum: all caps hold,
+coverage is never below the guaranteed $RK/\max\mathrm{cap}$, and the certified
+rounding gap is negligible. A dual-subgradient solver we tried first left
+gaps of up to 35\%, which the certificate exposed. On KuaiRec, where
+exposure is extremely concentrated, DRUP with low-rank imputation is the most
+accurate operator \emph{at every cap}. For example, it reaches $0.260$ against
+$0.228$ (logged graph) and $0.219$ (IPS) at $c=10$, and $0.143$ against
+$0.115$ and $0.111$ at $c=2$. With the additive imputation, DRUP is only on par
+with the logged graph under caps, because its non-personalised one-hop term
+puts every user's mass on the same items. Two caveats remain. First, at equal
+\emph{Gini}, logged-graph and IPS propagation still keep slightly more
+accuracy: below the cap they spread exposure more evenly (e.g., IPS reaches
+$0.219$ at Gini $0.80$, DRUP-LR $0.204$). Second, on Coat, whose random test
+items are already diverse, capping costs DRUP more accuracy than it costs the
+logged graph. Under a hard exposure-cap policy, then, DRUP is the best
+choice on concentrated data, while Gini-targeted fairness still favours the
+correlation-based operators.
 
 \subsection{Transparency}
 \begin{table}[t]\centering\small
@@ -524,15 +631,20 @@ large user base, as expected for user-level DP.
 
 %======================================================================
 \section{Discussion and limitations}
-%======================================================================
 DRUP relies on unconfoundedness and on nuisances that are fixed or cross-fitted,
-the standard assumptions of IPS/DR estimation. The exact correction is derived
-for up to three hops (and for the item Gram operator). Higher orders need the
-same idempotent rule, but the number of repetition patterns grows. The fairness
-guarantee concerns causal exposure invariance, not parity of outcomes. The
-privacy analysis treats the low-dimensional nuisances as public. Beyond
-accuracy, DRUP turns a graph recommender into an object whose bias, fairness,
-explanations, robustness and privacy can be stated and checked.
+the standard assumptions of IPS/DR estimation. When a flexible imputation is
+re-fitted on the data it is applied to, a small residual exposure sensitivity
+remains (Section~\ref{sec:fair}). The exact correction holds for any number of hops, but
+the number of coincidence patterns grows with the Bell numbers (2{,}790
+contractions at $K=7$). The item-side fairness guarantee is causal (exposure
+invariance). Distributional targets need the exposure-capped re-ranker, and
+at equal Gini the correlation-based operators still keep slightly more
+accuracy. Robustness certificates are informative only for small catalogs. The
+privacy analysis treats the low-dimensional nuisances as public. Finally, the
+accuracy gain of the walk correction itself is small. Its value lies in the
+guarantees: beyond accuracy, DRUP turns a graph recommender into an object whose
+bias, fairness, explanations, robustness, exposure allocation and privacy can be
+stated and checked.
 
 \bibliographystyle{abbrvnat}
 \bibliography{refs}

@@ -16,41 +16,64 @@ logged graph. Its properties are proved in `docs/THEORY.md`:
 
 ## Main results
 
-Accuracy on unbiased test data (mean over splits):
+Accuracy on unbiased test data (mean over splits; on KuaiRec the trained
+baselines are tuned and paired with DRUP on the same 5 splits):
 
 | | Coat nDCG@5 | KuaiRec nDCG@20 |
 |---|---|---|
-| MF / IPS-MF / DR-MF | 0.462 / 0.457 / 0.536 | 0.625 / 0.623 / 0.610 |
-| LightGCN / NAVIP / DR-LightGCN | 0.508 / 0.499 / 0.556 | 0.629 / 0.625 / 0.616 |
-| imputation only | 0.566 | 0.622 |
+| MF / IPS-MF / DR-MF | 0.462 / 0.457 / 0.536 | 0.632 / 0.629 / 0.619 |
+| LightGCN / NAVIP / DR-LightGCN | 0.508 / 0.499 / 0.556 | 0.630 / 0.630 / 0.625 |
+| imputation only (additive) | 0.566 | 0.622 |
 | DR adjacency (no walk correction) | 0.559 | 0.632 |
-| **DRUP (training-free)** | 0.553 | **0.633** |
+| DRUP, additive imputation | 0.553 | 0.633 |
+| DRUP, low-rank imputation | – | 0.639 |
+| **DRUP, low-rank imputation, 5 hops** | 0.555 (additive) | **0.640** |
 
-DRUP is accuracy-competitive with trained models, but it is not the most
-accurate method on Coat (see `paper/tables/significance.tex`). Its contribution
-is the guarantees:
+On KuaiRec, DRUP (no gradient training) significantly beats every tuned
+trained baseline (paired t-test, p < 0.01). On Coat it ties with the best
+trained model but is below the additive imputation alone
+(`paper/tables/significance.tex`).
 
-- The corrected estimators are unbiased (relative |bias| 0.02 against 1.9–2.4
-  without the correction), and exposure elasticity is +0.005 (logged graph
-  +1.78, DR adjacency −0.19).
-- Under a real exposure intervention on KuaiRec, DRUP's rank shift is
-  +0.0005 ± 0.0008, against −0.134 for the logged graph. The exposure-conditional
-  bias drops from 0.83 to 0.42.
-- Explanations are exact (error 1e-15). Minimal counterfactual explanations
-  exist for 18% (Coat) and 55% (KuaiRec) of top recommendations.
-- No attack with up to 100 fake users placed the target in any KuaiRec
-  top-20. On Coat, 100% of users are certified against one fake profile.
-- Joint DP: nDCG@20 is 0.613 at ε=8 and 0.629 at ε=16 on KuaiRec (non-private 0.633).
+Guarantees and their checks:
 
-Limitations: the item-side guarantee is causal, not distributional (DRUP's
-top-K lists are concentrated when quality is). Certificates are vacuous for
-KuaiRec-sized catalogs. Nuisances are assumed fixed or cross-fitted.
+- **Unbiasedness, any number of hops.** The correction is exact for any odd
+  K (Möbius inversion over walk-index coincidence patterns, `drup/khop.py`).
+  Uncorrected IPS/DR propagation has relative bias 2.4 / 1.9 at 3 hops and
+  78 / 70 at 5 hops. The corrected estimators stay within Monte-Carlo error.
+- **Causal item fairness.** Exposure elasticity is +0.005 (logged graph +1.78,
+  DR adjacency −0.19). Under a real exposure intervention on KuaiRec, DRUP's rank
+  shift is +0.0005 ± 0.0008, against −0.134 for the logged graph. The
+  exposure-conditional bias drops from 0.83 to 0.42, and to 0.29 with low-rank
+  imputation.
+- **Exposure caps.** An exact min-cost-flow re-ranker enforces per-item
+  exposure caps (certified gap < 5e-6). Under every cap on KuaiRec, DRUP-LR is
+  the most accurate operator (e.g. 0.260 vs 0.228 for the logged graph at
+  c = 10).
+- **Transparency.** Explanations are exact (error 1e-15). Minimal
+  counterfactual explanations exist for 18% (Coat) and 55% (KuaiRec) of top
+  recommendations.
+- **Accountability.** No attack with up to 100 fake users placed the target in
+  any KuaiRec top-20. On Coat, 100% of users are certified against one fake
+  profile.
+- **Privacy.** Joint DP: nDCG@20 is 0.613 at ε = 8 and 0.629 at ε = 16 on
+  KuaiRec (non-private 0.633).
+
+Limitations:
+
+- At equal Gini, logged-graph propagation keeps slightly more accuracy under
+  re-ranking.
+- Certificates are vacuous for KuaiRec-sized catalogs.
+- A re-fitted low-rank imputation leaves a small exposure sensitivity
+  (+0.008), because it violates the fixed-nuisance assumption.
+- The number of correction terms grows with the Bell numbers (2,790 at 7 hops).
 
 ## Layout
 
 ```
 drup/propagation.py   edge estimators, walk-corrected 3-hop operator, public operator form
-drup/estimation.py    propensity model, outcome imputation
+drup/khop.py          exact walk correction for any odd number of hops
+drup/rerank.py        exposure-capped allocation (exact min-cost flow, dual certificate)
+drup/estimation.py    propensity model, additive and low-rank outcome imputation
 drup/fat.py           explanations, counterfactuals, robustness certificates, DP release, fairness metrics
 drup/pipeline.py      build a propagation recommender from a configuration
 drup/learned.py       trained baselines (MF, IPS-MF, DR-MF, LightGCN, NAVIP, DR-LightGCN)

@@ -70,6 +70,9 @@ def main():
     ap.add_argument("--dtype", default="float64")
     ap.add_argument("--reps", type=int, default=5)
     ap.add_argument("--n_explain", type=int, default=200)
+    ap.add_argument("--methods", nargs="+", default=None)
+    ap.add_argument("--filters_json", default=None)
+    ap.add_argument("--tag", default="", help="suffix of the output file")
     a = ap.parse_args()
     dt = getattr(torch, a.dtype)
     if a.dataset == "coat":
@@ -93,7 +96,10 @@ def main():
     rows_users = sorted({u for u, _, _ in test})
     rows = torch.tensor(rows_users)
     row_of = {u: k for k, u in enumerate(rows_users)}
-    fpath = f"results/filters_{a.dataset}_{a.prop}.json"
+    global METHODS
+    if a.methods:
+        METHODS = a.methods
+    fpath = a.filters_json or f"results/filters_{a.dataset}_{a.prop}.json"
     cfgs = {mth: chosen_config(fpath, mth) for mth in METHODS}
     item_pop = (O * Y).sum(0).numpy()
     # true item quality on the unbiased data
@@ -103,7 +109,7 @@ def main():
         qc[items] += 1
     quality = np.where(qc > 0, qa / np.maximum(qc, 1), 0.0)
     out = {"dataset": a.dataset, "configs": cfgs}
-    path = f"results/fat_{a.dataset}_{a.prop}.json"
+    path = f"results/fat_{a.dataset}_{a.prop}{a.tag}.json"
 
     def save():
         """Merge this run's sections into the result file (after every section)."""

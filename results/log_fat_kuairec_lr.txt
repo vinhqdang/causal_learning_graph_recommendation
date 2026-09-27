@@ -1,0 +1,4 @@
+fairness DR {'ndcg@20': 0.6396, 'PRU': 0.7921, 'ECB': 0.2839, 'gini@20': 0.9938, 'coverage@20': 0.0138, 'group_gap': 0.0135, 'group0': 0.6462, 'group1': 0.6328}
+fairness DRUP {'ndcg@20': 0.6395, 'PRU': 0.7926, 'ECB': 0.2848, 'gini@20': 0.9938, 'coverage@20': 0.0138, 'group_gap': 0.0136, 'group0': 0.6462, 'group1': 0.6326}
+intervene DR 0.007972660485734528 +- 0.0003965988879158533
+intervene DRUP 0.007711485649909071 +- 0.00039589592373161003

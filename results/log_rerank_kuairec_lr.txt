@@ -1,0 +1,14 @@
+DR c=inf {'ndcg@20': 0.6396, 'gini': 0.9938, 'coverage': 0.0138, 'coverage_lower_bound': 0.006, 'rel_gap': 0.0, 'feasible': True}
+DR c=50.0 {'ndcg@20': 0.4568, 'gini': 0.979, 'coverage': 0.0502, 'coverage_lower_bound': 0.02, 'rel_gap': 0.0, 'feasible': True}
+DR c=20.0 {'ndcg@20': 0.3329, 'gini': 0.948, 'coverage': 0.0962, 'coverage_lower_bound': 0.0499, 'rel_gap': 0.0, 'feasible': True}
+DR c=10.0 {'ndcg@20': 0.2603, 'gini': 0.8984, 'coverage': 0.1548, 'coverage_lower_bound': 0.0998, 'rel_gap': 0.0, 'feasible': True}
+DR c=5.0 {'ndcg@20': 0.2043, 'gini': 0.8011, 'coverage': 0.26, 'coverage_lower_bound': 0.1973, 'rel_gap': 0.0, 'feasible': True}
+DR c=3.0 {'ndcg@20': 0.1692, 'gini': 0.6721, 'coverage': 0.3968, 'coverage_lower_bound': 0.3262, 'rel_gap': 0.0, 'feasible': True}
+DR c=2.0 {'ndcg@20': 0.1425, 'gini': 0.4994, 'coverage': 0.5717, 'coverage_lower_bound': 0.4989, 'rel_gap': 0.0, 'feasible': True}
+DRUP c=inf {'ndcg@20': 0.6395, 'gini': 0.9938, 'coverage': 0.0138, 'coverage_lower_bound': 0.006, 'rel_gap': 0.0, 'feasible': True}
+DRUP c=50.0 {'ndcg@20': 0.4569, 'gini': 0.9791, 'coverage': 0.0499, 'coverage_lower_bound': 0.02, 'rel_gap': 0.0, 'feasible': True}
+DRUP c=20.0 {'ndcg@20': 0.3325, 'gini': 0.948, 'coverage': 0.0959, 'coverage_lower_bound': 0.0499, 'rel_gap': 0.0, 'feasible': True}
+DRUP c=10.0 {'ndcg@20': 0.2604, 'gini': 0.8984, 'coverage': 0.1548, 'coverage_lower_bound': 0.0998, 'rel_gap': 0.0, 'feasible': True}
+DRUP c=5.0 {'ndcg@20': 0.2045, 'gini': 0.8011, 'coverage': 0.2594, 'coverage_lower_bound': 0.1973, 'rel_gap': 0.0, 'feasible': True}
+DRUP c=3.0 {'ndcg@20': 0.1692, 'gini': 0.6722, 'coverage': 0.3971, 'coverage_lower_bound': 0.3262, 'rel_gap': 0.0, 'feasible': True}
+DRUP c=2.0 {'ndcg@20': 0.1425, 'gini': 0.4994, 'coverage': 0.5711, 'coverage_lower_bound': 0.4989, 'rel_gap': 0.0, 'feasible': True}
