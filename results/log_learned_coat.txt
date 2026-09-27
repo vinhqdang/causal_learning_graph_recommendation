@@ -1,0 +1,68 @@
+  MF split 0: val 0.7322 test 0.4604 {'lr': 0.01, 'wd': 0.0001}
+  MF split 1: val 0.6949 test 0.4752 {'lr': 0.003, 'wd': 0.001}
+  MF split 2: val 0.7422 test 0.4452 {'lr': 0.003, 'wd': 0.0001}
+  MF split 3: val 0.7624 test 0.4668 {'lr': 0.01, 'wd': 0.0001}
+  MF split 4: val 0.7467 test 0.4301 {'lr': 0.003, 'wd': 0.001}
+  MF split 5: val 0.6998 test 0.4943 {'lr': 0.003, 'wd': 0.0001}
+  MF split 6: val 0.7587 test 0.4815 {'lr': 0.01, 'wd': 0.001}
+  MF split 7: val 0.7357 test 0.4292 {'lr': 0.003, 'wd': 0.001}
+  MF split 8: val 0.7400 test 0.4897 {'lr': 0.01, 'wd': 0.0001}
+  MF split 9: val 0.7024 test 0.4461 {'lr': 0.01, 'wd': 0.001}
+MF           ndcg@5=0.4619±0.0224  ndcg@10=0.6056±0.0178  recall@5=0.5666±0.0213  recall@10=0.9342±0.0121   [15s]
+  IPS-MF split 0: val 0.7329 test 0.4715 {'lr': 0.01, 'wd': 0.001}
+  IPS-MF split 1: val 0.6917 test 0.4584 {'lr': 0.01, 'wd': 0.001}
+  IPS-MF split 2: val 0.7417 test 0.4570 {'lr': 0.01, 'wd': 0.0001}
+  IPS-MF split 3: val 0.7581 test 0.4705 {'lr': 0.003, 'wd': 0.0001}
+  IPS-MF split 4: val 0.7506 test 0.4135 {'lr': 0.01, 'wd': 0.0001}
+  IPS-MF split 5: val 0.7232 test 0.4873 {'lr': 0.003, 'wd': 0.001}
+  IPS-MF split 6: val 0.7508 test 0.4804 {'lr': 0.01, 'wd': 0.001}
+  IPS-MF split 7: val 0.7307 test 0.4473 {'lr': 0.01, 'wd': 0.001}
+  IPS-MF split 8: val 0.7333 test 0.4657 {'lr': 0.003, 'wd': 0.001}
+  IPS-MF split 9: val 0.7100 test 0.4175 {'lr': 0.01, 'wd': 0.001}
+IPS-MF       ndcg@5=0.4569±0.0234  ndcg@10=0.6049±0.0178  recall@5=0.5579±0.0241  recall@10=0.9357±0.0096   [15s]
+  DR-MF split 0: val 0.7698 test 0.5142 {'lr': 0.01, 'wd': 0.0001}
+  DR-MF split 1: val 0.7244 test 0.5521 {'lr': 0.01, 'wd': 0.001}
+  DR-MF split 2: val 0.7691 test 0.5251 {'lr': 0.01, 'wd': 0.001}
+  DR-MF split 3: val 0.7545 test 0.5449 {'lr': 0.003, 'wd': 0.001}
+  DR-MF split 4: val 0.7896 test 0.5176 {'lr': 0.01, 'wd': 0.001}
+  DR-MF split 5: val 0.7629 test 0.5534 {'lr': 0.01, 'wd': 0.0001}
+  DR-MF split 6: val 0.7999 test 0.5424 {'lr': 0.01, 'wd': 0.0001}
+  DR-MF split 7: val 0.7795 test 0.5233 {'lr': 0.01, 'wd': 0.001}
+  DR-MF split 8: val 0.7533 test 0.5506 {'lr': 0.01, 'wd': 0.001}
+  DR-MF split 9: val 0.7722 test 0.5333 {'lr': 0.01, 'wd': 0.001}
+DR-MF        ndcg@5=0.5357±0.0141  ndcg@10=0.6575±0.0113  recall@5=0.6473±0.0162  recall@10=0.9576±0.0077   [22s]
+/home/user/causal_learning_graph_recommendation/experiments/../drup/learned.py:44: UserWarning: Sparse invariant checks are implicitly disabled. Memory errors (e.g. SEGFAULT) will occur when operating on a sparse tensor which violates the invariants, but checks incur performance overhead. To silence this warning, explicitly opt in or out. See `torch.sparse.check_sparse_tensor_invariants.__doc__` for guidance.  (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/Context.cpp:848.)
+  self.A = torch.sparse_coo_tensor(idx, torch.cat([val, val]), (m + n, m + n)).coalesce()
+  LightGCN split 0: val 0.7671 test 0.4962 {'lr': 0.01, 'wd': 0.0001}
+  LightGCN split 1: val 0.7188 test 0.5137 {'lr': 0.003, 'wd': 0.0001}
+  LightGCN split 2: val 0.7536 test 0.4859 {'lr': 0.01, 'wd': 0.001}
+  LightGCN split 3: val 0.7495 test 0.5187 {'lr': 0.003, 'wd': 0.0001}
+  LightGCN split 4: val 0.7765 test 0.4976 {'lr': 0.003, 'wd': 0.0001}
+  LightGCN split 5: val 0.7450 test 0.5344 {'lr': 0.003, 'wd': 0.001}
+  LightGCN split 6: val 0.7617 test 0.5221 {'lr': 0.003, 'wd': 0.001}
+  LightGCN split 7: val 0.7589 test 0.4888 {'lr': 0.01, 'wd': 0.0001}
+  LightGCN split 8: val 0.7359 test 0.5303 {'lr': 0.003, 'wd': 0.0001}
+  LightGCN split 9: val 0.7325 test 0.4896 {'lr': 0.003, 'wd': 0.0001}
+LightGCN     ndcg@5=0.5077±0.0173  ndcg@10=0.6403±0.0109  recall@5=0.6036±0.0216  recall@10=0.9418±0.0105   [12s]
+  NAVIP split 0: val 0.7650 test 0.5132 {'lr': 0.003, 'wd': 0.0001}
+  NAVIP split 1: val 0.7086 test 0.5004 {'lr': 0.003, 'wd': 0.0001}
+  NAVIP split 2: val 0.7464 test 0.4869 {'lr': 0.003, 'wd': 0.0001}
+  NAVIP split 3: val 0.7507 test 0.4651 {'lr': 0.003, 'wd': 0.0001}
+  NAVIP split 4: val 0.7642 test 0.5005 {'lr': 0.003, 'wd': 0.0001}
+  NAVIP split 5: val 0.7400 test 0.5323 {'lr': 0.003, 'wd': 0.001}
+  NAVIP split 6: val 0.7547 test 0.5016 {'lr': 0.003, 'wd': 0.0001}
+  NAVIP split 7: val 0.7471 test 0.4775 {'lr': 0.01, 'wd': 0.001}
+  NAVIP split 8: val 0.7256 test 0.5269 {'lr': 0.003, 'wd': 0.001}
+  NAVIP split 9: val 0.7222 test 0.4894 {'lr': 0.003, 'wd': 0.001}
+NAVIP        ndcg@5=0.4994±0.0199  ndcg@10=0.6329±0.0129  recall@5=0.5979±0.0246  recall@10=0.9398±0.0089   [15s]
+  DR-LightGCN split 0: val 0.8022 test 0.5683 {'lr': 0.003, 'wd': 0.0001}
+  DR-LightGCN split 1: val 0.7459 test 0.5457 {'lr': 0.01, 'wd': 0.0001}
+  DR-LightGCN split 2: val 0.7745 test 0.5391 {'lr': 0.01, 'wd': 0.001}
+  DR-LightGCN split 3: val 0.7573 test 0.5863 {'lr': 0.01, 'wd': 0.0001}
+  DR-LightGCN split 4: val 0.7851 test 0.5177 {'lr': 0.003, 'wd': 0.0001}
+  DR-LightGCN split 5: val 0.7922 test 0.5883 {'lr': 0.003, 'wd': 0.0001}
+  DR-LightGCN split 6: val 0.8027 test 0.5707 {'lr': 0.01, 'wd': 0.0001}
+  DR-LightGCN split 7: val 0.7783 test 0.5352 {'lr': 0.003, 'wd': 0.001}
+  DR-LightGCN split 8: val 0.7666 test 0.5784 {'lr': 0.01, 'wd': 0.0001}
+  DR-LightGCN split 9: val 0.7757 test 0.5300 {'lr': 0.01, 'wd': 0.0001}
+DR-LightGCN  ndcg@5=0.5560±0.0241  ndcg@10=0.6725±0.0165  recall@5=0.6565±0.0254  recall@10=0.9521±0.0043   [29s]

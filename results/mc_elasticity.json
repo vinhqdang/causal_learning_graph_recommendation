@@ -1,0 +1,31 @@
+{
+  "config": {
+    "m": 60,
+    "n": 50,
+    "reps": 3000,
+    "seed": 1,
+    "out": "results/mc_elasticity.json"
+  },
+  "results": {
+    "Obs": {
+      "elasticity_treated": 1.7768611467915616,
+      "control_ratio": 0.5531896266093866
+    },
+    "IPS": {
+      "elasticity_treated": 0.007103688384926444,
+      "control_ratio": 0.9941698562859203
+    },
+    "IPS+WC": {
+      "elasticity_treated": 0.007103688384926444,
+      "control_ratio": 0.9941698562859203
+    },
+    "DR": {
+      "elasticity_treated": -0.1871279491559431,
+      "control_ratio": 1.0409224495964007
+    },
+    "DRUP": {
+      "elasticity_treated": 0.005356808547608088,
+      "control_ratio": 0.9975349864966001
+    }
+  }
+}
