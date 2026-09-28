@@ -1,0 +1,65 @@
+\section{Additional results}\label{app:more}
+
+\begin{table}[h]\centering\small
+\caption{Stress tests outside Assumption~\ref{as:unconf} and with misspecified
+propensities (log-normal noise with $\sigma=0.5$). Relative $|$bias$|$ on unexposed
+candidates.}\label{tab:stress}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/mc_stress.tex}
+\end{adjustbox}
+\end{table}
+
+Table~\ref{tab:stress} leaves the assumptions of Theorem~\ref{thm:unbiased}. With
+fixed-size slates (every user sees exactly $k_u$ items, drawn without
+replacement, so exposures within a user are negatively dependent with
+$\rho\approx0.29$), IPS picks up a first-order bias (0.22 at three hops), whereas
+DRUP stays at 0.024, as Proposition~\ref{prop:dep} predicts for DR edges. With
+misspecified propensities and an exact imputation, both DR operators remain
+exactly unbiased, the double robustness of Theorem~\ref{thm:unbiased}; with a
+noisy imputation DRUP's bias is 0.16, against 0.57 for IPS and 1.9 for the
+uncorrected DR operator. Finally, the variance and concentration bounds of
+Theorem~\ref{thm:var} were never violated, but they are loose
+(Table~\ref{tab:bounds}): by a factor of $5\cdot10^2$--$8\cdot10^3$ for the variance and
+$7\cdot10^1$--$2\cdot10^3$ for the deviation at level 0.05. They describe how the error
+scales with $\tau$ and the imputation error, not its size.
+
+\begin{table}[h]\centering\small
+\caption{Tightness of Theorem~\ref{thm:var} in a 12-user, 15-item model (20{,}000
+replications, all propensities $\ge\tau$), over all $(u,i)$.}\label{tab:bounds}
+\input{tables/bounds.tex}
+\end{table}
+
+\begin{table}[h]\centering\small
+\caption{Exposure-capped re-ranking for all caps. Cells: nDCG@$K$ (Gini@$K$).}\label{tab:rerankfull}
+\begin{adjustbox}{max width=\textwidth}\input{tables/rerank_coat.tex}\end{adjustbox}
+
+\medskip
+\begin{adjustbox}{max width=\textwidth}\input{tables/rerank_kuairec.tex}\end{adjustbox}
+
+\medskip
+\begin{adjustbox}{max width=\textwidth}\input{tables/rerank_yahoo.tex}\end{adjustbox}
+\end{table}
+
+\begin{table}[h]\centering\small
+\caption{Best nDCG over each operator's hyper-parameter grid under a cap on the
+Gini coefficient of top-$K$ exposure.}\label{tab:frontier}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/frontier.tex}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[h]\centering\small
+\caption{Certificates under re-fitted nuisances: the nuisances are re-fitted on the
+poisoned log (no cross-fitting) and the realised top-$K$ is checked against the
+frozen-nuisance certificates of the clean system.}\label{tab:refit}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/attack_refit.tex}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[h]\centering\small
+\caption{Jointly private DRUP for all fixed denoising ranks ($\delta=10^{-5}$).}\label{tab:privfull}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/privacy.tex}
+\end{adjustbox}
+\end{table}

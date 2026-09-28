@@ -30,8 +30,14 @@ candidates on Coat, 30\% of the test users otherwise) and a test part, over 10
 validation part of each split, and trained models also select their epoch
 there. All fitted nuisances are cross-fitted over ten folds of pairs
 (Remark~\ref{rem:xfit}). We report the mean and standard deviation over splits
-of the test metric. Differences are tested at the level of users with a
-Holm correction over all comparisons of a dataset (Appendix~\ref{app:details}).
+of the test metric. Because paired tests over re-sampled splits are anti-conservative when the
+splits overlap~\cite{dietterich1998,nadeau2003}, differences are tested at the level
+of users, with a Holm correction over all comparisons of a dataset
+(Appendix~\ref{app:details}). Progress claims in top-$N$ recommendation have
+repeatedly failed against well-tuned simple
+baselines~\cite{dacrema2019progress,rendle2019baselines,anelli2023myth}; we therefore
+tune every method on the same validation data and report how many
+configurations each one searched.
 
 \paragraph{Methods.}
 We compare 23 methods. \emph{Non-personalised}: popularity and the imputation

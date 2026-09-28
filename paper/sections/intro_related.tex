@@ -82,7 +82,7 @@ by real-data interventions on exposure.
 \section{Related work}
 %======================================================================
 
-We review seven lines of work that DRUP touches. Table~\ref{tab:related}
+We review six lines of work that DRUP touches. Table~\ref{tab:related}
 summarises how DRUP relates to representative methods.
 
 \paragraph{Graph-based recommendation.}
@@ -194,50 +194,33 @@ exposure-capped allocation (Theorem~\ref{thm:alloc}) is the distributive
 mechanism; like the matching view of~\cite{patro2020fairrec} it is a
 $b$-matching.
 
-\paragraph{Explainable recommendation.}
-Explainable recommendation is surveyed by~\cite{zhang2020explainable}, and the
+\paragraph{Explanations, robustness and privacy.}
+Explainable recommendation is surveyed by~\cite{zhang2020explainable} and the
 evaluation of explanations by~\cite{tintarev2012}; what makes an explanation
-useful to people is discussed by~\cite{miller2019explanation}. For graph
-models, GNNExplainer~\cite{ying2019gnnexplainer} learns a soft mask over edges
-and CF-GNNExplainer~\cite{lucic2022cfgnn} searches for minimal edge deletions.
-PRINCE~\cite{ghazimatin2020prince} finds minimal sets of a user's actions whose
-removal changes a random-walk recommendation, and CountER~\cite{tan2021counter}
-solves an optimisation problem for aspect-based recommenders. Counterfactual
-explanations have a legal motivation~\cite{wachter2018counterfactual} and
-hidden assumptions~\cite{barocas2020hidden}, and Shapley-value attributions
-depend on the choice of the baseline~\cite{kumar2020shapley}. Because a DRUP
-score is affine in each user's own interactions when the nuisances are held
-fixed, its attributions are exact and its minimal counterfactual
-explanations are found by sorting (Proposition~\ref{prop:affine},
-Theorem~\ref{thm:cf}). This holds for any linear propagation operator and does
-not explain the population-level part of a score.
-
-\paragraph{Robustness and privacy.}
-Recommenders can be manipulated by injected
-profiles~\cite{lam2004shilling}; optimised attacks exist for factorisation
-models~\cite{li2016poisoning} and graph-based recommenders~\cite{fang2018poisoning},
-and shilling groups can be detected with graph convolutions~\cite{wang2022shilling}.
+useful to people is discussed by~\cite{miller2019explanation}. For graph models,
+GNNExplainer~\cite{ying2019gnnexplainer} and CF-GNNExplainer~\cite{lucic2022cfgnn}
+search for important or minimal sets of edges, PRINCE~\cite{ghazimatin2020prince}
+finds minimal sets of a user's actions whose removal changes a random-walk
+recommendation, and CountER~\cite{tan2021counter} optimises counterfactual
+explanations of aspect-based models. Counterfactual explanations have a legal
+motivation~\cite{wachter2018counterfactual} and hidden
+assumptions~\cite{barocas2020hidden}, and Shapley attributions depend on their
+baseline~\cite{kumar2020shapley}. Recommenders can be manipulated by injected
+profiles~\cite{lam2004shilling,li2016poisoning,fang2018poisoning}, and shilling
+groups can be detected with graph convolutions~\cite{wang2022shilling};
 PORE~\cite{jia2023pore} certifies robustness by ensembling models trained on
-sub-sampled data. DRUP instead gives a closed-form bound, for a single model
-with frozen nuisances, on the effect of any bounded set of injected profiles
-(Theorem~\ref{thm:robust}). Differentially private recommenders perturb
-item--item statistics~\cite{mcsherry2009netflix}, factorisation
-models~\cite{liu2024dpmf} or matrix completion under joint differential
-privacy~\cite{jain2018dpmc}, and federated approaches keep ratings on the
-device~\cite{chai2021fedmf}. DRUP releases one item operator with a Gaussian
-mechanism calibrated analytically~\cite{balle2018analytic} and scores locally,
-which gives joint differential privacy~\cite{hsu2014matchings} conditional on
-public nuisances (Theorem~\ref{thm:dp}); privacy guarantees of this kind can be
-audited empirically~\cite{jagielski2020auditing}.
-
-\paragraph{Evaluation methodology.}
-Progress claims in top-$N$ recommendation have repeatedly failed against
-well-tuned simple baselines~\cite{dacrema2019progress,rendle2019baselines,anelli2023myth}.
-Paired tests over re-sampled splits are anti-conservative because the splits
-overlap~\cite{dietterich1998,nadeau2003}. We therefore tune every method per
-split on the same validation data, report the number of configurations each
-method was searched over, and test differences at the level of users with a
-correction for multiple comparisons.
+sub-sampled data. Private recommenders perturb item--item
+statistics~\cite{mcsherry2009netflix}, factorisation models~\cite{liu2024dpmf} or
+matrix completion under joint differential privacy~\cite{jain2018dpmc}, and
+federated approaches keep ratings on the device~\cite{chai2021fedmf}. Because a
+DRUP score with fixed nuisances is linear in each user's own interactions, its
+attributions are exact and its minimal counterfactual explanations are found by
+sorting (Proposition~\ref{prop:affine}, Theorem~\ref{thm:cf}); the same linearity
+gives closed-form certificates against injected profiles
+(Theorem~\ref{thm:robust}) and a jointly private release of one item operator
+with an analytically calibrated Gaussian mechanism~\cite{balle2018analytic,hsu2014matchings}
+(Theorem~\ref{thm:dp}). These properties hold for any linear propagation
+operator.
 
 \begin{table}[t]\centering\footnotesize
 \caption{DRUP and representative related methods. ``loss'': the correction

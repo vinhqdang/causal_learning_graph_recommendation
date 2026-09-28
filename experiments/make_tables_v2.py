@@ -368,3 +368,62 @@ if __name__ == "__main__":
         except Exception as e:           # a missing result should not block the others
             print("skip", f.__name__, repr(e))
     print("tables written to", T)
+
+
+def compact():
+    """Compact main-text versions of the re-ranking, attack and privacy tables."""
+    ops = (("Obs", "logged graph"), ("IPS", "IPS adjacency"), ("DR", "DR adjacency"), ("DRUP", "DRUP"))
+    # re-ranking: no cap, c = 5, c = 2
+    lines = ["\\begin{tabular}{llccc}", "\\toprule", "Data & Operator & no cap & $c=5$ & $c=2$\\\\", "\\midrule"]
+    for ds, prop, key, nm in DS:
+        j = load(f"rerank_{ds}_{prop}.json")
+        if not j:
+            continue
+        K = j["K"]
+        for mth, lab in ops:
+            rs = {r["factor"]: r for r in j["results"].get(mth, []) if "error" not in r}
+            cells = []
+            for f in (float("inf"), 5.0, 2.0):
+                r = next((v for k, v in rs.items() if (k == f) or (f == float("inf") and k > 1e9)), None)
+                cells.append("--" if r is None else f"{r[f'ndcg@{K}']:.3f} ({r['gini']:.2f})")
+            lines.append(f"{nm if mth == 'Obs' else ''} & {lab} & " + " & ".join(cells) + "\\\\")
+        lines.append("\\midrule")
+    lines[-1] = "\\bottomrule"
+    lines.append("\\end{tabular}")
+    open(f"{T}/rerank_compact.tex", "w").write("\n".join(lines) + "\n")
+    # attack: hit rate and certified fraction at three budgets per dataset
+    pick = {"coat": ["1", "5", "20"], "yahoo": ["1", "5", "100"], "kuairec": ["1", "5", "200"]}
+    lines = ["\\begin{tabular}{llcccccc}", "\\toprule",
+             "Data & Operator & \\multicolumn{3}{c}{realised hit rate} & \\multicolumn{3}{c}{certified fraction}\\\\", "\\midrule"]
+    for ds, prop, key, nm in DS:
+        j = load(f"fat_{ds}_{prop}.json")
+        if not j or "attack" not in j:
+            continue
+        bs = pick[ds]
+        lines.append(f"{nm} & $F=$ & " + " & ".join(bs) + " & " + " & ".join(bs) + "\\\\")
+        for mth, lab in ops:
+            r = j["attack"]["results"].get(mth)
+            if r is None:
+                continue
+            lines.append(f" & {lab} & " + " & ".join(f"{r['hit@K'][b]:.3f}" for b in bs) + " & " +
+                         " & ".join(f"{r['certified_frac'][b]:.2f}" for b in bs) + "\\\\")
+        lines.append("\\midrule")
+    lines[-1] = "\\bottomrule"
+    lines.append("\\end{tabular}")
+    open(f"{T}/attack_compact.tex", "w").write("\n".join(lines) + "\n")
+    # privacy: fixed rank 32
+    lines = ["\\begin{tabular}{lccccccccc}", "\\toprule",
+             "Data & $\\epsilon=0.5$ & 1 & 2 & 4 & 8 & 16 & $\\infty$ & all nuisances & popularity\\\\", "\\midrule"]
+    for ds, prop, key, nm in DS:
+        j = load(f"fat_{ds}_{prop}.json")
+        if not j or "privacy" not in j:
+            continue
+        pr = j["privacy"]["results"]
+        cells = [f"{pr[e]['ndcg']['32']:.3f}" for e in ("0.5", "1.0", "2.0", "4.0", "8.0", "16.0", "inf") if e in pr]
+        lines.append(f"{nm} & " + " & ".join(cells) + f" & {j['privacy']['non_private_full_nuisance_ndcg']:.3f} & {j['privacy']['pop_ndcg']:.3f}\\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    open(f"{T}/privacy_compact.tex", "w").write("\n".join(lines) + "\n")
+
+
+if __name__ == "__main__":
+    compact()

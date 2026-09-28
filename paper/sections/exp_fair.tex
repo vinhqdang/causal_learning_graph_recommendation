@@ -77,27 +77,10 @@ operators on any dataset.
 \begin{table}[t]\centering\small
 \caption{Exposure-capped re-ranking (Theorem~\ref{thm:alloc}, exact min-cost flow).
 Each item may be recommended to at most $c$ times its fair share $NK/n$ of users.
-Cells: nDCG@$K$ (Gini@$K$). Every cap held.}\label{tab:rerank}
+Cells: nDCG@$K$ (Gini@$K$). Every cap held; the full range of caps and the
+accuracy--concentration frontier are in Appendix~\ref{app:more}.}\label{tab:rerank}
 \begin{adjustbox}{max width=\textwidth}
-\input{tables/rerank_coat.tex}
-\end{adjustbox}
-
-\medskip
-\begin{adjustbox}{max width=\textwidth}
-\input{tables/rerank_kuairec.tex}
-\end{adjustbox}
-
-\medskip
-\begin{adjustbox}{max width=\textwidth}
-\input{tables/rerank_yahoo.tex}
-\end{adjustbox}
-\end{table}
-
-\begin{table}[t]\centering\small
-\caption{Best nDCG over each operator's hyper-parameter grid under a cap on the
-Gini coefficient of top-$K$ exposure.}\label{tab:frontier}
-\begin{adjustbox}{max width=\textwidth}
-\input{tables/frontier.tex}
+\input{tables/rerank_compact.tex}
 \end{adjustbox}
 \end{table}
 
