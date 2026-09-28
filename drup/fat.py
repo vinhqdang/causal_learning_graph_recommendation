@@ -90,17 +90,23 @@ def contributions(i, w1, w0, c_u, G_loo, logged):
     return phi * logged
 
 
-def minimal_counterfactual(i, k, w1, w0, c_u, G_loo, logged):
+def minimal_counterfactual(i, k, w1, w0, c_u, G_loo, logged, margin=None, scale=1.0):
     """Minimum number of the user's logged interactions whose removal makes
     item k outrank item i (i, k unexposed candidates). Since the margin
     s_ui - s_uk decreases by exactly sum_{j in S} (phi_ij - phi_kj), picking
     the largest gains first is optimal (unit-cost selection).
+
+    ``margin`` is the margin of the full score and ``scale`` the weight of the
+    three-hop term in it (the one-hop term of an unexposed candidate does not
+    depend on the user's other interactions). Without them the three-hop
+    score alone is used.
     Returns (list of removed items or None if impossible, margin)."""
-    s = exact_three_hop(w1, c_u, G_loo)
-    margin = float(s[i] - s[k])
+    if margin is None:
+        s = exact_three_hop(w1, c_u, G_loo)
+        margin = float(s[i] - s[k])
     if margin < 0:
         return [], margin
-    gain = contributions(i, w1, w0, c_u, G_loo, logged) - contributions(k, w1, w0, c_u, G_loo, logged)
+    gain = scale * (contributions(i, w1, w0, c_u, G_loo, logged) - contributions(k, w1, w0, c_u, G_loo, logged))
     gain[i] = gain[k] = 0.0
     order = torch.argsort(gain, descending=True)
     acc, removed = 0.0, []

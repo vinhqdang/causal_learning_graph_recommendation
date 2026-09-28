@@ -330,9 +330,9 @@
    "random": {
     "1": 0.0,
     "2": 0.0,
-    "3": 0.0,
-    "5": 0.02,
-    "10": 0.015
+    "3": 0.005,
+    "5": 0.015,
+    "10": 0.01
    },
    "item-similarity": {
     "1": 0.0,
@@ -342,9 +342,10 @@
     "10": 0.015
    }
   },
-  "minimal_cf_size_mean": 1.1666666666666667,
-  "minimal_cf_size_median": 0.0,
-  "frac_no_cf": 0.67
+  "minimal_cf_size_mean": 2.230769230769231,
+  "minimal_cf_size_median": 2.0,
+  "frac_no_cf": 0.935,
+  "cf_verified_frac": 1.0
  },
  "attack": {
   "K": 5,

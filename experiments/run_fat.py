@@ -292,7 +292,7 @@ def main():
         rng = np.random.default_rng(0)
         users = [t for t in test if len(t[1]) > 1]
         users = [users[k] for k in rng.permutation(len(users))[: a.n_explain]]
-        comp_err, cf_sizes, no_cf = [], [], 0
+        comp_err, cf_sizes, no_cf, cf_checked = [], [], 0, []
         curves = {"DRUP-attribution": [], "random": [], "item-similarity": []}
         ks = [1, 2, 3, 5, 10]
         Wt = C * W
@@ -328,17 +328,26 @@ def main():
                     s3_ = user_scores(u, w3, Gloo)[items]
                     row.append(float((s3_ > s3_[list(items).index(i)]).sum()))  # new rank of i (0 = top)
                 curves[name].append(row)
-            removed, _ = fat.minimal_counterfactual(i, k2, W[u], w0, C[u], Gloo, logged)
+            sc3 = (beta / c3) if beta < 1e3 else 1.0 / c3
+            removed, _ = fat.minimal_counterfactual(i, k2, W[u], w0, C[u], Gloo, logged,
+                                                    margin=float(s[i] - s[k2]), scale=sc3)
             if removed is None:
                 no_cf += 1
             else:
                 cf_sizes.append(len(removed))
+                # verify by re-scoring: after un-logging the set, k2 outranks i,
+                # and removing one interaction fewer does not suffice
+                w4 = W[u].clone()
+                w4[removed] = w0[removed]
+                s4 = user_scores(u, w4, Gloo)
+                cf_checked.append(bool(s4[k2] > s4[i] - 1e-9 * abs(float(s[i]))))
         out["explain"] = {
             "max_rel_error_completeness_additivity": float(np.max(comp_err)),
             "deletion_rank_of_top1": {nm: dict(zip(map(str, ks), np.mean(v, 0).tolist())) for nm, v in curves.items()},
             "minimal_cf_size_mean": float(np.mean(cf_sizes)) if cf_sizes else None,
             "minimal_cf_size_median": float(np.median(cf_sizes)) if cf_sizes else None,
             "frac_no_cf": no_cf / len(users),
+            "cf_verified_frac": float(np.mean(cf_checked)) if cf_checked else None,
         }
         print("explain", json.dumps(out["explain"]), flush=True)
         save()
