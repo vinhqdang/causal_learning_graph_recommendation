@@ -18,6 +18,8 @@ appendix = re.sub(r"~?\\cite\{", "~\\\\citep{", appendix)
 # elsarticle appends its own full stop to run-in paragraph titles
 body = re.sub(r"\\paragraph\{([^}]*?)\.\}", r"\\paragraph{\1}", body)
 appendix = re.sub(r"\\paragraph\{([^}]*?)\.\}", r"\\paragraph{\1}", appendix)
+# elsarticle's \ref to an appendix section already prints "Appendix A"
+body = body.replace("Appendix~\\ref{", "\\ref{")
 # tables live one directory up
 body = body.replace("\\input{tables/", "\\input{../tables/")
 
