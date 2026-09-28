@@ -81,3 +81,5 @@ LightGCN     ndcg@5=0.6693±0.0045  ndcg@10=0.7473±0.0032  recall@5=0.7993±0.0
   LightGCN-pt {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [334s] best split0 val 0.6085
   LightGCN-pt {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 2} done [337s] best split0 val 0.6085
 LightGCN-pt  ndcg@5=0.5935±0.0059  ndcg@10=0.6946±0.0032  recall@5=0.7338±0.0105  recall@10=1.0000±0.0000   [2166s, 9 cfgs] seeds 0.5878±0.0044
+  r-AdjNorm {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'r': 0.3} done [57s] best split0 val 0.6707
+  r-AdjNorm {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'r': 0.7} done [80s] best split0 val 0.6870
