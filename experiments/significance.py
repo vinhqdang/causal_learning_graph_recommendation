@@ -74,6 +74,13 @@ def main():
             d = user_diffs(res[ref], r)
             if len(d) < 3:
                 continue
+            if np.abs(d).max() < 1e-5:
+                # numerically identical rankings (e.g. both select the same
+                # IPS-end configuration); floating-point noise is not a difference
+                rows.append({"ref": ref, "other": m, "n_users": int(len(d)), "diff": 0.0,
+                             "ci95": [0.0, 0.0], "p_t": 1.0, "p_wilcoxon": 1.0, "p_nb_splits": 1.0,
+                             "identical": True})
+                continue
             se = d.std(ddof=1) / np.sqrt(len(d))
             tcrit = stats.t.ppf(0.975, len(d) - 1)
             p_t = float(stats.ttest_1samp(d, 0.0).pvalue)
