@@ -1,0 +1,83 @@
+{
+ "base": {
+  "alpha": 0.5,
+  "beta": 0.03,
+  "cv": 0.0,
+  "deg": "Wx",
+  "floor": 0.2,
+  "imp": "add",
+  "lam": 20.0
+ },
+ "rows": [
+  {
+   "method": "Obs",
+   "tau": 0.2,
+   "ndcg@5": 0.6590309049361947,
+   "shift": -0.1603542713556644,
+   "shift_std": 0.0014180271623344632,
+   "elasticity": 0.9995881104453549,
+   "elasticity_std": 0.011208094313827984,
+   "frac_logged_pairs_clipped": 1.0
+  },
+  {
+   "method": "DRUP",
+   "tau": 0.0005,
+   "ndcg@5": 0.6135857324078761,
+   "shift": -0.04769475305075462,
+   "shift_std": 0.0017678072763202904,
+   "elasticity": 0.18065112037374198,
+   "elasticity_std": 0.11315055387533184,
+   "frac_logged_pairs_clipped": 2.566537484279958e-05
+  },
+  {
+   "method": "DRUP",
+   "tau": 0.002,
+   "ndcg@5": 0.613987451294201,
+   "shift": -0.05193196798005419,
+   "shift_std": 0.0014116208416329106,
+   "elasticity": 0.19481270452609975,
+   "elasticity_std": 0.09873388408370051,
+   "frac_logged_pairs_clipped": 0.005049662500320817
+  },
+  {
+   "method": "DRUP",
+   "tau": 0.01,
+   "ndcg@5": 0.6239167482132696,
+   "shift": -0.08778854211366975,
+   "shift_std": 0.0011977000514882923,
+   "elasticity": 0.5078088119033107,
+   "elasticity_std": 0.05477273536179461,
+   "frac_logged_pairs_clipped": 0.1490933706336781
+  },
+  {
+   "method": "DRUP",
+   "tau": 0.05,
+   "ndcg@5": 0.6499759441567324,
+   "shift": -0.1273741073651471,
+   "shift_std": 0.0014090126421607322,
+   "elasticity": 0.824550168773461,
+   "elasticity_std": 0.01710445133290587,
+   "frac_logged_pairs_clipped": 0.509470523316993
+  },
+  {
+   "method": "DRUP",
+   "tau": 0.1,
+   "ndcg@5": 0.6569709501462252,
+   "shift": -0.13939200011371408,
+   "shift_std": 0.0014740685425293969,
+   "elasticity": 0.9014612714694961,
+   "elasticity_std": 0.012858673545806247,
+   "frac_logged_pairs_clipped": 0.6662923799502092
+  },
+  {
+   "method": "DRUP",
+   "tau": 0.2,
+   "ndcg@5": 0.657163134371008,
+   "shift": -0.14941068147845218,
+   "shift_std": 0.0013933545791900857,
+   "elasticity": 0.9592530513480808,
+   "elasticity_std": 0.008976869103246122,
+   "frac_logged_pairs_clipped": 0.8213978646408131
+  }
+ ]
+}
