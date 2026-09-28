@@ -1,1 +1,17 @@
-
+Table~\ref{tab:rerank} applies the exposure-capped allocation of
+Theorem~\ref{thm:alloc} to every operator. The min-cost-flow solver returns the
+optimum up to its rounding gap (a relative gap below $4\cdot10^{-5}$ in every run), all
+caps hold, and coverage never falls below the guaranteed $NK/\max\mathrm{cap}$; a
+dual-subgradient solver we tried first left gaps of up to 35\%, which the
+certificate exposed. On KuaiRec, where exposure is extremely concentrated,
+DR adjacency and DRUP are the most accurate operators under every cap, for
+example 0.199 against 0.173 (logged graph) and 0.178 (IPS) at $c=5$, and 0.140
+against 0.115 and 0.121 at $c=2$. Under the same cap, however, their lists
+remain more concentrated (Gini 0.80 against 0.72 at $c=5$), and at equal Gini
+the frontier over each operator's grid (Table~\ref{tab:frontier}) favours the
+correlation-based operators on Coat. On Coat, whose random test items are already
+diverse, capping costs DRUP more accuracy than it costs the logged graph; on
+Yahoo!\,R3 exposure is not concentrated (Gini 0.27) and caps down to twice the
+fair share cost every operator at most 0.002. The allocation is thus the
+mechanism that controls concentration, and the DR graph is the better input to
+it when exposure in the log is very uneven.
