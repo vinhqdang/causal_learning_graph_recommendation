@@ -1,0 +1,63 @@
+{
+ "base": {
+  "alpha": 0.5,
+  "beta": 10.0,
+  "cv": 1.0,
+  "deg": "Yhat",
+  "floor": 0.1,
+  "imp": "lr",
+  "lam": 20.0
+ },
+ "rows": [
+  {
+   "method": "Obs",
+   "tau": 0.1,
+   "ndcg@20": 0.6025644224211092,
+   "shift": -0.2412225673638971,
+   "shift_std": 0.0024945961169464403,
+   "elasticity": 0.996886428836615,
+   "elasticity_std": 0.0026548961813691596,
+   "frac_logged_pairs_clipped": 1.0
+  },
+  {
+   "method": "DRUP",
+   "tau": 0.01,
+   "ndcg@20": 0.5308586947290311,
+   "shift": -3.407945069111573e-05,
+   "shift_std": 0.0004950370359791401,
+   "elasticity": -0.0015012688061284932,
+   "elasticity_std": 0.0019660304222538756,
+   "frac_logged_pairs_clipped": 0.022734268979937713
+  },
+  {
+   "method": "DRUP",
+   "tau": 0.05,
+   "ndcg@20": 0.6352751067221852,
+   "shift": 0.0033369073724958953,
+   "shift_std": 0.00029818337893197655,
+   "elasticity": -0.007117574225234553,
+   "elasticity_std": 0.0012724260708422432,
+   "frac_logged_pairs_clipped": 0.07158297437842984
+  },
+  {
+   "method": "DRUP",
+   "tau": 0.1,
+   "ndcg@20": 0.6381531934139952,
+   "shift": 0.005945748223913527,
+   "shift_std": 0.00013119773490111175,
+   "elasticity": -0.012288056274027037,
+   "elasticity_std": 0.00022019220949002008,
+   "frac_logged_pairs_clipped": 0.10432775790316426
+  },
+  {
+   "method": "DRUP",
+   "tau": 0.2,
+   "ndcg@20": 0.6358719228637947,
+   "shift": 0.009914173241168944,
+   "shift_std": 0.0002241503826171387,
+   "elasticity": -0.02061030749819403,
+   "elasticity_std": 7.119208396321429e-05,
+   "frac_logged_pairs_clipped": 0.15844519093300835
+  }
+ ]
+}
