@@ -1,0 +1,8 @@
+/home/user/causal_learning_graph_recommendation/experiments/../drup/data.py:89: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)
+  O[tr.u.values, tr.i.values] = 1.0
+Pop      ndcg@5=0.5331±0.0059  ndcg@10=0.6556±0.0042  recall@5=0.6794±0.0044  recall@10=1.0000±0.0000   [0s] e.g. {}
+Impute   ndcg@5=0.4368±0.0048  ndcg@10=0.5917±0.0033  recall@5=0.5840±0.0072  recall@10=1.0000±0.0000   [104s] e.g. {'lam': 20.0, 'imp': 'lr'}
+Obs      ndcg@5=0.6585±0.0058  ndcg@10=0.7434±0.0035  recall@5=0.7809±0.0067  recall@10=1.0000±0.0000   [29s] e.g. {'alpha': 0.5, 'beta': 0.03}
+IPS      ndcg@5=0.6555±0.0065  ndcg@10=0.7407±0.0047  recall@5=0.7788±0.0050  recall@10=1.0000±0.0000   [97s] e.g. {'alpha': 0.5, 'floor': 0.2, 'beta': 0.03}
+IPS+WC   ndcg@5=0.6555±0.0065  ndcg@10=0.7407±0.0047  recall@5=0.7788±0.0050  recall@10=1.0000±0.0000   [82s] e.g. {'alpha': 0.5, 'floor': 0.2, 'beta': 0.03}
+DR       ndcg@5=0.4923±0.0064  ndcg@10=0.6213±0.0047  recall@5=0.6634±0.0061  recall@10=1.0000±0.0000   [1147s] e.g. {'alpha': 0.5, 'floor': 0.2, 'lam': 20.0, 'deg': 'Yhat', 'imp': 'lr', 'beta': 10.0}

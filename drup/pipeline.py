@@ -25,7 +25,7 @@ def build(O, Y, P_raw, method, cfg):
     else:
         P = clip_propensity(P_raw, cfg["floor"])
         Yhat = impute(O, Y, P, cfg) if method.startswith("DR") else None
-    W = edge_estimate(O, Y, P, Yhat)
+    W = edge_estimate(O, Y, P, Yhat, cfg.get("cv", 1.0) if Yhat is not None else 1.0)
     D = Yhat if cfg.get("deg", "W") == "Yhat" and Yhat is not None else None
     C = degree_weights(W, cfg["alpha"], D=D)
     return {"method": method, "cfg": cfg, "P": P, "Yhat": Yhat, "W": W, "C": C,

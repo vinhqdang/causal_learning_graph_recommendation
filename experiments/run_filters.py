@@ -25,8 +25,8 @@ import numpy as np
 import torch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from drup.data import load_coat, split_test  # noqa: E402
-from drup.estimation import clip_propensity, popularity_propensity  # noqa: E402
+from drup.data import load_coat, load_yahoo, split_test  # noqa: E402
+from drup.estimation import clip_propensity, get_propensity  # noqa: E402
 from drup.pipeline import impute  # noqa: E402
 from drup.metrics import evaluate  # noqa: E402
 from drup.khop import khop  # noqa: E402
@@ -40,16 +40,16 @@ def unit(x):
     return x / x.abs().mean(1, keepdim=True).clamp_min(1e-12)
 
 
-def propagate(O, Y, P, Yhat, alpha, correct, rows, deg="W"):
-    W = edge_estimate(O, Y, P, Yhat)
+def propagate(O, Y, P, Yhat, alpha, correct, rows, deg="W", cv=1.0):
+    W = edge_estimate(O, Y, P, Yhat, cv)
     C = degree_weights(W, alpha, D=Yhat if deg == "Yhat" else None)
     s1 = (C * W)[rows]
     s3 = three_hop(W, C, rows=rows, correct=correct)
     return unit(s1), unit(s3)
 
 
-def propagate5(O, Y, P, Yhat, alpha, correct, rows, deg="W"):
-    W = edge_estimate(O, Y, P, Yhat)
+def propagate5(O, Y, P, Yhat, alpha, correct, rows, deg="W", cv=1.0):
+    W = edge_estimate(O, Y, P, Yhat, cv)
     C = degree_weights(W, alpha, D=Yhat if deg == "Yhat" else None)
     s1 = (C * W)[rows]
     s3 = three_hop(W, C, rows=rows, correct=correct)
@@ -65,7 +65,8 @@ def configs(method, a):
     elif method.startswith("IPS"):
         grid = {"alpha": a.alphas, "floor": a.floors}
     else:
-        grid = {"alpha": a.alphas, "floor": a.floors, "lam": a.lams, "deg": a.degs, "imp": a.imps}
+        grid = {"alpha": a.alphas, "floor": a.floors, "lam": a.lams, "deg": a.degs, "imp": a.imps,
+                "cv": a.cvs}
     keys = list(grid)
     for vals in itertools.product(*[grid[k] for k in keys]):
         yield dict(zip(keys, vals))
@@ -89,13 +90,15 @@ def score_bank(d, method, cfg, P_raw, rows):
             Yhat = impute(O, Y, P, cfg)
         correct = method in ("IPS+WC", "DRUP", "DRUP-5hop")
         if method.endswith("5hop"):
-            s1, s3, s5 = propagate5(O, Y, P, Yhat, cfg["alpha"], correct, rows, cfg.get("deg", "W"))
+            s1, s3, s5 = propagate5(O, Y, P, Yhat, cfg["alpha"], correct, rows, cfg.get("deg", "W"),
+                                    cfg.get("cv", 1.0))
             out = []
             for b in BETAS[:-1]:
                 for gm in GAMMAS:
                     out.append((dict(cfg, beta=b, gamma=gm), s1 + b * s3 + gm * s5))
             return out
-        s1, s3 = propagate(O, Y, P, Yhat, cfg["alpha"], correct, rows, cfg.get("deg", "W"))
+        s1, s3 = propagate(O, Y, P, Yhat, cfg["alpha"], correct, rows, cfg.get("deg", "W"),
+                           cfg.get("cv", 1.0) if Yhat is not None else 1.0)
     out = []
     for b in BETAS:
         c = dict(cfg, beta=b)
@@ -114,6 +117,8 @@ def main():
     ap.add_argument("--lams", type=float, nargs="+", default=[1.0, 5.0, 20.0])
     ap.add_argument("--degs", nargs="+", default=["W", "Yhat"])
     ap.add_argument("--imps", nargs="+", default=["add"], help="imputation: add | lr")
+    ap.add_argument("--cvs", type=float, nargs="+", default=[1.0],
+                    help="control-variate weight of the imputation (0 = IPS, 1 = DR)")
     ap.add_argument("--methods", nargs="+",
                     default=["Pop", "Impute", "Obs", "IPS", "IPS+WC", "DR", "DRUP"])
     ap.add_argument("--dtype", default="float64")
@@ -124,15 +129,14 @@ def main():
     if a.dataset == "coat":
         d = load_coat()
         ks, key, by = (5, 10), "ndcg@5", "entry"
+    elif a.dataset == "yahoo":
+        d = load_yahoo()
+        ks, key, by = (5, 10), "ndcg@5", "user"
     else:
         d = torch.load("data/raw/kuairec.pt", weights_only=False)
         ks, key, by = (10, 20, 50), "ndcg@20", "user"
     d["O"], d["Y"] = d["O"].to(dt), d["Y"].to(dt)
-    if a.prop == "given" and d.get("P_given") is not None:
-        P_raw = d["P_given"].to(dt)
-    else:
-        P_raw, theta = popularity_propensity(d["O"])
-        print("propensity model theta:", theta.tolist())
+    P_raw = get_propensity(d, d["O"], d["Y"], a.prop)
     rows_users = sorted({u for u, _, _ in d["test"]})
     rows = torch.tensor(rows_users)
     row_of = {u: k for k, u in enumerate(rows_users)}

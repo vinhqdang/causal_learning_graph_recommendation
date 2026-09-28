@@ -25,8 +25,8 @@ import torch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from drup import fat  # noqa: E402
-from drup.data import load_coat  # noqa: E402
-from drup.estimation import popularity_propensity  # noqa: E402
+from drup.data import load_coat, load_yahoo  # noqa: E402
+from drup.estimation import get_propensity  # noqa: E402
 from drup.metrics import evaluate  # noqa: E402
 from drup.pipeline import build, scores_with_consts  # noqa: E402
 from drup.propagation import item_gram, local_three_hop  # noqa: E402
@@ -81,6 +81,13 @@ def main():
         feats = np.loadtxt("data/raw/coat/user_item_features/user_features.ascii")
         groups = {u: int(feats[u, 1] == 1) for u in range(feats.shape[0])}  # women = 1
         gname = "gender (men vs women)"
+    elif a.dataset == "yahoo":
+        d = load_yahoo()
+        K, kn = 5, 5
+        act = d["O"].sum(1).numpy()
+        med = np.median(act[[u for u, _, _ in d["test"]]])
+        groups = {u: int(act[u] > med) for u, _, _ in d["test"]}
+        gname = "activity (inactive vs active)"
     else:
         d = torch.load("data/raw/kuairec.pt", weights_only=False)
         K, kn = 20, 20
@@ -90,8 +97,7 @@ def main():
         gname = "activity (inactive vs active)"
     O, Y = d["O"].to(dt), d["Y"].to(dt)
     m, n = O.shape
-    P_raw = d["P_given"].to(dt) if (a.prop == "given" and d.get("P_given") is not None) \
-        else popularity_propensity(O)[0]
+    P_raw = get_propensity(d, O, Y, a.prop)
     test = d["test"]
     rows_users = sorted({u for u, _, _ in test})
     rows = torch.tensor(rows_users)
@@ -264,9 +270,10 @@ def main():
         elig = np.nonzero(cand_cnt >= np.percentile(cand_cnt[cand_cnt > 0], 50))[0]
         elig = elig[np.argsort(item_pop[elig])]
         targets = elig[int(0.1 * len(elig)): int(0.1 * len(elig)) + 5]
-        L = 20 if a.dataset == "coat" else 50
+        L = 50 if a.dataset == "kuairec" else 20
         fillers = np.argsort(-item_pop)[:L]
-        budgets = [0, 1, 2, 5, 10, 20, 50] if a.dataset == "coat" else [0, 1, 2, 5, 20, 50, 100, 200]
+        budgets = {"coat": [0, 1, 2, 5, 10, 20, 50], "yahoo": [0, 1, 2, 5, 10, 20, 50, 100]}.get(
+            a.dataset, [0, 1, 2, 5, 20, 50, 100, 200])
         unexp_of = {uu: torch.nonzero(O[uu] == 0).flatten() for uu, _, _ in test}
         for mth in METHODS:
             Mm = get_model(mth)

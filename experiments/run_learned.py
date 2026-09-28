@@ -11,8 +11,8 @@ import numpy as np
 import torch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from drup.data import load_coat, split_test  # noqa: E402
-from drup.estimation import baseline_imputation, clip_propensity, popularity_propensity  # noqa: E402
+from drup.data import load_coat, load_yahoo, split_test  # noqa: E402
+from drup.estimation import baseline_imputation, clip_propensity, get_propensity  # noqa: E402
 from drup.learned import MF, LightGCN, train  # noqa: E402
 from drup.metrics import evaluate  # noqa: E402
 
@@ -59,15 +59,15 @@ def main():
     if a.dataset == "coat":
         d = load_coat()
         ks, key, by = (5, 10), "ndcg@5", "entry"
+    elif a.dataset == "yahoo":
+        d = load_yahoo()
+        ks, key, by = (5, 10), "ndcg@5", "user"
     else:
         d = torch.load("data/raw/kuairec.pt", weights_only=False)
         ks, key, by = (10, 20, 50), "ndcg@20", "user"
     O, Y = d["O"].float(), d["Y"].float()
     m, n = O.shape
-    if a.prop == "given" and d.get("P_given") is not None:
-        P = d["P_given"].float()
-    else:
-        P = popularity_propensity(O.double())[0].float()
+    P = get_propensity(d, O.double(), Y.double(), a.prop).float()
     P = clip_propensity(P, a.floor)
     Yhat = baseline_imputation(O.double(), Y.double(), P.double(), lam=5.0).float()
     rows_users = sorted({u for u, _, _ in d["test"]})

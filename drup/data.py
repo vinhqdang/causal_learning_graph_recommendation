@@ -74,6 +74,38 @@ def load_kuairec(root=ROOT, threshold=2.0):
     return {"name": "kuairec", "O": O, "Y": Y, "P_given": None, "test": test}
 
 
+def load_yahoo(root=ROOT, threshold=4, mar_holdout=0.05, seed=2024):
+    """Yahoo! R3: 311,704 self-selected song ratings of 15,400 users (MNAR
+    log) and 54,000 ratings of 10 uniformly random songs for 5,400 of them
+    (MAR test). Files as distributed with the AutoDebias code
+    (datasets/yahooR3/{user,random}.txt, 0-indexed "user,item,rating")."""
+    d = os.path.join(root, "yahooR3")
+    tr = pd.read_csv(os.path.join(d, "user.txt"), header=None, names=["u", "i", "r"])
+    te = pd.read_csv(os.path.join(d, "random.txt"), header=None, names=["u", "i", "r"])
+    m = int(max(tr.u.max(), te.u.max())) + 1
+    n = int(max(tr.i.max(), te.i.max())) + 1
+    O = torch.zeros(m, n, dtype=torch.float64)
+    Y = torch.zeros(m, n, dtype=torch.float64)
+    O[tr.u.values, tr.i.values] = 1.0
+    Y[tr.u.values, tr.i.values] = torch.as_tensor((tr.r.values >= threshold).astype(np.float64))
+    # A small random share of the MAR users is held out entirely: it is used
+    # only to estimate P(Y=1 | MAR) for the Naive-Bayes propensity and never
+    # appears in validation or test.
+    rng = np.random.default_rng(seed)
+    te_users = np.sort(te.u.unique())
+    hold = set(rng.choice(te_users, int(round(mar_holdout * len(te_users))), replace=False).tolist())
+    cal = te[te.u.isin(hold)]
+    mar_rate = float((cal.r.values >= threshold).mean())
+    Onp = O.numpy()
+    test = []
+    for u, grp in te[~te.u.isin(hold)].groupby("u"):
+        it = grp.i.values
+        keep = Onp[u, it] == 0
+        test.append((int(u), it[keep], (grp.r.values[keep] >= threshold).astype(np.float64)))
+    return {"name": "yahoo", "O": O, "Y": Y, "P_given": None, "test": test,
+            "mar_rate": mar_rate, "mar_holdout_users": sorted(hold)}
+
+
 def split_test(test, frac_val, seed, by="entry"):
     """Split the unbiased data into validation (tuning) and test parts.
 
@@ -102,4 +134,6 @@ def load(name):
         return load_coat()
     if name == "kuairec":
         return load_kuairec()
+    if name == "yahoo":
+        return load_yahoo()
     raise ValueError(name)

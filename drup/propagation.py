@@ -40,15 +40,22 @@ import numpy as np
 import torch
 
 
-def edge_estimate(O, Y, P, Yhat=None):
+def edge_estimate(O, Y, P, Yhat=None, cv=1.0):
     """Edge-level unbiased estimate W of the potential-outcome matrix Y.
 
     O, Y, P, Yhat are dense (m, n) tensors. Y may hold anything where O == 0.
+    With an imputation, W is the control-variate family
+        W = O Y / P + cv * (Yhat - O Yhat / P),
+    which is IPS for cv = 0 and doubly robust for cv = 1. The added term has
+    mean zero under correct propensities, so every cv gives E[W] = Y and the
+    walk correction applies unchanged; double robustness needs cv = 1.
     """
     Yobs = O * Y
     if Yhat is None:
         return Yobs / P
-    return Yhat + O * (Yobs - Yhat) / P
+    if cv == 1.0:
+        return Yhat + O * (Yobs - Yhat) / P
+    return Yobs / P + cv * (Yhat - O * Yhat / P)
 
 
 def degree_weights(W, alpha=0.5, floor=1.0, D=None):

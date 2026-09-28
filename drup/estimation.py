@@ -110,3 +110,29 @@ def lowrank_imputation(O, Y, P, rank=32, lam=10.0, ridge=5.0, iters=8, chunk=512
         solve(Wt, Rz, V, U)
         solve(Wt.T, Rz.T, U, V)
     return (base + U @ V.T).clamp(0.0, 1.0)
+
+
+def naive_bayes_propensity(base, O, Y, mar_rate):
+    """Outcome-dependent (MNAR-on-Y) propensity in the spirit of Schnabel et
+    al. (2016):
+        P(O=1 | u, i, y) = P(O=1 | u, i) * P(Y=y | O=1) / P(Y=y | MAR),
+    with P(O=1 | u, i) from the exposure model ``base`` and P(Y=1 | MAR)
+    estimated on a small held-out random sample. Only entries of exposed
+    pairs are used downstream (their Y is known); others keep ``base``.
+    """
+    p_obs = float((O * Y).sum() / O.sum())
+    r1 = p_obs / mar_rate
+    r0 = (1.0 - p_obs) / (1.0 - mar_rate)
+    ratio = torch.where(Y > 0, torch.full_like(base, r1), torch.full_like(base, r0))
+    return torch.where(O > 0, (base * ratio).clamp(max=1.0), base)
+
+
+def get_propensity(d, O, Y, prop):
+    """'given' (shipped with the data), 'pop' (logistic exposure model) or
+    'nb' (exposure model x outcome-dependent Naive-Bayes factor)."""
+    if prop == "given" and d.get("P_given") is not None:
+        return d["P_given"].to(O.dtype)
+    base = popularity_propensity(O)[0]
+    if prop == "nb":
+        return naive_bayes_propensity(base, O, Y, d["mar_rate"])
+    return base

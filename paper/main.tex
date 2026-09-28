@@ -239,6 +239,13 @@ across users (Algorithm~\ref{alg:drup}).
 \end{algorithmic}
 \end{algorithm}
 
+\paragraph{Control-variate family.}
+More generally, $W^\lambda_e=O_eY_e/\bar p_e+\lambda(\hat Y_e-O_e\hat Y_e/\bar p_e)$ is unbiased
+for every $\lambda\in[0,1]$ under correct propensities. It interpolates between
+IPS ($\lambda=0$) and DR ($\lambda=1$, the only member that is also robust to
+propensity errors). Its variance is $\frac{1-p}{p}(Y-\lambda\hat Y)^2$. All results below
+hold for every member, and $\lambda$ is selected on validation data.
+
 \paragraph{Imputation.}
 Theorem~\ref{thm:unbiased} holds for any fixed $\hat Y$, so the imputation
 is a free design choice. Its accuracy enters only the variance

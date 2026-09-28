@@ -18,8 +18,8 @@ import torch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from drup import fat  # noqa: E402
-from drup.data import load_coat  # noqa: E402
-from drup.estimation import popularity_propensity  # noqa: E402
+from drup.data import load_coat, load_yahoo  # noqa: E402
+from drup.estimation import get_propensity  # noqa: E402
 from drup.metrics import evaluate  # noqa: E402
 from drup.pipeline import build, scores_with_consts  # noqa: E402
 from drup.rerank import rerank, rerank_exact, uniform_caps  # noqa: E402
@@ -45,13 +45,15 @@ def main():
     if a.dataset == "coat":
         d = load_coat()
         K = 5
+    elif a.dataset == "yahoo":
+        d = load_yahoo()
+        K = 5
     else:
         d = torch.load("data/raw/kuairec.pt", weights_only=False)
         K = 20
     O, Y = d["O"].to(dt), d["Y"].to(dt)
     n = O.shape[1]
-    P_raw = d["P_given"].to(dt) if (a.prop == "given" and d.get("P_given") is not None) \
-        else popularity_propensity(O)[0]
+    P_raw = get_propensity(d, O, Y, a.prop)
     test = [t for t in d["test"] if len(t[1]) >= K]
     rows_users = sorted({u for u, _, _ in test})
     rows = torch.tensor(rows_users)

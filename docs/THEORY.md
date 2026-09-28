@@ -113,6 +113,17 @@ With unbiased estimators, $|z|>3$ occurs 0.27% of the time by chance, which is
 what the corrected estimators show. The correction also removes the
 $1/p^2$ terms that dominate the variance, so RMSE drops about 5×.
 
+**Remark (control-variate family).** For any $\lambda\in[0,1]$, the edge
+estimate $W^\lambda_e=O_eY_e/\bar p_e+\lambda(\hat Y_e-O_e\hat Y_e/\bar p_e)$ has
+$\mathbb E[W^\lambda_e]=Y_e+(p_e/\bar p_e-1)(Y_e-\lambda\hat Y_e)$. It is therefore unbiased
+whenever the propensity is correct. $\lambda=0$ gives IPS and $\lambda=1$ gives DR,
+which is the only member that is also robust to propensity errors. Theorems 1–9
+hold for every member, because they only use $\mathbb E W_e=Y_e$, independence
+and boundedness. Its variance is
+$\frac{1-p_e}{p_e}(Y_e-\lambda\hat Y_e)^2$. The best $\lambda$ therefore shrinks towards 0
+when $\hat Y$ is poor, e.g. on very sparse logs where almost every
+edge of the propagated graph is imputed. We select $\lambda$ on validation data.
+
 ### 3.1 Any number of hops
 
 **Theorem 1′ (exact K-hop correction).** Fix an odd $K$. A $K$-hop walk
