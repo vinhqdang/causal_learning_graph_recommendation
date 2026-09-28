@@ -1,0 +1,61 @@
+{
+ "base": {
+  "alpha": 0.7,
+  "beta": 3.0,
+  "deg": "Yhat",
+  "floor": 0.2,
+  "lam": 1.0
+ },
+ "rows": [
+  {
+   "method": "Obs",
+   "tau": 0.2,
+   "ndcg@5": 0.4917362178136298,
+   "shift": -0.0645951119534418,
+   "shift_std": 0.004687288218778787,
+   "elasticity": 1.0342511533382222,
+   "elasticity_std": 0.04346851041377092,
+   "frac_logged_pairs_clipped": 1.0
+  },
+  {
+   "method": "DRUP",
+   "tau": 0.001,
+   "ndcg@5": 0.4107174902845132,
+   "shift": 0.012104295538102031,
+   "shift_std": 0.00864501062716214,
+   "elasticity": -0.04426314695888626,
+   "elasticity_std": 0.05725383575186746,
+   "frac_logged_pairs_clipped": 0.0
+  },
+  {
+   "method": "DRUP",
+   "tau": 0.01,
+   "ndcg@5": 0.41877410345368704,
+   "shift": 0.02124683917198326,
+   "shift_std": 0.009274700443632327,
+   "elasticity": -0.09445625686305992,
+   "elasticity_std": 0.06000633040895714,
+   "frac_logged_pairs_clipped": 0.007614942528735632
+  },
+  {
+   "method": "DRUP",
+   "tau": 0.05,
+   "ndcg@5": 0.48387024197805784,
+   "shift": 0.01875105198372669,
+   "shift_std": 0.0032039387699374505,
+   "elasticity": -0.06869077175521392,
+   "elasticity_std": 0.01785641764222568,
+   "frac_logged_pairs_clipped": 0.1182471264367816
+  },
+  {
+   "method": "DRUP",
+   "tau": 0.2,
+   "ndcg@5": 0.4802704248081327,
+   "shift": 0.0060634598047196175,
+   "shift_std": 0.0013674484770364271,
+   "elasticity": -0.02006643300281774,
+   "elasticity_std": 0.00458859183302485,
+   "frac_logged_pairs_clipped": 0.7738505747126436
+  }
+ ]
+}

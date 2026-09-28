@@ -19,20 +19,21 @@ logged graph. Its properties are proved in `docs/THEORY.md`:
 Accuracy on unbiased test data (mean over splits; on KuaiRec the trained
 baselines are tuned and paired with DRUP on the same 5 splits):
 
-| | Coat nDCG@5 | KuaiRec nDCG@20 |
-|---|---|---|
-| MF / IPS-MF / DR-MF | 0.462 / 0.457 / 0.536 | 0.632 / 0.629 / 0.619 |
-| LightGCN / NAVIP / DR-LightGCN | 0.508 / 0.499 / 0.556 | 0.630 / 0.630 / 0.625 |
-| imputation only (additive) | 0.566 | 0.622 |
-| DR adjacency (no walk correction) | 0.559 | 0.632 |
-| DRUP, additive imputation | 0.553 | 0.633 |
-| DRUP, low-rank imputation | – | 0.639 |
-| **DRUP, low-rank imputation, 5 hops** | 0.555 (additive) | **0.640** |
+| | Coat nDCG@5 | Yahoo!R3 nDCG@5 | KuaiRec nDCG@20 |
+|---|---|---|---|
+| MF / IPS-MF / DR-MF | 0.462 / 0.457 / 0.536 | 0.507 / 0.512 / 0.509 | 0.632 / 0.629 / 0.619 |
+| LightGCN / NAVIP / DR-LightGCN | 0.508 / 0.499 / 0.556 | 0.588 / 0.591 / 0.561 | 0.630 / 0.630 / 0.625 |
+| imputation only (additive) | 0.566 | 0.524 | 0.622 |
+| linear LightGCN on the logged graph | 0.557 | 0.659 | 0.604 |
+| DR adjacency (no walk correction) | 0.559 | 0.662 | 0.632 |
+| DRUP, additive imputation | 0.553 | **0.662** (λ = 0) | 0.633 |
+| DRUP, low-rank imputation, 5 hops | 0.555 (additive) | – | **0.640** |
 
-On KuaiRec, DRUP (no gradient training) significantly beats every tuned
-trained baseline (paired t-test, p < 0.01). On Coat it ties with the best
-trained model but is below the additive imputation alone
-(`paper/tables/significance.tex`).
+DRUP (no gradient training) significantly beats every tuned trained
+baseline on KuaiRec and Yahoo!R3 (paired t-test, p < 0.01). On Coat it ties
+with the best trained model but is below the additive imputation alone
+(`paper/tables/significance.tex`). On Yahoo!R3 (2% dense), validation picks the
+IPS end (λ = 0) of the control-variate family.
 
 Guarantees and their checks:
 
@@ -40,7 +41,11 @@ Guarantees and their checks:
   K (Möbius inversion over walk-index coincidence patterns, `drup/khop.py`).
   Uncorrected IPS/DR propagation has relative bias 2.4 / 1.9 at 3 hops and
   78 / 70 at 5 hops. The corrected estimators stay within Monte-Carlo error.
-- **Causal item fairness.** Exposure elasticity is +0.005 (logged graph +1.78,
+- **Causal item fairness.** Under a real do(p ← p/2) intervention with frozen
+  nuisances, the mean-score elasticity of the logged graph is +1.00 on every
+  dataset. DRUP's is −0.02 (Coat) and −0.01 (KuaiRec). On Yahoo!R3 it is +0.95
+  at the validated clip τ = 0.2 and +0.006 at τ ≤ 5e-4, at an nDCG cost of
+  0.04 (`paper/tables/tau.tex`). In Monte-Carlo, exposure elasticity is +0.005 (logged graph +1.78,
   DR adjacency −0.19). Under a real exposure intervention on KuaiRec, DRUP's rank
   shift is +0.0005 ± 0.0008, against −0.134 for the logged graph. The
   exposure-conditional bias drops from 0.83 to 0.42, and to 0.29 with low-rank
@@ -77,7 +82,7 @@ drup/estimation.py    propensity model, additive and low-rank outcome imputation
 drup/fat.py           explanations, counterfactuals, robustness certificates, DP release, fairness metrics
 drup/pipeline.py      build a propagation recommender from a configuration
 drup/learned.py       trained baselines (MF, IPS-MF, DR-MF, LightGCN, NAVIP, DR-LightGCN)
-drup/data.py          Coat and KuaiRec (MNAR training log, unbiased test)
+drup/data.py          Coat, Yahoo!R3 and KuaiRec (MNAR training log, unbiased test)
 experiments/          all experiments (run_all.sh runs one dataset end to end)
 results/              JSON outputs
 docs/THEORY.md        method, theorems and proofs
@@ -88,6 +93,9 @@ docs/THEORY.md        method, theorems and proofs
 Put the raw data under `data/raw/`:
 
 - Coat: `https://www.cs.cornell.edu/~schnabts/mnar/coat.zip`. Unzip to `data/raw/coat/`. Its test set is a random (MAR) sample.
+- Yahoo! R3: `datasets/yahooR3/{user,random}.txt` as distributed with the
+  AutoDebias code (`https://github.com/DongHande/AutoDebias`). Place them in
+  `data/raw/yahooR3/`. The official source is Yahoo! Webscope (R3).
 - KuaiRec 2.0: `https://zenodo.org/records/18164998`. Unzip to `data/raw/KuaiRec 2.0/`. The big matrix is used as the MNAR log and the fully observed small matrix as the test set. Build the cache with
   `python3 -c "from drup.data import load_kuairec; import torch; torch.save(load_kuairec(), 'data/raw/kuairec.pt')"`.
 

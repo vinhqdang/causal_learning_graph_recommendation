@@ -209,13 +209,36 @@ def frontier_table():
     return "\n".join(lines) + "\n"
 
 
+def tau_table():
+    """Accuracy vs exposure invariance under the clip tau (frozen nuisances)."""
+    lines = ["\\begin{tabular}{llcccc}", "\\toprule",
+             "Data & operator & $\\tau$ & nDCG & score elasticity $\\eta$ & rank shift\\\\", "\\midrule"]
+    for ds, title in [("coat", "Coat"), ("kuairec", "KuaiRec"), ("yahoo", "Yahoo!\\,R3")]:
+        rows = []
+        for tag in ("_frozen", "_frozen_small"):
+            f = load(f"tau_tradeoff_{ds}{tag}.json")
+            if f:
+                rows += [r for r in f["rows"] if not (r["method"] == "Obs" and any(x["method"] == "Obs" for x in rows))]
+        if not rows:
+            continue
+        rows.sort(key=lambda r: (r["method"] != "Obs", -(r["tau"] or 0)))
+        for r in rows:
+            nd = [v for k, v in r.items() if k.startswith("ndcg")][0]
+            tau = "--" if r["method"] == "Obs" else f"{r['tau']:g}"
+            lines.append(f"{title} & {r['method']} & {tau} & {nd:.4f} & {r['elasticity']:+.3f}$\\pm${r['elasticity_std']:.3f}"
+                         f" & {r['shift']:+.4f}\\\\")
+        lines.append("\\midrule")
+    lines = lines[:-1] + ["\\bottomrule", "\\end{tabular}"]
+    return "\n".join(lines) + "\n"
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     tabs = {"accuracy": accuracy_table(), "mc": mc_table(), "fat": fat_table(),
-            "frontier": frontier_table()}
-    for name, blk in zip(["rerank_coat", "rerank_kuairec"], rerank_table()):
+            "frontier": frontier_table(), "tau": tau_table()}
+    for name, blk in zip(["rerank_coat", "rerank_kuairec", "rerank_yahoo"], rerank_table()):
         tabs[name] = blk
-    for name, blk in zip(["attack_coat", "attack_kuairec"], attack_table()):
+    for name, blk in zip(["attack_coat", "attack_kuairec", "attack_yahoo"], attack_table()):
         tabs[name] = blk + "\n"
     tabs["explain"], tabs["privacy"] = explain_privacy_table()
     for k, v in tabs.items():

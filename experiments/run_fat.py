@@ -206,6 +206,10 @@ def main():
         s1 = C[u] * w_row
         return s3 / c3 if beta >= 1e3 else s1 / c1 + beta * s3 / c3
 
+    # W^cv = O Y / P + cv (Yhat - O Yhat / P) is DR with the shrunk imputation
+    # cv * Yhat, so every DR formula below applies with Yhat -> cv * Yhat.
+    cv_drup = M["cfg"].get("cv", 1.0)
+
     if "explain" in a.sections:
         rng = np.random.default_rng(0)
         users = [t for t in test if len(t[1]) > 1]
@@ -223,7 +227,7 @@ def main():
             order = items[np.argsort(-s[items].numpy())]
             i, k2 = int(order[0]), int(order[1])
             logged = (O[u] > 0).to(dt)
-            w0 = Yhat[u]
+            w0 = cv_drup * Yhat[u]      # unlogged value under the control-variate weight
             phi = fat.contributions(i, W[u], w0, C[u], Gloo, logged) * (beta / c3 if beta < 1e3 else 1 / c3)
             # exactness of additivity for a random subset
             idx = torch.nonzero(logged).flatten()
@@ -303,7 +307,8 @@ def main():
                     pv = torch.full((n,), float(Pm[:, t].mean()), dtype=dt)
                     pv[fillers] = Pm[:, fillers].mean(0)
                     pv = pv.clamp_min(tau)
-                    yh_v = Mm["Yhat"].mean(0) if Mm["Yhat"] is not None else torch.zeros(n, dtype=dt)
+                    yh_v = Mm["cfg"].get("cv", 1.0) * Mm["Yhat"].mean(0) if Mm["Yhat"] is not None \
+                        else torch.zeros(n, dtype=dt)
                     w_v = yh_v + o_v * (1.0 - yh_v) / pv
                 dv = (w_v if Dsrc is Wm else Mm["Yhat"].mean(0) if Mm["Yhat"] is not None else w_v).sum().clamp_min(1.0)
                 c_v = dv ** (-alpha) * di ** (-(1 - alpha))
@@ -317,7 +322,8 @@ def main():
                     dS3 = (wt_u @ wt_v)[:, None] * wt_v[None, :]
                 # certified bounds for ANY profile with <= L+1 logged items
                 kind = "Obs" if mth == "Obs" else ("IPS" if mth.startswith("IPS") else "DR")
-                yh_v = Mm["Yhat"].mean(0) if Mm["Yhat"] is not None else torch.zeros(n, dtype=dt)
+                yh_v = Mm["cfg"].get("cv", 1.0) * Mm["Yhat"].mean(0) if Mm["Yhat"] is not None \
+                    else torch.zeros(n, dtype=dt)
                 if Dsrc is Wm:   # attacker-controlled degree, only d_v >= 1 known
                     c_lo, c_hi = torch.zeros(n, dtype=dt), di ** (-(1 - alpha))
                 else:            # degree from the imputation: c_v known exactly

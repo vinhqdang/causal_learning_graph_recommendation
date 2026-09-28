@@ -64,11 +64,13 @@ recommender jointly differentially private; and
 (vi) an exposure-capped allocation, solved exactly by min-cost flow, that
 enforces hard per-item exposure limits and retains a utility guarantee with respect to the
 causal (full-exposure) objective.
-On Coat and KuaiRec, whose test sets are random or fully observed, DRUP needs no
-gradient training. On KuaiRec it significantly outperforms tuned MF,
-LightGCN, NAVIP and DR baselines (nDCG@20 0.640 against at most 0.632,
-$p<0.01$). On Coat it ties with the best trained model. Every guarantee is
-verified empirically.
+We evaluate on Coat, Yahoo!\,R3 and KuaiRec, whose test sets are random or fully
+observed. DRUP needs no gradient training. It significantly outperforms tuned
+MF, LightGCN, NAVIP and DR baselines on KuaiRec (nDCG@20 0.640 against at most
+0.632) and on Yahoo!\,R3 (nDCG@5 0.662 against at most 0.591), and it ties with
+the best trained model on Coat. Every guarantee is verified empirically. We
+also map where they break: on very sparse logs, exposure invariance requires a
+small propensity clip, and that costs accuracy.
 \end{abstract}
 
 \noindent\textbf{Keywords:} causal recommendation; graph neural networks; doubly robust estimation;
@@ -125,9 +127,9 @@ exact attributions and optimal counterfactual explanations
 certified robustness to injected profiles (Theorem~\ref{thm:robust});
 joint differential privacy (Theorem~\ref{thm:dp}); and exposure-capped
 allocation with a causal utility guarantee (Theorem~\ref{thm:alloc}).
-\item We evaluate DRUP on Coat~\cite{schnabel2016}, whose test set is a random
-sample, and on KuaiRec~\cite{gao2022kuairec}, whose test matrix is fully
-observed. We compare it with trained and training-free baselines and verify each
+\item We evaluate DRUP on Coat~\cite{schnabel2016} and
+Yahoo!\,R3~\cite{marlin2009collaborative}, whose test sets are random samples,
+and on KuaiRec~\cite{gao2022kuairec}, whose test matrix is fully observed. We compare it with trained and training-free baselines and verify each
 guarantee: by Monte Carlo, by a real-data intervention on exposure, by brute
 force, and against realised attacks.
 \end{enumerate}
@@ -531,6 +533,30 @@ far fewer parameters and stays within noise. The nDCG gap between
 men and women on Coat shrinks from $0.112$ to $0.079$. On KuaiRec, the gap
 between active and inactive users is small for every method ($\le0.013$).
 
+\paragraph{When does invariance hold? The role of $\tau$.}
+Theorem~\ref{thm:fair} is a statement about \emph{expected scores} under
+Assumptions~\ref{as:unconf}--\ref{as:fixed} and $\pi p\ge\tau$. Table~\ref{tab:tau}
+measures the score elasticity $\eta$ directly, with nuisances frozen at their
+values on the original log. The logged graph has $\eta=+1.000\pm0.011$
+(Yahoo!\,R3) and $+1.03$ (Coat), exactly as predicted. On Coat and KuaiRec,
+DRUP with its validation-selected clip is invariant ($\eta=-0.02$ on Coat).
+On Yahoo!\,R3 the log is 2\% dense and the median logged propensity is only
+$0.05$, so the validation-selected clip $\tau=0.2$ binds for 81\% of logged pairs.
+DRUP then behaves almost like the logged graph ($\eta=+0.95$). Lowering $\tau$
+restores invariance: $\eta=+0.006\pm0.039$ at $\tau\le5\cdot10^{-4}$. It costs
+accuracy, though (nDCG@5 $0.620$ instead of $0.662$), which is exactly the
+clipping bias--variance trade-off of Theorem~\ref{thm:var}. Two further caveats
+come from these runs. First, re-fitting the nuisances on the intervened log
+leaves a residual elasticity. Second, expected-score invariance does not imply
+rank invariance when the scores are sums of few, heavily skewed inverse-propensity
+terms: on Yahoo!\,R3 the median-sensitive rank shift stays at $-0.04$ even when
+$\eta\approx0$. On the denser KuaiRec log, both vanish.
+
+\begin{table}[t]\centering\small
+\caption{Clip $\tau$ versus exposure invariance under a real $do(p\leftarrow p/2)$ on a random half of the items, with nuisances frozen (Assumption~\ref{as:fixed}). $\eta$ is the elasticity of the mean score of treated relative to control items (1: exposure-proportional, 0: invariant).}\label{tab:tau}
+\input{tables/tau.tex}
+\end{table}
+
 \emph{Limitation.} Exposure invariance is a causal guarantee, not a
 distributional one. When true quality is concentrated, DRUP's top-$K$ lists are
 concentrated too, with higher Gini and PRU than the logged graph. The
@@ -556,6 +582,11 @@ certified guarantee.
 \begin{adjustbox}{max width=\textwidth}
 \input{tables/rerank_kuairec.tex}
 \end{adjustbox}
+
+\medskip
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/rerank_yahoo.tex}
+\end{adjustbox}
 \end{table}
 
 Table~\ref{tab:rerank} applies the same exposure-capped allocation to every
@@ -573,7 +604,8 @@ puts every user's mass on the same items. Two caveats remain. First, at equal
 accuracy: below the cap they spread exposure more evenly (e.g., IPS reaches
 $0.219$ at Gini $0.80$, DRUP-LR $0.204$). Second, on Coat, whose random test
 items are already diverse, capping costs DRUP more accuracy than it costs the
-logged graph. Under a hard exposure-cap policy, then, DRUP is the best
+logged graph. On Yahoo!\,R3 exposure is not concentrated (Gini $0.27$), and caps
+down to $1.5$ times the fair share cost every operator at most $0.01$. Under a hard exposure-cap policy, then, DRUP is the best
 choice on concentrated data, while Gini-targeted fairness still favours the
 correlation-based operators.
 
@@ -610,6 +642,11 @@ certifies that they are.
 \begin{adjustbox}{max width=\textwidth}
 \input{tables/attack_kuairec.tex}
 \end{adjustbox}
+
+\medskip
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/attack_yahoo.tex}
+\end{adjustbox}
 \end{table}
 
 Table~\ref{tab:attack} reports the attack. Empirically, the DR-based
@@ -636,7 +673,11 @@ under bounded profile norms, are an open problem. At intermediate budgets the
 uncorrected DR adjacency with attacker-controlled degrees is sometimes harder
 to push than DRUP, because the fake user's large DR weights inflate its own
 degree. That protection cannot be certified, because an attacker can design a
-profile that avoids it.
+profile that avoids it. On Yahoo!\,R3, where DRUP selects the IPS end, it
+inherits the larger $1/\tau$ weights of IPS: at $F=100$ the target reaches 23\%
+of users against 20\% for the logged graph, and only the logged graph obtains
+non-trivial certificates (12\% of users at $F=1$). Robustness therefore favours
+the DR end of the family and the imputation-based degrees.
 
 \subsection{Privacy}
 \begin{table}[t]\centering\small
@@ -651,7 +692,9 @@ Table~\ref{tab:privacy} shows the privacy--utility curve. On KuaiRec
 $0.629$ at $\epsilon=16$. The non-private value is $0.633$, trained LightGCN reaches
 $0.629$ and popularity $0.577$. On Coat, with only 290 users, the
 same guarantee costs considerably more accuracy. Useful privacy needs a
-large user base, as expected for user-level DP.
+large user base, as expected for user-level DP. On Yahoo!\,R3 (15{,}400 users,
+1{,}000 items) the jointly private recommender reaches $0.595$ at $\epsilon=16$
+against $0.657$ non-private.
 
 %======================================================================
 \section{Discussion and limitations}

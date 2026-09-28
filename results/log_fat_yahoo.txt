@@ -1,2 +1,25 @@
 /home/user/causal_learning_graph_recommendation/experiments/../drup/data.py:89: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)
   O[tr.u.values, tr.i.values] = 1.0
+/home/user/causal_learning_graph_recommendation/experiments/../drup/fat.py:290: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
+  rho = spearmanr(S[r, items], item_pop[items]).correlation
+fairness Obs {'ndcg@5': 0.659, 'PRU': 0.5341, 'ECB': 0.856, 'gini@5': 0.2809, 'coverage@5': 1.0, 'group_gap': 0.0457, 'group0': 0.6366, 'group1': 0.6823}
+fairness IPS {'ndcg@5': 0.6616, 'PRU': 0.5196, 'ECB': 0.8512, 'gini@5': 0.2744, 'coverage@5': 1.0, 'group_gap': 0.047, 'group0': 0.6386, 'group1': 0.6856}
+fairness DR {'ndcg@5': 0.6616, 'PRU': 0.5196, 'ECB': 0.8512, 'gini@5': 0.2744, 'coverage@5': 1.0, 'group_gap': 0.047, 'group0': 0.6386, 'group1': 0.6856}
+fairness DRUP {'ndcg@5': 0.6616, 'PRU': 0.5196, 'ECB': 0.8512, 'gini@5': 0.2744, 'coverage@5': 1.0, 'group_gap': 0.047, 'group0': 0.6386, 'group1': 0.6856}
+intervene Obs -0.09426389897963416 +- 0.0017651241036255297
+intervene IPS -0.08899536879663666 +- 0.0017326621286042295
+intervene DR -0.08899536879663666 +- 0.0017326621286042295
+intervene DRUP -0.08899536879663666 +- 0.0017326621286042295
+explain {"max_rel_error_completeness_additivity": 1.734723475976807e-06, "deletion_rank_of_top1": {"DRUP-attribution": {"1": 0.69, "2": 1.015, "3": 1.275, "5": 1.39, "10": 1.385}, "random": {"1": 0.19, "2": 0.335, "3": 0.41, "5": 0.5, "10": 0.545}, "item-similarity": {"1": 0.41, "2": 0.605, "3": 0.75, "5": 0.87, "10": 1.085}}, "minimal_cf_size_mean": 2.3790849673202614, "minimal_cf_size_median": 1.0, "frac_no_cf": 0.235}
+attack Obs {"hit@K": {"0": 0.064595756577234, "1": 0.064595756577234, "2": 0.064595756577234, "5": 0.0646347809674779, "10": 0.06479213826459282, "20": 0.06483128486862491, "50": 0.07145973850674447, "100": 0.19908701001010948}, "certified_frac": {"0": 0.9352871702520342, "1": 0.11711100317866878, "2": 0.047263047730028374, "5": 0.00011799541144388811, "10": 0.0, "20": 0.0, "50": 0.0, "100": 0.0}, "certificate_violations": 0, "tau": 1.0, "max_rel_bound_excess": 0.0}
+attack IPS {"hit@K": {"0": 0.06463518098093989, "1": 0.06467448915704052, "2": 0.06467448915704052, "5": 0.06475293795099032, "10": 0.06475293795099032, "20": 0.06490927993954232, "50": 0.08028447597060588, "100": 0.2339686083111358}, "certified_frac": {"0": 0.9350517438369585, "1": 0.0, "2": 0.0, "5": 0.0, "10": 0.0, "20": 0.0, "50": 0.0, "100": 0.0}, "certificate_violations": 0, "tau": 0.2, "max_rel_bound_excess": 0.0}
+attack DR {"hit@K": {"0": 0.06463518098093989, "1": 0.06463518098093989, "2": 0.06467448915704052, "5": 0.06479253827805481, "10": 0.06487110928579282, "20": 0.06506772941454511, "50": 0.06683317421523743, "100": 0.07925606648403269}, "certified_frac": {"0": 0.9350517438369585, "1": 0.022344163104508263, "2": 0.0003902439024390244, "5": 0.0, "10": 0.0, "20": 0.0, "50": 0.0, "100": 0.0}, "certificate_violations": 0, "tau": 0.2, "max_rel_bound_excess": 0.0}
+attack DRUP {"hit@K": {"0": 0.06463518098093989, "1": 0.06463518098093989, "2": 0.06467448915704052, "5": 0.06479253827805481, "10": 0.06487110928579282, "20": 0.06506772941454511, "50": 0.06683317421523743, "100": 0.07925606648403269}, "certified_frac": {"0": 0.9350517438369585, "1": 0.022344163104508263, "2": 0.0003902439024390244, "5": 0.0, "10": 0.0, "20": 0.0, "50": 0.0, "100": 0.0}, "certificate_violations": 0, "tau": 0.2, "max_rel_bound_excess": 0.0}
+privacy eps 0.5 {'ndcg': 0.36618385635820877, 'std': 0.0023648315532110178, 'sigma': 0.09817306727291901, 'ranks': [None, 128, 32]}
+privacy eps 1.0 {'ndcg': 0.3629826461770162, 'std': 0.006219878670106657, 'sigma': 0.049086533636459505, 'ranks': [None, None, None]}
+privacy eps 2.0 {'ndcg': 0.38581130353627824, 'std': 0.004172352053584514, 'sigma': 0.024543266818229752, 'ranks': [128, 128, None]}
+privacy eps 4.0 {'ndcg': 0.45755812511975313, 'std': 0.007048134189163956, 'sigma': 0.012271633409114876, 'ranks': [4, 4, 4]}
+privacy eps 8.0 {'ndcg': 0.536009067888482, 'std': 0.0025974215428158304, 'sigma': 0.006135816704557438, 'ranks': [4, 8, 4]}
+privacy eps 16.0 {'ndcg': 0.594958602127765, 'std': 0.002441599583262292, 'sigma': 0.003067908352278719, 'ranks': [16, 8, 8]}
+privacy eps inf {'ndcg': 0.6451184604654937, 'std': 0.0, 'sigma': 0.0, 'ranks': [32]}
+privacy reference 0.6566183534138019 pop 0.5252641822550739

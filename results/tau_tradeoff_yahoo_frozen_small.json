@@ -1,0 +1,63 @@
+{
+ "base": {
+  "alpha": 0.5,
+  "beta": 0.03,
+  "cv": 0.0,
+  "deg": "W",
+  "floor": 0.2,
+  "imp": "add",
+  "lam": 20.0
+ },
+ "rows": [
+  {
+   "method": "Obs",
+   "tau": 0.2,
+   "ndcg@5": 0.6590309049361947,
+   "shift": -0.1603542713556644,
+   "shift_std": 0.0014180271623344632,
+   "elasticity": 0.9995881104453552,
+   "elasticity_std": 0.011208094313827613,
+   "frac_logged_pairs_clipped": 1.0
+  },
+  {
+   "method": "DRUP",
+   "tau": 0.0002,
+   "ndcg@5": 0.6204073026077763,
+   "shift": -0.04347442815092656,
+   "shift_std": 0.0019617799912870874,
+   "elasticity": 0.00599672080393443,
+   "elasticity_std": 0.03898426022179403,
+   "frac_logged_pairs_clipped": 0.0
+  },
+  {
+   "method": "DRUP",
+   "tau": 0.0005,
+   "ndcg@5": 0.6204073026077763,
+   "shift": -0.04352066704370835,
+   "shift_std": 0.0019342310164492866,
+   "elasticity": 0.006289444843216862,
+   "elasticity_std": 0.03916103557052893,
+   "frac_logged_pairs_clipped": 6.416343710699895e-06
+  },
+  {
+   "method": "DRUP",
+   "tau": 0.001,
+   "ndcg@5": 0.6204960627753029,
+   "shift": -0.043983148560931495,
+   "shift_std": 0.0018866950831245082,
+   "elasticity": 0.012250646878690605,
+   "elasticity_std": 0.034779945513085136,
+   "frac_logged_pairs_clipped": 0.0002951518106921952
+  },
+  {
+   "method": "DRUP",
+   "tau": 0.002,
+   "ndcg@5": 0.619462148067438,
+   "shift": -0.04681573247658268,
+   "shift_std": 0.0017322909499021665,
+   "elasticity": 0.060298904845176915,
+   "elasticity_std": 0.010688492599179571,
+   "frac_logged_pairs_clipped": 0.003230629058337397
+  }
+ ]
+}

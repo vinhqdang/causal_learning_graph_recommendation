@@ -1,0 +1,8 @@
+base config {'alpha': 0.7, 'beta': 3.0, 'deg': 'Yhat', 'floor': 0.2, 'lam': 1.0}  propensity quantiles on logged pairs: [0.029, 0.1387, 0.3535]
+{'method': 'Obs', 'tau': 0.2, 'ndcg@5': 0.4917362178136298, 'shift': -0.056062683481061526, 'shift_std': 0.006242299329217258, 'frac_logged_pairs_clipped': 1.0}
+{'method': 'DRUP', 'tau': 0.005, 'ndcg@5': 0.4109148510049475, 'shift': 0.0002788145675500046, 'shift_std': 0.005205763949213408, 'frac_logged_pairs_clipped': 0.00028735632183908046}
+{'method': 'DRUP', 'tau': 0.01, 'ndcg@5': 0.41877410345368704, 'shift': 0.015117459450309586, 'shift_std': 0.006624173033124471, 'frac_logged_pairs_clipped': 0.007614942528735632}
+{'method': 'DRUP', 'tau': 0.02, 'ndcg@5': 0.4375888158915423, 'shift': 0.026797264784177172, 'shift_std': 0.010498505471835406, 'frac_logged_pairs_clipped': 0.06379310344827586}
+{'method': 'DRUP', 'tau': 0.05, 'ndcg@5': 0.48387024197805784, 'shift': 0.015177995515626819, 'shift_std': 0.009087654561029064, 'frac_logged_pairs_clipped': 0.1182471264367816}
+{'method': 'DRUP', 'tau': 0.1, 'ndcg@5': 0.4852659039330418, 'shift': 0.015751477513563206, 'shift_std': 0.009078564614134572, 'frac_logged_pairs_clipped': 0.2507183908045977}
+{'method': 'DRUP', 'tau': 0.2, 'ndcg@5': 0.4802704248081327, 'shift': 0.007424352021673779, 'shift_std': 0.009247698751334767, 'frac_logged_pairs_clipped': 0.7738505747126436}

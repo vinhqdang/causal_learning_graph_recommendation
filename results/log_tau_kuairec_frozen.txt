@@ -1,0 +1,5 @@
+base config {'alpha': 0.5, 'beta': 1000.0, 'deg': 'W', 'floor': 0.2, 'lam': 20.0}  propensity quantiles on logged pairs: [0.0926, 0.4806, 0.7186]
+{'method': 'Obs', 'tau': 0.2, 'ndcg@20': 0.6025644224211092, 'shift': -0.2412225673649184, 'shift_std': 0.0024945950846022302, 'elasticity': 0.9968889655807154, 'elasticity_std': 0.002655713098960788, 'frac_logged_pairs_clipped': 1.0}
+{'method': 'DRUP', 'tau': 0.001, 'ndcg@20': 0.1941662020192014, 'shift': 0.0029963366758197774, 'shift_std': 2.061654179991157e-05, 'elasticity': -0.04489395347134745, 'elasticity_std': 0.02160098870162173, 'frac_logged_pairs_clipped': 0.002281630009759276}
+{'method': 'DRUP', 'tau': 0.02, 'ndcg@20': 0.33927774836232605, 'shift': 0.002655530921136101, 'shift_std': 9.698609248209866e-07, 'elasticity': 0.0011313126262912344, 'elasticity_std': 0.004285087482150703, 'frac_logged_pairs_clipped': 0.038708397239133524}
+{'method': 'DRUP', 'tau': 0.1, 'ndcg@20': 0.6304985736516469, 'shift': 0.0035479907279512, 'shift_std': 0.00033697328089959955, 'elasticity': -0.012990848597018847, 'elasticity_std': 0.0002600438143696357, 'frac_logged_pairs_clipped': 0.10416253072890522}

@@ -116,7 +116,9 @@ $1/p^2$ terms that dominate the variance, so RMSE drops about 5×.
 **Remark (control-variate family).** For any $\lambda\in[0,1]$, the edge
 estimate $W^\lambda_e=O_eY_e/\bar p_e+\lambda(\hat Y_e-O_e\hat Y_e/\bar p_e)$ has
 $\mathbb E[W^\lambda_e]=Y_e+(p_e/\bar p_e-1)(Y_e-\lambda\hat Y_e)$. It is therefore unbiased
-whenever the propensity is correct. $\lambda=0$ gives IPS and $\lambda=1$ gives DR,
+whenever the propensity is correct. Equivalently, $W^\lambda$ is exactly the DR
+estimate built with the shrunk imputation $\lambda\hat Y$, so every DR statement
+(including double robustness with respect to $\lambda\hat Y$) carries over. $\lambda=0$ gives IPS and $\lambda=1$ gives DR,
 which is the only member that is also robust to propensity errors. Theorems 1–9
 hold for every member, because they only use $\mathbb E W_e=Y_e$, independence
 and boundedness. Its variance is
