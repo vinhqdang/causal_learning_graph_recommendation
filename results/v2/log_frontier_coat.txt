@@ -1,8 +1,0 @@
-Obs done 24
-IPS done 384
-DR done 384
-DRUP done 384
-Obs best ndcg under Gini cap: {'0.3': None, '0.4': 0.4917, '0.5': 0.4917, '0.6': 0.4917, '1.0': 0.4917}
-IPS best ndcg under Gini cap: {'0.3': None, '0.4': 0.4951, '0.5': 0.4951, '0.6': 0.4951, '1.0': 0.4951}
-DR best ndcg under Gini cap: {'0.3': None, '0.4': 0.4168, '0.5': 0.462, '0.6': 0.4862, '1.0': 0.4978}
-DRUP best ndcg under Gini cap: {'0.3': None, '0.4': 0.4168, '0.5': 0.4406, '0.6': 0.4842, '1.0': 0.4968}

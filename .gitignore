@@ -233,3 +233,4 @@ paper/ipm/*.bbl
 paper/ipm/*.blg
 paper/ipm/*.out
 paper/ipm/*.spl
+results/v2/log_*.txt

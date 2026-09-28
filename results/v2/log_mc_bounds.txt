@@ -1,2 +1,0 @@
-0.3 {'var_bound_over_mc_median': 1581.6835587445494, 'var_bound_over_mc_min': 470.7557201013787, 't_bound_over_q95_median': 130.95284769428696, 't_bound_over_q95_min': 72.70199542866962}
-0.1 {'var_bound_over_mc_median': 8422.195584361869, 'var_bound_over_mc_min': 2125.757722327728, 't_bound_over_q95_median': 1830.914964351892, 't_bound_over_q95_min': 684.83171873763}
