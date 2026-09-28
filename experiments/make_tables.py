@@ -4,6 +4,10 @@ import json
 import os
 
 R = "results"
+# propensity model selected on validation for DRUP on Yahoo!R3 (see
+# experiments/select_yahoo.py); FAT / re-ranking runs use that model
+YPROP = open(os.path.join("results", "yahoo_prop.txt")).read().strip() \
+    if os.path.exists(os.path.join("results", "yahoo_prop.txt")) else "pop"
 OUT = os.path.join("paper", "tables")
 
 
@@ -23,7 +27,8 @@ def fmt(mv, best=False, second=False):
 
 def accuracy_table():
     specs = [("coat", "given", ["ndcg@5", "recall@5", "ndcg@10"], "Coat"),
-             ("kuairec", "pop", ["ndcg@20", "recall@20", "ndcg@50"], "KuaiRec")]
+             ("kuairec", "pop", ["ndcg@20", "recall@20", "ndcg@50"], "KuaiRec"),
+             ("yahoo", "sel", ["ndcg@5", "recall@5", "ndcg@10"], "Yahoo!\\,R3")]
     order = [("Pop", "filters"), ("Impute", "filters"), ("MF", "learned"), ("IPS-MF", "learned"),
              ("DR-MF", "learned"), ("LightGCN", "learned"), ("NAVIP", "learned"),
              ("DR-LightGCN", "learned"), ("Obs", "filters"), ("IPS", "filters"),
@@ -66,7 +71,7 @@ def accuracy_table():
                 cells.append(fmt(v, v[0] == ranks[met][0], len(ranks[met]) > 1 and v[0] == ranks[met][1]))
             lines.append(f"{names.get(mth, mth)} & " + " & ".join(cells) + "\\\\")
         lines.append("\\midrule")
-    hdr = ("\\begin{tabular}{lccc}\n\\toprule\nMethod & \\multicolumn{3}{c}{metrics (Coat: nDCG@5, Recall@5, nDCG@10;"
+    hdr = ("\\begin{tabular}{lccc}\n\\toprule\nMethod & \\multicolumn{3}{c}{metrics (Coat, Yahoo!\\,R3: nDCG@5, Recall@5, nDCG@10;"
            " KuaiRec: nDCG@20, Recall@20, nDCG@50)}\\\\\n\\midrule\n")
     body = "\n".join(lines[:-1])
     return hdr + body + "\n\\bottomrule\n\\end{tabular}\n"
@@ -93,7 +98,7 @@ def mc_table():
 def rerank_table():
     """nDCG@K and Gini@K of each operator under exposure caps (exact solver)."""
     out = []
-    for ds, prop, title in [("coat", "given", "Coat"), ("kuairec", "pop", "KuaiRec")]:
+    for ds, prop, title in [("coat", "given", "Coat"), ("kuairec", "pop", "KuaiRec"), ("yahoo", YPROP, "Yahoo!\\,R3")]:
         f = load(f"rerank_{ds}_{prop}.json")
         if not f:
             continue
@@ -118,7 +123,7 @@ def fat_table():
     lines = ["\\begin{tabular}{llcccccc}", "\\toprule",
              "Data & Method & nDCG & ECB$\\downarrow$ & PRU$\\downarrow$ & Gini$\\downarrow$ & user gap$\\downarrow$ & rank shift under $do(p/2)$\\\\",
              "\\midrule"]
-    for ds, prop, title in [("coat", "given", "Coat"), ("kuairec", "pop", "KuaiRec")]:
+    for ds, prop, title in [("coat", "given", "Coat"), ("kuairec", "pop", "KuaiRec"), ("yahoo", YPROP, "Yahoo!\\,R3")]:
         f = load(f"fat_{ds}_{prop}.json")
         if not f or "fairness" not in f:
             continue
@@ -139,7 +144,7 @@ def fat_table():
 def attack_table():
     """One sub-table per dataset (their attack budgets differ)."""
     blocks = []
-    for ds, prop, title in [("coat", "given", "Coat"), ("kuairec", "pop", "KuaiRec")]:
+    for ds, prop, title in [("coat", "given", "Coat"), ("kuairec", "pop", "KuaiRec"), ("yahoo", YPROP, "Yahoo!\\,R3")]:
         f = load(f"fat_{ds}_{prop}.json")
         if not f or "attack" not in f:
             continue
@@ -165,7 +170,7 @@ def explain_privacy_table():
              "Data & max rel.\\ error & mean min.\\ CF size & median & users without CF\\\\", "\\midrule"]
     priv = ["\\begin{tabular}{l" + "c" * 8 + "}", "\\toprule",
             "Data & $\\epsilon$=0.5 & 1 & 2 & 4 & 8 & 16 & $\\infty$ (clipped) & non-private / Pop\\\\", "\\midrule"]
-    for ds, prop, title in [("coat", "given", "Coat"), ("kuairec", "pop", "KuaiRec")]:
+    for ds, prop, title in [("coat", "given", "Coat"), ("kuairec", "pop", "KuaiRec"), ("yahoo", YPROP, "Yahoo!\\,R3")]:
         f = load(f"fat_{ds}_{prop}.json")
         if not f:
             continue
@@ -188,7 +193,7 @@ def frontier_table():
     dataset-specific caps (KuaiRec lists are far more concentrated)."""
     caps = {"coat": [0.4, 0.5, 0.6, 1.0], "kuairec": [0.97, 0.98, 0.99, 1.0]}
     lines = ["\\begin{tabular}{llcccc}", "\\toprule", "Data & Method & \\multicolumn{4}{c}{Gini cap}\\\\", "\\midrule"]
-    for ds, prop, title in [("coat", "given", "Coat"), ("kuairec", "pop", "KuaiRec")]:
+    for ds, prop, title in [("coat", "given", "Coat"), ("kuairec", "pop", "KuaiRec"), ("yahoo", YPROP, "Yahoo!\\,R3")]:
         f = load(f"frontier_{ds}_{prop}.json")
         if not f:
             continue
@@ -227,7 +232,8 @@ def significance():
     """Paired t-tests of DRUP against every baseline on the splits both share."""
     from scipy.stats import ttest_rel
     rows = []
-    for ds, prop, met, title in [("coat", "given", "ndcg@5", "Coat"), ("kuairec", "pop", "ndcg@20", "KuaiRec")]:
+    for ds, prop, met, title in [("coat", "given", "ndcg@5", "Coat"), ("kuairec", "pop", "ndcg@20", "KuaiRec"),
+                                 ("yahoo", "sel", "ndcg@5", "Yahoo!\\,R3")]:
         fl = load(f"filters_{ds}_{prop}.json")
         le = load(f"learned_{ds}_{prop}_tuned.json") or load(f"learned_{ds}_{prop}.json")
         lr = load(f"filters_{ds}_{prop}_lr.json")
@@ -255,7 +261,8 @@ def significance():
             k = min(len(drup), len(other))
             diff = sum(d - o for d, o in zip(drup[:k], other[:k])) / k
             p = ttest_rel(drup[:k], other[:k]).pvalue if k > 1 else float("nan")
-            rows.append(f"{title} & {ours[0]} vs {mth} & {k} & {diff:+.4f} & {p:.3g}\\\\")
+            ptxt = "identical" if (p != p and abs(diff) < 1e-12) else f"{p:.3g}"
+            rows.append(f"{title} & {ours[0]} vs {mth} & {k} & {diff:+.4f} & {ptxt}\\\\")
         rows.append("\\midrule")
     return "\n".join(["\\begin{tabular}{llccc}", "\\toprule",
                       "Data & comparison & splits & mean diff. & $p$ (paired $t$)\\\\",

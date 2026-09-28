@@ -34,6 +34,7 @@ from drup.propagation import degree_weights, edge_estimate, three_hop  # noqa: E
 
 BETAS = [0.0, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 1e3]
 GAMMAS = [0.03, 0.1, 0.3, 1.0, 3.0]          # weight of the 5-hop term
+_IMPUTE_CACHE = {}
 
 
 def unit(x):
@@ -65,8 +66,8 @@ def configs(method, a):
     elif method.startswith("IPS"):
         grid = {"alpha": a.alphas, "floor": a.floors}
     else:
-        grid = {"alpha": a.alphas, "floor": a.floors, "lam": a.lams, "deg": a.degs, "imp": a.imps,
-                "cv": a.cvs}
+        grid = {"floor": a.floors, "lam": a.lams, "imp": a.imps, "alpha": a.alphas, "deg": a.degs,
+                "cv": a.cvs}             # imputation keys first -> cache hits
     keys = list(grid)
     for vals in itertools.product(*[grid[k] for k in keys]):
         yield dict(zip(keys, vals))
@@ -87,7 +88,12 @@ def score_bank(d, method, cfg, P_raw, rows):
         P = clip_propensity(P_raw, cfg["floor"])
         Yhat = None
         if method.startswith("DR"):
-            Yhat = impute(O, Y, P, cfg)
+            # the imputation only depends on (floor, lam, imp): cache it
+            key = (cfg["floor"], cfg["lam"], cfg.get("imp", "add"))
+            if key not in _IMPUTE_CACHE:
+                _IMPUTE_CACHE.clear()
+                _IMPUTE_CACHE[key] = impute(O, Y, P, cfg)
+            Yhat = _IMPUTE_CACHE[key]
         correct = method in ("IPS+WC", "DRUP", "DRUP-5hop")
         if method.endswith("5hop"):
             s1, s3, s5 = propagate5(O, Y, P, Yhat, cfg["alpha"], correct, rows, cfg.get("deg", "W"),
@@ -154,13 +160,15 @@ def main():
                 bank.append((c, vm, tm))
         per_split = []
         chosen = []
+        val_best = []
         for sidx in range(a.seeds):
             best = max(bank, key=lambda b: b[1][sidx])
             per_split.append(best[2][sidx])
             chosen.append(best[0])
+            val_best.append(best[1][sidx])
         agg = {m: (float(np.mean([r[m] for r in per_split])), float(np.std([r[m] for r in per_split])))
                for m in per_split[0]}
-        results[method] = {"test": agg, "chosen": chosen, "per_split": per_split}
+        results[method] = {"test": agg, "chosen": chosen, "per_split": per_split, "val_best": val_best}
         txt = "  ".join(f"{m}={v[0]:.4f}±{v[1]:.4f}" for m, v in agg.items())
         print(f"{method:8s} {txt}   [{time.time() - t0:.0f}s] e.g. {chosen[0]}", flush=True)
     out = a.out or f"results/filters_{a.dataset}_{a.prop}.json"

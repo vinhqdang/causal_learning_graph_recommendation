@@ -14,3 +14,15 @@ IPS-MF       ndcg@5=0.5115±0.0049  ndcg@10=0.6381±0.0029  recall@5=0.6674±0.0
 DR-MF        ndcg@5=0.5086±0.0033  ndcg@10=0.6341±0.0034  recall@5=0.6744±0.0061  recall@10=1.0000±0.0000   [236s]
 /home/user/causal_learning_graph_recommendation/experiments/../drup/learned.py:44: UserWarning: Sparse invariant checks are implicitly disabled. Memory errors (e.g. SEGFAULT) will occur when operating on a sparse tensor which violates the invariants, but checks incur performance overhead. To silence this warning, explicitly opt in or out. See `torch.sparse.check_sparse_tensor_invariants.__doc__` for guidance.  (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/Context.cpp:848.)
   self.A = torch.sparse_coo_tensor(idx, torch.cat([val, val]), (m + n, m + n)).coalesce()
+  NAVIP split 0: val 0.5981 test 0.5905 {'lr': 0.003, 'wd': 1e-05}
+  NAVIP split 1: val 0.5826 test 0.5940 {'lr': 0.003, 'wd': 1e-05}
+  NAVIP split 2: val 0.6110 test 0.5830 {'lr': 0.003, 'wd': 1e-05}
+  NAVIP split 3: val 0.5959 test 0.5862 {'lr': 0.003, 'wd': 1e-05}
+  NAVIP split 4: val 0.5920 test 0.5979 {'lr': 0.003, 'wd': 1e-05}
+NAVIP        ndcg@5=0.5903±0.0053  ndcg@10=0.6957±0.0034  recall@5=0.7202±0.0053  recall@10=1.0000±0.0000   [325s]
+  DR-LightGCN split 0: val 0.5651 test 0.5564 {'lr': 0.003, 'wd': 0.0001}
+  DR-LightGCN split 1: val 0.5664 test 0.5561 {'lr': 0.003, 'wd': 0.0001}
+  DR-LightGCN split 2: val 0.5732 test 0.5648 {'lr': 0.003, 'wd': 0.0001}
+  DR-LightGCN split 3: val 0.5733 test 0.5612 {'lr': 0.003, 'wd': 0.0001}
+  DR-LightGCN split 4: val 0.5495 test 0.5656 {'lr': 0.003, 'wd': 0.0001}
+DR-LightGCN  ndcg@5=0.5608±0.0040  ndcg@10=0.6733±0.0042  recall@5=0.7077±0.0037  recall@10=1.0000±0.0000   [2063s]

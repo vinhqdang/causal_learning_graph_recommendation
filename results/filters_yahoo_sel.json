@@ -1,46 +1,4 @@
 {
- "args": {
-  "dataset": "yahoo",
-  "prop": "pop",
-  "seeds": 5,
-  "frac_val": 0.3,
-  "alphas": [
-   0.5,
-   0.7
-  ],
-  "floors": [
-   0.1,
-   0.2
-  ],
-  "lams": [
-   20.0
-  ],
-  "degs": [
-   "W",
-   "Yhat"
-  ],
-  "imps": [
-   "add",
-   "lr"
-  ],
-  "cvs": [
-   0.0,
-   0.25,
-   0.5,
-   1.0
-  ],
-  "methods": [
-   "Pop",
-   "Impute",
-   "Obs",
-   "IPS",
-   "IPS+WC",
-   "DR",
-   "DRUP"
-  ],
-  "dtype": "float64",
-  "out": "results/filters_yahoo_pop.json"
- },
  "results": {
   "Pop": {
    "test": {
@@ -654,5 +612,14 @@
     0.6690976390171592
    ]
   }
+ },
+ "propensity_choice": {
+  "Pop": "pop",
+  "Impute": "pop",
+  "Obs": "pop",
+  "IPS": "pop",
+  "IPS+WC": "pop",
+  "DR": "pop",
+  "DRUP": "pop"
  }
 }

@@ -1,7 +1,9 @@
 /home/user/causal_learning_graph_recommendation/experiments/../drup/data.py:89: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)
   O[tr.u.values, tr.i.values] = 1.0
-Pop      ndcg@5=0.5331±0.0059  ndcg@10=0.6556±0.0042  recall@5=0.6794±0.0044  recall@10=1.0000±0.0000   [1s] e.g. {}
-Impute   ndcg@5=0.5241±0.0047  ndcg@10=0.6447±0.0036  recall@5=0.6875±0.0046  recall@10=1.0000±0.0000   [444s] e.g. {'lam': 20.0, 'imp': 'add'}
-Obs      ndcg@5=0.6585±0.0058  ndcg@10=0.7434±0.0035  recall@5=0.7809±0.0067  recall@10=1.0000±0.0000   [281s] e.g. {'alpha': 0.5, 'beta': 0.03}
-IPS      ndcg@5=0.6620±0.0064  ndcg@10=0.7453±0.0040  recall@5=0.7849±0.0066  recall@10=1.0000±0.0000   [560s] e.g. {'alpha': 0.5, 'floor': 0.2, 'beta': 0.03}
-IPS+WC   ndcg@5=0.6620±0.0064  ndcg@10=0.7453±0.0040  recall@5=0.7849±0.0066  recall@10=1.0000±0.0000   [554s] e.g. {'alpha': 0.5, 'floor': 0.2, 'beta': 0.03}
+Pop      ndcg@5=0.5331±0.0059  ndcg@10=0.6556±0.0042  recall@5=0.6794±0.0044  recall@10=1.0000±0.0000   [0s] e.g. {}
+Impute   ndcg@5=0.5241±0.0047  ndcg@10=0.6447±0.0036  recall@5=0.6875±0.0046  recall@10=1.0000±0.0000   [71s] e.g. {'lam': 20.0, 'imp': 'add'}
+Obs      ndcg@5=0.6585±0.0058  ndcg@10=0.7434±0.0035  recall@5=0.7809±0.0067  recall@10=1.0000±0.0000   [83s] e.g. {'alpha': 0.5, 'beta': 0.03}
+IPS      ndcg@5=0.6620±0.0064  ndcg@10=0.7453±0.0040  recall@5=0.7849±0.0066  recall@10=1.0000±0.0000   [152s] e.g. {'alpha': 0.5, 'floor': 0.2, 'beta': 0.03}
+IPS+WC   ndcg@5=0.6620±0.0064  ndcg@10=0.7453±0.0040  recall@5=0.7849±0.0066  recall@10=1.0000±0.0000   [137s] e.g. {'alpha': 0.5, 'floor': 0.2, 'beta': 0.03}
+DR       ndcg@5=0.6620±0.0064  ndcg@10=0.7453±0.0040  recall@5=0.7849±0.0066  recall@10=1.0000±0.0000   [2648s] e.g. {'floor': 0.2, 'lam': 20.0, 'imp': 'add', 'alpha': 0.5, 'deg': 'W', 'cv': 0.0, 'beta': 0.03}
+DRUP     ndcg@5=0.6620±0.0064  ndcg@10=0.7453±0.0040  recall@5=0.7849±0.0066  recall@10=1.0000±0.0000   [2569s] e.g. {'floor': 0.2, 'lam': 20.0, 'imp': 'add', 'alpha': 0.5, 'deg': 'W', 'cv': 0.0, 'beta': 0.03}

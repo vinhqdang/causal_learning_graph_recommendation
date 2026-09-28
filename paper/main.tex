@@ -403,13 +403,21 @@ dataset ships propensities; we also fit our own exposure model, with the same
 conclusions. \emph{KuaiRec}~\cite{gao2022kuairec} provides the big matrix
 (7{,}176 users, 10{,}728 items, 10.3M logged views) as the MNAR log and a fully
 observed small matrix (1{,}411 users, 3{,}327 items, 99.6\% dense) as the test
-set. We rank all never-logged small-matrix items. Positives are ratings $\ge4$
-(Coat) and watch ratio $\ge2$ (KuaiRec).
+set. We rank all never-logged small-matrix items. \emph{Yahoo!\,R3}~\cite{marlin2009collaborative}
+has 311{,}704 self-selected song ratings of 15{,}400 users on 1{,}000 songs
+(MNAR log, 2\% dense) and 54{,}000 ratings of 10 uniformly random songs for
+5{,}400 of the users (MAR test). A random 5\% of the MAR users (270) is held out
+entirely and used only to estimate $P(Y{=}1\mid\text{MAR})$ for an
+outcome-dependent Naive-Bayes propensity~\cite{schnabel2016}. For every method
+the propensity model (logistic exposure model or Naive Bayes) is a
+hyper-parameter chosen on validation data. Positives are ratings $\ge4$ (Coat,
+Yahoo!\,R3) and watch ratio $\ge2$ (KuaiRec).
 
 \paragraph{Protocol.}
 Hyper-parameters are chosen on a validation part of the unbiased data: 30\% of
-each user's test items for Coat, 30\% of the test users for KuaiRec. We report
-the held-out remainder, averaged over 10 (Coat) or 5 (KuaiRec) random splits.
+each user's test items for Coat, 30\% of the test users for KuaiRec and
+Yahoo!\,R3. We report the held-out remainder, averaged over 10 (Coat) or 5
+(KuaiRec, Yahoo!\,R3) random splits.
 Trained baselines are popularity, imputation only, and MF / IPS-MF / DR-MF /
 LightGCN / NAVIP-LightGCN / DR-LightGCN with 64-dimensional embeddings,
 pointwise losses and early stopping on the validation part. On Coat they use
@@ -464,6 +472,15 @@ against three hops), and the 5-hop variant beats every trained baseline with
 $p<0.01$. As a sensitivity check, lowering the learning rate of MF, LightGCN and
 NAVIP to $10^{-3}$ raised the split-0 validation score only for MF (by $0.002$),
 lowered it for LightGCN and NAVIP, and never raised the test score. On Coat, five hops neither help nor hurt.
+On Yahoo!\,R3, validation selects the IPS end of the control-variate family
+($\lambda=0$) for both DR and DRUP. The log is only 2\% dense, so almost every
+edge of a DR graph would be imputed, and the imputation alone is below
+popularity ($0.524$ against $0.533$). DRUP then coincides with IPS adjacency
+(nDCG@5 $0.662$) and is significantly better than logged-graph propagation
+($+0.0035$, $p=0.001$). It is far ahead of every tuned trained baseline: NAVIP
+$0.591$, LightGCN $0.588$, DR-LightGCN $0.561$ and MF-type models about $0.51$,
+all with $p<10^{-3}$. The outcome-dependent Naive-Bayes propensity did not help
+any method on validation, except NAVIP by a small margin.
 On Coat, DRUP significantly outperforms MF, IPS-MF,
 DR-MF, LightGCN and NAVIP, and ties with DR-LightGCN. It is, however,
 significantly \emph{below} the additive imputation model ($-0.014$) and the
