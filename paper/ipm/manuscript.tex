@@ -127,38 +127,136 @@ force, and against realised attacks.
 \section{Related work}
 %======================================================================
 
-\paragraph{Causal and debiased recommendation}
-Surveys organise the biases of recommendation data and their
-remedies~\citep{chen2023bias} and the fairness notions of
-recommenders~\citep{wang2023fairness}. Inverse propensity
-scoring~\citep{schnabel2016} and doubly robust learning~\citep{wang2019drjl} are
-the standard tools for MNAR feedback, and a small unbiased sample can be used to
-learn debiasing parameters~\citep{chen2021autodebias}. Causal
-embeddings disentangle interest from conformity~\citep{zheng2021dice}. The survey
-of~\citet{yu2026survey} organises causal GBRs by challenge. None of these
-methods analyses the bias of the \emph{propagation operator} beyond one hop.
+We review six lines of work that DRUP touches: graph-based recommendation,
+bias and debiasing in recommendation, debiasing inside graph propagation,
+fairness, explainability, and robustness and privacy. Table~\ref{tab:related}
+summarises how DRUP relates to representative methods.
 
-\paragraph{Debiased message passing}
-NAVIP~\citep{kim2022navip} applies inverse-propensity weights with Laplacian
-normalisation inside LightGCN aggregation. DPAA~\citep{dpaa2026} learns
-popularity-aware aggregation weights. Both are unbiased for a single
-aggregation step at most. Theorem~\ref{thm:lower} shows that stacking such
-steps reintroduces a bias of order $1/p$.
+\paragraph{Graph-based recommendation}
+Graph neural recommenders learn user and item representations by propagating
+embeddings over the user--item interaction graph. NGCF~\citep{wang2019ngcf}
+stacks non-linear propagation layers. LightGCN~\citep{he2020lightgcn} shows that
+removing feature transformations and non-linearities improves accuracy, which
+reduces propagation to a weighted sum of normalised-adjacency powers.
+UltraGCN~\citep{mao2021ultragcn} approximates infinite-layer propagation with a
+constraint loss, and SGL~\citep{wu2021sgl} adds self-supervised contrastive
+views of the graph. Closed-form graph filters are competitive with trained
+propagation~\citep{shen2021gfcf}, which suggests that the propagation operator
+itself carries most of the signal. Surveys of this family are given
+by~\citet{wu2022gnnsurvey}. All these models propagate over the \emph{logged}
+graph, whose edges exist only where the platform exposed an item. The
+survey of~\citet{yu2026survey} traces the out-of-distribution, fairness and
+interpretability problems of graph recommenders to this correlation-driven
+propagation. DRUP keeps the linear propagation form of LightGCN and
+closed-form filters, but it propagates over an unbiased estimate of the
+full-exposure graph.
 
-\paragraph{Linear graph filters}
-LightGCN is a polynomial filter of the normalised adjacency, and closed-form
-filters are competitive with it~\citep{shen2021gfcf}. DRUP is a closed-form
-filter on a debiased operator. Its linearity is what makes exact explanations,
-certificates and DP releases possible.
+\paragraph{Bias and debiasing in recommendation}
+Recommendation logs are missing not at random. Users see what the system
+exposed and rate what they chose to rate~\citep{marlin2009collaborative}.
+Surveys organise the resulting biases (selection, exposure, popularity,
+conformity and position) and their remedies~\citep{chen2023bias}, and they cast
+debiasing as causal inference~\citep{gao2024causalsurvey}. Propensity-based
+methods re-weight the training loss by inverse exposure
+probabilities~\citep{schnabel2016}, possibly self-normalised to reduce
+variance~\citep{swaminathan2015snips}. \citet{saito2020unbiased} extend this to
+implicit feedback, and \citet{liang2016exposure} model exposure as a latent
+variable. Doubly robust (DR) learning combines inverse propensities with an
+imputation model and is unbiased if either is correct~\citep{wang2019drjl}. Later
+variants reduce its bias and variance~\citep{guo2021mrdr}. A small uniformly
+logged sample can supervise the debiasing
+itself~\citep{bonner2018cause,chen2021autodebias}. Causal approaches to popularity
+bias remove the direct effect of popularity through counterfactual
+inference~\citep{wei2021macr}, adjust for popularity as a confounder by
+backdoor adjustment~\citep{zhang2021pda}, or disentangle interest from
+conformity~\citep{zheng2021dice}. These methods correct the \emph{loss} or the
+\emph{output} of a model; the propagation operator of a graph recommender stays
+biased. DRUP applies IPS and DR estimation to the \emph{edges} of the propagated
+graph, and our control-variate family interpolates between the two.
 
-\paragraph{Explanations, robustness and privacy}
+\paragraph{Debiasing inside graph propagation}
+Closest to our work are methods that debias neighbour aggregation.
+NAVIP~\citep{kim2022navip} weights each edge by its inverse propensity with
+Laplacian normalisation inside LightGCN. DPAA~\citep{dpaa2026} learns
+popularity-aware, layer-wise aggregation weights. Both change the adjacency
+that is propagated. Neither analyses what happens when the re-weighted
+adjacency is multiplied with itself over several hops. Theorem~\ref{thm:lower}
+shows that the re-weighted operator is then biased, by a term of order $1/p$
+that concentrates on rarely exposed items. DRUP removes this term exactly, for
+any number of hops (Theorem~\ref{thm:khop}).
+
+\paragraph{Fairness in recommendation}
+Fairness notions in recommendation cover users and items, groups and
+individuals, and outcomes and exposure~\citep{wang2023fairness}. On the item
+side, popularity bias can be reduced by regularising learning-to-rank
+objectives~\citep{abdollahpouri2017popularity}. Exposure can be allocated in
+proportion to merit~\citep{singh2018exposure}, and two-sided fair allocations can
+be guaranteed through constrained matching~\citep{patro2020fairrec}. On the user
+side, counterfactually fair recommenders learn representations that are
+invariant to sensitive attributes~\citep{li2021personalized}. DRUP contributes a
+causal item-side guarantee: its expected scores do not depend on
+interventions on an item's exposure mechanism (Theorem~\ref{thm:fair}). It
+also contributes an exposure-capped allocation with a certified optimality gap
+and a utility bound with respect to the full-exposure objective
+(Theorem~\ref{thm:alloc}). Like the matching view of~\citet{patro2020fairrec},
+the allocation is a $b$-matching; unlike it, the objective is an unbiased
+estimate of the causal utility.
+
+\paragraph{Explainable recommendation}
 Explainable recommendation is surveyed by~\citet{zhang2020explainable}.
-GNNExplainer~\citep{ying2019gnnexplainer} and CF-GNNExplainer~\citep{lucic2022cfgnn}
-approximate explanations by optimising on a surrogate. PORE~\citep{jia2023pore}
-certifies recommenders against poisoning by ensembling. Differentially private
-recommenders release noisy item covariances~\citep{mcsherry2009netflix}.
-DRUP gives exact explanations, closed-form certificates and a joint-DP
-guarantee~\citep{hsu2014matchings} for one and the same scoring rule.
+For graph models, GNNExplainer~\citep{ying2019gnnexplainer} learns a soft mask
+over edges and features, and CF-GNNExplainer~\citep{lucic2022cfgnn} searches for
+minimal edge deletions that change a prediction. Both optimise a surrogate
+objective and return approximate explanations. PRINCE~\citep{ghazimatin2020prince}
+finds minimal sets of a user's actions whose removal changes a random-walk
+recommendation, and CountER~\citep{tan2021counter} generates counterfactual
+explanations of aspect-based recommenders by solving an optimisation problem.
+Because a DRUP score is affine in each user's own interactions
+(Proposition~\ref{prop:affine}), its attributions are exact Shapley values, and
+its minimal counterfactual explanations are found by sorting with a proof of
+optimality (Theorem~\ref{thm:cf}). The same computation also certifies when no
+counterfactual explanation exists.
+
+\paragraph{Robustness and privacy}
+Recommenders can be manipulated by injected fake
+profiles~\citep{lam2004shilling}. Optimised poisoning attacks exist for
+factorisation models~\citep{li2016poisoning} and for graph-based
+recommenders~\citep{fang2018poisoning}. PORE~\citep{jia2023pore} obtains certified
+robustness by ensembling models trained on sub-sampled data. DRUP instead gives
+a closed-form bound, for a single model, on the effect of any bounded set of
+injected profiles (Theorem~\ref{thm:robust}). On privacy, differentially private
+recommenders perturb item--item covariance statistics~\citep{mcsherry2009netflix},
+and federated approaches keep ratings on the device and share encrypted
+updates~\citep{chai2021fedmf}. The public-operator form of DRUP combines the two
+ideas. Only one item operator is released with a Gaussian mechanism, and scoring
+is done locally, which yields joint differential privacy~\citep{hsu2014matchings}
+(Theorem~\ref{thm:dp}).
+
+\begin{table}[t]\centering\footnotesize
+\caption{DRUP and representative related methods. ``loss'': the correction
+acts on the training objective only; ``1 hop'': one aggregation step;
+``approx.'': surrogate optimisation without guarantee; ``--'': not applicable.}\label{tab:related}
+\setlength{\tabcolsep}{4pt}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lcccccc}
+\toprule
+Method & \shortstack{debiases\\propagation} & \shortstack{unbiased\\beyond 1 hop} & \shortstack{doubly\\robust} &
+\shortstack{causal fairness\\guarantee} & \shortstack{exact\\explanations} & \shortstack{certificates /\\privacy}\\
+\midrule
+\shortstack[l]{LightGCN, NGCF,\\UltraGCN, SGL} & no & no & no & no & no & no\\[2pt]
+\shortstack[l]{IPS, SNIPS,\\DR, MRDR} & loss & -- & DR only & no & no & no\\[2pt]
+MACR, PDA, DICE & output & -- & no & popularity & no & no\\
+NAVIP & 1 hop & no & no & no & no & no\\
+DPAA & learned & no & no & no & no & no\\
+\shortstack[l]{GNNExplainer,\\CF-GNNExplainer} & -- & -- & -- & -- & approx. & no\\[2pt]
+PORE & -- & -- & -- & -- & -- & certified\\
+DP / federated MF & -- & -- & -- & -- & -- & privacy\\
+\midrule
+\textbf{DRUP (ours)} & \textbf{yes} & \textbf{any $K$} & \textbf{yes} & \textbf{yes} & \textbf{yes} & \textbf{both}\\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
 
 %======================================================================
 \section{Problem setting}
@@ -492,7 +590,9 @@ candidates at three hops, because the factor $W_{ui}=0$ hides the IPS bias.
 
 \begin{table}[t]\centering\small
 \caption{Paired $t$-tests of DRUP against each baseline (nDCG@5 on Coat, nDCG@20 on KuaiRec).}\label{tab:sig}
+\begin{adjustbox}{max width=\textwidth}
 \input{../tables/significance.tex}
+\end{adjustbox}
 \end{table}
 
 \subsection{Fairness}\label{sec:fair}
