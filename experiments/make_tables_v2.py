@@ -83,12 +83,12 @@ def accuracy():
 
 
 SIG = [("DRUP", "DR", "DR adjacency (effect of the correction)"),
-       ("DRUP-5hop", "DR-5hop", "DR adjacency, 5 hops (effect of the correction)"),
+       ("DRUP-5hop", "DR-5hop", "DR adjacency (effect of the correction), both 5 hops"),
        ("DRUP", "Obs", "linear LightGCN on the logged graph"),
        ("DRUP", "Impute", "imputation only"),
        ("DRUP", "GF-CF", "GF-CF"), ("DRUP", "EASE", "EASE"),
        ("DRUP", "GF-CF-DR", "GF-CF on DR graph"), ("DRUP", "EASE-DR", "EASE on DR graph"),
-       ("DRUP", "LightGCN", "LightGCN (BPR)"), ("DRUP", "r-AdjNorm", "r-AdjNorm"),
+       ("DRUP", "LightGCN-pt", "LightGCN (pointwise)"), ("DRUP", "LightGCN", "LightGCN (BPR)"), ("DRUP", "r-AdjNorm", "r-AdjNorm"),
        ("DRUP", "NAVIP", "NAVIP"), ("DRUP", "BPR-MF", "MF (BPR)"), ("DRUP", "DR-MF", "DR-MF"),
        ("DRUP", "PDA", "PDA"), ("DRUP", "DR-LightGCN", "DR-LightGCN")]
 
@@ -111,7 +111,7 @@ def significance():
             cells.append(f"{r['diff']:+.4f} [{r['ci95'][0]:+.3f}, {r['ci95'][1]:+.3f}]")
             p = r["p_holm"]
             cells.append("$<10^{-3}$" if p < 1e-3 else f"{p:.3f}")
-        name = label if ref == "DRUP" else f"{label} (5 hops)"
+        name = label
         lines.append(f"{name} & " + " & ".join(cells) + "\\\\")
     lines += ["\\bottomrule", "\\end{tabular}"]
     open(f"{T}/significance.tex", "w").write("\n".join(lines) + "\n")

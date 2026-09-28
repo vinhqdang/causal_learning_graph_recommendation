@@ -2,28 +2,28 @@
 \toprule
 Method & Coat & Yahoo!\,R3 & KuaiRec\\
 \midrule
-Popularity (non-personalised) & -- & 1 & --\\
-Imputation only (non-personalised) & -- & 2 & --\\
-MF (trained) & 18 & -- & --\\
-IPS-MF (trained) & 18 & -- & --\\
-DR-MF (trained) & 18 & -- & --\\
-LightGCN (trained) & 18 & -- & --\\
-DR-LightGCN (trained) & 18 & -- & --\\
-MF (trained) & 18 & -- & --\\
-PDA (trained) & 36 & -- & --\\
-LightGCN (trained) & 18 & -- & --\\
-r-AdjNorm (trained) & 36 & -- & --\\
-NAVIP (trained) & 18 & -- & --\\
-linear LightGCN / r-AdjNorm (training-free) & -- & 16 & --\\
-EASE (training-free) & -- & 3 & --\\
-GF-CF (training-free) & -- & 4 & --\\
-IPS adjacency (NAVIP-style) (training-free) & -- & 32 & --\\
-IPS + walk correction (training-free) & -- & 32 & --\\
-EASE on DR graph (training-free) & -- & -- & --\\
-GF-CF on DR graph (training-free) & -- & -- & --\\
-DR adjacency (training-free) & -- & 256 & --\\
-\textbf{DRUP} (training-free) & -- & -- & --\\
-DR adjacency, 5 hops (training-free) & -- & -- & --\\
-\textbf{DRUP}, 5 hops (training-free) & -- & -- & --\\
+Popularity (non-personalised) & 1 & 1 & 1\\
+Imputation only (non-personalised) & 6 & 2 & 4\\
+MF (trained) & 18 & 9 & 4\\
+IPS-MF (trained) & 18 & 9 & 4\\
+DR-MF (trained) & 18 & 9 & 4\\
+LightGCN (trained) & 18 & 9 & 4\\
+DR-LightGCN (trained) & 18 & 9 & 4\\
+MF (trained) & 18 & 9 & 4\\
+PDA (trained) & 36 & 18 & 8\\
+LightGCN (trained) & 18 & 9 & 4\\
+r-AdjNorm (trained) & 36 & 18 & 8\\
+NAVIP (trained) & 18 & 9 & 4\\
+linear LightGCN / r-AdjNorm (training-free) & 24 & 16 & 16\\
+EASE (training-free) & 3 & 3 & 3\\
+GF-CF (training-free) & 4 & 4 & 4\\
+IPS adjacency (NAVIP-style) (training-free) & 720 & 64 & 192\\
+IPS + walk correction (training-free) & 720 & 64 & 192\\
+EASE on DR graph (training-free) & 90 & 48 & 36\\
+GF-CF on DR graph (training-free) & 120 & 64 & 48\\
+DR adjacency (training-free) & 1440 & 512 & 384\\
+\textbf{DRUP} (training-free) & 1440 & 512 & 384\\
+DR adjacency, 5 hops (training-free) & 6300 & -- & 420\\
+\textbf{DRUP}, 5 hops (training-free) & 6300 & -- & 420\\
 \bottomrule
 \end{tabular}
