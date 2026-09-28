@@ -142,7 +142,7 @@ def rerank_exact(S, mask, K, cap, resolution=1e6):
 
     Scores are mapped affinely to integers in [0, resolution]; the optimum of
     the integer problem is optimal for the real scores up to
-    R K * range / (2 resolution), which is reported as the certified gap.
+    R K * range / resolution, which is reported as the certified gap.
     """
     from ortools.graph.python import min_cost_flow
 
@@ -177,7 +177,7 @@ def rerank_exact(S, mask, K, cap, resolution=1e6):
     alloc = alloc.gather(1, order)
     primal = float(Sc.gather(1, alloc).sum())
     load = torch.zeros(N, dtype=torch.float64).index_add_(0, alloc.flatten(), torch.ones(alloc.numel(), dtype=torch.float64))
-    gap = R * K * rng / (2 * resolution)
+    gap = R * K * rng / resolution    # each chosen score is rounded by <= rng / (2 resolution)
     return cols[alloc], {"primal": primal, "dual": primal + gap, "rel_gap": gap / max(abs(primal), 1e-12),
                          "max_load_over_cap": float((load / capc.clamp_min(1)).max()),
                          "feasible": bool((load <= capc + 1e-9).all()), "solver": "min-cost-flow"}

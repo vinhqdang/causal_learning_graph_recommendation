@@ -18,9 +18,8 @@ import torch
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from drup import fat  # noqa: E402
 from drup.data import load_coat, load_yahoo  # noqa: E402
-from drup.estimation import get_propensity  # noqa: E402
 from drup.metrics import evaluate  # noqa: E402
-from drup.pipeline import build, raw_parts  # noqa: E402
+from drup.pipeline import Nuisance, build, raw_parts  # noqa: E402
 
 BETAS = [0.0, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 1e3]
 
@@ -33,6 +32,9 @@ def main():
     ap.add_argument("--alphas", type=float, nargs="+", default=[0.3, 0.5, 0.7])
     ap.add_argument("--floors", type=float, nargs="+", default=[0.02, 0.05, 0.1, 0.2])
     ap.add_argument("--lams", type=float, nargs="+", default=[1.0, 5.0])
+    ap.add_argument("--cvs", type=float, nargs="+", default=[1.0])
+    ap.add_argument("--degs", nargs="+", default=["Yhat", "Wx"])
+    ap.add_argument("--xfit", type=int, default=10)
     a = ap.parse_args()
     dt = getattr(torch, a.dtype)
     if a.dataset == "coat":
@@ -46,7 +48,7 @@ def main():
         K = 20
     O, Y = d["O"].to(dt), d["Y"].to(dt)
     n = O.shape[1]
-    P_raw = get_propensity(d, O, Y, a.prop)
+    P_raw = Nuisance(d, O, Y, a.prop, K=a.xfit, seed=0)
     test = d["test"]
     rows_users = sorted({u for u, _, _ in test})
     rows = torch.tensor(rows_users)
@@ -57,19 +59,20 @@ def main():
 
     grids = {
         "Obs": [{"alpha": al} for al in a.alphas],
-        "IPS": [{"alpha": al, "floor": f} for al in a.alphas for f in a.floors],
-        "DR": [{"alpha": al, "floor": f, "lam": l, "deg": "W"}
-               for al, f, l in itertools.product(a.alphas, a.floors, a.lams)],
-        "DRUP": [{"alpha": al, "floor": f, "lam": l, "deg": "Yhat"}
-                 for al, f, l in itertools.product(a.alphas, a.floors, a.lams)],
+        "IPS": [{"alpha": al, "floor": f, "lam": l, "deg": dg}
+                for f, l, al, dg in itertools.product(a.floors, a.lams, a.alphas, a.degs)],
+        "DR": [{"alpha": al, "floor": f, "lam": l, "cv": cv, "deg": dg}
+               for f, l, cv, al, dg in itertools.product(a.floors, a.lams, a.cvs, a.alphas, a.degs)],
+        "DRUP": [{"alpha": al, "floor": f, "lam": l, "cv": cv, "deg": dg}
+                 for f, l, cv, al, dg in itertools.product(a.floors, a.lams, a.cvs, a.alphas, a.degs)],
     }
     points = {m: [] for m in grids}
     for mth, cfgs in grids.items():
         for cfg in cfgs:
             M = build(O, Y, P_raw, mth, cfg)
             s1, s3 = raw_parts(M, rows)
-            s1 = s1 / s1.abs().mean(1, keepdim=True).clamp_min(1e-12)
-            s3 = s3 / s3.abs().mean(1, keepdim=True).clamp_min(1e-12)
+            s1 = s1 / s1.abs().mean().clamp_min(1e-12)      # global constants (as run_filters)
+            s3 = s3 / s3.abs().mean().clamp_min(1e-12)
             for b in BETAS:
                 S = s3 if b >= 1e3 else s1 + b * s3
                 nd = evaluate(S, test, (K,), row_of)[f"ndcg@{K}"]
@@ -87,7 +90,7 @@ def main():
     for mth, pts in points.items():
         summary[mth] = {str(c): max([p["ndcg"] for p in pts if p["gini"] <= c], default=None) for c in caps}
         print(mth, "best ndcg under Gini cap:", {k: (round(v, 4) if v else None) for k, v in summary[mth].items()})
-    with open(f"results/frontier_{a.dataset}_{a.prop}.json", "w") as f:
+    with open(f"results/v2/frontier_{a.dataset}_{a.prop}.json", "w") as f:
         json.dump({"K": K, "summary": summary, "points": points}, f, indent=1)
 
 

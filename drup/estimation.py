@@ -8,22 +8,39 @@ def _logit(x, eps=1e-6):
     return torch.log(x) - torch.log1p(-x)
 
 
-def popularity_propensity(O, iters=50, ridge=1e-6):
+def predict_propensity(params, shape, dtype):
+    """Rebuild the fitted logistic exposure model from its parameters."""
+    theta, feats = params
+    z = torch.full(shape, float(theta[0]), dtype=dtype)
+    for c, (v, ax) in enumerate(feats, start=1):
+        z = z + float(theta[c]) * (v[:, None] if ax == 0 else v[None, :]).to(dtype)
+    return torch.sigmoid(z)
+
+
+def popularity_propensity(O, iters=50, ridge=1e-6, mask=None, return_params=False):
     """Logistic exposure model p_ui = sigmoid(a + b*logit(r_u) + c*logit(r_i)).
 
     r_u / r_i are the user / item exposure rates. Fitted by Newton's method on
     all m*n pairs using row/column reductions (no (m, n, k) design tensor).
     A feature with no variation (e.g. every Coat user rated 24 items) is
     dropped, since it is collinear with the intercept.
+
+    mask (0/1, same shape as O) restricts the fit, including the exposure
+    rates, to the pairs with mask = 1; predictions are returned for all pairs.
     """
     dt = O.dtype
+    if mask is None:
+        mask = torch.ones_like(O)
+    O = O * mask
     feats = []  # (vector, axis) with axis 0 = user feature, 1 = item feature
-    for vec, ax in ((_logit(O.mean(1)), 0), (_logit(O.mean(0)), 1)):
+    ru = O.sum(1) / mask.sum(1).clamp_min(1.0)
+    ri = O.sum(0) / mask.sum(0).clamp_min(1.0)
+    for vec, ax in ((_logit(ru), 0), (_logit(ri), 1)):
         if vec.std() > 1e-9:
             feats.append(((vec - vec.mean()) / vec.std(), ax))
     k = 1 + len(feats)
     theta = torch.zeros(k, dtype=torch.float64)
-    theta[0] = _logit(O.mean()).item()
+    theta[0] = _logit(O.sum() / mask.sum()).item()
 
     def linpred(th):
         z = torch.full(O.shape, th[0].item(), dtype=dt)
@@ -33,8 +50,8 @@ def popularity_propensity(O, iters=50, ridge=1e-6):
 
     for _ in range(iters):
         p = torch.sigmoid(linpred(theta))
-        r = O - p
-        w = p * (1 - p)
+        r = (O - p) * mask
+        w = p * (1 - p) * mask
         red = {0: (r.sum(1), w.sum(1)), 1: (r.sum(0), w.sum(0))}
         g = torch.zeros(k, dtype=torch.float64)
         H = torch.zeros(k, k, dtype=torch.float64)
@@ -53,7 +70,28 @@ def popularity_propensity(O, iters=50, ridge=1e-6):
         theta = theta + step
         if step.abs().max() < 1e-8:
             break
+    if return_params:
+        return torch.sigmoid(linpred(theta)), theta, (theta, feats)
     return torch.sigmoid(linpred(theta)), theta
+
+
+def fold_ids(shape, K, seed=0):
+    """Random assignment of every (u, i) pair to one of K cross-fitting folds."""
+    g = torch.Generator().manual_seed(seed)
+    return torch.randint(0, K, shape, generator=g, dtype=torch.int8)
+
+
+def crossfit(fit, O, folds, K):
+    """Cross-fitted nuisance: entry (u, i) in fold k comes from ``fit(mask)``
+    with mask = 1 outside fold k, so the nuisance at a pair never uses that
+    pair's own exposure or outcome. ``fit(mask)`` returns an (m, n) tensor."""
+    out = torch.empty_like(O)
+    for k in range(K):
+        inside = folds == k
+        est = fit((~inside).to(O.dtype))
+        out[inside] = est[inside]
+        del est
+    return out
 
 
 def baseline_imputation(O, Y, P, lam=5.0, iters=20, ips=True):
@@ -73,6 +111,57 @@ def baseline_imputation(O, Y, P, lam=5.0, iters=20, ips=True):
         res = Yo - mu - bu[:, None]
         bi = (Wt * res).sum(0) / (Wt.sum(0) + lam)
     return (mu + bu[:, None] + bi[None, :]).clamp(0.0, 1.0)
+
+
+def additive_params(O, Y, P, lam=5.0, iters=20):
+    """(mu, b_u, b_i) of the IPS-weighted additive model (see baseline_imputation)."""
+    Wt = O / P
+    Yo = O * Y
+    mu = (Wt * Yo).sum() / Wt.sum()
+    bu = torch.zeros(O.shape[0], dtype=O.dtype)
+    bi = torch.zeros(O.shape[1], dtype=O.dtype)
+    for _ in range(iters):
+        bu = (Wt * (Yo - mu - bi[None, :])).sum(1) / (Wt.sum(1) + lam)
+        bi = (Wt * (Yo - mu - bu[:, None])).sum(0) / (Wt.sum(0) + lam)
+    return mu, bu, bi
+
+
+def public_nuisance(O, Y, pub, prop, floor, lam, alpha, P_given=None):
+    """Nuisances whose population-level parts are fitted on a public set of
+    users only (boolean row mask ``pub``); every user-level part is computed
+    from the user's own row. Used for the jointly private recommender: the
+    released operator then depends on the private rows only through G.
+
+    Returns clipped propensities P, imputation Yhat and degree weights C.
+    """
+    Op, Yp = O[pub], Y[pub]
+    if prop == "given" and P_given is not None:
+        P = P_given.to(O.dtype)
+    else:
+        # logistic exposure model: coefficients and item rates from public
+        # users, user rate from the user's own row
+        lu_pub = _logit(Op.mean(1))
+        li = _logit(Op.mean(0))
+        mu_u, sd_u = lu_pub.mean(), lu_pub.std().clamp_min(1e-9)
+        mu_i, sd_i = li.mean(), li.std().clamp_min(1e-9)
+        _, theta = popularity_propensity(Op)
+        th = theta.tolist()
+        z = torch.full(O.shape, th.pop(0), dtype=torch.float64)
+        if lu_pub.std() > 1e-9:
+            z = z + th.pop(0) * ((_logit(O.mean(1)) - mu_u) / sd_u)[:, None]
+        if li.std() > 1e-9:
+            z = z + th.pop(0) * ((li - mu_i) / sd_i)[None, :]
+        P = torch.sigmoid(z.to(O.dtype))
+    P = clip_propensity(P, floor)
+    mu, _, bi = additive_params(Op, Yp, P[pub], lam=lam)
+    Wt = O / P
+    bu = (Wt * (O * Y - mu - bi[None, :])).sum(1) / (Wt.sum(1) + lam)
+    Yhat = (mu + bu[:, None] + bi[None, :]).clamp(0.0, 1.0)
+    npub, npriv = int(pub.sum()), int((~pub).sum())
+    di = (Yhat[pub].sum(0) * (npriv / max(npub, 1))).clamp_min(1.0)
+    du = Yhat.sum(1).clamp_min(1.0)
+    C = du.pow(-alpha)[:, None] * di.pow(-(1.0 - alpha))[None, :]
+    return P, Yhat, C
 
 
 def clip_propensity(P, floor):
@@ -127,12 +216,16 @@ def naive_bayes_propensity(base, O, Y, mar_rate):
     return torch.where(O > 0, (base * ratio).clamp(max=1.0), base)
 
 
-def get_propensity(d, O, Y, prop):
+def get_propensity(d, O, Y, prop, folds=None, K=0):
     """'given' (shipped with the data), 'pop' (logistic exposure model) or
-    'nb' (exposure model x outcome-dependent Naive-Bayes factor)."""
+    'nb' (exposure model x outcome-dependent Naive-Bayes factor).
+    With folds / K > 1 the fitted exposure model is cross-fitted."""
     if prop == "given" and d.get("P_given") is not None:
         return d["P_given"].to(O.dtype)
-    base = popularity_propensity(O)[0]
+    if folds is not None and K > 1:
+        base = crossfit(lambda M: popularity_propensity(O, mask=M)[0], O, folds, K)
+    else:
+        base = popularity_propensity(O)[0]
     if prop == "nb":
         return naive_bayes_propensity(base, O, Y, d["mar_rate"])
     return base

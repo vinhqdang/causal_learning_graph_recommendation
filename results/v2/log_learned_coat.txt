@@ -1,0 +1,228 @@
+  MF {'lr': 0.01, 'wd': 1e-05, 'dim': 32, 'layers': 0} done [2s] best split0 val 0.7551
+  MF {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [0s] best split0 val 0.7551
+  MF {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 0} done [0s] best split0 val 0.7551
+  MF {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [0s] best split0 val 0.7551
+  MF {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 0} done [0s] best split0 val 0.7551
+  MF {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 0} done [0s] best split0 val 0.7551
+  MF {'lr': 0.003, 'wd': 1e-05, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7551
+  MF {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7551
+  MF {'lr': 0.003, 'wd': 0.0001, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7551
+  MF {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7551
+  MF {'lr': 0.003, 'wd': 0.001, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7551
+  MF {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7551
+  MF {'lr': 0.001, 'wd': 1e-05, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7551
+  MF {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [2s] best split0 val 0.7551
+  MF {'lr': 0.001, 'wd': 0.0001, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7551
+  MF {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [2s] best split0 val 0.7551
+  MF {'lr': 0.001, 'wd': 0.001, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7551
+  MF {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 0} done [2s] best split0 val 0.7551
+MF           ndcg@5=0.4766±0.0166  ndcg@10=0.6150±0.0121  recall@5=0.5797±0.0196  recall@10=0.9314±0.0071   [18s, 18 cfgs] seeds 0.4618±0.0204
+  IPS-MF {'lr': 0.01, 'wd': 1e-05, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7538
+  IPS-MF {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [0s] best split0 val 0.7538
+  IPS-MF {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7538
+  IPS-MF {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [0s] best split0 val 0.7538
+  IPS-MF {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 0} done [0s] best split0 val 0.7538
+  IPS-MF {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7538
+  IPS-MF {'lr': 0.003, 'wd': 1e-05, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7538
+  IPS-MF {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7538
+  IPS-MF {'lr': 0.003, 'wd': 0.0001, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7538
+  IPS-MF {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7538
+  IPS-MF {'lr': 0.003, 'wd': 0.001, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7538
+  IPS-MF {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 0} done [0s] best split0 val 0.7538
+  IPS-MF {'lr': 0.001, 'wd': 1e-05, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7538
+  IPS-MF {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7538
+  IPS-MF {'lr': 0.001, 'wd': 0.0001, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7538
+  IPS-MF {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7538
+  IPS-MF {'lr': 0.001, 'wd': 0.001, 'dim': 32, 'layers': 0} done [2s] best split0 val 0.7538
+  IPS-MF {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7538
+IPS-MF       ndcg@5=0.4691±0.0163  ndcg@10=0.6144±0.0112  recall@5=0.5653±0.0211  recall@10=0.9369±0.0095   [16s, 18 cfgs] seeds 0.4661±0.0295
+  DR-MF {'lr': 0.01, 'wd': 1e-05, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7660
+  DR-MF {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7753
+  DR-MF {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7753
+  DR-MF {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7753
+  DR-MF {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7753
+  DR-MF {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7753
+  DR-MF {'lr': 0.003, 'wd': 1e-05, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7753
+  DR-MF {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7753
+  DR-MF {'lr': 0.003, 'wd': 0.0001, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7753
+  DR-MF {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7753
+  DR-MF {'lr': 0.003, 'wd': 0.001, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7753
+  DR-MF {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7753
+  DR-MF {'lr': 0.001, 'wd': 1e-05, 'dim': 32, 'layers': 0} done [2s] best split0 val 0.7753
+  DR-MF {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [2s] best split0 val 0.7753
+  DR-MF {'lr': 0.001, 'wd': 0.0001, 'dim': 32, 'layers': 0} done [4s] best split0 val 0.7753
+  DR-MF {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [2s] best split0 val 0.7753
+  DR-MF {'lr': 0.001, 'wd': 0.001, 'dim': 32, 'layers': 0} done [3s] best split0 val 0.7753
+  DR-MF {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 0} done [2s] best split0 val 0.7753
+DR-MF        ndcg@5=0.5259±0.0132  ndcg@10=0.6493±0.0121  recall@5=0.6332±0.0161  recall@10=0.9485±0.0101   [30s, 18 cfgs] seeds 0.5348±0.0114
+  BPR-MF {'lr': 0.01, 'wd': 1e-05, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7636
+  BPR-MF {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7636
+  BPR-MF {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7670
+  BPR-MF {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7670
+  BPR-MF {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7699
+  BPR-MF {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7699
+  BPR-MF {'lr': 0.003, 'wd': 1e-05, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7699
+  BPR-MF {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7699
+  BPR-MF {'lr': 0.003, 'wd': 0.0001, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7699
+  BPR-MF {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [2s] best split0 val 0.7699
+  BPR-MF {'lr': 0.003, 'wd': 0.001, 'dim': 32, 'layers': 0} done [1s] best split0 val 0.7699
+  BPR-MF {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 0} done [1s] best split0 val 0.7699
+  BPR-MF {'lr': 0.001, 'wd': 1e-05, 'dim': 32, 'layers': 0} done [2s] best split0 val 0.7699
+  BPR-MF {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [2s] best split0 val 0.7699
+  BPR-MF {'lr': 0.001, 'wd': 0.0001, 'dim': 32, 'layers': 0} done [2s] best split0 val 0.7699
+  BPR-MF {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [2s] best split0 val 0.7699
+  BPR-MF {'lr': 0.001, 'wd': 0.001, 'dim': 32, 'layers': 0} done [3s] best split0 val 0.7699
+  BPR-MF {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 0} done [3s] best split0 val 0.7699
+BPR-MF       ndcg@5=0.5133±0.0211  ndcg@10=0.6411±0.0161  recall@5=0.6178±0.0259  recall@10=0.9423±0.0059   [26s, 18 cfgs] seeds 0.4850±0.0188
+  PDA {'lr': 0.01, 'wd': 1e-05, 'dim': 32, 'layers': 0, 'gamma': 0.1} done [1s] best split0 val 0.7622
+  PDA {'lr': 0.01, 'wd': 1e-05, 'dim': 32, 'layers': 0, 'gamma': 0.2} done [1s] best split0 val 0.7622
+  PDA {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 0, 'gamma': 0.1} done [1s] best split0 val 0.7622
+  PDA {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 0, 'gamma': 0.2} done [1s] best split0 val 0.7622
+  PDA {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 0, 'gamma': 0.1} done [0s] best split0 val 0.7622
+  PDA {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 0, 'gamma': 0.2} done [0s] best split0 val 0.7622
+  PDA {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 0, 'gamma': 0.1} done [1s] best split0 val 0.7622
+  PDA {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 0, 'gamma': 0.2} done [1s] best split0 val 0.7622
+  PDA {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 0, 'gamma': 0.1} done [1s] best split0 val 0.7622
+  PDA {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 0, 'gamma': 0.2} done [0s] best split0 val 0.7640
+  PDA {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 0, 'gamma': 0.1} done [1s] best split0 val 0.7640
+  PDA {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 0, 'gamma': 0.2} done [1s] best split0 val 0.7640
+  PDA {'lr': 0.003, 'wd': 1e-05, 'dim': 32, 'layers': 0, 'gamma': 0.1} done [1s] best split0 val 0.7640
+  PDA {'lr': 0.003, 'wd': 1e-05, 'dim': 32, 'layers': 0, 'gamma': 0.2} done [1s] best split0 val 0.7640
+  PDA {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 0, 'gamma': 0.1} done [1s] best split0 val 0.7640
+  PDA {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 0, 'gamma': 0.2} done [1s] best split0 val 0.7640
+  PDA {'lr': 0.003, 'wd': 0.0001, 'dim': 32, 'layers': 0, 'gamma': 0.1} done [1s] best split0 val 0.7640
+  PDA {'lr': 0.003, 'wd': 0.0001, 'dim': 32, 'layers': 0, 'gamma': 0.2} done [1s] best split0 val 0.7640
+  PDA {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 0, 'gamma': 0.1} done [1s] best split0 val 0.7640
+  PDA {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 0, 'gamma': 0.2} done [1s] best split0 val 0.7640
+  PDA {'lr': 0.003, 'wd': 0.001, 'dim': 32, 'layers': 0, 'gamma': 0.1} done [1s] best split0 val 0.7640
+  PDA {'lr': 0.003, 'wd': 0.001, 'dim': 32, 'layers': 0, 'gamma': 0.2} done [1s] best split0 val 0.7640
+  PDA {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 0, 'gamma': 0.1} done [1s] best split0 val 0.7640
+  PDA {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 0, 'gamma': 0.2} done [1s] best split0 val 0.7640
+  PDA {'lr': 0.001, 'wd': 1e-05, 'dim': 32, 'layers': 0, 'gamma': 0.1} done [3s] best split0 val 0.7640
+  PDA {'lr': 0.001, 'wd': 1e-05, 'dim': 32, 'layers': 0, 'gamma': 0.2} done [3s] best split0 val 0.7640
+  PDA {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 0, 'gamma': 0.1} done [1s] best split0 val 0.7640
+  PDA {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 0, 'gamma': 0.2} done [2s] best split0 val 0.7640
+  PDA {'lr': 0.001, 'wd': 0.0001, 'dim': 32, 'layers': 0, 'gamma': 0.1} done [2s] best split0 val 0.7640
+  PDA {'lr': 0.001, 'wd': 0.0001, 'dim': 32, 'layers': 0, 'gamma': 0.2} done [3s] best split0 val 0.7640
+  PDA {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 0, 'gamma': 0.1} done [2s] best split0 val 0.7640
+  PDA {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 0, 'gamma': 0.2} done [1s] best split0 val 0.7640
+  PDA {'lr': 0.001, 'wd': 0.001, 'dim': 32, 'layers': 0, 'gamma': 0.1} done [2s] best split0 val 0.7640
+  PDA {'lr': 0.001, 'wd': 0.001, 'dim': 32, 'layers': 0, 'gamma': 0.2} done [2s] best split0 val 0.7640
+  PDA {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 0, 'gamma': 0.1} done [3s] best split0 val 0.7640
+  PDA {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 0, 'gamma': 0.2} done [1s] best split0 val 0.7640
+PDA          ndcg@5=0.5198±0.0160  ndcg@10=0.6452±0.0125  recall@5=0.6267±0.0175  recall@10=0.9413±0.0116   [49s, 36 cfgs] seeds 0.4838±0.0329
+/home/user/causal_learning_graph_recommendation/experiments/../drup/learned.py:47: UserWarning: Sparse invariant checks are implicitly disabled. Memory errors (e.g. SEGFAULT) will occur when operating on a sparse tensor which violates the invariants, but checks incur performance overhead. To silence this warning, explicitly opt in or out. See `torch.sparse.check_sparse_tensor_invariants.__doc__` for guidance.  (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/Context.cpp:848.)
+  self.A = torch.sparse_coo_tensor(idx, torch.cat([v_ui, v_iu]), (m + n, m + n)).coalesce()
+  LightGCN {'lr': 0.01, 'wd': 1e-05, 'dim': 32, 'layers': 2} done [0s] best split0 val 0.7812
+  LightGCN {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 2} done [0s] best split0 val 0.7812
+  LightGCN {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 2} done [0s] best split0 val 0.7812
+  LightGCN {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [0s] best split0 val 0.7812
+  LightGCN {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 2} done [0s] best split0 val 0.7812
+  LightGCN {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 2} done [0s] best split0 val 0.7812
+  LightGCN {'lr': 0.003, 'wd': 1e-05, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7812
+  LightGCN {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7812
+  LightGCN {'lr': 0.003, 'wd': 0.0001, 'dim': 32, 'layers': 2} done [0s] best split0 val 0.7812
+  LightGCN {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [0s] best split0 val 0.7812
+  LightGCN {'lr': 0.003, 'wd': 0.001, 'dim': 32, 'layers': 2} done [0s] best split0 val 0.7812
+  LightGCN {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 2} done [0s] best split0 val 0.7812
+  LightGCN {'lr': 0.001, 'wd': 1e-05, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7812
+  LightGCN {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7848
+  LightGCN {'lr': 0.001, 'wd': 0.0001, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7848
+  LightGCN {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7848
+  LightGCN {'lr': 0.001, 'wd': 0.001, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7848
+  LightGCN {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7848
+LightGCN     ndcg@5=0.5703±0.0141  ndcg@10=0.6886±0.0126  recall@5=0.6578±0.0131  recall@10=0.9566±0.0096   [13s, 18 cfgs] seeds 0.5468±0.0184
+  LightGCN-pt {'lr': 0.01, 'wd': 1e-05, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7490
+  LightGCN-pt {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7634
+  LightGCN-pt {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7704
+  LightGCN-pt {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [0s] best split0 val 0.7704
+  LightGCN-pt {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7708
+  LightGCN-pt {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7708
+  LightGCN-pt {'lr': 0.003, 'wd': 1e-05, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7829
+  LightGCN-pt {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7829
+  LightGCN-pt {'lr': 0.003, 'wd': 0.0001, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7829
+  LightGCN-pt {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7829
+  LightGCN-pt {'lr': 0.003, 'wd': 0.001, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7855
+  LightGCN-pt {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7855
+  LightGCN-pt {'lr': 0.001, 'wd': 1e-05, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7855
+  LightGCN-pt {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7855
+  LightGCN-pt {'lr': 0.001, 'wd': 0.0001, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7855
+  LightGCN-pt {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7855
+  LightGCN-pt {'lr': 0.001, 'wd': 0.001, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7855
+  LightGCN-pt {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7855
+LightGCN-pt  ndcg@5=0.5261±0.0123  ndcg@10=0.6498±0.0094  recall@5=0.6277±0.0222  recall@10=0.9422±0.0072   [18s, 18 cfgs] seeds 0.5198±0.0071
+  r-AdjNorm {'lr': 0.01, 'wd': 1e-05, 'dim': 32, 'layers': 2, 'r': 0.3} done [0s] best split0 val 0.7778
+  r-AdjNorm {'lr': 0.01, 'wd': 1e-05, 'dim': 32, 'layers': 2, 'r': 0.7} done [0s] best split0 val 0.7778
+  r-AdjNorm {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'r': 0.3} done [0s] best split0 val 0.7778
+  r-AdjNorm {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'r': 0.7} done [0s] best split0 val 0.7803
+  r-AdjNorm {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 2, 'r': 0.3} done [0s] best split0 val 0.7803
+  r-AdjNorm {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 2, 'r': 0.7} done [0s] best split0 val 0.7803
+  r-AdjNorm {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'r': 0.3} done [0s] best split0 val 0.7803
+  r-AdjNorm {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'r': 0.7} done [0s] best split0 val 0.7803
+  r-AdjNorm {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 2, 'r': 0.3} done [0s] best split0 val 0.7803
+  r-AdjNorm {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 2, 'r': 0.7} done [0s] best split0 val 0.7803
+  r-AdjNorm {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 2, 'r': 0.3} done [0s] best split0 val 0.7803
+  r-AdjNorm {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 2, 'r': 0.7} done [0s] best split0 val 0.7803
+  r-AdjNorm {'lr': 0.003, 'wd': 1e-05, 'dim': 32, 'layers': 2, 'r': 0.3} done [1s] best split0 val 0.7803
+  r-AdjNorm {'lr': 0.003, 'wd': 1e-05, 'dim': 32, 'layers': 2, 'r': 0.7} done [0s] best split0 val 0.7807
+  r-AdjNorm {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'r': 0.3} done [0s] best split0 val 0.7807
+  r-AdjNorm {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'r': 0.7} done [0s] best split0 val 0.7807
+  r-AdjNorm {'lr': 0.003, 'wd': 0.0001, 'dim': 32, 'layers': 2, 'r': 0.3} done [0s] best split0 val 0.7807
+  r-AdjNorm {'lr': 0.003, 'wd': 0.0001, 'dim': 32, 'layers': 2, 'r': 0.7} done [0s] best split0 val 0.7807
+  r-AdjNorm {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'r': 0.3} done [0s] best split0 val 0.7807
+  r-AdjNorm {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'r': 0.7} done [0s] best split0 val 0.7807
+  r-AdjNorm {'lr': 0.003, 'wd': 0.001, 'dim': 32, 'layers': 2, 'r': 0.3} done [0s] best split0 val 0.7807
+  r-AdjNorm {'lr': 0.003, 'wd': 0.001, 'dim': 32, 'layers': 2, 'r': 0.7} done [0s] best split0 val 0.7807
+  r-AdjNorm {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 2, 'r': 0.3} done [0s] best split0 val 0.7807
+  r-AdjNorm {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 2, 'r': 0.7} done [1s] best split0 val 0.7807
+  r-AdjNorm {'lr': 0.001, 'wd': 1e-05, 'dim': 32, 'layers': 2, 'r': 0.3} done [1s] best split0 val 0.7807
+  r-AdjNorm {'lr': 0.001, 'wd': 1e-05, 'dim': 32, 'layers': 2, 'r': 0.7} done [1s] best split0 val 0.7807
+  r-AdjNorm {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'r': 0.3} done [1s] best split0 val 0.7887
+  r-AdjNorm {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'r': 0.7} done [1s] best split0 val 0.7887
+  r-AdjNorm {'lr': 0.001, 'wd': 0.0001, 'dim': 32, 'layers': 2, 'r': 0.3} done [1s] best split0 val 0.7887
+  r-AdjNorm {'lr': 0.001, 'wd': 0.0001, 'dim': 32, 'layers': 2, 'r': 0.7} done [1s] best split0 val 0.7887
+  r-AdjNorm {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'r': 0.3} done [1s] best split0 val 0.7887
+  r-AdjNorm {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'r': 0.7} done [1s] best split0 val 0.7887
+  r-AdjNorm {'lr': 0.001, 'wd': 0.001, 'dim': 32, 'layers': 2, 'r': 0.3} done [1s] best split0 val 0.7887
+  r-AdjNorm {'lr': 0.001, 'wd': 0.001, 'dim': 32, 'layers': 2, 'r': 0.7} done [1s] best split0 val 0.7887
+  r-AdjNorm {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 2, 'r': 0.3} done [1s] best split0 val 0.7887
+  r-AdjNorm {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 2, 'r': 0.7} done [1s] best split0 val 0.7887
+r-AdjNorm    ndcg@5=0.5746±0.0132  ndcg@10=0.6904±0.0102  recall@5=0.6641±0.0190  recall@10=0.9568±0.0101   [21s, 36 cfgs] seeds 0.5410±0.0091
+  NAVIP {'lr': 0.01, 'wd': 1e-05, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7782
+  NAVIP {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 2} done [0s] best split0 val 0.7805
+  NAVIP {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 2} done [0s] best split0 val 0.7905
+  NAVIP {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [0s] best split0 val 0.7905
+  NAVIP {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 2} done [0s] best split0 val 0.7905
+  NAVIP {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 2} done [0s] best split0 val 0.7905
+  NAVIP {'lr': 0.003, 'wd': 1e-05, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7962
+  NAVIP {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2} done [0s] best split0 val 0.7962
+  NAVIP {'lr': 0.003, 'wd': 0.0001, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7962
+  NAVIP {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7962
+  NAVIP {'lr': 0.003, 'wd': 0.001, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7964
+  NAVIP {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 2} done [0s] best split0 val 0.7964
+  NAVIP {'lr': 0.001, 'wd': 1e-05, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7964
+  NAVIP {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7964
+  NAVIP {'lr': 0.001, 'wd': 0.0001, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7964
+  NAVIP {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7964
+  NAVIP {'lr': 0.001, 'wd': 0.001, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7964
+  NAVIP {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7964
+NAVIP        ndcg@5=0.5665±0.0133  ndcg@10=0.6851±0.0111  recall@5=0.6591±0.0152  recall@10=0.9600±0.0089   [13s, 18 cfgs] seeds 0.5558±0.0142
+  DR-LightGCN {'lr': 0.01, 'wd': 1e-05, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7794
+  DR-LightGCN {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7943
+  DR-LightGCN {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7951
+  DR-LightGCN {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7951
+  DR-LightGCN {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7979
+  DR-LightGCN {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7979
+  DR-LightGCN {'lr': 0.003, 'wd': 1e-05, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7979
+  DR-LightGCN {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2} done [3s] best split0 val 0.7979
+  DR-LightGCN {'lr': 0.003, 'wd': 0.0001, 'dim': 32, 'layers': 2} done [2s] best split0 val 0.7979
+  DR-LightGCN {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [2s] best split0 val 0.7979
+  DR-LightGCN {'lr': 0.003, 'wd': 0.001, 'dim': 32, 'layers': 2} done [2s] best split0 val 0.7979
+  DR-LightGCN {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 2} done [1s] best split0 val 0.7979
+  DR-LightGCN {'lr': 0.001, 'wd': 1e-05, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7979
+  DR-LightGCN {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 2} done [3s] best split0 val 0.7985
+  DR-LightGCN {'lr': 0.001, 'wd': 0.0001, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7985
+  DR-LightGCN {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [3s] best split0 val 0.7985
+  DR-LightGCN {'lr': 0.001, 'wd': 0.001, 'dim': 32, 'layers': 2} done [1s] best split0 val 0.7985
+  DR-LightGCN {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 2} done [3s] best split0 val 0.7985
+DR-LightGCN  ndcg@5=0.5500±0.0168  ndcg@10=0.6691±0.0121  recall@5=0.6478±0.0189  recall@10=0.9545±0.0086   [39s, 18 cfgs] seeds 0.5632±0.0020

@@ -1,0 +1,99 @@
+{
+ "config": {
+  "m": 30,
+  "n": 40,
+  "reps": 4000,
+  "rank_reps": 1000,
+  "pilot": 100000,
+  "seed": 0,
+  "K": 5,
+  "pscale": 1.0,
+  "scenarios": [
+   "indep",
+   "fixedrow",
+   "misprop"
+  ],
+  "out": null
+ },
+ "results": {
+  "indep": {
+   "IPS": {
+    "rel_bias": 14.640514181237107,
+    "rel_bias_unexposed": 4.667168264013992,
+    "kendall_tau": 0.058693900823651404
+   },
+   "IPS+WC": {
+    "rel_bias": 0.05980018508817993,
+    "rel_bias_unexposed": 0.05894129633973971,
+    "kendall_tau": 0.06079554310304196
+   },
+   "DR": {
+    "rel_bias": 8.349986636635418,
+    "rel_bias_unexposed": 5.05266666072154,
+    "kendall_tau": 0.10936233554601105
+   },
+   "DRUP": {
+    "rel_bias": 0.03938478748514755,
+    "rel_bias_unexposed": 0.03961209907927111,
+    "kendall_tau": 0.09176148672516586
+   },
+   "_info": {
+    "median_p": 0.05877433061185038,
+    "frac_p<0.05": 0.32166666666666666
+   }
+  },
+  "fixedrow": {
+   "IPS": {
+    "rel_bias": 9.6221598206281,
+    "rel_bias_unexposed": 2.3920774970699012,
+    "kendall_tau": 0.05174904327671355
+   },
+   "IPS+WC": {
+    "rel_bias": 0.4677027336715514,
+    "rel_bias_unexposed": 0.41605841363968166,
+    "kendall_tau": 0.05403575514720251
+   },
+   "DR": {
+    "rel_bias": 6.675826751427065,
+    "rel_bias_unexposed": 4.633123014397279,
+    "kendall_tau": 0.11755466765139366
+   },
+   "DRUP": {
+    "rel_bias": 0.030503170356967636,
+    "rel_bias_unexposed": 0.032316196902811796,
+    "kendall_tau": 0.09394160923858291
+   },
+   "_info": {
+    "median_p": 0.06332,
+    "frac_p<0.05": 0.3541666666666667,
+    "rho_bound_mean": 0.2869352869352869
+   }
+  },
+  "misprop": {
+   "IPS": {
+    "rel_bias": 96.82322799476862,
+    "rel_bias_unexposed": 19.2663987235961,
+    "kendall_tau": 0.05980277333988476
+   },
+   "IPS+WC": {
+    "rel_bias": 1.2345343306923695,
+    "rel_bias_unexposed": 1.1618197178590206,
+    "kendall_tau": 0.06257256115757721
+   },
+   "DR": {
+    "rel_bias": 44.80179339060611,
+    "rel_bias_unexposed": 16.027315335072252,
+    "kendall_tau": 0.10032727930655101
+   },
+   "DRUP": {
+    "rel_bias": 0.2059721078016753,
+    "rel_bias_unexposed": 0.2039364988483824,
+    "kendall_tau": 0.07922119998842395
+   },
+   "_info": {
+    "median_p": 0.05877433061185038,
+    "frac_p<0.05": 0.32166666666666666
+   }
+  }
+ }
+}

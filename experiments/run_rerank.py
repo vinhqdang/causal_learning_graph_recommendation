@@ -19,9 +19,8 @@ import torch
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from drup import fat  # noqa: E402
 from drup.data import load_coat, load_yahoo  # noqa: E402
-from drup.estimation import get_propensity  # noqa: E402
 from drup.metrics import evaluate  # noqa: E402
-from drup.pipeline import build, scores_with_consts  # noqa: E402
+from drup.pipeline import Nuisance, build, scores_with_consts  # noqa: E402
 from drup.rerank import rerank, rerank_exact, uniform_caps  # noqa: E402
 sys.path.insert(0, os.path.dirname(__file__))
 from run_fat import chosen_config  # noqa: E402
@@ -40,6 +39,7 @@ def main():
     ap.add_argument("--methods", nargs="+", default=METHODS)
     ap.add_argument("--filters_json", default=None, help="where to read the selected configurations")
     ap.add_argument("--tag", default="", help="suffix of the output file")
+    ap.add_argument("--xfit", type=int, default=10)
     a = ap.parse_args()
     dt = getattr(torch, a.dtype)
     if a.dataset == "coat":
@@ -53,7 +53,7 @@ def main():
         K = 20
     O, Y = d["O"].to(dt), d["Y"].to(dt)
     n = O.shape[1]
-    P_raw = get_propensity(d, O, Y, a.prop)
+    P_raw = Nuisance(d, O, Y, a.prop, K=a.xfit, seed=0)
     test = [t for t in d["test"] if len(t[1]) >= K]
     rows_users = sorted({u for u, _, _ in test})
     rows = torch.tensor(rows_users)
@@ -61,7 +61,7 @@ def main():
     mask = torch.zeros(len(rows_users), n, dtype=torch.bool)
     for u, items, _ in test:
         mask[row_of[u], torch.as_tensor(items)] = True
-    fj = a.filters_json or f"results/filters_{a.dataset}_{a.prop}.json"
+    fj = a.filters_json or f"results/v2/filters_{a.dataset}_{a.prop}.json"
     cfgs = {m: chosen_config(fj, m) for m in a.methods}
     out = {"K": K, "configs": cfgs, "results": {}}
     for mth in a.methods:
@@ -100,7 +100,7 @@ def main():
         out["results"][mth] = res
         del S
         gc.collect()
-    with open(f"results/rerank_{a.dataset}_{a.prop}{a.tag}.json", "w") as f:
+    with open(f"results/v2/rerank_{a.dataset}_{a.prop}{a.tag}.json", "w") as f:
         json.dump(out, f, indent=1)
 
 

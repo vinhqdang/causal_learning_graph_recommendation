@@ -1,0 +1,38 @@
+{
+ "coat": {
+  "test_users": 290,
+  "cand_mean": 14.73793103448276,
+  "cand_median": 15.0,
+  "pos_mean": 2.6517241379310343,
+  "users_with_pos": 225,
+  "random_ndcg@5": 0.3062815296384687,
+  "log_density": 0.08,
+  "log_rows": 290,
+  "log_cols": 300,
+  "logged": 6960
+ },
+ "yahoo": {
+  "test_users": 5130,
+  "cand_mean": 10.0,
+  "cand_median": 10.0,
+  "pos_mean": 0.8805068226120858,
+  "users_with_pos": 2315,
+  "random_ndcg@5": 0.3521999552030296,
+  "log_density": 0.02024051948051948,
+  "log_rows": 15400,
+  "log_cols": 1000,
+  "logged": 311704
+ },
+ "kuairec": {
+  "test_users": 1411,
+  "cand_mean": 3314.3656980864635,
+  "cand_median": 3315.0,
+  "pos_mean": 153.95393338058116,
+  "users_with_pos": 1411,
+  "random_ndcg@20": 0.04628746443003012,
+  "log_density": 0.13380639967760627,
+  "log_rows": 7176,
+  "log_cols": 10728,
+  "logged": 10300969
+ }
+}

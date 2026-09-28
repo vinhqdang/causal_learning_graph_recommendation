@@ -1,0 +1,45 @@
+nuisance setup (xfit=10) 0s
+[1/31] nuisance None done [3s]
+[2/31] nuisance (0.01, 1.0, 'add') done [48s]
+[3/31] nuisance (0.01, 1.0, 'lr') done [41s]
+[4/31] nuisance (0.01, 20.0, 'add') done [48s]
+[5/31] nuisance (0.01, 20.0, 'lr') done [42s]
+[6/31] nuisance (0.01, 5.0, 'add') done [47s]
+[7/31] nuisance (0.01, 5.0, 'lr') done [43s]
+[8/31] nuisance (0.02, 1.0, 'add') done [50s]
+[9/31] nuisance (0.02, 1.0, 'lr') done [40s]
+[10/31] nuisance (0.02, 20.0, 'add') done [48s]
+[11/31] nuisance (0.02, 20.0, 'lr') done [41s]
+[12/31] nuisance (0.02, 5.0, 'add') done [46s]
+[13/31] nuisance (0.02, 5.0, 'lr') done [42s]
+[14/31] nuisance (0.05, 1.0, 'add') done [48s]
+[15/31] nuisance (0.05, 1.0, 'lr') done [42s]
+[16/31] nuisance (0.05, 20.0, 'add') done [49s]
+[17/31] nuisance (0.05, 20.0, 'lr') done [41s]
+[18/31] nuisance (0.05, 5.0, 'add') done [47s]
+[19/31] nuisance (0.05, 5.0, 'lr') done [41s]
+[20/31] nuisance (0.1, 1.0, 'add') done [49s]
+[21/31] nuisance (0.1, 1.0, 'lr') done [40s]
+[22/31] nuisance (0.1, 20.0, 'add') done [49s]
+[23/31] nuisance (0.1, 20.0, 'lr') done [43s]
+[24/31] nuisance (0.1, 5.0, 'add') done [48s]
+[25/31] nuisance (0.1, 5.0, 'lr') done [40s]
+[26/31] nuisance (0.2, 1.0, 'add') done [48s]
+[27/31] nuisance (0.2, 1.0, 'lr') done [43s]
+[28/31] nuisance (0.2, 20.0, 'add') done [48s]
+[29/31] nuisance (0.2, 20.0, 'lr') done [43s]
+[30/31] nuisance (0.2, 5.0, 'add') done [49s]
+[31/31] nuisance (0.2, 5.0, 'lr') done [43s]
+Pop       ndcg@5=0.5367±0.0095  ndcg@10=0.6599±0.0086  recall@5=0.6441±0.0093  recall@10=0.9578±0.0064   [0s, 1 cfgs] e.g. {}
+Impute    ndcg@5=0.5532±0.0097  ndcg@10=0.6682±0.0071  recall@5=0.6634±0.0106  recall@10=0.9578±0.0074   [4s, 6 cfgs] e.g. {'lam': 20.0, 'imp': 'lr'}
+Obs       ndcg@5=0.5571±0.0100  ndcg@10=0.6745±0.0076  recall@5=0.6461±0.0094  recall@10=0.9443±0.0106   [2s, 24 cfgs] e.g. {'alpha': 0.7, 'beta': 0.03}
+EASE      ndcg@5=0.5401±0.0138  ndcg@10=0.6658±0.0094  recall@5=0.6199±0.0122  recall@10=0.9384±0.0062   [0s, 3 cfgs] e.g. {'lam_e': 1000.0}
+GF-CF     ndcg@5=0.5512±0.0124  ndcg@10=0.6679±0.0096  recall@5=0.6573±0.0176  recall@10=0.9497±0.0076   [0s, 4 cfgs] e.g. {'w': 1.0, 'k': 256}
+IPS       ndcg@5=0.5510±0.0224  ndcg@10=0.6690±0.0193  recall@5=0.6450±0.0139  recall@10=0.9441±0.0103   [57s, 720 cfgs] e.g. {'floor': 0.2, 'lam': 1.0, 'alpha': 0.7, 'deg': 'Yhat', 'beta': 0.03}
+IPS+WC    ndcg@5=0.5510±0.0224  ndcg@10=0.6690±0.0193  recall@5=0.6450±0.0139  recall@10=0.9441±0.0103   [55s, 720 cfgs] e.g. {'floor': 0.2, 'lam': 1.0, 'alpha': 0.7, 'deg': 'Yhat', 'beta': 0.03}
+DR        ndcg@5=0.5459±0.0244  ndcg@10=0.6655±0.0142  recall@5=0.6545±0.0286  recall@10=0.9591±0.0089   [121s, 1440 cfgs] e.g. {'floor': 0.2, 'lam': 5.0, 'imp': 'lr', 'alpha': 0.7, 'cv': 1.0, 'deg': 'Yhat', 'beta': 0.3}
+DRUP      ndcg@5=0.5467±0.0235  ndcg@10=0.6677±0.0134  recall@5=0.6550±0.0254  recall@10=0.9631±0.0056   [109s, 1440 cfgs] e.g. {'floor': 0.2, 'lam': 5.0, 'imp': 'lr', 'alpha': 0.7, 'cv': 1.0, 'deg': 'Yhat', 'beta': 0.3}
+EASE-DR   ndcg@5=0.5564±0.0141  ndcg@10=0.6748±0.0119  recall@5=0.6680±0.0101  recall@10=0.9682±0.0066   [7s, 90 cfgs] e.g. {'floor': 0.2, 'lam': 20.0, 'imp': 'lr', 'cv': 1.0, 'lam_e': 1000.0}
+GF-CF-DR  ndcg@5=0.5598±0.0084  ndcg@10=0.6747±0.0100  recall@5=0.6709±0.0134  recall@10=0.9641±0.0077   [10s, 120 cfgs] e.g. {'floor': 0.2, 'lam': 20.0, 'imp': 'lr', 'cv': 1.0, 'w': 1.0, 'k': 256}
+DR-5hop   ndcg@5=0.5524±0.0245  ndcg@10=0.6707±0.0160  recall@5=0.6619±0.0266  recall@10=0.9643±0.0110   [477s, 6300 cfgs] e.g. {'floor': 0.2, 'lam': 20.0, 'imp': 'lr', 'alpha': 0.3, 'cv': 1.0, 'deg': 'Yhat', 'beta': 1.0, 'gamma': 3.0}
+DRUP-5hop ndcg@5=0.5451±0.0204  ndcg@10=0.6664±0.0121  recall@5=0.6551±0.0253  recall@10=0.9662±0.0074   [505s, 6300 cfgs] e.g. {'floor': 0.2, 'lam': 20.0, 'imp': 'lr', 'alpha': 0.3, 'cv': 1.0, 'deg': 'Yhat', 'beta': 0.0, 'gamma': 3.0}

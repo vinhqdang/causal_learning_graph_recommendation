@@ -1,0 +1,82 @@
+/home/user/causal_learning_graph_recommendation/experiments/../drup/data.py:89: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)
+  O[tr.u.values, tr.i.values] = 1.0
+  MF {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [12s] best split0 val 0.5179
+  MF {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [10s] best split0 val 0.5179
+  MF {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 0} done [10s] best split0 val 0.5210
+  MF {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [12s] best split0 val 0.5210
+  MF {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [12s] best split0 val 0.5210
+  MF {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 0} done [12s] best split0 val 0.5210
+  MF {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [14s] best split0 val 0.5210
+  MF {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [13s] best split0 val 0.5210
+  MF {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 0} done [13s] best split0 val 0.5210
+MF           ndcg@5=0.5076±0.0060  ndcg@10=0.6333±0.0029  recall@5=0.6681±0.0141  recall@10=1.0000±0.0000   [141s, 9 cfgs] seeds 0.5100±0.0035
+  IPS-MF {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [10s] best split0 val 0.5236
+  IPS-MF {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [10s] best split0 val 0.5236
+  IPS-MF {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 0} done [11s] best split0 val 0.5236
+  IPS-MF {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [11s] best split0 val 0.5236
+  IPS-MF {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [11s] best split0 val 0.5236
+  IPS-MF {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 0} done [11s] best split0 val 0.5236
+  IPS-MF {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [15s] best split0 val 0.5236
+  IPS-MF {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [16s] best split0 val 0.5236
+  IPS-MF {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 0} done [15s] best split0 val 0.5236
+IPS-MF       ndcg@5=0.5098±0.0048  ndcg@10=0.6354±0.0038  recall@5=0.6710±0.0048  recall@10=1.0000±0.0000   [146s, 9 cfgs] seeds 0.5106±0.0063
+  DR-MF {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [14s] best split0 val 0.4819
+  DR-MF {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [13s] best split0 val 0.4891
+  DR-MF {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 0} done [14s] best split0 val 0.4939
+  DR-MF {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [27s] best split0 val 0.5150
+  DR-MF {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [31s] best split0 val 0.5150
+  DR-MF {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 0} done [37s] best split0 val 0.5166
+  DR-MF {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [17s] best split0 val 0.5166
+  DR-MF {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [17s] best split0 val 0.5166
+  DR-MF {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 0} done [18s] best split0 val 0.5166
+DR-MF        ndcg@5=0.5116±0.0020  ndcg@10=0.6356±0.0020  recall@5=0.6773±0.0022  recall@10=1.0000±0.0000   [298s, 9 cfgs] seeds 0.5103±0.0066
+  BPR-MF {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [12s] best split0 val 0.6372
+  BPR-MF {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [11s] best split0 val 0.6431
+  BPR-MF {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 0} done [9s] best split0 val 0.6443
+  BPR-MF {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [26s] best split0 val 0.6540
+  BPR-MF {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [32s] best split0 val 0.6552
+  BPR-MF {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 0} done [26s] best split0 val 0.6596
+  BPR-MF {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 0} done [54s] best split0 val 0.6596
+  BPR-MF {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 0} done [47s] best split0 val 0.6596
+  BPR-MF {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 0} done [49s] best split0 val 0.6623
+BPR-MF       ndcg@5=0.6460±0.0041  ndcg@10=0.7318±0.0028  recall@5=0.7783±0.0054  recall@10=1.0000±0.0000   [428s, 9 cfgs] seeds 0.6412±0.0036
+  PDA {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 0, 'gamma': 0.1} done [9s] best split0 val 0.6450
+  PDA {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 0, 'gamma': 0.2} done [11s] best split0 val 0.6450
+  PDA {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 0, 'gamma': 0.1} done [10s] best split0 val 0.6450
+  PDA {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 0, 'gamma': 0.2} done [10s] best split0 val 0.6450
+  PDA {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 0, 'gamma': 0.1} done [9s] best split0 val 0.6474
+  PDA {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 0, 'gamma': 0.2} done [10s] best split0 val 0.6480
+  PDA {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 0, 'gamma': 0.1} done [17s] best split0 val 0.6584
+  PDA {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 0, 'gamma': 0.2} done [18s] best split0 val 0.6620
+  PDA {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 0, 'gamma': 0.1} done [22s] best split0 val 0.6620
+  PDA {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 0, 'gamma': 0.2} done [17s] best split0 val 0.6626
+  PDA {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 0, 'gamma': 0.1} done [24s] best split0 val 0.6689
+  PDA {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 0, 'gamma': 0.2} done [23s] best split0 val 0.6702
+  PDA {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 0, 'gamma': 0.1} done [49s] best split0 val 0.6702
+  PDA {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 0, 'gamma': 0.2} done [47s] best split0 val 0.6702
+  PDA {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 0, 'gamma': 0.1} done [51s] best split0 val 0.6702
+  PDA {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 0, 'gamma': 0.2} done [50s] best split0 val 0.6702
+  PDA {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 0, 'gamma': 0.1} done [42s] best split0 val 0.6702
+  PDA {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 0, 'gamma': 0.2} done [42s] best split0 val 0.6702
+PDA          ndcg@5=0.6516±0.0052  ndcg@10=0.7346±0.0045  recall@5=0.7867±0.0020  recall@10=1.0000±0.0000   [518s, 18 cfgs] seeds 0.6382±0.0021
+/home/user/causal_learning_graph_recommendation/experiments/../drup/learned.py:47: UserWarning: Sparse invariant checks are implicitly disabled. Memory errors (e.g. SEGFAULT) will occur when operating on a sparse tensor which violates the invariants, but checks incur performance overhead. To silence this warning, explicitly opt in or out. See `torch.sparse.check_sparse_tensor_invariants.__doc__` for guidance.  (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/Context.cpp:848.)
+  self.A = torch.sparse_coo_tensor(idx, torch.cat([v_ui, v_iu]), (m + n, m + n)).coalesce()
+  LightGCN {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 2} done [68s] best split0 val 0.6776
+  LightGCN {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [78s] best split0 val 0.6776
+  LightGCN {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 2} done [91s] best split0 val 0.6785
+  LightGCN {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2} done [161s] best split0 val 0.6902
+  LightGCN {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [159s] best split0 val 0.6902
+  LightGCN {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 2} done [161s] best split0 val 0.6902
+  LightGCN {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 2} done [273s] best split0 val 0.6902
+  LightGCN {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [272s] best split0 val 0.6902
+  LightGCN {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 2} done [278s] best split0 val 0.6902
+LightGCN     ndcg@5=0.6693±0.0045  ndcg@10=0.7473±0.0032  recall@5=0.7993±0.0034  recall@10=1.0000±0.0000   [2055s, 9 cfgs] seeds 0.6656±0.0012
+  LightGCN-pt {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 2} done [111s] best split0 val 0.6025
+  LightGCN-pt {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [113s] best split0 val 0.6037
+  LightGCN-pt {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 2} done [111s] best split0 val 0.6085
+  LightGCN-pt {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2} done [171s] best split0 val 0.6085
+  LightGCN-pt {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [176s] best split0 val 0.6085
+  LightGCN-pt {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 2} done [166s] best split0 val 0.6085
+  LightGCN-pt {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 2} done [321s] best split0 val 0.6085
+  LightGCN-pt {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [334s] best split0 val 0.6085
+  LightGCN-pt {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 2} done [337s] best split0 val 0.6085

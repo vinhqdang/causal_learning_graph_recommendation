@@ -12,18 +12,27 @@ numerical check in `experiments/`.
 
 - Users $u\in[m]$, items $i\in[n]$, pairs (edges) $e=(u,i)$.
 - **Potential outcome** $Y_e\in\{0,1\}$: would $u$ like $i$ if it were shown.
-- **Exposure** $O_e\in\{0,1\}$ with propensity $p_e=\Pr(O_e=1)$.
+- **Exposure** $O_e\in\{0,1\}$ with propensity $p_e=\Pr(O_e=1\mid Y)$, which may
+  depend on the pair's own outcome.
 - Observed log: $\{(O_e, O_eY_e)\}$, which is missing not at random (MNAR).
 
-**Assumption A1 (unconfoundedness and independence).** Given the propensities,
-the $O_e$ are independent across edges and independent of $Y$.
+**Assumption A1 (conditionally independent exposure).** Conditionally on $Y$,
+the $O_e$ are independent Bernoulli($p_e$) with $p_e>0$. All expectations are
+over $O$ given $Y$.
 
 **Assumption A2 (fixed nuisances).** The propensity model $\hat p$, the
-imputation $\hat Y\in[0,1]^{m\times n}$ and the edge weights $C$ are fixed with
-respect to $O$. In practice this means cross-fitting, or nuisances estimated
-on a vetted historical log. For $C$ we take degree weights computed from
-$\hat Y$, $C_{ui}=d_u^{-\alpha}d_i^{-(1-\alpha)}$ with $d=\hat Y\mathbf 1$ and
-$d=\mathbf 1^\top\hat Y$. These weights do not depend on $O$.
+imputation $\hat Y\in[0,1]^{m\times n}$ and the edge weights $C$ are fixed given
+$Y$, i.e. they do not depend on $O$ (for instance, fitted on an independent
+log). We take $C_{ui}=d_u^{-\alpha}d_i^{-(1-\alpha)}$ with degrees from $\hat Y$.
+
+*Cross-fitting.* In the experiments $\hat p$ and $\hat Y$ are cross-fitted over
+ten random folds of pairs: the nuisance used at a pair of fold $k$ is fitted on
+the other nine folds (`drup/pipeline.py`, class `Nuisance`). The degree weights
+come either from $\hat Y$ or from cross-fitted edge estimates (row and column
+sums of $W$ over the other folds); the degree source is a searched and reported
+hyper-parameter. This removes the dependence of every nuisance on its own pair;
+the remaining dependence on other pairs is diffuse and is measured by
+re-fitting experiments.
 
 **Target.** A graph recommender propagates preference along walks of the
 *counterfactual full-exposure* graph $Y$, not along walks of the logged graph
@@ -126,6 +135,29 @@ $\frac{1-p_e}{p_e}(Y_e-\lambda\hat Y_e)^2$. The best $\lambda$ therefore shrinks
 when $\hat Y$ is poor, e.g. on very sparse logs where almost every
 edge of the propagated graph is imputed. We select $\lambda$ on validation data.
 
+**Corollary 1a (unexposed candidates).** Recommendations rank unexposed
+candidates, where $W_{ui}=\hat Y_{ui}$ (DR) or $0$ (IPS) is deterministic. With
+correct propensities,
+$$
+\mathbb E[s_{ui}\mid O_{ui}=0]=F^*_{ui}-(Y_{ui}-\hat Y_{ui})\,g_{ui},\qquad
+g_{ui}=\partial F^*_{ui}/\partial Y_{ui}
+=C_{ui}\big(a+b(\textstyle\sum_{v\ne u}C_{vi}^2Y_{vi}+\sum_{j\ne i}C_{uj}^2Y_{uj}+C_{ui}^2)\big).
+$$
+The residual is the imputation error at the candidate itself, which no estimator
+built from the log can remove. With IPS edges the walks through $(u,i)$ vanish
+on unexposed candidates, so at three hops the uncorrected IPS operator has no
+repeated-walk bias there; it reappears from five hops on.
+
+**Proposition 1b (exposure dependence within users).** If exposures are
+independent across users but $|\mathrm{Cov}(O_e,O_f\mid Y)|\le\rho\,p_ep_f$ for distinct
+pairs of the same user (fixed-size slates give $\rho\le1/k$), then with correct
+propensities
+$$
+|\mathbb E\hat T_{ui}-T^*_{ui}|\le\rho\sum_{j\ne i}C_{uj}\Big(\sum_{v\ne u}C_{vj}C_{vi}\varepsilon_{vj}\varepsilon_{vi}+C_{uj}C_{ui}\varepsilon_{uj}\varepsilon_{ui}\Big).
+$$
+For DR edges the bias is of second order in the imputation error; for IPS
+($\varepsilon=Y$) it is of first order. `experiments/mc_stress.py` checks this.
+
 ### 3.1 Any number of hops
 
 **Theorem 1′ (exact K-hop correction).** Fix an odd $K$. A $K$-hop walk
@@ -172,8 +204,12 @@ $C_{ui}\hat Y_{ui}K_i\ge0$. It satisfies
 $$
 K_i\;\ge\;\Big(\tfrac1{\max_v p_{vi}}-1\Big)\sum_{v\ne u}C_{vi}^2(Y_{vi}-\hat Y_{vi})^2,
 $$
-which is unbounded as the item's propensities go to 0 and is $\Omega(1/\tau)$
-when the clip is active. DRUP's bias is identically 0.
+which is unbounded as the item's propensities go to 0. With clipped propensities
+$\bar p=\max(p,\tau)$, $\tau\le1/2$, the excess of a doubly traversed edge,
+$C_e^2(\mathbb E W_e^2-\mathbb E W_e)$, is at most $C_e^2(1/\tau-1)\varepsilon_e^2$, with
+equality at $p_e=\tau$ (for $p_e<\tau$ it decreases and the clipping bias of
+Theorem 3 takes over), so the worst-case repeated-walk bias is $\Theta(1/\tau)$.
+DRUP's bias is identically 0.
 
 *Proof.* In the three repeated-edge cases the naive monomial is
 $\tilde W_e^2\tilde W_f$ (or $\tilde W_e^3$), and
@@ -348,18 +384,24 @@ User $v$ contributes
 $\text{contrib}_v=\tilde w_v^\top\tilde w_v-\operatorname{diag}(\tilde w_v^2)+\operatorname{diag}(c_v^2w_v)$
 to $G$. Scale each row so that $\|\tilde w_v\|_2\le R$ and $\|c_v^2w_v\|_2\le R^2$.
 
-**Theorem 8.** Adding symmetric Gaussian noise with
-$\sigma=2R^2\sqrt{2\ln(1.25/\delta)}/\epsilon$ to the upper triangle of $G$ is
-$(\epsilon,\delta)$-DP under adding or removing one user, because
+**Theorem 8.** Let the population-level nuisances (propensity model, item
+parameters of $\hat Y$, item degrees, $R$) be computed from public data and the
+user-level parts from each user's own row. Adding symmetric Gaussian noise with
+the analytic calibration $\sigma=\sigma_{\mathrm{aG}}(\epsilon,\delta;2R^2)$ of Balle and
+Wang (2018), which is valid for every $\epsilon>0$ (the classical
+$\sigma=2R^2\sqrt{2\ln(1.25/\delta)}/\epsilon$ is only valid for $\epsilon<1$), to the
+upper triangle of $G$ is $(\epsilon,\delta)$-DP under adding or removing one user, because
 $\|\text{contrib}_v\|_F\le\|\tilde w_v\|_2^2+\|c_v^2w_v\|_2\le2R^2$. Each user's
 recommendations are then computed locally from the released $G$ and the user's
 own row (Section 2). By the billboard lemma the whole system is therefore
 $(\epsilon,\delta)$-**jointly** differentially private. Any post-processing of the
 released $G$, such as low-rank denoising, is free.
 
-*Caveat.* The nuisances ($\hat p,\hat Y$, item degrees) are treated as public.
-They are $O(m+n)$ statistics and can be released with a small extra budget.
-Our experiments do not privatise them.
+*Scope.* The guarantee is conditional on public nuisances. The experiments
+(`run_fat.py --sections privacy`) fit the population-level nuisances on a public
+10% of the non-test users and compute the user-level parts locally; the
+denoising ranks are fixed in advance and all are reported. Row scaling shrinks
+the estimate for rows with norm above $R$.
 
 ## 9b. Exposure-constrained allocation with a causal utility guarantee
 
@@ -368,13 +410,11 @@ lists are. We add a re-ranker (`drup/rerank.py`). Among feasible allocations
 $\mathcal X=\{x\in\{0,1\}^{R\times N}:\sum_ix_{ui}=K,\ \sum_ux_{ui}\le\mathrm{cap}_i\}$
 (candidates only), it maximises $\sum x_{ui}s_{ui}$. This is a bipartite
 $b$-matching: its constraint matrix is totally unimodular, so the LP has an
-integral optimum and zero duality gap. We minimise the Lagrangian dual
-$D(\lambda)=\sum_u\mathrm{top}_K(s_u-\lambda)+\langle\lambda,\mathrm{cap}\rangle$ by
-projected subgradient steps, take top-$K$ under the prices, and repair the
-remaining violations greedily.
+integral optimum. We solve it exactly by min-cost flow (OR-Tools) on the
+scores rounded to $L=10^6$ levels, which is optimal up to
+$\Gamma\le RK(\max s-\min s)/L$. (A dual-subgradient solver left gaps of up to 35%.)
 
-**Theorem 9.** Let $\hat x$ be the returned allocation, $\Gamma=D(\lambda)-\sum\hat x s\ge0$
-the certified gap, and $U(x)=\sum x_{ui}F^*_{ui}$ the full-exposure utility.
+**Theorem 9.** Let $\hat x$ be the returned allocation, $\Gamma$ the rounding gap, and $U(x)=\sum x_{ui}F^*_{ui}$ the full-exposure utility.
 (a) Every cap holds, so each item's share is at most $\max\mathrm{cap}/R$
 and at least $RK/\max\mathrm{cap}$ items are recommended.
 (b) Deterministically,
@@ -409,8 +449,13 @@ privacy as open problems. DRUP contributes the following:
    operator that is exactly unbiased and edge-wise doubly robust for the
    full-exposure graph (Theorem 1), with variance, clipping and concentration
    bounds (Theorem 3).
-3. The same structural property (a multilinear walk polynomial without repeated
-   edges, affine in each user's row) yields provable FAT properties:
-   exposure-invariant causal fairness (Thm 4), exact and optimal counterfactual
-   explanations (Prop 5, Thm 6), certified robustness (Thm 7) and joint DP
-   (Thm 8).
+3. Exposure invariance in expectation (Thm 4) is specific to the corrected
+   operator. The remaining properties (exact attributions and counterfactual
+   explanations, Prop 5 and Thm 6; certificates, Thm 7; joint DP of the item
+   operator, Thm 8; capped allocation, Thm 9) follow from linearity with fixed
+   nuisances and hold for any linear propagation operator, including the
+   uncorrected ones. They describe the recommender with its nuisances frozen
+   (certificates, explanations) or public (joint DP).
+4. The walk correction does not change top-$K$ accuracy on the three
+   benchmarks. Its value is unbiased score estimates and verifiable exposure
+   invariance; see `README.md` for the evaluation.

@@ -202,17 +202,48 @@ def _box_extremes(a, D_lo, D_hi, x_lo, x_hi, c_lo, c_hi, corrected):
 # Privacy: differentially private public item operator
 # --------------------------------------------------------------------------
 
-def dp_item_operator(W, C, epsilon, delta, R, generator=None):
-    """(epsilon, delta)-DP release of G_corr under add/remove-one-user.
+def analytic_gaussian_sigma(epsilon, delta, sens):
+    """Smallest sigma for which the Gaussian mechanism with L2 sensitivity
+    ``sens`` is (epsilon, delta)-DP, for any epsilon > 0 (analytic Gaussian
+    mechanism, Balle & Wang 2018, Theorem 8): the privacy profile
+        Phi(sens/(2 sigma) - epsilon sigma/sens)
+        - exp(epsilon) Phi(-sens/(2 sigma) - epsilon sigma/sens) <= delta
+    is decreasing in sigma, so sigma is found by bisection."""
+    from math import erf, exp, sqrt
+
+    def Phi(x):
+        return 0.5 * (1.0 + erf(x / sqrt(2.0)))
+
+    def profile(sig):
+        a, b = sens / (2.0 * sig), epsilon * sig / sens
+        return Phi(a - b) - exp(epsilon) * Phi(-a - b)
+    lo, hi = 1e-6 * sens, sens
+    while profile(hi) > delta:
+        hi *= 2.0
+    for _ in range(200):
+        mid = 0.5 * (lo + hi)
+        if profile(mid) > delta:
+            lo = mid
+        else:
+            hi = mid
+    return hi
+
+
+def dp_item_operator(W, C, epsilon, delta, R, generator=None, users=None):
+    """(epsilon, delta)-DP release of G_corr under add/remove-one-user,
+    conditional on public nuisances (propensities, imputation, C and R fixed
+    independently of the private rows).
 
     Each user's weighted row is scaled so that ||wt_v||_2 <= R and
     ||c_v^2 w_v||_2 <= R^2. User v contributes
         wt_v^T wt_v - diag(wt_v^2) + diag(c_v^2 w_v)
     whose Frobenius norm is <= ||wt_v||^2 + ||c_v^2 w_v|| <= 2 R^2, so the
-    L2 sensitivity of the upper triangle is 2 R^2 and the Gaussian mechanism
-    with sigma = 2 R^2 sqrt(2 ln(1.25/delta)) / epsilon applies.
-    (C is treated as public; see docs/THEORY.md for the degree release.)
+    L2 sensitivity of the upper triangle is 2 R^2. The noise scale is the
+    analytic Gaussian calibration, valid for every epsilon > 0.
+    ``users``: optional index of the (private) rows that form G.
     """
+    if users is not None:
+        W, C = W[users], C[users]
     wt = C * W
     d2 = C * C * W
     s1 = (R / wt.norm(dim=1).clamp_min(1e-12)).clamp(max=1.0)
@@ -220,8 +251,10 @@ def dp_item_operator(W, C, epsilon, delta, R, generator=None):
     k = torch.minimum(s1, s2)[:, None]
     Wc = W * k
     G = item_gram(Wc, C, correct=True)
+    if epsilon == float("inf"):
+        return G, k.squeeze(1), 0.0
     sens = 2.0 * R * R
-    sigma = sens * math.sqrt(2.0 * math.log(1.25 / delta)) / epsilon
+    sigma = analytic_gaussian_sigma(epsilon, delta, sens)
     n = G.shape[0]
     N = torch.randn(n, n, generator=generator, dtype=G.dtype) * sigma
     N = torch.triu(N)
