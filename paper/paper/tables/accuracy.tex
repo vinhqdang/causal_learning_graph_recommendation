@@ -1,0 +1,34 @@
+\begin{tabular}{llccc}
+\toprule
+ & Method & Coat nDCG@5 & Yahoo!\,R3 nDCG@5 & KuaiRec nDCG@20\\
+\midrule
+\multicolumn{5}{l}{\emph{Non-personalised}}\\
+ & Popularity & -- & -- & --\\
+ & Imputation only & -- & -- & --\\
+\multicolumn{5}{l}{\emph{Trained, pointwise loss}}\\
+ & MF & -- & -- & --\\
+ & IPS-MF & -- & -- & --\\
+ & DR-MF & -- & -- & --\\
+ & LightGCN & -- & -- & --\\
+ & DR-LightGCN & -- & -- & --\\
+\multicolumn{5}{l}{\emph{Trained, pairwise loss (BPR)}}\\
+ & MF & -- & -- & --\\
+ & PDA & -- & -- & --\\
+ & LightGCN & -- & -- & --\\
+ & r-AdjNorm & -- & -- & --\\
+ & NAVIP & -- & -- & --\\
+\multicolumn{5}{l}{\emph{Training-free, logged graph}}\\
+ & linear LightGCN / r-AdjNorm & -- & -- & --\\
+ & EASE & -- & -- & --\\
+ & GF-CF & -- & -- & --\\
+\multicolumn{5}{l}{\emph{Training-free, debiased graph}}\\
+ & IPS adjacency (NAVIP-style) & -- & -- & --\\
+ & IPS + walk correction & -- & -- & --\\
+ & EASE on DR graph & -- & -- & --\\
+ & GF-CF on DR graph & -- & -- & --\\
+ & DR adjacency & -- & -- & --\\
+ & \textbf{DRUP} & -- & -- & --\\
+ & DR adjacency, 5 hops & -- & -- & --\\
+ & \textbf{DRUP}, 5 hops & -- & -- & --\\
+\bottomrule
+\end{tabular}
