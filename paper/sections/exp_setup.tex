@@ -1,0 +1,52 @@
+\subsection{Setup}\label{sec:setup}
+
+\paragraph{Data.}
+\emph{Coat}~\cite{schnabel2016} has 290 users, 300 items and 6{,}960 self-selected
+(MNAR) ratings, exactly 24 per user. The test data are 16 ratings per user on
+uniformly random items (MAR); we rank only the items the user did not rate,
+which leaves 14.7 candidates per user on average, and 225 users have at least
+one positive candidate. The dataset ships propensities, which we use.
+\emph{Yahoo!\,R3}~\cite{marlin2009collaborative} has 311{,}704 self-selected ratings of
+15{,}400 users on 1{,}000 songs (2.0\% dense) and 54{,}000 ratings of 10 random
+songs for 5{,}400 of the users, in the version distributed
+with~\cite{chen2021autodebias}. A random 5\% of the MAR users is held out and used
+only to fit an outcome-dependent Naive-Bayes propensity~\cite{schnabel2016}; in a
+preliminary comparison on validation data it did not improve the propagation
+operators, and all reported results use the logistic exposure model. The remaining 5{,}130 test users have 10 candidates each, and 2{,}315 of
+them have a positive. \emph{KuaiRec}~\cite{gao2022kuairec} provides the big matrix
+(7{,}176 users, 10{,}728 items, 10.3M logged views, 13.4\% dense) as the MNAR log and
+a fully observed small matrix (1{,}411 users, 3{,}327 items) as the test set. We rank
+all small-matrix items that the user never viewed in the log (3{,}314 candidates
+per user, 154 of them positive on average). Positives are ratings $\ge4$ (Coat,
+Yahoo!\,R3) and a watch ratio $\ge2$ (KuaiRec). A random ranking reaches nDCG@5
+of 0.306 on Coat and 0.352 on Yahoo!\,R3 and nDCG@20 of 0.046 on KuaiRec. The
+candidate sets of Coat and Yahoo!\,R3 are small, so their metric differences
+are compressed; KuaiRec ranks thousands of candidates.
+
+\paragraph{Protocol.}
+The unbiased data are split into a validation part (30\% of each user's
+candidates on Coat, 30\% of the test users otherwise) and a test part, over 10
+(Coat) or 5 random splits. Every method selects its configuration on the
+validation part of each split, and trained models also select their epoch
+there. All fitted nuisances are cross-fitted over ten folds of pairs
+(Remark~\ref{rem:xfit}). We report the mean and standard deviation over splits
+of the test metric. Differences are tested at the level of users with a
+Holm correction over all comparisons of a dataset (Appendix~\ref{app:details}).
+
+\paragraph{Methods.}
+We compare 23 methods. \emph{Non-personalised}: popularity and the imputation
+$\hat Y$ alone. \emph{Trained with a pointwise loss}: MF, IPS-MF~\cite{schnabel2016},
+DR-MF~\cite{wang2019drjl}, LightGCN and DR-LightGCN (LightGCN with the DR loss).
+\emph{Trained with a pairwise (BPR) loss}: MF, PDA~\cite{zhang2021pda},
+LightGCN~\cite{he2020lightgcn}, r-AdjNorm~\cite{zhao2022radjnorm} and
+NAVIP~\cite{kim2022navip}. \emph{Training-free on the logged graph}: linear LightGCN
+(the one- plus three-hop form of Section~4 on $O\odot Y$; with the searched
+normalisation exponent it is a linear r-AdjNorm), EASE~\cite{steck2019ease} and
+GF-CF~\cite{shen2021gfcf}. \emph{Training-free on a debiased graph}: IPS adjacency
+(NAVIP-style), IPS adjacency with the walk correction, EASE and GF-CF on the DR
+graph $W$, DR adjacency, DRUP, and the five-hop versions of DR adjacency and
+DRUP. Grids, the number of configurations per method, and training details are
+in Appendix~\ref{app:details}. The training-free methods search between 3 and
+6{,}300 configurations and the trained ones between 4 and 36; each trained
+configuration is trained once and evaluated after every epoch on every split,
+so that it is also tuned per split.

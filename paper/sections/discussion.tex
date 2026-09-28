@@ -1,0 +1,114 @@
+%======================================================================
+\section{Discussion}\label{sec:disc}
+%======================================================================
+
+\paragraph{What the correction is for.}
+On the three benchmarks the walk correction does not change top-$K$
+accuracy, and in simulation the uncorrected DR operator can even agree
+slightly better with the full-exposure ranking, because its bias adds weight
+to the imputation (Section~\ref{sec:mc}). The correction matters wherever the
+\emph{value} of a propagated score is used rather than only its order within
+one user's list: when scores are compared across users, as in the
+exposure-capped allocation; when they are aggregated into an estimate of
+full-exposure utility; and when an auditor wants to verify that expected
+scores do not depend on exposure. In these uses the uncorrected estimate is
+biased by a factor of 2--80 in our simulations, and the bias grows with the
+number of hops and with small propensities. A practitioner who only needs
+within-user rankings from a dense log loses nothing by using the uncorrected
+DR adjacency; one who needs calibrated, auditable scores, or propagates over
+five hops or more, should use the corrected operator. In both cases, most of
+the accuracy comes from training-free propagation over a doubly robust graph.
+
+\paragraph{Stakeholders.}
+For \emph{item providers}, exposure invariance means that an item is not
+penalised in expectation for having been shown rarely in the past. It does not
+mean equal exposure: when quality is concentrated, DRUP's lists can be more
+concentrated than those of the logged graph (Table~\ref{tab:fair}), and the
+scores of rarely exposed items have a larger variance
+(Theorem~\ref{thm:var}(a)), so their realised rankings are noisier. Providers
+who need exposure guarantees need an explicit mechanism such as the
+exposure-capped allocation. For \emph{users}, the attributions show which of
+their own interactions drive a recommendation, or certify that none can
+overturn it; the population-level part of the score, which dominates on Coat,
+remains unexplained, and explaining it through $G$ would conflict with the
+privacy guarantee. For the \emph{platform}, DRUP is cheap and training-free
+but needs propensities, and the clip $\tau$ and the control-variate weight
+$\lambda$ trade exposure invariance against accuracy. This trade-off is a policy
+choice rather than a tuning detail. One option is to select the most accurate
+configuration subject to a bound on the elasticity measured in a thinning
+audit such as ours. For \emph{auditors and regulators}, DRUP produces concrete
+artefacts: a single item operator, a thinning audit with a known answer, and
+certificates. Under the EU Digital Services Act~\cite{dsa2022}, platforms must
+explain the main parameters of their recommender systems (Art.~27), assess and
+mitigate systemic risks (Arts.~34--35), undergo independent audits (Art.~37)
+and give vetted researchers access to data (Art.~40). Our artefacts fit the
+last three, but the audit of exposure invariance needs the platform's
+propensities, which an external auditor usually does not have.
+
+\paragraph{Limitations.}
+The analysis is static. It assumes a single logging policy and fixed potential
+outcomes, whereas recommenders are retrained on the feedback they
+generate~\cite{chaney2018confounding,hazrati2022evolution} and can change the
+preferences they predict~\cite{perdomo2020performative}; extending the
+guarantees to adaptive and slate logging~\cite{swaminathan2017slate} is open.
+Proposition~\ref{prop:dep} covers dependence within a user's history, not
+dependence across users. The idempotent correction relies on binary outcomes;
+graded relevance would need separate unbiased estimates of the powers of $Y$.
+Items that were never exposed fall outside $\pi p\ge\tau$ and are scored by the
+imputation only. The nuisances are cross-fitted rather than fitted on an
+independent log, the joint-DP guarantee requires public nuisances, and on the
+small Coat data the public-nuisance variant loses much of its accuracy. The
+certificates are vacuous for catalogues of our KuaiRec size, and the variance
+and concentration bounds are loose by several orders of magnitude
+(Section~\ref{sec:mc}). The target $F^*$ is a linear LightGCN score of the
+full-exposure world, a normative choice that other stakeholders may not
+share. Like every method in our comparison, DRUP selects its hyper-parameters
+on a small unbiased sample; without such a sample, selection would need an
+off-policy estimate of the validation metric. Finally, our largest catalogue
+has about $10^4$ items.
+
+%======================================================================
+\section{Implications}
+%======================================================================
+
+\paragraph{For research.}
+Propagation-level debiasing needs to consider the propagation operator itself,
+not only the edges it propagates: multiplying unbiased edge estimates does not
+give an unbiased multi-hop score. The repeated-walk bias is exactly
+removable, and the tools that remove it (idempotent reduction and Möbius
+inversion over walk-index coincidences) apply to any polynomial graph filter
+built from inverse-propensity or DR estimates. Our evaluation also shows that
+training-free propagation over a DR graph is a strong baseline against which
+trained debiased graph recommenders should be compared, and that claims of
+exposure invariance can be tested on real data by thinning exposures with a
+known factor.
+
+\paragraph{For practice.}
+DRUP runs at the cost of one item Gram matrix and needs no gradient training,
+so it can serve as an auditable baseline or as a candidate scorer. The
+choice between the corrected and the uncorrected operator depends on whether
+score values or only within-user orders matter. On sparse logs, exact exposure
+invariance requires small clips and costs accuracy (Table~\ref{tab:tau}). The
+structural properties (exact attributions, certificates, a private item
+operator and capped allocation) come with any linear propagation operator and
+hold for the model with its nuisances held fixed; platforms should report them
+together with that scope.
+
+%======================================================================
+\section{Conclusion}
+%======================================================================
+
+Inverse-propensity and doubly robust graph propagation are biased beyond one
+hop because walks that repeat an edge multiply its estimate with itself. We
+gave the exact bias, whose worst case grows as the inverse of the propensity
+clip, and removed it with an idempotent correction that is exact for any odd
+number of hops and costs no more than the uncorrected operator. With fixed
+nuisances the resulting estimator, DRUP, is edge-wise doubly robust for
+propagation over the full-exposure graph, robust to within-user exposure
+dependence to second order in the imputation error, and exposure-invariant in
+expectation. On three benchmarks with unbiased test data, training-free DR
+propagation is competitive with tuned trained and closed-form baselines, while
+the correction itself leaves top-$K$ accuracy unchanged. Future work includes
+private nuisance models, certificates that remain informative for large
+catalogues, guarantees under adaptive logging, and combining the correction with
+learned propagation weights.

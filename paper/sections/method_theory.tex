@@ -1,0 +1,385 @@
+%======================================================================
+\section{Problem setting}
+%======================================================================
+
+Users $u\in[m]$, items $i\in[n]$ and pairs $e=(u,i)$ carry a binary potential
+outcome $Y_e\in\{0,1\}$ (whether $u$ would like $i$ if it were shown) and an
+exposure indicator $O_e\in\{0,1\}$. The log reveals $O$ and $O\odot Y$.
+
+\begin{assumption}[Conditionally independent exposure]\label{as:unconf}
+Conditionally on $Y$, the exposures $O_e$ are independent Bernoulli variables
+with propensities $p_e=\Pr(O_e=1\mid Y)>0$.
+\end{assumption}
+The propensity may depend on the pair's own outcome, so the log may be missing
+not at random. All expectations below are over $O$ given $Y$.
+
+\begin{assumption}[Fixed nuisances]\label{as:fixed}
+The propensity estimates $\hat p$, the imputation $\hat Y\in[0,1]^{m\times n}$ and
+the edge weights $C$ are fixed given $Y$, i.e., they do not depend on $O$ (for
+instance, they are fitted on an independent log). We use
+$C_{ui}=d_u^{-\alpha}d_i^{-(1-\alpha)}$ with degrees $d$ taken from $\hat Y$.
+\end{assumption}
+
+\begin{remark}[Cross-fitting]\label{rem:xfit}
+In the experiments $\hat p$ and $\hat Y$ are cross-fitted over ten random folds
+of pairs: the nuisances used at a pair of fold $k$ are fitted on the other
+nine folds~\cite{chernozhukov2018dml}. A nuisance therefore never depends on
+its own pair, which is the dependence that matters for one-hop terms. It
+still depends weakly on other pairs, each nuisance parameter aggregating
+hundreds of interactions. We measure the consequences directly by re-fitting
+the nuisances after interventions and attacks
+(Sections~\ref{sec:fair} and~\ref{sec:struct}).
+\end{remark}
+
+With $\tY=C\odot Y$, the target is propagation over the full-exposure graph,
+\begin{equation}\label{eq:target}
+F^*=a\,\tY+b\,T^*,\qquad T^*=\tY\tY^\top\tY ,
+\end{equation}
+with fixed constants $a,b\ge0$. $F^*$ is the linear LightGCN score one would
+compute if every item had been shown to every user. It is a normative choice:
+it treats potential outcomes as fixed and ignores preferences that exposure
+itself shapes~\cite{chaney2018confounding,perdomo2020performative}
+(Section~\ref{sec:disc}).
+
+%======================================================================
+\section{DRUP}
+%======================================================================
+
+\paragraph{Edge estimates.}
+With clipped propensities $\bar p=\max(\hat p,\tau)$,
+\begin{equation}
+W^{\mathrm{IPS}}_e=\frac{O_eY_e}{\bar p_e},\qquad
+W^{\mathrm{DR}}_e=\hat Y_e+\frac{O_e(Y_e-\hat Y_e)}{\bar p_e}.
+\end{equation}
+Both have mean $Y_e$ when $\bar p=p$.
+
+\paragraph{Where the plug-in operator fails.}
+The plug-in three-hop operator $(\tW\tW^\top\tW)_{ui}$, with $\tW=C\odot W$, sums
+the products $\tW_{uj}\tW_{vj}\tW_{vi}$ over all walks $u\!-\!j\!-\!v\!-\!i$.
+If $v\neq u$ and $j\neq i$ the three edges are distinct and, by independence,
+the product is unbiased. The other walks repeat an edge
+(Figure~\ref{fig:walks}): for $v=u$ the edge $(u,j)$ is traversed twice, for
+$j=i$ the edge $(v,i)$, and for $v=u,j=i$ the edge $(u,i)$ three times. A
+repeated factor $\tW_e^k$ has mean $C_e^k\E[W_e^k]\ne C_e^kY_e$; for IPS,
+$\E[W_e^2]=Y_e/p_e$. Because $Y_e^k=Y_e$ for binary outcomes, the unbiased
+replacement of $\tW_e^k$ is simply $C_e^kW_e$.
+
+\begin{figure}[t]\centering
+\begin{tikzpicture}[x=1cm,y=1cm,font=\footnotesize,
+  un/.style={circle,draw,minimum size=5.5mm,inner sep=0pt,fill=blue!8},
+  it/.style={rectangle,draw,minimum size=5mm,inner sep=0pt,fill=orange!12},
+  w/.style={->,thick,>=stealth},
+  rep/.style={->,very thick,>=stealth,red!75!black}]
+\begin{scope}[xshift=0cm]
+ \node[un] (u) at (0,1) {$u$}; \node[un] (v) at (0,0) {$v$};
+ \node[it] (j) at (1.6,1) {$j$}; \node[it] (i) at (1.6,0) {$i$};
+ \draw[w] (u) -- (j); \draw[w] (j) -- (v); \draw[w] (v) -- (i);
+ \node at (0.8,-0.75) {(a) distinct edges};
+\end{scope}
+\begin{scope}[xshift=3.3cm]
+ \node[un] (u) at (0,1) {$u$};
+ \node[it] (j) at (1.6,1) {$j$}; \node[it] (i) at (1.6,0) {$i$};
+ \draw[rep] (u) to[bend left=15] node[above]{$\times2$} (j); \draw[rep] (j) to[bend left=15] (u); \draw[w] (u) -- (i);
+ \node at (0.8,-0.75) {(b) $v=u$: $\tW_{uj}^2\tW_{ui}$};
+\end{scope}
+\begin{scope}[xshift=6.6cm]
+ \node[un] (u) at (0,1) {$u$}; \node[un] (v) at (0,0) {$v$};
+ \node[it] (i) at (1.6,0.5) {$i$};
+ \draw[w] (u) -- (i); \draw[rep] (i) to[bend left=15] node[below right=-1pt]{$\times2$} (v); \draw[rep] (v) to[bend left=15] (i);
+ \node at (0.8,-0.75) {(c) $j=i$: $\tW_{ui}\tW_{vi}^2$};
+\end{scope}
+\begin{scope}[xshift=9.9cm]
+ \node[un] (u) at (0,0.5) {$u$};
+ \node[it] (i) at (1.6,0.5) {$i$};
+ \draw[rep] (u) to[bend left=25] node[above]{$\times3$} (i); \draw[rep] (i) -- (u); \draw[rep] (u) to[bend right=25] (i);
+ \node at (0.8,-0.75) {(d) $v=u$, $j=i$: $\tW_{ui}^3$};
+\end{scope}
+\end{tikzpicture}
+\caption{The four kinds of three-hop walks from user $u$ to item $i$. Only walks
+of type (a) consist of distinct edges. In (b)--(d) an edge estimate is
+multiplied with itself (red), and its power has the wrong mean. DRUP replaces
+each repeated factor $\tW_e^k$ by $C_e^kW_e$.}\label{fig:walks}
+\end{figure}
+
+\paragraph{Idempotent walk correction.}
+Let $\Delta=\tW\odot\tW-C\odot C\odot W$, with row sums $r$ and column sums
+$\kappa$. The corrected three-hop operator subtracts the excess of each walk
+type:
+\begin{equation}\label{eq:drup}
+\hat T=\tW\tW^\top\tW-\tW\odot(r\mathbf 1^\top-\Delta)-\tW\odot(\mathbf 1\kappa^\top-\Delta)
+-(\tW^{\odot3}-C^{\odot3}\odot W).
+\end{equation}
+The second term removes the excess of type (b) walks, the third that of type
+(c), and the last that of type (d); the subtracted $\Delta$ inside the first
+two avoids counting type (d) twice. The DRUP score is $s=a\,\tW+b\,\hat T$.
+In the experiments $a=1/c_1$ and $b=\beta/c_3$, where $c_1$ and $c_3$ are the
+mean absolute values of the one- and three-hop terms over all scored users and
+$\beta$ is selected on validation data, so $s$ is a fixed linear combination
+of the two terms.
+
+\paragraph{Public-operator form.}
+Define the diagonal-corrected item Gram matrix
+$G=\tW^\top\tW-\diag(\tW^\top\tW)+\diag(\mathbf 1^\top(C\odot C\odot W))$. Then
+\begin{equation}\label{eq:local}
+\hat T_{u\cdot}=\tilde w_uG-\tilde w_u\odot(r_u\mathbf 1^\top-2\delta_u)-(\tilde w_u^{\odot3}-c_u^{\odot3}\odot w_u),
+\end{equation}
+where $\delta_u=\tilde w_u^{\odot2}-c_u^{\odot2}\odot w_u$ and lower-case rows
+belong to user $u$. Equation~\eqref{eq:local} matches~\eqref{eq:drup} to machine
+precision. $G$ is the only object shared across users
+(Algorithm~\ref{alg:drup}). Its off-diagonal entries are products of distinct
+edges; its diagonal is corrected from $\sum_u\tW_{ui}^2$ to
+$\sum_uC_{ui}^2W_{ui}$, the analogue of the diagonal correction of a Gram
+matrix estimated from masked data~\cite{lounici2014}.
+
+\begin{algorithm}[t]
+\caption{DRUP (training-free)}\label{alg:drup}
+\begin{algorithmic}[1]
+\Require log $(O,O\odot Y)$; hyper-parameters $\tau,\alpha,\lambda,\beta$
+\State fit $\hat p$ (logistic exposure model) and $\hat Y$ (IPS-weighted additive ridge, optionally plus an IPS-weighted low-rank ALS residual), cross-fitted over ten folds of pairs
+\State $\bar p\gets\max(\hat p,\tau)$; \ $W\gets\hat Y+O\odot(Y-\hat Y)/\bar p$
+\State $C\gets d_u^{-\alpha}d_i^{-(1-\alpha)}$ with $d$ from $\hat Y$
+\State $G\gets\tW^\top\tW-\diag(\tW^\top\tW)+\diag(\mathbf 1^\top(C\odot C\odot W))$ \Comment{public operator}
+\For{each user $u$ (locally)}
+\State $\hat T_{u\cdot}\gets$ Eq.~\eqref{eq:local}; \ $s_u\gets a\,\tilde w_u+b\,\hat T_{u\cdot}$; rank unexposed items by $s_u$
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Control-variate family.}
+More generally, $W^\lambda_e=O_eY_e/\bar p_e+\lambda(\hat Y_e-O_e\hat Y_e/\bar p_e)$
+is unbiased for every $\lambda\in[0,1]$ under correct propensities. It
+interpolates between IPS ($\lambda=0$) and DR ($\lambda=1$, the only member that
+is also robust to propensity errors), and it equals the DR estimate with the
+shrunk imputation $\lambda\hat Y$. With $\bar p=p$ its variance is
+$\frac{1-p}{p}(Y-\lambda\hat Y)^2$. All results below hold for every member, and
+$\lambda$ is selected on validation data.
+
+\paragraph{Imputation.}
+Theorem~\ref{thm:unbiased} holds for any fixed $\hat Y$, so the imputation is a
+design choice; its accuracy enters the variance and the clipping bias
+(Theorem~\ref{thm:var}). We use an additive model $\mu+b_u+b_i$ fitted by
+IPS-weighted ridge regression, or that model plus a rank-32 residual $UV^\top$
+fitted by IPS-weighted alternating least squares. The additive imputation gives
+every user the same item order on unexposed candidates, which makes the one-hop
+DR term non-personalised; the low-rank imputation removes this limitation.
+
+\paragraph{Complexity and scale.}
+One $n\times n$ Gram product and $O(mn)$ reductions, i.e., the cost of the
+uncorrected operator. On KuaiRec (7{,}176 users, 10{,}728 items) one
+configuration takes under a minute on four CPU cores. The dense $W$ and $G$
+need $O(mn+n^2)$ memory, which limits the present implementation to catalogues
+of about $10^4$--$10^5$ items. Because the correction only modifies diagonals
+and row and column sums, it carries over to sparse or low-rank
+representations of $W$, but we have not evaluated catalogues of $10^6$ items.
+
+%======================================================================
+\section{Theory}
+%======================================================================
+
+Proofs are in Appendix~\ref{app:proofs}. Let $\varepsilon_e=|Y_e-\hat Y_e|$.
+
+\subsection{Unbiasedness and its limits}
+
+\begin{theorem}[Edge-wise double robustness]\label{thm:unbiased}
+Under Assumptions~\ref{as:unconf}--\ref{as:fixed}, let
+$\delta_e=(p_e/\bar p_e-1)(Y_e-\hat Y_e)$. Then $\E[\hat T_{ui}]$ equals $T^*_{ui}$
+with every distinct edge contributing $Y_e+\delta_e$ once. In particular, if
+every edge has a correct propensity or a correct imputation, then
+$\E[s]=F^*$.
+\end{theorem}
+
+Recommendations rank the \emph{unexposed} candidates of a user, and there
+the candidate's own edge estimate is deterministic ($W_{ui}=\hat Y_{ui}$ for DR,
+$0$ for IPS). The following corollary states what DRUP estimates on the
+candidate set.
+
+\begin{corollary}[Unexposed candidates]\label{cor:cand}
+Under the conditions of Theorem~\ref{thm:unbiased} with $\delta\equiv0$,
+\[
+\E[s_{ui}\mid O_{ui}=0]=F^*_{ui}-(Y_{ui}-\hat Y_{ui})\,g_{ui},\qquad
+g_{ui}=\frac{\partial F^*_{ui}}{\partial Y_{ui}}
+=C_{ui}\Big(a+b\big(\textstyle\sum_{v\neq u}C_{vi}^2Y_{vi}+\sum_{j\neq i}C_{uj}^2Y_{uj}+C_{ui}^2\big)\Big)\ge0 .
+\]
+For IPS edges the same holds with $\hat Y_{ui}=0$. The residual is the
+imputation error at the candidate itself, which no estimator built from the
+log can remove.
+\end{corollary}
+
+At three hops the walks through $(u,i)$ are exactly those counted in
+$g_{ui}$. With IPS edges they vanish on unexposed candidates, so the uncorrected
+IPS operator has no repeated-walk bias there; from five hops on, walks repeat
+edges that are not incident to the candidate (for example
+$u\!-\!j\!-\!v\!-\!j\!-\!v\!-\!i$) and the bias reappears
+(Table~\ref{tab:mc}).
+
+\begin{theorem}[Any odd number of hops]\label{thm:khop}
+For $K=2r+1$, a walk $U_0\!-\!J_1\!-\!U_1\!-\cdots-\!U_r\!-\!J_{r+1}$ has user
+variables $U_0,\dots,U_r$ and item variables $J_1,\dots,J_{r+1}$, with $U_0=u$
+and $J_{r+1}=i$. The equality pattern of an assignment is a pair $\pi$ of set
+partitions of the user and item variables, and $\pi$ fixes the multiplicity
+$k_e$ of every distinct edge. Let $g_\pi(\sigma)$ be the unconstrained
+contraction, over the blocks of a coarser pattern $\sigma\ge\pi$, of
+$\prod_eC_e^{k_e}W_e$ (corrected) or of $\prod_e\tW_e^{k_e}$ (plug-in), the
+product running over the distinct edges of $\pi$. Then
+\[
+\hat T^{(K)}=\tW(\tW^\top\tW)^r+\sum_{\pi:\,\exists k_e>1}\ \sum_{\sigma\ge\pi}\mu(\pi,\sigma)\big(g^{\mathrm{corr}}_\pi(\sigma)-g^{\mathrm{plug}}_\pi(\sigma)\big),
+\]
+with $\mu$ the Möbius function of the product of the two partition lattices,
+satisfies $\E\hat T^{(K)}=(\tY\tY^\top)^r\tY$ under the conditions of
+Theorem~\ref{thm:unbiased} with $\delta\equiv0$.
+\end{theorem}
+The number of pairs $(\pi,\sigma)$ is 5, 99 and 2{,}790 for $K=3,5,7$, and for
+$K=3$ the construction reduces to Eq.~\eqref{eq:drup}. Theorem~\ref{thm:unbiased},
+Corollary~\ref{cor:cand} and Theorem~\ref{thm:fair} carry over to any odd $K$.
+
+Assumption~\ref{as:unconf} excludes slates of fixed size, where exposures in a
+user's history are negatively dependent (Coat, for instance, collects exactly
+24 ratings per user). The next result bounds the resulting bias.
+
+\begin{proposition}[Exposure dependence within users]\label{prop:dep}
+Suppose that exposures are independent across users but may be dependent within
+a user's row, with $|\mathrm{Cov}(O_e,O_f\mid Y)|\le\rho\,p_ep_f$ for distinct $e,f$ in
+the same row. With correct propensities,
+\[
+\big|\E\hat T_{ui}-T^*_{ui}\big|\ \le\ \rho\sum_{j\neq i}C_{uj}\Big(\sum_{v\neq u}C_{vj}C_{vi}\,\varepsilon_{vj}\varepsilon_{vi}+C_{uj}C_{ui}\,\varepsilon_{uj}\varepsilon_{ui}\Big).
+\]
+For slates of $k$ items drawn uniformly without replacement, $\rho\le1/k$. For
+DR edges the bias is of second order in the imputation error; for IPS edges
+($\varepsilon=Y$) it is of first order.
+\end{proposition}
+
+\begin{theorem}[Repeated-walk bias of uncorrected propagation]\label{thm:lower}
+Let the propensities be correct and let $(u,i)$ be a candidate with $O_{ui}=0$.
+Relative to the conditional target of Corollary~\ref{cor:cand}, the
+uncorrected DR operator $\tW\tW^\top\tW$ has conditional bias
+\[
+C_{ui}\hat Y_{ui}\big(R_u^{(i)}+K_i\big)-C_{ui}^3\hat Y_{ui}(1-\hat Y_{ui}^2),\quad
+K_i=\sum_{v\neq u}C_{vi}^2V_{vi},\quad R_u^{(i)}=\sum_{j\neq i}C_{uj}^2V_{uj},
+\]
+where $V_e=\Var(W_e)=\frac{1-p_e}{p_e}\varepsilon_e^2$. Moreover:
+(a) $K_i\ge(1/\max_vp_{vi}-1)\sum_{v\neq u}C_{vi}^2\varepsilon_{vi}^2$, which is unbounded
+as the item's propensities vanish;
+(b) with clipped propensities $\bar p=\max(p,\tau)$, $\tau\le1/2$, the excess
+$C_e^2(\E[W_e^2]-\E[W_e])$ of a doubly traversed edge is at most
+$C_e^2(1/\tau-1)\varepsilon_e^2$, with equality at $p_e=\tau$; the worst-case
+repeated-walk bias is therefore $\Theta(1/\tau)$;
+(c) for IPS edges the conditional bias vanishes at three hops.
+DRUP has zero bias relative to the same target.
+\end{theorem}
+The within-user ranking is affected through $C_{ui}\hat Y_{ui}K_i$, which
+up-weights items whose other raters were rarely exposed; $R_u^{(i)}$ depends on
+$i$ only through one term.
+
+\begin{theorem}[Variance, clipping and concentration]\label{thm:var}
+Let $\Lambda_e(u,i)$ be the $C$-weighted mass of the walks from $u$ to $i$ through
+edge $e$, and $B=\max(1,1/\tau)$. Then
+(a) $\Var(W_e)\le\varepsilon_e^2/\tau$;
+(b) $\Var(\hat T_{ui})\le\frac{(1+1/\tau)^2}{\tau}\sum_e\varepsilon_e^2\Lambda_e(u,i)^2$;
+(c) if $\hat p=p$, so that clipping is the only source of bias,
+$|\E\hat T_{ui}-T^*_{ui}|\le3\bar\delta(1+\bar\delta)^2\sum_{j,v}C_{uj}C_{vj}C_{vi}$ with
+$\bar\delta=\max_e(1-p_e/\tau)_+\varepsilon_e$;
+(d) $\Pr(|\hat T_{ui}-\E\hat T_{ui}|\ge t)\le2\exp(-2t^2/\sum_ec_e^2)$ with
+$c_e=\varepsilon_eB^2\Lambda_e(u,i)/\tau$.
+\end{theorem}
+
+The variance scales with the imputation error $\varepsilon^2$, not with $Y^2$ as
+for IPS, and $\tau$ trades variance against a clipping bias that vanishes when
+$\hat Y$ is accurate. The constants are worst-case and loose; Section~\ref{sec:mc}
+compares bound (b) with the Monte-Carlo variance.
+
+\begin{definition}[Exposure elasticity]
+For an intervention $do(p_{\cdot i}\leftarrow\pi p_{\cdot i})$ on item $i$'s
+exposure mechanism, $\eta_i=\partial\log\E[s_{ui}]/\partial\log\pi$.
+\end{definition}
+
+\begin{theorem}[Exposure invariance]\label{thm:fair}
+Under Assumptions~\ref{as:unconf}--\ref{as:fixed} and $\pi p\ge\tau$, DRUP has
+$\eta_i=0$, also conditionally on $O_{ui}=0$: items with equal potential
+outcomes receive equal expected scores whatever their exposure history.
+Logged-graph propagation has $\eta_i\ge1$ (popularity amplification).
+Uncorrected DR propagation has $\eta_i<0$ whenever $\hat Y_{ui}K_i>0$
+(over-correction).
+\end{theorem}
+
+Exposure invariance is a statement about expected scores. It is not a
+distributive fairness criterion, and it is conditional: when many propensities
+lie below the clip, $\pi p\ge\tau$ fails and invariance is lost
+(Section~\ref{sec:fair}).
+
+\subsection{Structural properties of linear propagation}\label{sec:structth}
+
+The remaining results use only that, given the nuisances, $s$ is a fixed
+linear function of the edge estimates. They hold for DRUP and equally for
+the uncorrected operators and for linear LightGCN, and they describe the
+recommender with its nuisances held fixed.
+
+\begin{proposition}[Affine in the user's own data]\label{prop:affine}
+Fix $u$ and a candidate $i$ with $O_{ui}=0$, and let $G^{(-u)}$ be $G$ without
+$u$'s own contribution. With frozen nuisances,
+$s_{ui}=\mathrm{const}+\sum_{j\neq i}\big(c_{uj}G^{(-u)}_{ji}+c_{ui}w_{ui}c_{uj}^2\big)w_{uj}$.
+Hence un-logging interaction $j$, i.e., replacing $w_{uj}$ by its unlogged
+value $\hat Y_{uj}$, changes $s_{ui}$ by exactly $\phi_j=a_j(w_{uj}-\hat Y_{uj})$,
+removal effects add up over any subset, and completeness holds exactly.
+\end{proposition}
+Because the removal game is additive, the $\phi_j$ are also its Shapley values;
+this is a consequence of linearity, and the attribution is relative to the
+stated baseline~\cite{kumar2020shapley}.
+
+\begin{theorem}[Optimal minimal counterfactual explanation]\label{thm:cf}
+For candidates $i,k$ with $s_{ui}>s_{uk}$, sorting $g_j=\phi^{(i)}_j-\phi^{(k)}_j$ in
+decreasing order and removing interactions until the cumulative sum exceeds the
+margin yields a minimum-cardinality set whose removal makes $k$ outrank $i$.
+If the positive $g_j$ do not sum above the margin, no such set exists. The
+cost is $O(n+d_u\log d_u)$.
+\end{theorem}
+
+\begin{theorem}[Certificates against injected profiles, frozen nuisances]\label{thm:robust}
+With frozen nuisances, one injected user $v$ changes $u$'s three-hop score of item
+$k$ by $\Delta_k=x_k(D+a_kc_{vk})-a_kx_k^2$, where $a=\tilde w_u$, $x=c_v\odot w_v$
+and $D=\langle a,x\rangle$. If $v$ logs at most $L$ interactions with arbitrary
+items, labels and propensities $\ge\tau$, then $D$ and $x_k$ lie in closed-form
+intervals. $\Delta_k$ is linear in $D$ and quadratic in $x_k$, so its extremes
+$[\underline\Delta_k,\overline\Delta_k]$ over this box are exact. Item $t$
+provably stays out of $u$'s top-$K$ against any $F$ such users if
+$s_{ut}+F\overline\Delta_t$ is below the $(K{+}1)$-th largest value of
+$s_{uk}+F\underline\Delta_k$ over the other candidates. With unclipped IPS, the
+influence of a single interaction is unbounded.
+\end{theorem}
+The same argument certifies the uncorrected operators (with
+$\Delta_k=x_kD$). Degrees taken from $\hat Y$ make the fake user's weight $c_v$
+known; degrees taken from $W$ would be attacker-controlled.
+
+\begin{theorem}[Joint differential privacy with public nuisances]\label{thm:dp}
+Let the population-level parts of the nuisances (the propensity model, the
+item parameters of $\hat Y$, the item degrees in $C$ and the radius $R$) be
+computed from public data, and every user-level part from the user's own row.
+Scale each private row so that $\|\tilde w_v\|_2\le R$ and
+$\|c_v^{\odot2}\odot w_v\|_2\le R^2$. Releasing $G$, computed over the private
+rows, plus symmetric Gaussian noise of scale
+$\sigma=\sigma_{\mathrm{aG}}(\epsilon,\delta;2R^2)$, the analytic Gaussian
+calibration~\cite{balle2018analytic}, is $(\epsilon,\delta)$-DP under adding or
+removing one user, for every $\epsilon>0$. Scoring by~\eqref{eq:local} uses only
+the release and the user's own row, so the recommender is $(\epsilon,\delta)$-jointly
+DP~\cite{hsu2014matchings}. Post-processing such as low-rank denoising is free.
+\end{theorem}
+Row scaling changes the estimate for users whose rows exceed $R$, so
+Theorems~\ref{thm:unbiased} and~\ref{thm:fair} hold for the private variant only
+up to this shrinkage.
+
+\begin{theorem}[Exposure-capped allocation]\label{thm:alloc}
+Let $N$ users each receive $K$ of their candidates and let item $i$ be
+recommended to at most $\mathrm{cap}_i$ users. Let $\hat x$ maximise $\langle x,s\rangle$
+over such allocations. The constraint matrix is totally unimodular, so the
+linear relaxation has an integral optimum, and min-cost flow on the scores
+rounded to a grid of $L$ levels finds $\hat x$ exactly up to the rounding gap
+$\Gamma\le NK(\max s-\min s)/L$. All caps hold, at least $NK/\max_i\mathrm{cap}_i$
+items are recommended, and for the full-exposure utility $U(x)=\langle x,F^*\rangle$,
+\[
+U(\hat x)\ \ge\ \max_{x}U(x)-\Gamma-2\max_x|\langle x,s-F^*\rangle| .
+\]
+If $\E s=F^*$ (DRUP with correct propensities), Theorem~\ref{thm:var}(d) and a
+union bound give $\max_x|\langle x,s-F^*\rangle|\le NK\,t_\delta$ with probability
+$1-\delta$, where $t_\delta=\max_{u,i}\big(\tfrac12\sum_ec_e(u,i)^2\ln(2|\mathcal C|/\delta)\big)^{1/2}$
+and $\mathcal C$ is the candidate set. For logged-graph propagation,
+$\E s=F^*(P\odot Y)$, and the last term does not vanish.
+\end{theorem}

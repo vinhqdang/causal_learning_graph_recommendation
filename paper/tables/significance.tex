@@ -1,53 +1,22 @@
-\begin{tabular}{llccc}
+\begin{tabular}{lcccccc}
 \toprule
-Data & comparison & splits & mean diff. & $p$ (paired $t$)\\
+DRUP against & \multicolumn{2}{c}{Coat} & \multicolumn{2}{c}{Yahoo!\,R3} & \multicolumn{2}{c}{KuaiRec}\\
+ & $\Delta$ [95\% CI] & $p_{\mathrm{Holm}}$ & $\Delta$ [95\% CI] & $p_{\mathrm{Holm}}$ & $\Delta$ [95\% CI] & $p_{\mathrm{Holm}}$\\
 \midrule
-Coat & DRUP vs Pop & 10 & +0.0159 & 0.0021\\
-Coat & DRUP vs Impute & 10 & -0.0136 & 0.000517\\
-Coat & DRUP vs Obs & 10 & -0.0044 & 0.356\\
-Coat & DRUP vs IPS & 10 & +0.0088 & 0.249\\
-Coat & DRUP vs IPS+WC & 10 & +0.0088 & 0.249\\
-Coat & DRUP vs DR & 10 & -0.0060 & 0.00272\\
-Coat & DRUP vs MF & 10 & +0.0908 & 8.78e-08\\
-Coat & DRUP vs IPS-MF & 10 & +0.0957 & 5.91e-07\\
-Coat & DRUP vs DR-MF & 10 & +0.0170 & 0.000639\\
-Coat & DRUP vs LightGCN & 10 & +0.0449 & 2.08e-06\\
-Coat & DRUP vs NAVIP & 10 & +0.0533 & 3.06e-05\\
-Coat & DRUP vs DR-LightGCN & 10 & -0.0033 & 0.635\\
-\midrule
-KuaiRec & DRUP-LR vs Pop & 5 & +0.0619 & 2.23e-07\\
-KuaiRec & DRUP-LR vs Impute & 5 & +0.0170 & 7.68e-05\\
-KuaiRec & DRUP-LR vs Obs & 5 & +0.0348 & 9.72e-07\\
-KuaiRec & DRUP-LR vs IPS & 5 & +0.0431 & 1.72e-07\\
-KuaiRec & DRUP-LR vs IPS+WC & 5 & +0.0431 & 1.72e-07\\
-KuaiRec & DRUP-LR vs DR & 5 & +0.0067 & 0.00233\\
-KuaiRec & DRUP-LR vs DRUP (additive $\hat Y$) & 5 & +0.0059 & 0.00664\\
-KuaiRec & DRUP-LR vs Impute-LR & 5 & +0.0879 & 6.25e-08\\
-KuaiRec & DRUP-LR vs MF & 5 & +0.0065 & 0.00464\\
-KuaiRec & DRUP-LR vs IPS-MF & 5 & +0.0098 & 0.000462\\
-KuaiRec & DRUP-LR vs DR-MF & 5 & +0.0194 & 8.98e-05\\
-KuaiRec & DRUP-LR vs LightGCN & 5 & +0.0085 & 0.00569\\
-KuaiRec & DRUP-LR vs NAVIP & 5 & +0.0082 & 0.00549\\
-KuaiRec & DRUP-LR vs DR-LightGCN & 5 & +0.0137 & 0.000886\\
-KuaiRec & DRUP-5hop-LR vs MF & 5 & +0.0083 & 0.00518\\
-KuaiRec & DRUP-5hop-LR vs IPS-MF & 5 & +0.0116 & 0.000172\\
-KuaiRec & DRUP-5hop-LR vs DR-MF & 5 & +0.0212 & 6.07e-06\\
-KuaiRec & DRUP-5hop-LR vs LightGCN & 5 & +0.0102 & 0.000764\\
-KuaiRec & DRUP-5hop-LR vs NAVIP & 5 & +0.0100 & 0.000504\\
-KuaiRec & DRUP-5hop-LR vs DR-LightGCN & 5 & +0.0155 & 0.000193\\
-KuaiRec & DRUP-5hop-LR vs DRUP-LR (3 hops) & 5 & +0.0018 & 0.112\\
-\midrule
-Yahoo!\,R3 & DRUP vs Pop & 5 & +0.1289 & 6.31e-08\\
-Yahoo!\,R3 & DRUP vs Impute & 5 & +0.1379 & 1.29e-05\\
-Yahoo!\,R3 & DRUP vs Obs & 5 & +0.0035 & 0.00117\\
-Yahoo!\,R3 & DRUP vs IPS & 5 & +0.0000 & identical\\
-Yahoo!\,R3 & DRUP vs IPS+WC & 5 & +0.0000 & identical\\
-Yahoo!\,R3 & DRUP vs DR & 5 & +0.0000 & identical\\
-Yahoo!\,R3 & DRUP vs MF & 5 & +0.1550 & 9.02e-06\\
-Yahoo!\,R3 & DRUP vs IPS-MF & 5 & +0.1505 & 6.06e-06\\
-Yahoo!\,R3 & DRUP vs DR-MF & 5 & +0.1534 & 1.96e-06\\
-Yahoo!\,R3 & DRUP vs LightGCN & 5 & +0.0743 & 0.000108\\
-Yahoo!\,R3 & DRUP vs NAVIP & 5 & +0.0707 & 0.00018\\
-Yahoo!\,R3 & DRUP vs DR-LightGCN & 5 & +0.1012 & 2.05e-05\\
+DR adjacency (effect of the correction) & +0.0020 [-0.003, +0.007] & 1.000 & -- & -- & -- & --\\
+DR adjacency, 5 hops (effect of the correction) (5 hops) & -- & -- & -- & -- & -- & --\\
+linear LightGCN on the logged graph & -0.0097 [-0.049, +0.029] & 1.000 & -- & -- & -- & --\\
+imputation only & -0.0057 [-0.016, +0.004] & 1.000 & -- & -- & -- & --\\
+GF-CF & -0.0043 [-0.043, +0.034] & 1.000 & -- & -- & -- & --\\
+EASE & +0.0061 [-0.033, +0.045] & 1.000 & -- & -- & -- & --\\
+GF-CF on DR graph & -0.0102 [-0.017, -0.004] & 0.058 & -- & -- & -- & --\\
+EASE on DR graph & -0.0074 [-0.021, +0.006] & 1.000 & -- & -- & -- & --\\
+LightGCN (BPR) & -0.0248 [-0.058, +0.008] & 1.000 & -- & -- & -- & --\\
+r-AdjNorm & -0.0294 [-0.063, +0.004] & 1.000 & -- & -- & -- & --\\
+NAVIP & -0.0212 [-0.054, +0.012] & 1.000 & -- & -- & -- & --\\
+MF (BPR) & +0.0372 [+0.007, +0.067] & 0.287 & -- & -- & -- & --\\
+DR-MF & +0.0235 [+0.002, +0.045] & 0.627 & -- & -- & -- & --\\
+PDA & +0.0277 [-0.004, +0.060] & 1.000 & -- & -- & -- & --\\
+DR-LightGCN & +0.0004 [-0.021, +0.022] & 1.000 & -- & -- & -- & --\\
 \bottomrule
 \end{tabular}

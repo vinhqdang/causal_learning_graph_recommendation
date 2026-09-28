@@ -1,0 +1,71 @@
+\subsection{Monte-Carlo checks}\label{sec:mc}
+
+Table~\ref{tab:mc} uses a synthetic MNAR model with known propensities: 30 users,
+40 items, low-rank preferences, and exposures driven by user activity, item
+popularity and the outcome itself (median propensity 0.06, a third of the
+pairs below 0.05). We draw 20{,}000 exposure matrices for three hops and 4{,}000
+for five hops.
+
+\begin{table}[t]\centering\small
+\caption{Monte-Carlo check of Theorems~\ref{thm:unbiased}, \ref{thm:khop}, \ref{thm:lower}
+and~\ref{thm:fair} and Corollary~\ref{cor:cand}. Relative $|$bias$|$ is the mean absolute
+bias divided by the mean target, over all entries and conditionally on unexposed
+candidates (against the conditional target of Corollary~\ref{cor:cand}). Kendall
+$\tau$ is the mean within-user rank agreement of one realisation with the
+full-exposure target on unexposed candidates. $\eta$ is the exposure elasticity
+(separate model, 3{,}000 replications).}\label{tab:mc}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/mc.tex}
+\end{adjustbox}
+\end{table}
+
+Over all entries, the uncorrected IPS and DR operators are biased by 2.3 and 1.8
+times the mean target at three hops, and by 15 and 8 times at five hops. With
+the correction the residual bias (0.02--0.06) is at the level of the
+Monte-Carlo error. On unexposed candidates the picture is the one predicted by
+Corollary~\ref{cor:cand}: the uncorrected IPS operator is unbiased at three
+hops (0.029, identical to IPS with the correction) but not at five hops (4.7),
+and the uncorrected DR operator is biased at both depths (1.1 and 5.1). The
+exposure elasticity is $+1.78$ for the logged graph, $-0.19$ for DR adjacency and
+$+0.005$ for DRUP. The $K$-hop engine reproduces the closed-form three-hop
+operator to $7\times10^{-15}$ and brute-force enumeration of all five-hop walks to
+$10^{-13}$.
+
+Unbiasedness does not buy ranking accuracy in this model. The rank agreement
+of a single realisation with the target is higher for the uncorrected DR
+operator (Kendall $\tau=0.20$) than for DRUP (0.12), and at five hops 0.11 against
+0.09. The reason is visible in Theorem~\ref{thm:lower}: on unexposed candidates
+the bias is $C_{ui}\hat Y_{ui}(R_u^{(i)}+K_i)$, which adds a positive multiple of the
+imputation to the score, and here the imputation is informative. The corrected
+operator removes this term and, with it, some useful signal. For IPS edges,
+whose bias does not involve the imputation, the correction leaves the rank
+agreement unchanged (0.061 against 0.059 at five hops).
+
+\begin{table}[t]\centering\small
+\caption{Stress tests outside Assumption~\ref{as:unconf} and with misspecified
+propensities (log-normal noise with $\sigma=0.5$). Relative $|$bias$|$ on unexposed
+candidates.}\label{tab:stress}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/mc_stress.tex}
+\end{adjustbox}
+\end{table}
+
+Table~\ref{tab:stress} leaves the assumptions of Theorem~\ref{thm:unbiased}. With
+fixed-size slates (every user sees exactly $k_u$ items, drawn without
+replacement, so exposures within a user are negatively dependent with
+$\rho\approx0.29$), IPS picks up a first-order bias (0.22 at three hops), whereas
+DRUP stays at 0.024, as Proposition~\ref{prop:dep} predicts for DR edges. With
+misspecified propensities and an exact imputation, both DR operators remain
+exactly unbiased, the double robustness of Theorem~\ref{thm:unbiased}; with a
+noisy imputation DRUP's bias is 0.16, against 0.57 for IPS and 1.9 for the
+uncorrected DR operator. Finally, the variance and concentration bounds of
+Theorem~\ref{thm:var} were never violated, but they are loose
+(Table~\ref{tab:bounds}): by a factor of $5\cdot10^2$--$8\cdot10^3$ for the variance and
+$7\cdot10^1$--$2\cdot10^3$ for the deviation at level 0.05. They describe how the error
+scales with $\tau$ and the imputation error, not its size.
+
+\begin{table}[t]\centering\small
+\caption{Tightness of Theorem~\ref{thm:var} in a 12-user, 15-item model (20{,}000
+replications, all propensities $\ge\tau$), over all $(u,i)$.}\label{tab:bounds}
+\input{tables/bounds.tex}
+\end{table}

@@ -1,0 +1,181 @@
+\section{Proofs}\label{app:proofs}
+
+Throughout, expectations are conditional on $Y$, and ``walk'' means a
+three-hop walk $u\!-\!j\!-\!v\!-\!i$ unless stated otherwise. Its edges are
+$(u,j)$, $(v,j)$ and $(v,i)$.
+
+\paragraph{Equations~\eqref{eq:drup} and~\eqref{eq:local}.}
+Split the plug-in sum $(\tW\tW^\top\tW)_{ui}=\sum_{j,v}\tW_{uj}\tW_{vj}\tW_{vi}$ by walk
+type (Figure~\ref{fig:walks}): (a) $v\ne u$, $j\ne i$; (b) $v=u$, $j\ne i$, giving
+$\sum_{j\ne i}\tW_{uj}^2\tW_{ui}$; (c) $v\ne u$, $j=i$, giving
+$\sum_{v\ne u}\tW_{ui}\tW_{vi}^2$; (d) $v=u$, $j=i$, giving $\tW_{ui}^3$. The
+corrected estimator keeps (a) and replaces (b)--(d) by
+$\sum_{j\ne i}C_{uj}^2W_{uj}\tW_{ui}$, $\sum_{v\ne u}\tW_{ui}C_{vi}^2W_{vi}$ and
+$C_{ui}^3W_{ui}$. The difference between plug-in and corrected sums is
+$\tW_{ui}\sum_{j\ne i}\Delta_{uj}+\tW_{ui}\sum_{v\ne u}\Delta_{vi}+(\tW_{ui}^3-C_{ui}^3W_{ui})
+=\tW_{ui}(r_u-\Delta_{ui})+\tW_{ui}(\kappa_i-\Delta_{ui})+(\tW_{ui}^3-C_{ui}^3W_{ui})$,
+which is Eq.~\eqref{eq:drup}. For Eq.~\eqref{eq:local},
+$(\tilde w_uG)_i=\sum_{j\ne i}\tW_{uj}(\tW^\top\tW)_{ji}+\tW_{ui}\sum_vC_{vi}^2W_{vi}
+=(\tW\tW^\top\tW)_{ui}-\tW_{ui}\kappa_i+\tW_{ui}\sum_vC_{vi}^2W_{vi}$, and substituting
+into Eq.~\eqref{eq:drup} cancels the $\kappa_i$ terms. \qed
+
+\paragraph{Theorem~\ref{thm:unbiased}.}
+By the decomposition above, the corrected estimator is a sum over walks of
+$\prod_{e}C_e^{k_e}W_e$, the product running over the \emph{distinct} edges of the
+walk with multiplicities $k_e$. Under Assumptions~\ref{as:unconf}--\ref{as:fixed}
+the $W_e$ of distinct edges are independent, so the expectation factorises,
+with $\E W_e=\hat Y_e+p_e(Y_e-\hat Y_e)/\bar p_e=Y_e+\delta_e$. The target walk
+monomial is $\prod_eC_e^{k_e}Y_e^{k_e}=\prod_eC_e^{k_e}Y_e$ because
+$Y_e\in\{0,1\}$. The one-hop term is unbiased edge by edge. \qed
+
+\paragraph{Corollary~\ref{cor:cand}.}
+Given $O_{ui}=0$, $W_{ui}=\hat Y_{ui}$ is deterministic and the other edge
+estimates keep their distribution (Assumption~\ref{as:unconf}). The edge $(u,i)$
+belongs to the one-hop term and to exactly the walks of types (b), (c) and (d).
+In each of them it contributes $C_{ui}^{k}\hat Y_{ui}$ instead of $C_{ui}^kY_{ui}$,
+and every other distinct edge contributes its mean $Y_e$. After the idempotent
+reduction, $F^*_{ui}$ is affine in $Y_{ui}$, so
+$\E[s_{ui}\mid O_{ui}=0]=F^*_{ui}|_{Y_{ui}\leftarrow\hat Y_{ui}}=F^*_{ui}-(Y_{ui}-\hat Y_{ui})\,\partial F^*_{ui}/\partial Y_{ui}$.
+The derivative collects $aC_{ui}$ from the one-hop term,
+$bC_{ui}\sum_{j\ne i}C_{uj}^2Y_{uj}$ from type (b),
+$bC_{ui}\sum_{v\ne u}C_{vi}^2Y_{vi}$ from type (c) and $bC_{ui}^3$ from type (d).
+For IPS edges, $W_{ui}=0$ given $O_{ui}=0$. \qed
+
+\paragraph{Theorem~\ref{thm:khop}.}
+Fix $u$ and $i$. For an assignment $\varphi$ of values to the free variables, let
+$\pi(\varphi)$ be its equality pattern. Two walk edges $(U_s,J_t)$ and
+$(U_{s'},J_{t'})$ coincide if and only if $U_s,U_{s'}$ share a user block and
+$J_t,J_{t'}$ share an item block, so the distinct edges and their
+multiplicities $k_e$ depend on $\pi(\varphi)$ only. For a pattern $\pi$, let
+$F_\pi(\varphi)=\prod_\epsilon X^{(k_\epsilon)}_{\varphi(\epsilon)}$, the product over the
+distinct edges $\epsilon$ of $\pi$, with $X^{(k)}=C^{\odot k}\odot W$ (corrected) or
+$X^{(k)}=\tW^{\odot k}$ (plug-in). The plug-in $K$-hop product equals
+$\sum_\pi S^{\mathrm{plug}}_\pi$ and the corrected estimator is
+$\sum_\pi S^{\mathrm{corr}}_\pi$, where $S_\pi=\sum_{\varphi:\pi(\varphi)=\pi}F_\pi(\varphi)$. The two
+coincide for patterns without a repeated edge, which gives the form of
+$\hat T^{(K)}$ once each $S_\pi$ is written through unconstrained sums. For
+$\sigma\ge\pi$ let $g_\pi(\sigma)=\sum_{\varphi:\pi(\varphi)\ge\sigma}F_\pi(\varphi)$: variables in the
+same block of $\sigma$ are equal and values of different blocks are unrestricted,
+so $g_\pi(\sigma)$ is a single tensor contraction over the blocks of $\sigma$ (with
+the blocks of $U_0$ and $J_{r+1}$ fixed to $u$ and $i$). Grouping the terms of
+$g_\pi(\sigma)$ by their exact pattern gives $g_\pi(\sigma)=\sum_{\tau\ge\sigma}f_\pi(\tau)$ with
+$f_\pi(\tau)=\sum_{\varphi:\pi(\varphi)=\tau}F_\pi(\varphi)$. Möbius inversion on the interval
+$[\pi,\hat1]$ of the product of the two partition lattices~\cite{rota1964} yields
+$S_\pi=f_\pi(\pi)=\sum_{\sigma\ge\pi}\mu(\pi,\sigma)\,g_\pi(\sigma)$, where
+$\mu(\pi,\sigma)=\prod_{B}(-1)^{b_B-1}(b_B-1)!$ over the blocks $B$ of $\sigma$ in both
+lattices and $b_B$ is the number of blocks of $\pi$ merged into $B$. Finally, for
+every $\varphi$ with $\pi(\varphi)=\pi$ the distinct edges are independent, so
+$\E F^{\mathrm{corr}}_\pi(\varphi)=\prod_\epsilon C_{\varphi(\epsilon)}^{k_\epsilon}Y_{\varphi(\epsilon)}$, which is the
+corresponding monomial of $(\tY\tY^\top)^r\tY$ since $Y$ is binary. The number of
+contraction terms is the number of pairs $(\pi,\sigma)$ with $\sigma\ge\pi$ and $\pi$
+containing a repeated edge, which is 5, 99 and 2{,}790 for $K=3,5,7$. \qed
+
+\paragraph{Proposition~\ref{prop:dep}.}
+With correct propensities $\E W_e=Y_e$, and for distinct $e,f$ in the same row
+$\mathrm{Cov}(W_e,W_f)=(Y_e-\hat Y_e)(Y_f-\hat Y_f)\,\mathrm{Cov}(O_e,O_f)/(p_ep_f)$, so
+$|\mathrm{Cov}(W_e,W_f)|\le\rho\,\varepsilon_e\varepsilon_f$. In a type (a) walk the edge $(u,j)$
+lies in row $u$ and the edges $(v,j),(v,i)$ in row $v\ne u$; rows are independent,
+so $\E[W_{uj}W_{vj}W_{vi}]=Y_{uj}(Y_{vj}Y_{vi}+\mathrm{Cov}(W_{vj},W_{vi}))$ and the bias of
+the walk is at most $C_{uj}C_{vj}C_{vi}\rho\,\varepsilon_{vj}\varepsilon_{vi}$. A corrected type (b)
+walk contributes $C_{uj}^2C_{ui}W_{uj}W_{ui}$ with two edges in row $u$, with bias
+at most $C_{uj}^2C_{ui}\rho\,\varepsilon_{uj}\varepsilon_{ui}$. Type (c) walks have their two
+distinct edges in different rows and type (d) walks a single edge, so they are
+unbiased. Summing gives the bound. For $k$ of $n$ items drawn uniformly,
+$\Pr(O_e=O_f=1)=k(k-1)/(n(n-1))$, so
+$|\mathrm{Cov}(O_e,O_f)|/(p_ep_f)=(n-k)/(k(n-1))\le1/k$. \qed
+
+\paragraph{Theorem~\ref{thm:lower}.}
+By the decomposition of Eq.~\eqref{eq:drup}, the plug-in minus the corrected
+operator is $\tW_{ui}\sum_{j\ne i}\Delta_{uj}+\tW_{ui}\sum_{v\ne u}\Delta_{vi}+(\tW_{ui}^3-C_{ui}^3W_{ui})$.
+Given $O_{ui}=0$, $\tW_{ui}=C_{ui}\hat Y_{ui}$ is deterministic and the other
+$\Delta_e$ keep their distribution. With correct propensities and binary $Y$,
+$\E\Delta_e=C_e^2(\E W_e^2-\E W_e)=C_e^2(\Var W_e+Y_e^2-Y_e)=C_e^2V_e$ with
+$V_e=\frac{1-p_e}{p_e}\varepsilon_e^2$, which gives the stated bias, the last term being
+$C_{ui}^3(\hat Y_{ui}^3-\hat Y_{ui})$. Part (a) uses $(1-p)/p\ge1/\max_vp_{vi}-1$. For
+(b), with $\mu_e=\E W_e\in[0,1]$, $\E W_e^2-\E W_e=\Var W_e-\mu_e(1-\mu_e)\le\Var W_e
+=p_e(1-p_e)\varepsilon_e^2/\bar p_e^2$. If $p_e\ge\tau$ this is
+$\frac{1-p_e}{p_e}\varepsilon_e^2\le(1/\tau-1)\varepsilon_e^2$; if $p_e<\tau\le1/2$ it is
+$p_e(1-p_e)\varepsilon_e^2/\tau^2<\tau(1-\tau)\varepsilon_e^2/\tau^2$ because $p(1-p)$ increases on
+$[0,1/2]$. At $p_e=\tau$, $\mu_e=Y_e$ and the bound is attained; setting all
+$p_{vi}=\tau$ gives a bias $C_{ui}\hat Y_{ui}(1/\tau-1)\sum_{v\ne u}C_{vi}^2\varepsilon_{vi}^2$, so the
+worst case is $\Theta(1/\tau)$. For (c), IPS gives $\tW_{ui}=0$ and $C_{ui}^3W_{ui}=0$
+given $O_{ui}=0$. \qed
+
+\paragraph{Theorem~\ref{thm:var}.}
+(a) $\Var(W_e)=p_e(1-p_e)\varepsilon_e^2/\bar p_e^2$; if $p_e\ge\tau$ it is at most
+$(1/\tau-1)\varepsilon_e^2$, otherwise at most $p_e\varepsilon_e^2/\tau^2<\varepsilon_e^2/\tau$.
+(b) $\hat T_{ui}$ is multilinear in the independent $W_e$ and hence affine in each
+of them. The Efron--Stein inequality~\cite{efron1981jackknife} gives
+$\Var(\hat T)\le\sum_e\E[(\partial_e\hat T)^2]\Var(W_e)$. The derivative $\partial_e\hat T$
+is a sum over the walks through $e$ of $C$-weights times at most two other
+independent $W_f$, and $\E W_f^2=\mu_f^2+\Var W_f\le1+1/\tau$. Minkowski's
+inequality bounds $\|\partial_e\hat T\|_2\le(1+1/\tau)\Lambda_e$.
+(c) By Theorem~\ref{thm:unbiased}, the bias is at most
+$\sum_{\text{walks}}|\kappa_{\text{walk}}|\,[\prod_f(Y_f+|\delta_f|)-\prod_fY_f]\le((1+\bar\delta)^3-1)\sum_{j,v}C_{uj}C_{vj}C_{vi}$,
+and $(1+x)^3-1\le3x(1+x)^2$. With $\hat p=p$, $|\delta_e|=(1-p_e/\tau)_+\varepsilon_e$.
+(d) Changing $O_e$ moves $W_e$ by at most $\varepsilon_e/\tau$. Every edge estimate
+satisfies $|W_f|\le B$, so $|\partial_e\hat T|\le B^2\Lambda_e$, and McDiarmid's
+inequality~\cite{mcdiarmid1989} applies. \qed
+
+\paragraph{Theorem~\ref{thm:fair}.}
+If $\pi p\ge\tau$ the clip does not bind after the intervention, so the
+propensities remain correct. DRUP: by Theorem~\ref{thm:unbiased}, $\E[s]=F^*$,
+and by Corollary~\ref{cor:cand}, $\E[s\mid O_{ui}=0]$ is $F^*$ with $Y_{ui}$ replaced by
+the fixed $\hat Y_{ui}$; neither depends on $\pi$. Logged graph: $\E[O_eY_e]=p_eY_e$,
+and every walk that ends at $i$ contains $k\ge1$ edges incident to $i$, so its
+expectation scales as $\pi^k$ and $\eta_i$ is an average of such $k$. Uncorrected
+DR: by Theorem~\ref{thm:lower}, $\E[s_{ui}\mid O_{ui}=0]$ equals the DRUP target plus
+$C_{ui}\hat Y_{ui}(R_u^{(i)}+K_i(\pi))$ minus a term free of $\pi$; $R_u^{(i)}$ involves
+no edge of item $i$, and $K_i(\pi)=\sum_{v\ne u}C_{vi}^2\frac{1-\pi p_{vi}}{\pi p_{vi}}\varepsilon_{vi}^2$ is
+strictly decreasing in $\pi$. \qed
+
+\paragraph{Proposition~\ref{prop:affine} and Theorem~\ref{thm:cf}.}
+With frozen nuisances, substitute
+$G=G^{(-u)}+\tilde w_u^\top\tilde w_u-\diag(\tilde w_u^2)+\diag(c_u^2w_u)$
+into~\eqref{eq:local}. The terms $\tilde w_{ui}\sum_j\tilde w_{uj}^2$ cancel against the
+local correction, leaving $\tilde w_{ui}\sum_jc_{uj}^2w_{uj}$, and every remaining term
+involving $w_{uj}$ ($j\neq i$) is linear. Un-logging $j$ replaces $w_{uj}$ by
+$\hat Y_{uj}$, which changes $s_{ui}$ by $a_j(w_{uj}-\hat Y_{uj})$; the game is additive, so
+its Shapley values are the individual effects. For Theorem~\ref{thm:cf}, the
+margin after removing $S$ is $s_{ui}-s_{uk}-\sum_{j\in S}g_j$, so minimising $|S|$
+under $\sum_Sg_j>$ margin selects the largest $g_j$. \qed
+
+\paragraph{Theorem~\ref{thm:robust}.}
+Adding row $v$ adds $\mathrm{contrib}_v$ to $G$ and leaves $u$'s local terms
+unchanged, so $\Delta=\tilde w_u\,\mathrm{contrib}_v=(a\cdot x)x-a\odot x^2+a\odot c_v\odot x$.
+A logged DR entry satisfies $w\in[\hat Y-\hat Y/\tau,\hat Y+(1-\hat Y)/\tau]$ for any label
+and any $p\ge\tau$, and an unlogged one equals $\hat Y$. $D$ is maximised
+(minimised) by assigning the $L$ slots to the largest positive (negative)
+deviations. For fixed $x_k$ the effect is linear in $D$, so its extremes are at
+the ends of the $D$ interval; for fixed $D$ it is quadratic in $x_k$, with
+extremes at the ends or at the clamped vertex. Effects add over fake users. For
+unclipped IPS, $|W_e|=1/p_e$ is unbounded. \qed
+
+\paragraph{Theorem~\ref{thm:dp}.}
+Because the population-level nuisances are public and every user-level part
+depends only on the user's own row, adding or removing user $v$ changes $G$ by
+$\mathrm{contrib}_v$ alone. With the row scaling,
+$\|\mathrm{contrib}_v\|_F\le\|\tilde w_v\tilde w_v^\top-\diag(\tilde w_v^2)\|_F+\|c_v^2w_v\|_2\le R^2+R^2$,
+so the $\ell_2$-sensitivity of the upper triangle is at most $2R^2$. The analytic
+Gaussian mechanism is $(\epsilon,\delta)$-DP for every $\epsilon>0$ exactly when
+$\Phi(\frac{\Delta}{2\sigma}-\frac{\epsilon\sigma}{\Delta})-e^\epsilon\Phi(-\frac{\Delta}{2\sigma}-\frac{\epsilon\sigma}{\Delta})\le\delta$
+(Theorem~8 of~\cite{balle2018analytic}); we use the smallest such $\sigma$. The
+classical calibration $\sigma=\Delta\sqrt{2\ln(1.25/\delta)}/\epsilon$~\cite{dwork2014algorithmic}
+is only valid for $\epsilon<1$. Each user's output is a function of the release and
+the user's own data, which gives joint DP by the billboard
+lemma~\cite{hsu2014matchings}. \qed
+
+\paragraph{Theorem~\ref{thm:alloc}.}
+The allocation polytope is defined by the incidence matrix of the bipartite
+user--candidate graph with degree bounds, which is totally unimodular, so the
+linear relaxation has an integral optimal vertex and min-cost flow finds it.
+Rounding changes each score by at most $h/2$ with $h=(\max s-\min s)/L$. If
+$x^\star$ is optimal for $s$ and $\hat x$ for the rounded scores $\tilde s$, then
+$\langle x^\star,s\rangle\le\langle x^\star,\tilde s\rangle+NKh/2\le\langle\hat x,\tilde s\rangle+NKh/2\le\langle\hat x,s\rangle+NKh$, so
+$\Gamma\le NKh$. Each item is recommended at most $\max_i\mathrm{cap}_i$ times and $NK$
+slots are filled, which gives the coverage bound. With $x_F$ optimal for $U$,
+$U(\hat x)\ge\langle\hat x,s\rangle-|\langle\hat x,s-F^*\rangle|\ge\langle x_F,s\rangle-\Gamma-|\langle\hat x,s-F^*\rangle|
+\ge U(x_F)-\Gamma-2\max_x|\langle x,s-F^*\rangle|$. If $\E s=F^*$, Theorem~\ref{thm:var}(d)
+applied to every candidate pair and a union bound give
+$|s_{ui}-F^*_{ui}|\le t_\delta$ for all candidate pairs with probability $1-\delta$, and an
+allocation sums $NK$ such terms. \qed

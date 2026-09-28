@@ -1,56 +1,34 @@
-\begin{tabular}{lccc}
+\begin{tabular}{llccc}
 \toprule
-Method & \multicolumn{3}{c}{metrics (Coat, Yahoo!\,R3: nDCG@5, Recall@5, nDCG@10; KuaiRec: nDCG@20, Recall@20, nDCG@50)}\\
+ & Method & Coat nDCG@5 & Yahoo!\,R3 nDCG@5 & KuaiRec nDCG@20\\
 \midrule
-\multicolumn{4}{l}{\textit{Coat}}\\
-Popularity & 0.5367$\pm$0.0095 & 0.6441$\pm$0.0093 & 0.6599$\pm$0.0086\\
-Imputation only & \textbf{0.5662$\pm$0.0095} & \textbf{0.6736$\pm$0.0120} & \textbf{0.6787$\pm$0.0071}\\
-MF & 0.4619$\pm$0.0224 & 0.5666$\pm$0.0213 & 0.6056$\pm$0.0178\\
-IPS-MF & 0.4569$\pm$0.0234 & 0.5579$\pm$0.0241 & 0.6049$\pm$0.0178\\
-DR-MF & 0.5357$\pm$0.0141 & 0.6473$\pm$0.0162 & 0.6575$\pm$0.0113\\
-LightGCN & 0.5077$\pm$0.0173 & 0.6036$\pm$0.0216 & 0.6403$\pm$0.0109\\
-NAVIP-LightGCN & 0.4994$\pm$0.0199 & 0.5979$\pm$0.0246 & 0.6329$\pm$0.0129\\
-DR-LightGCN & 0.5560$\pm$0.0241 & 0.6565$\pm$0.0254 & 0.6725$\pm$0.0165\\
-Linear LightGCN (logged graph) & 0.5571$\pm$0.0100 & 0.6461$\pm$0.0094 & \underline{0.6745$\pm$0.0076}\\
-IPS adjacency (NAVIP-style) & 0.5438$\pm$0.0186 & 0.6403$\pm$0.0152 & 0.6641$\pm$0.0138\\
-IPS adjacency + WC & 0.5438$\pm$0.0186 & 0.6403$\pm$0.0152 & 0.6641$\pm$0.0138\\
-DR adjacency & \underline{0.5586$\pm$0.0124} & \underline{0.6728$\pm$0.0143} & 0.6737$\pm$0.0088\\
-\textbf{DRUP (ours)} & 0.5526$\pm$0.0134 & 0.6637$\pm$0.0157 & 0.6720$\pm$0.0108\\
-DR adjacency, 5 hops & 0.5551$\pm$0.0131 & 0.6683$\pm$0.0132 & 0.6720$\pm$0.0105\\
-\textbf{DRUP, 5 hops (ours)} & 0.5545$\pm$0.0082 & 0.6681$\pm$0.0130 & 0.6725$\pm$0.0095\\
-\midrule
-\multicolumn{4}{l}{\textit{KuaiRec}}\\
-Popularity & 0.5766$\pm$0.0023 & 0.1656$\pm$0.0016 & 0.4610$\pm$0.0019\\
-Imputation only & 0.6215$\pm$0.0014 & 0.1867$\pm$0.0020 & 0.5112$\pm$0.0013\\
-MF & 0.6320$\pm$0.0041 & 0.1925$\pm$0.0022 & 0.5101$\pm$0.0050\\
-IPS-MF & 0.6287$\pm$0.0028 & 0.1913$\pm$0.0018 & 0.5077$\pm$0.0024\\
-DR-MF & 0.6191$\pm$0.0020 & 0.1878$\pm$0.0016 & 0.5044$\pm$0.0026\\
-LightGCN & 0.6300$\pm$0.0028 & 0.1927$\pm$0.0025 & 0.5114$\pm$0.0016\\
-NAVIP-LightGCN & 0.6302$\pm$0.0025 & 0.1921$\pm$0.0024 & 0.5135$\pm$0.0028\\
-DR-LightGCN & 0.6247$\pm$0.0027 & 0.1917$\pm$0.0014 & 0.5070$\pm$0.0018\\
-Linear LightGCN (logged graph) & 0.6036$\pm$0.0028 & 0.1815$\pm$0.0016 & 0.4985$\pm$0.0024\\
-IPS adjacency (NAVIP-style) & 0.5954$\pm$0.0022 & 0.1829$\pm$0.0015 & 0.4892$\pm$0.0017\\
-IPS adjacency + WC & 0.5954$\pm$0.0022 & 0.1829$\pm$0.0015 & 0.4892$\pm$0.0017\\
-DR adjacency & 0.6318$\pm$0.0017 & 0.1927$\pm$0.0023 & 0.5144$\pm$0.0019\\
-\textbf{DRUP (ours)} & 0.6326$\pm$0.0018 & 0.1929$\pm$0.0025 & 0.5147$\pm$0.0015\\
-DR adjacency, 5 hops & \textbf{0.6404$\pm$0.0015} & \textbf{0.1941$\pm$0.0021} & \underline{0.5201$\pm$0.0017}\\
-\textbf{DRUP, 5 hops (ours)} & \underline{0.6402$\pm$0.0012} & \underline{0.1941$\pm$0.0021} & \textbf{0.5201$\pm$0.0016}\\
-DR adjacency, low-rank $\hat Y$ & 0.6384$\pm$0.0028 & 0.1941$\pm$0.0024 & 0.5194$\pm$0.0027\\
-\textbf{DRUP, low-rank $\hat Y$ (ours)} & 0.6385$\pm$0.0028 & 0.1941$\pm$0.0024 & 0.5194$\pm$0.0027\\
-\midrule
-\multicolumn{4}{l}{\textit{Yahoo!\,R3}}\\
-Popularity & 0.5331$\pm$0.0059 & 0.6794$\pm$0.0044 & 0.6556$\pm$0.0042\\
-Imputation only & 0.5241$\pm$0.0047 & 0.6875$\pm$0.0046 & 0.6447$\pm$0.0036\\
-MF & 0.5070$\pm$0.0056 & 0.6630$\pm$0.0063 & 0.6347$\pm$0.0043\\
-IPS-MF & 0.5115$\pm$0.0049 & 0.6674$\pm$0.0073 & 0.6381$\pm$0.0029\\
-DR-MF & 0.5086$\pm$0.0033 & 0.6744$\pm$0.0061 & 0.6341$\pm$0.0034\\
-LightGCN & 0.5876$\pm$0.0049 & 0.7210$\pm$0.0071 & 0.6929$\pm$0.0030\\
-NAVIP-LightGCN & 0.5913$\pm$0.0070 & 0.7246$\pm$0.0090 & 0.6957$\pm$0.0042\\
-DR-LightGCN & 0.5608$\pm$0.0040 & 0.7077$\pm$0.0037 & 0.6733$\pm$0.0042\\
-Linear LightGCN (logged graph) & \underline{0.6585$\pm$0.0058} & \underline{0.7809$\pm$0.0067} & \underline{0.7434$\pm$0.0035}\\
-IPS adjacency (NAVIP-style) & \textbf{0.6620$\pm$0.0064} & \textbf{0.7849$\pm$0.0066} & \textbf{0.7453$\pm$0.0040}\\
-IPS adjacency + WC & \textbf{0.6620$\pm$0.0064} & \textbf{0.7849$\pm$0.0066} & \textbf{0.7453$\pm$0.0040}\\
-DR adjacency & \textbf{0.6620$\pm$0.0064} & \textbf{0.7849$\pm$0.0066} & \textbf{0.7453$\pm$0.0040}\\
-\textbf{DRUP (ours)} & \textbf{0.6620$\pm$0.0064} & \textbf{0.7849$\pm$0.0066} & \textbf{0.7453$\pm$0.0040}\\
+\multicolumn{5}{l}{\emph{Non-personalised}}\\
+ & Popularity & -- & 0.5331$\pm$0.0059 & --\\
+ & Imputation only & -- & 0.5162$\pm$0.0044 & --\\
+\multicolumn{5}{l}{\emph{Trained, pointwise loss}}\\
+ & MF & 0.4766$\pm$0.0166 & -- & --\\
+ & IPS-MF & 0.4691$\pm$0.0163 & -- & --\\
+ & DR-MF & 0.5259$\pm$0.0132 & -- & --\\
+ & LightGCN & 0.5261$\pm$0.0123 & -- & --\\
+ & DR-LightGCN & 0.5500$\pm$0.0168 & -- & --\\
+\multicolumn{5}{l}{\emph{Trained, pairwise loss (BPR)}}\\
+ & MF & 0.5133$\pm$0.0211 & -- & --\\
+ & PDA & 0.5198$\pm$0.0160 & -- & --\\
+ & LightGCN & \underline{0.5703$\pm$0.0141} & -- & --\\
+ & r-AdjNorm & \textbf{0.5746$\pm$0.0132} & -- & --\\
+ & NAVIP & 0.5665$\pm$0.0133 & -- & --\\
+\multicolumn{5}{l}{\emph{Training-free, logged graph}}\\
+ & linear LightGCN / r-AdjNorm & -- & \textbf{0.6585$\pm$0.0058} & --\\
+ & EASE & -- & 0.6478$\pm$0.0061 & --\\
+ & GF-CF & -- & \underline{0.6569$\pm$0.0051} & --\\
+\multicolumn{5}{l}{\emph{Training-free, debiased graph}}\\
+ & IPS adjacency (NAVIP-style) & -- & 0.6324$\pm$0.0058 & --\\
+ & IPS + walk correction & -- & 0.6324$\pm$0.0058 & --\\
+ & EASE on DR graph & -- & -- & --\\
+ & GF-CF on DR graph & -- & -- & --\\
+ & DR adjacency & -- & 0.6324$\pm$0.0058 & --\\
+ & \textbf{DRUP} & -- & -- & --\\
+ & DR adjacency, 5 hops & -- & -- & --\\
+ & \textbf{DRUP}, 5 hops & -- & -- & --\\
 \bottomrule
 \end{tabular}
