@@ -227,3 +227,9 @@ paper/*.bbl
 paper/*.blg
 paper/*.out
 experiments/__pycache__/
+paper/ipm/*.aux
+paper/ipm/*.log
+paper/ipm/*.bbl
+paper/ipm/*.blg
+paper/ipm/*.out
+paper/ipm/*.spl
