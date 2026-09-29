@@ -4,7 +4,12 @@
 
 Users $u\in[m]$, items $i\in[n]$ and pairs $e=(u,i)$ carry a binary potential
 outcome $Y_e\in\{0,1\}$ (whether $u$ would like $i$ if it were shown) and an
-exposure indicator $O_e\in\{0,1\}$. The log reveals $O$ and $O\odot Y$.
+observation indicator $O_e\in\{0,1\}$. The log reveals $O$ and $O\odot Y$. What
+$O$ records depends on the platform: on KuaiRec it is an impression chosen by
+the system, on Coat and Yahoo!\,R3 it is a rating that the user chose to give,
+so the ``exposure'' mechanism modelled by $p$ is then user self-selection
+rather than the platform's display policy. All statements below are relative
+to the mechanism that generates $O$; we keep the word exposure for brevity.
 
 \begin{assumption}[Conditionally independent exposure]\label{as:unconf}
 Conditionally on $Y$, the exposures $O_e$ are independent Bernoulli variables
@@ -20,6 +25,10 @@ given $Y$, i.e., they do not depend on $O$ (for instance, they are fitted on
 an independent log). We use $C_{ui}=d_u^{-\alpha}d_i^{-(1-\alpha)}$ with degrees
 $d$ taken from $\hat Y$.
 \end{assumption}
+The weights $C$ also enter the target below, so with degrees from $\hat Y$ the
+target is indexed by the imputation. A normalisation fixed a priori (a design
+choice, or degrees from an independent source) makes the target independent
+of $\hat Y$; Section~\ref{sec:semisynth} compares both.
 
 \begin{remark}[Scope of the guarantees and the experimental protocol]\label{rem:xfit}
 All guarantees below are stated under Assumption~\ref{as:fixed}. Our main
@@ -146,18 +155,20 @@ the edge estimates of the pairs in $A$ by $\hat Y$, take the degrees from
 $\hat Y$, and compute $c_1$ and $c_3$ on the imputed graph $C\odot\hat Y$.
 Conditionally on $A$ and on the exposures in $A$, the remaining edge estimates
 are independent of every nuisance, so Assumption~\ref{as:fixed} holds and the
-results below apply, with $\delta_e=\hat Y_e-Y_e$ on the pairs in $A$. The price
+results below apply, with $\xi_e=\hat Y_e-Y_e$ on the pairs in $A$. The price
 is a first-order imputation bias on a fraction $q$ of the pairs and fewer
 exposures for the edge estimates. We call this variant DRUP-split and use
-$q=0.2$.
+$q=0.2$. The guarantee holds for every fixed configuration; selecting the
+hyper-parameters on validation data, as every method in our comparison does,
+is outside it, as it is for any estimator.
 
 \paragraph{Public-operator form.}
 Define the diagonal-corrected item Gram matrix
 $G=\tW^\top\tW-\diag(\tW^\top\tW)+\diag(\mathbf 1^\top(C\odot C\odot W))$. Then
 \begin{equation}\label{eq:local}
-\hat T_{u\cdot}=\tilde w_uG-\tilde w_u\odot(r_u\mathbf 1^\top-2\delta_u)-(\tilde w_u^{\odot3}-c_u^{\odot3}\odot w_u),
+\hat T_{u\cdot}=\tilde w_uG-\tilde w_u\odot(r_u\mathbf 1^\top-2\zeta_u)-(\tilde w_u^{\odot3}-c_u^{\odot3}\odot w_u),
 \end{equation}
-where $\delta_u=\tilde w_u^{\odot2}-c_u^{\odot2}\odot w_u$ and lower-case rows
+where $\zeta_u=\tilde w_u^{\odot2}-c_u^{\odot2}\odot w_u$ and lower-case rows
 belong to user $u$. Equation~\eqref{eq:local} matches~\eqref{eq:drup} to machine
 precision. $G$ is the only object shared across users
 (Algorithm~\ref{alg:drup}). Its off-diagonal entries are products of distinct
@@ -219,8 +230,8 @@ Proofs are in Appendix~\ref{app:proofs}. Let $\varepsilon_e=|Y_e-\hat Y_e|$.
 
 \begin{theorem}[Edge-wise double robustness]\label{thm:unbiased}
 Under Assumptions~\ref{as:unconf}--\ref{as:fixed}, let
-$\delta_e=(p_e/\bar p_e-1)(Y_e-\hat Y_e)$. Then $\E[\hat T_{ui}]$ equals $T^*_{ui}$
-with every distinct edge contributing $Y_e+\delta_e$ once. In particular, if
+$\xi_e=(p_e/\bar p_e-1)(Y_e-\hat Y_e)$. Then $\E[\hat T_{ui}]$ equals $T^*_{ui}$
+with every distinct edge contributing $Y_e+\xi_e$ once. In particular, if
 every edge has a correct propensity or a correct imputation, then
 $\E[s]=F^*$.
 \end{theorem}
@@ -231,15 +242,16 @@ $0$ for IPS). The following corollary states what DRUP estimates on the
 candidate set.
 
 \begin{corollary}[Unexposed candidates]\label{cor:cand}
-Under the conditions of Theorem~\ref{thm:unbiased} with $\delta\equiv0$,
+Under the conditions of Theorem~\ref{thm:unbiased} with $\xi\equiv0$,
 \begin{gather*}
 \E[s_{ui}\mid O_{ui}=0]=F^*_{ui}-(Y_{ui}-\hat Y_{ui})\,g_{ui},\\
 g_{ui}=\frac{\partial F^*_{ui}}{\partial Y_{ui}}
 =C_{ui}\Big(a+b\big(\textstyle\sum_{v\neq u}C_{vi}^2Y_{vi}+\sum_{j\neq i}C_{uj}^2Y_{uj}+C_{ui}^2\big)\Big)\ge0 .
 \end{gather*}
 For IPS edges the same holds with $\hat Y_{ui}=0$. The residual is the
-imputation error at the candidate itself, which no estimator built from the
-log can remove.
+imputation error at the candidate itself. If $p_e$ depends on $Y$ only through
+$Y_e$, the log carries no information on $Y_{ui}$ when $O_{ui}=0$, so the
+residual is not identified and no estimator can remove it.
 \end{corollary}
 
 At three hops the walks through $(u,i)$ are exactly those counted in
@@ -263,7 +275,7 @@ product running over the distinct edges of $\pi$. Then
 \]
 with $\mu$ the Möbius function of the product of the two partition lattices,
 satisfies $\E\hat T^{(K)}=(\tY\tY^\top)^r\tY$ under the conditions of
-Theorem~\ref{thm:unbiased} with $\delta\equiv0$.
+Theorem~\ref{thm:unbiased} with $\xi\equiv0$.
 \end{theorem}
 The number of pairs $(\pi,\sigma)$ is 5, 99 and 2{,}790 for $K=3,5,7$, and for
 $K=3$ the construction reduces to Eq.~\eqref{eq:drup}. Theorem~\ref{thm:unbiased},
@@ -280,9 +292,10 @@ the same row. With correct propensities,
 \[
 \big|\E\hat T_{ui}-T^*_{ui}\big|\ \le\ \rho\sum_{j\neq i}C_{uj}\Big(\sum_{v\neq u}C_{vj}C_{vi}\,\varepsilon_{vj}\varepsilon_{vi}+C_{uj}C_{ui}\,\varepsilon_{uj}\varepsilon_{ui}\Big).
 \]
-For slates of $k$ items drawn uniformly without replacement, $\rho\le1/k$. For
-DR edges the bias is of second order in the imputation error; for IPS edges
-($\varepsilon=Y$) it is of first order.
+For slates of $k$ items drawn uniformly without replacement, $\rho\le1/k$, and
+$\rho\le1$ for any negatively dependent design. For DR edges the bias is of
+second order in the imputation error; for IPS edges ($\varepsilon=Y$) it is of
+first order.
 \end{proposition}
 
 \begin{theorem}[Repeated-walk bias of uncorrected propagation]\label{thm:lower}
@@ -310,12 +323,12 @@ $i$ only through one term.
 \begin{theorem}[Variance, clipping and concentration]\label{thm:var}
 Let $\Lambda_e(u,i)$ be the $C$-weighted mass of the walks from $u$ to $i$ through
 edge $e$, and $B=\max(1,1/\tau)$. Then
-(a) $\Var(W_e)\le\varepsilon_e^2/\tau$;
-(b) $\Var(\hat T_{ui})\le\frac{(1+1/\tau)^2}{\tau}\sum_e\varepsilon_e^2\Lambda_e(u,i)^2$;
+(a) $\Var(W_e)\le\varepsilon_e^2/(4\tau^2)$, and $\Var(W_e)\le\varepsilon_e^2/\tau$ if $\hat p=p$;
+(b) if $\hat p=p$, $\Var(\hat T_{ui})\le\frac{(1+1/\tau)^2}{\tau}\sum_e\varepsilon_e^2\Lambda_e(u,i)^2$;
 (c) if $\hat p=p$, so that clipping is the only source of bias,
-$|\E\hat T_{ui}-T^*_{ui}|\le3\bar\delta(1+\bar\delta)^2\sum_{j,v}C_{uj}C_{vj}C_{vi}$ with
-$\bar\delta=\max_e(1-p_e/\tau)_+\varepsilon_e$;
-(d) $\Pr(|\hat T_{ui}-\E\hat T_{ui}|\ge t)\le2\exp(-2t^2/\sum_ec_e^2)$ with
+$|\E\hat T_{ui}-T^*_{ui}|\le3\bar\xi(1+\bar\xi)^2\sum_{j,v}C_{uj}C_{vj}C_{vi}$ with
+$\bar\xi=\max_e(1-p_e/\tau)_+\varepsilon_e$;
+(d) for any $\hat p$, $\Pr(|\hat T_{ui}-\E\hat T_{ui}|\ge t)\le2\exp(-2t^2/\sum_ec_e^2)$ with
 $c_e=\varepsilon_eB^2\Lambda_e(u,i)/\tau$.
 \end{theorem}
 
@@ -324,16 +337,19 @@ for IPS, and $\tau$ trades variance against a clipping bias that vanishes when
 $\hat Y$ is accurate. The constants are worst-case and loose; Section~\ref{sec:mc}
 compares bound (b) with the Monte-Carlo variance.
 
-\begin{definition}[Exposure elasticity]
+\begin{definition}[Exposure elasticity]\label{def:elast}
 For an intervention $do(p_{\cdot i}\leftarrow\pi p_{\cdot i})$ on item $i$'s
-exposure mechanism, $\eta_i=\partial\log\E[s_{ui}]/\partial\log\pi$.
+exposure mechanism, after which the estimator uses the post-intervention
+propensities ($\hat p_{\cdot i}\leftarrow\pi\hat p_{\cdot i}$) and otherwise the same
+nuisances, $\eta_i=\partial\log\E[s_{ui}]/\partial\log\pi$.
 \end{definition}
 
 \begin{theorem}[Exposure invariance]\label{thm:fair}
 Under Assumptions~\ref{as:unconf}--\ref{as:fixed} and $\pi p\ge\tau$, DRUP has
 $\eta_i=0$, also conditionally on $O_{ui}=0$: the expected score of every
 candidate is unchanged when item $i$'s exposure mechanism is scaled.
-Logged-graph propagation has $\eta_i\ge1$ (popularity amplification).
+Logged-graph propagation with fixed weights $C$ has $\eta_i\ge1$ (popularity
+amplification); normalising by logged degrees partly offsets it.
 Uncorrected DR propagation has $\eta_i<0$ whenever $\hat Y_{ui}K_i>0$
 (over-correction).
 \end{theorem}
@@ -343,91 +359,18 @@ distributive fairness criterion, and it is conditional: when many propensities
 lie below the clip, $\pi p\ge\tau$ fails and invariance is lost
 (Section~\ref{sec:fair}).
 
-\subsection{Structural properties of linear propagation}\label{sec:structth}
+\subsection{Structural properties}\label{sec:structsum}
 
-The remaining results use only that, given the nuisances, $s$ is a fixed
-linear function of the edge estimates. They hold for DRUP and equally for
-the uncorrected operators and for linear LightGCN, and they describe the
-recommender with its nuisances held fixed.
-
-\begin{proposition}[Affine in the user's own data]\label{prop:affine}
-Fix $u$ and a candidate $i$ with $O_{ui}=0$, and let $G^{(-u)}$ be $G$ without
-$u$'s own contribution. With frozen nuisances,
-$s_{ui}=\mathrm{const}+\sum_{j\neq i}\omega_jw_{uj}$ with
-$\omega_j=b\big(c_{uj}G^{(-u)}_{ji}+c_{ui}w_{ui}c_{uj}^2\big)$.
-Hence un-logging interaction $j$, i.e., replacing $w_{uj}$ by its unlogged
-value $\hat Y_{uj}$, changes $s_{ui}$ by exactly $\phi_j=\omega_j(w_{uj}-\hat Y_{uj})$,
-removal effects add up over any subset, and completeness holds exactly.
-\end{proposition}
-Because the removal game is additive, the $\phi_j$ are also its Shapley values;
-this is a consequence of linearity, and the attribution is relative to the
-stated baseline~\cite{kumar2020shapley}.
-
-\begin{theorem}[Optimal minimal counterfactual explanation]\label{thm:cf}
-For candidates $i,k$ with $s_{ui}>s_{uk}$, sorting $g_j=\phi^{(i)}_j-\phi^{(k)}_j$ in
-decreasing order and removing interactions until the cumulative sum exceeds the
-margin yields a minimum-cardinality set whose removal makes $k$ outrank $i$.
-If the positive $g_j$ do not sum above the margin, no such set exists. The
-cost is $O(n+d_u\log d_u)$.
-\end{theorem}
-
-\begin{theorem}[Certificates against injected profiles, frozen nuisances]\label{thm:robust}
-With frozen nuisances, one injected user $v$ changes $u$'s three-hop score of item
-$k$ by $\Delta_k=x_k(D+a_kc_{vk})-a_kx_k^2$, where $a=\tilde w_u$, $x=c_v\odot w_v$
-and $D=\langle a,x\rangle$. If $v$ logs at most $L$ interactions with arbitrary
-items, labels and propensities $\ge\tau$, then $D$ and $x_k$ lie in closed-form
-intervals. $\Delta_k$ is linear in $D$ and quadratic in $x_k$, so its extremes
-$[\underline\Delta_k,\overline\Delta_k]$ over the box formed by the two intervals
-are attained at its edges or at the vertex of the quadratic. The box contains
-every feasible $(D,x_k)$ but ignores that both are determined by the same $L$
-interactions, so $[\underline\Delta_k,\overline\Delta_k]$ contains the feasible
-range of $\Delta_k$ and is conservative rather than exact. Item $t$
-provably stays out of $u$'s top-$K$ against any $F$ such users if
-$s_{ut}+F\overline\Delta_t$ is below the $(K{+}1)$-th largest value of
-$s_{uk}+F\underline\Delta_k$ over the other candidates. With unclipped IPS, the
-influence of a single interaction is unbounded.
-\end{theorem}
-The same argument certifies the uncorrected operators (with
-$\Delta_k=x_kD$). Degrees taken from $\hat Y$ make the fake user's weight $c_v$
-known; degrees taken from $W$ would be attacker-controlled.
-
-\begin{theorem}[Joint differential privacy with public nuisances]\label{thm:dp}
-Let the population-level parts of the nuisances (the propensity model, the
-item parameters of $\hat Y$, the item degrees in $C$ and the radius $R$) be
-computed from public data, and every user-level part from the user's own row.
-Scale each private row so that $\|\tilde w_v\|_2\le R$ and
-$\|c_v^{\odot2}\odot w_v\|_2\le R^2$. Releasing $G$, computed over the private
-rows, plus symmetric Gaussian noise of scale
-$\sigma=\sigma_{\mathrm{aG}}(\epsilon,\delta;2R^2)$, the analytic Gaussian
-calibration~\cite{balle2018analytic}, is $(\epsilon,\delta)$-DP under adding or
-removing one user, for every $\epsilon>0$. Scoring by~\eqref{eq:local} uses only
-the release and the user's own row, so the recommender is $(\epsilon,\delta)$-jointly
-DP~\cite{hsu2014matchings}. Post-processing such as low-rank denoising is free.
-\end{theorem}
-Row scaling changes the estimate for users whose rows exceed $R$, so
-Theorems~\ref{thm:unbiased} and~\ref{thm:fair} hold for the private variant only
-up to this shrinkage.
-
-\begin{theorem}[Exposure-capped allocation]\label{thm:alloc}
-Let $N$ users each receive $K$ of their candidates and let item $i$ be
-recommended to at most $\mathrm{cap}_i$ users. Let $\hat x$ maximise $\langle x,s\rangle$
-over such allocations. The constraint matrix is totally unimodular, so the
-linear relaxation has an integral optimum, and min-cost flow on the scores
-rounded to a grid of $L$ levels finds $\hat x$ exactly up to the rounding gap
-$\Gamma\le NK(\max s-\min s)/L$. All caps hold, at least $NK/\max_i\mathrm{cap}_i$
-items are recommended, and for the full-exposure utility $U(x)=\langle x,F^*\rangle$,
-\[
-U(\hat x)\ \ge\ \max_{x}U(x)-\Gamma-2\max_x|\langle x,s-F^*\rangle| .
-\]
-If $\E s=F^*$ (DRUP under Assumption~\ref{as:fixed} with $\delta\equiv0$),
-McDiarmid's inequality and a union bound over all $mn$ pairs give
-$\max_x|\langle x,s-F^*\rangle|\le NK\,t_\delta$ with probability $1-\delta$, where
-\begin{gather*}
-t_\delta=\max_{u,i}\Big(\tfrac12\textstyle\sum_e\bar c_e(u,i)^2\ln(2mn/\delta)\Big)^{1/2},\\
-\bar c_e(u,i)=b\,c_e(u,i)+a\,C_{ui}\,\varepsilon_{ui}\,\mathbb 1[e=(u,i)]/\tau ,
-\end{gather*}
-$c_e(u,i)$ is the constant of Theorem~\ref{thm:var}(d) for the three-hop term
-and the second part is the sensitivity of the one-hop term. The union runs over
-all pairs because the candidate set depends on the log. For logged-graph propagation,
-$\E s=F^*(P\odot Y)$, and the last term does not vanish.
-\end{theorem}
+Given its nuisances, $s$ is a fixed linear function of the edge estimates.
+Section~\ref{sec:structth} of the Supplementary Material states and proves the
+consequences, which hold for every linear propagation operator, corrected or
+not: exact attributions and minimal counterfactual explanations with frozen
+nuisances (Proposition~\ref{prop:affine}, Theorem~\ref{thm:cf}), conservative
+certificates against injected profiles (Theorem~\ref{thm:robust}), joint
+differential privacy when the population-level nuisances, the
+hyper-parameters and the score constants are public (Theorem~\ref{thm:dp}),
+and an exposure-capped allocation solved exactly by min-cost flow
+(Theorem~\ref{thm:alloc}). Because they are not specific to DRUP, we report
+their empirical behaviour in the Supplementary Material
+(Section~\ref{sec:struct}) and use only the allocation in the main text, as a
+decision that compares scores across users (Section~\ref{sec:semisynth}).

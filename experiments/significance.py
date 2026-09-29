@@ -61,11 +61,11 @@ def main():
     ap.add_argument("--ref", nargs="+", default=["DRUP"])
     ap.add_argument("--frac_val", type=float, default=0.3)
     ap.add_argument("--others", nargs="+", default=None, help="compare only with these methods")
-    ap.add_argument("--exclude", nargs="+", default=["DR-split", "DRUP-split"],
+    ap.add_argument("--exclude", nargs="*", default=[],
                     help="methods left out of the default family (reported with --others)")
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
-    key = a.key or ("ndcg@20" if a.dataset == "kuairec" else "ndcg@5")
+    key = a.key or {"kuairec": "ndcg@20", "kuairand": "ndcg@10"}.get(a.dataset, "ndcg@5")
     res = load([f"results/v2/filters_{a.dataset}_{a.prop}.json", f"results/v2/learned_{a.dataset}_{a.prop}.json"])
     rows = []
     for ref in a.ref:
@@ -97,14 +97,21 @@ def main():
                          "ci95": [float(d.mean() - tcrit * se), float(d.mean() + tcrit * se)],
                          "p_t": p_t, "p_wilcoxon": p_w,
                          "p_nb_splits": nadeau_bengio(res[ref], r, key, a.frac_val)})
-    for ref in a.ref:                       # Holm within each reference's family
+    # Holm over every comparison run for the dataset (all references together),
+    # for the t-test and for the Wilcoxon test; the within-reference
+    # adjustment is kept for information only.
+    for r, q in zip(rows, holm([r["p_t"] for r in rows])):
+        r["p_holm"] = float(q)
+    for r, q in zip(rows, holm([r["p_wilcoxon"] for r in rows])):
+        r["p_wilcoxon_holm"] = float(q)
+    for ref in a.ref:
         fam = [r for r in rows if r["ref"] == ref]
         for r, q in zip(fam, holm([r["p_t"] for r in fam])):
-            r["p_holm"] = float(q)
+            r["p_holm_within_ref"] = float(q)
     for r in rows:
         print(f"{r['ref']:10s} vs {r['other']:12s} n={r['n_users']:5d} diff={r['diff']:+.4f} "
               f"[{r['ci95'][0]:+.4f},{r['ci95'][1]:+.4f}] p={r['p_t']:.2g} holm={r['p_holm']:.2g} "
-              f"wilc={r['p_wilcoxon']:.2g} nb={r['p_nb_splits']:.2g}")
+              f"wilc={r['p_wilcoxon']:.2g} wholm={r['p_wilcoxon_holm']:.2g} nb={r['p_nb_splits']:.2g}")
     out = a.out or f"results/v2/significance_{a.dataset}_{a.prop}.json"
     with open(out, "w") as f:
         json.dump({"key": key, "rows": rows}, f, indent=1)

@@ -2,6 +2,7 @@
 
 import numpy as np
 import torch
+from scipy.stats import rankdata
 
 
 def evaluate(scores, test, ks=(5, 10), row_of=None, per_user=None):
@@ -14,6 +15,7 @@ def evaluate(scores, test, ks=(5, 10), row_of=None, per_user=None):
     out = {f"ndcg@{k}": [] for k in ks}
     users = []
     out.update({f"recall@{k}": [] for k in ks})
+    out["auc"] = []
     S = scores.detach().cpu().numpy() if isinstance(scores, torch.Tensor) else scores
     for u, items, rel in test:
         if len(items) == 0 or rel.sum() == 0:
@@ -31,6 +33,13 @@ def evaluate(scores, test, ks=(5, 10), row_of=None, per_user=None):
             ideal = disc[: int(min(npos, k))].sum()
             out[f"ndcg@{k}"].append(dcg / ideal)
             out[f"recall@{k}"].append(top.sum() / npos)
+        # AUC of the candidate list (ties count one half); 1 if no negative
+        nneg = len(rel) - npos
+        if nneg > 0:
+            rk = rankdata(s)
+            out["auc"].append(float((rk[rel > 0].sum() - npos * (npos + 1) / 2) / (npos * nneg)))
+        else:
+            out["auc"].append(1.0)
     agg = {k: float(np.mean(v)) for k, v in out.items()}
     if per_user is not None:
         return agg, dict(zip(users, [float(x) for x in out[per_user]]))

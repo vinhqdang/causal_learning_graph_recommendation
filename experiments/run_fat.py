@@ -14,6 +14,11 @@ Sections (all on the unbiased test users):
   attack       shilling attack with frozen nuisances + certified bound, and a
                check of the certificates when the nuisances are re-fitted on
                the poisoned log
+  intervene_extra  the same intervention for DRUP-split, popularity and the
+               imputation alone, a negative control in which the auditor's
+               propensities are not updated (misspecified), and the rank
+               correlation of every operator with the imputation (how much of
+               the score is not simply the imputation)
   privacy      jointly private DRUP: population-level nuisances fitted on a
                public 10% of the (non-test) users, G released with the
                analytic Gaussian mechanism, fixed denoising ranks
@@ -40,7 +45,9 @@ from drup.estimation import clip_propensity, public_nuisance  # noqa: E402
 from drup.metrics import evaluate  # noqa: E402
 from drup.pipeline import Nuisance, build, scores_with_consts  # noqa: E402
 from drup.propagation import edge_estimate  # noqa: E402
-from drup.propagation import item_gram, local_three_hop  # noqa: E402
+from drup.propagation import degree_weights, item_gram, local_three_hop, three_hop  # noqa: E402
+from drup.estimation import popularity_propensity  # noqa: E402
+from drup.pipeline import _impute  # noqa: E402
 
 METHODS = ["Obs", "IPS", "DR", "DRUP"]
 
@@ -106,6 +113,9 @@ def main():
     ap.add_argument("--xfit", type=int, default=10)
     ap.add_argument("--refit_xfit", type=int, default=5, help="cross-fitting folds when re-fitting")
     ap.add_argument("--refit_attack", type=int, default=1, help="check certificates under re-fitting")
+    ap.add_argument("--split", type=float, default=0.2)
+    ap.add_argument("--priv_cfg", default="fixed", choices=["fixed", "selected"],
+                    help="privacy: configuration fixed a priori (fixed) or the non-private selection")
     a = ap.parse_args()
     dt = getattr(torch, a.dtype)
     if a.dataset == "coat":
@@ -117,6 +127,13 @@ def main():
     elif a.dataset == "yahoo":
         d = load_yahoo()
         K, kn = 5, 5
+        act = d["O"].sum(1).numpy()
+        med = np.median(act[[u for u, _, _ in d["test"]]])
+        groups = {u: int(act[u] > med) for u, _, _ in d["test"]}
+        gname = "activity (inactive vs active)"
+    elif a.dataset == "kuairand":
+        d = torch.load("data/raw/kuairand.pt", weights_only=False)
+        K, kn = 10, 10
         act = d["O"].sum(1).numpy()
         med = np.median(act[[u for u, _, _ in d["test"]]])
         groups = {u: int(act[u] > med) for u, _, _ in d["test"]}
@@ -271,6 +288,93 @@ def main():
                 r_ = out["intervene"][v][mth]
                 if r_:
                     print("intervene", v, mth, {k: round(x["mean"], 4) for k, x in r_.items()}, flush=True)
+        save()
+
+    if "intervene_extra" in a.sections:
+        from scipy.stats import spearmanr
+
+        def gm(x):
+            return float(x.abs().mean().clamp_min(1e-12))
+
+        def split_scores(O_, P_raw_, A, cfg, correct, Yh=None):
+            P_ = clip_propensity(P_raw_, cfg["floor"])
+            if Yh is None:
+                Yh = _impute(O_, Y, P_, dict(cfg, imp=cfg.get("imp", "add")), mask=A.to(dt))
+            W_ = torch.where(A, Yh, edge_estimate(O_, Y, P_, Yh, cfg.get("cv", 1.0)))
+            C_ = degree_weights(W_, cfg["alpha"], D=Yh)
+            s1 = (C_ * W_)[rows] / gm((C_ * Yh)[rows])
+            s3 = three_hop(W_, C_, rows=rows, correct=correct) / gm(three_hop(Yh, C_, rows=rows, correct=correct))
+            b = cfg.get("beta", 1.0)
+            return (s3 if b >= 1e3 else s1 + b * s3), Yh
+
+        gA = torch.Generator().manual_seed(12345)
+        A = torch.rand(O.shape, generator=gA) < a.split       # the split of run_filters (seed 0)
+        fsplit = chosen_config(fpath, "DRUP-split")
+        P_A = P_raw if a.prop == "given" else popularity_propensity(O, mask=A.to(dt))[0]
+        S_split, Yh_A = split_scores(O, P_A, A, fsplit, True)
+        Mdr = get_model("DR")
+        cfg_imp = dict(cfgs["DR"])
+        S_imp = Mdr["Yhat"][rows]
+        S_pop = (O * Y).sum(0, keepdim=True).expand(len(rows), -1)
+        base = {"DRUP-split": S_split, "Impute": S_imp, "Pop": S_pop}
+        # rank correlation with the imputation on the candidates
+        corr = {}
+        allS = dict(S, **base)
+        for nm, Sx in allS.items():
+            rs = []
+            for u, items, rel in test:
+                if len(items) > 2:
+                    r_ = row_of[u]
+                    c = spearmanr(Sx[r_, items].numpy(), S_imp[r_, items].numpy()).correlation
+                    if np.isfinite(c):
+                        rs.append(c)
+            corr[nm] = float(np.mean(rs))
+        print("spearman with imputation", corr, flush=True)
+        res = {k: {"shift": [], "eta": []} for k in ("DRUP-split/frozen", "DRUP-split/refit_known",
+                                                        "DRUP-split/refit_estimated", "Impute/refit_known",
+                                                        "Pop/refit", "IPS/misspecified", "DR/misspecified",
+                                                        "DRUP/misspecified")}
+        g = torch.Generator().manual_seed(123)
+        for r in range(a.reps):
+            treated = torch.rand(n, generator=g) < 0.5
+            keep = (torch.rand(m, n, generator=g) < 0.5).to(dt)
+            O2 = O * torch.where(treated[None, :], keep, torch.ones_like(keep))
+            tr_np = treated.numpy()
+            P2 = torch.where(treated[None, :], P_raw * 0.5, P_raw)
+            P2A = torch.where(treated[None, :], P_A * 0.5, P_A)
+            S2 = {}
+            S2["DRUP-split/frozen"] = split_scores(O2, P2A, A, fsplit, True, Yh=Yh_A)[0]
+            S2["DRUP-split/refit_known"] = split_scores(O2, P2A, A, fsplit, True)[0]
+            if a.prop != "given":
+                S2["DRUP-split/refit_estimated"] = split_scores(
+                    O2, popularity_propensity(O2, mask=A.to(dt))[0], A, fsplit, True)[0]
+            S2["Impute/refit_known"] = _impute(O2, Y, clip_propensity(P2, cfg_imp["floor"]),
+                                               dict(cfg_imp, imp=cfg_imp.get("imp", "add")))[rows]
+            S2["Pop/refit"] = (O2 * Y).sum(0, keepdim=True).expand(len(rows), -1)
+            for mth in ("IPS", "DR", "DRUP"):
+                M0 = get_model(mth)
+                cfg = cfgs[mth]
+                W2 = edge_estimate(O2, Y, clip_propensity(P_raw, cfg["floor"]),
+                                   M0["Yhat"] if mth != "IPS" else None, cfg.get("cv", 1.0))
+                S2[f"{mth}/misspecified"] = scores_with_consts(dict(M0, W=W2), rows)[0]
+            for key, Sx in S2.items():
+                S0 = allS[key.split("/")[0]]
+                a0, c0 = within_user_rank(S0, test, row_of, n)
+                a1, c1_ = within_user_rank(Sx, test, row_of, n)
+                ok = c0 > 0
+                tr, ct = tr_np & ok, (~tr_np) & ok
+                shift = (a1[tr].sum() / c1_[tr].sum() - a0[tr].sum() / c0[tr].sum()) \
+                    - (a1[ct].sum() / c1_[ct].sum() - a0[ct].sum() / c0[ct].sum())
+                res[key]["shift"].append(float(shift))
+                res[key]["eta"].append(score_elasticity(S0, Sx, test, row_of, tr_np))
+            del O2, P2, S2
+            gc.collect()
+        out["intervene_extra"] = {"spearman_with_imputation": corr, "config_split": fsplit,
+                                  "results": {k: {q: {"mean": float(np.mean(x)), "std": float(np.std(x)), "all": x}
+                                                  for q, x in v.items() if x} for k, v in res.items()}}
+        for k, v in out["intervene_extra"]["results"].items():
+            if v:
+                print("intervene_extra", k, {q: round(x["mean"], 4) for q, x in v.items()}, flush=True)
         save()
 
     M = get_model("DRUP")
@@ -525,7 +629,12 @@ def main():
         # noise; denoising ranks fixed in advance (all reported).
         from drup.data import split_test
         _, ptest = split_test(test, 0.3, 0, by="entry" if a.dataset == "coat" else "user")
-        cfg = dict(cfgs["DRUP"], imp="add")
+        # The configuration must not depend on private data: by default it is
+        # fixed a priori; the score constants come from the public users.
+        if a.priv_cfg == "fixed":
+            cfg = {"floor": 0.1, "lam": 20.0, "imp": "add", "alpha": 0.5, "cv": 1.0, "beta": 1.0}
+        else:
+            cfg = dict(cfgs["DRUP"], imp="add")
         gpub = np.random.default_rng(11)
         test_users = set(row_of)
         cand_pub = np.array([u for u in range(m) if u not in test_users], dtype=np.int64)
@@ -543,7 +652,8 @@ def main():
         R = float((Cp * Wp)[pub].norm(dim=1).median())
         bp = cfg.get("beta", 1.0)
         s1p = (Cp * Wp)[rows]
-        c1p = float(s1p.abs().mean())
+        pub_rows = torch.nonzero(pub).flatten()
+        c1p = float((Cp * Wp)[pub_rows].abs().mean())      # public users only
         g = torch.Generator().manual_seed(7)
         ranks = [8, 32, 128, None]
 
@@ -551,10 +661,12 @@ def main():
             s3 = local_three_hop(Wp[rows], Cp[rows], Gd)
             sc = s3 / c3p if bp >= 1e3 else s1p / c1p + bp * s3 / c3p
             return evaluate(sc, ptest, (kn,), row_of)[f"ndcg@{kn}"]
+        def c3_public(Gd):
+            # constant of the three-hop term from the release and the public rows
+            return float(local_three_hop(Wp[pub_rows], Cp[pub_rows], Gd).abs().mean().clamp_min(1e-12))
         G_np, _, _ = fat.dp_item_operator(Wp, Cp, float("inf"), 1e-5, R, users=priv)
-        c3p = float(local_three_hop(Wp[rows], Cp[rows], G_np).abs().mean())
-        res = {"inf": {"ndcg": {str(rk): utility(fat.low_rank_denoise(G_np, rk), c3p) for rk in ranks},
-                       "sigma": 0.0}}
+        res = {"inf": {"ndcg": {str(rk): utility(fat.low_rank_denoise(G_np, rk), c3_public(fat.low_rank_denoise(G_np, rk)))
+                                for rk in ranks}, "sigma": 0.0}}
         print("privacy eps inf", res["inf"], flush=True)
         for eps in [0.5, 1.0, 2.0, 4.0, 8.0, 16.0]:
             vals = {str(rk): [] for rk in ranks}
@@ -562,7 +674,8 @@ def main():
                 Gd, _, sigma = fat.dp_item_operator(Wp, Cp, eps, 1e-5, R, generator=g, users=priv)
                 comps = fat.spectral_components(Gd, max(r_ for r_ in ranks if r_))
                 for rk in ranks:
-                    vals[str(rk)].append(utility(fat.low_rank_denoise(Gd, rk, comps), c3p))
+                    Gr = fat.low_rank_denoise(Gd, rk, comps)
+                    vals[str(rk)].append(utility(Gr, c3_public(Gr)))
             res[str(eps)] = {"ndcg": {k: float(np.mean(v)) for k, v in vals.items()},
                              "std": {k: float(np.std(v)) for k, v in vals.items()}, "sigma": sigma}
             print("privacy eps", eps, res[str(eps)], flush=True)

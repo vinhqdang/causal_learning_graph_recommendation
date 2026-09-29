@@ -74,17 +74,3 @@ are different properties, and DRUP improves the first at the expense of the
 second. The user-group gaps do not differ between operators. They are clearly
 non-zero on Coat (men 0.11 above women) and on Yahoo!\,R3 (inactive users 0.046
 below active ones), under every operator, and not on KuaiRec.
-
-\subsection{Exposure-capped allocation}\label{sec:rerank}
-
-\begin{table}[t]\centering\small
-\caption{Exposure-capped re-ranking (Theorem~\ref{thm:alloc}, exact min-cost flow).
-Each item may be recommended to at most $c$ times its fair share $NK/n$ of users.
-Cells: nDCG@$K$ (Gini@$K$). Every cap held; the full range of caps and the
-accuracy--concentration frontier are in Appendix~\ref{app:more}.}\label{tab:rerank}
-\begin{adjustbox}{max width=\textwidth}
-\input{tables/rerank_compact.tex}
-\end{adjustbox}
-\end{table}
-
-\input{sections/exp_rerank_text}

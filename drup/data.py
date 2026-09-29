@@ -129,6 +129,44 @@ def split_test(test, frac_val, seed, by="entry"):
     return val, tst
 
 
+def load_kuairand(root=ROOT, n_users=10000, seed=0):
+    """KuaiRand-Pure (Gao et al., CIKM 2022): the standard impression log
+    (2022-04-08 to 05-08) is the MNAR log, with O = impression and Y = click;
+    the randomly exposed impressions (is_rand = 1, 2022-04-22 to 05-08) are the
+    unbiased test. We keep a random subset of ``n_users`` users that appear in
+    both logs (for memory) and all items. As for KuaiRec, candidates that were
+    logged in the standard log are not ranked."""
+    d = os.path.join(root, "KuaiRand-Pure", "data")
+    cols = ["user_id", "video_id", "is_click"]
+    std = pd.concat([pd.read_csv(os.path.join(d, f), usecols=cols) for f in
+                     ("log_standard_4_08_to_4_21_pure.csv", "log_standard_4_22_to_5_08_pure.csv")])
+    rnd = pd.read_csv(os.path.join(d, "log_random_4_22_to_5_08_pure.csv"), usecols=cols)
+    both = np.intersect1d(std.user_id.unique(), rnd.user_id.unique())
+    rng = np.random.default_rng(seed)
+    users = np.sort(rng.choice(both, size=min(n_users, len(both)), replace=False))
+    items = np.union1d(std.video_id.unique(), rnd.video_id.unique())
+    std, rnd = std[std.user_id.isin(users)], rnd[rnd.user_id.isin(users)]
+    uidx = {u: k for k, u in enumerate(users)}
+    iidx = {i: k for k, i in enumerate(items)}
+    m, n = len(users), len(items)
+    g = std.groupby(["user_id", "video_id"]).is_click.max().reset_index()
+    O = torch.zeros(m, n, dtype=torch.float64)
+    Y = torch.zeros(m, n, dtype=torch.float64)
+    uu = torch.as_tensor(g.user_id.map(uidx).values)
+    ii = torch.as_tensor(g.video_id.map(iidx).values)
+    O[uu, ii] = 1.0
+    Y[uu, ii] = torch.as_tensor(g.is_click.values.astype(np.float64))
+    Onp = O.numpy()
+    rg = rnd.groupby(["user_id", "video_id"]).is_click.max().reset_index()
+    test = []
+    for u, grp in rg.groupby("user_id"):
+        r = uidx[u]
+        it = grp.video_id.map(iidx).values
+        keep = Onp[r, it] == 0
+        test.append((int(r), it[keep], grp.is_click.values[keep].astype(np.float64)))
+    return {"name": "kuairand", "O": O, "Y": Y, "P_given": None, "test": test}
+
+
 def load(name):
     if name == "coat":
         return load_coat()
@@ -136,4 +174,6 @@ def load(name):
         return load_kuairec()
     if name == "yahoo":
         return load_yahoo()
+    if name == "kuairand":
+        return load_kuairand()
     raise ValueError(name)

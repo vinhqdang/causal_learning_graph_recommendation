@@ -42,13 +42,33 @@ def natbib(t):
 
 body, appendix, abstract = natbib(body), natbib(appendix), natbib(abstract)
 
-# Additional results go to a separate Supplementary Material file.
+# Everything after the SUPPLEMENT-START marker (structural properties with their
+# proofs and experiments, additional results) goes to a separate
+# Supplementary Material file, numbered S1, S2, ...
 supp = ""
-if "\\label{app:more}" in appendix:
-    k = appendix.index("\\section{Additional results}")
+if "%SUPPLEMENT-START" in appendix:
+    k = appendix.index("%SUPPLEMENT-START")
     supp, appendix = appendix[k:], appendix[:k]
-    labels = re.findall(r"\\label\{(tab:[^}]*)\}", supp)
-    snum = {lab: f"S{n}" for n, lab in enumerate(labels, start=1)}
+    snum = {}
+    cnt = {"sec": 0, "sub": 0, "thm": 0, "tab": 0, "fig": 0}
+    tok = re.compile(r"\\(section|subsection)\{[^}]*\}\\label\{([^}]*)\}|"
+                     r"\\begin\{(theorem|proposition|corollary)\}(?:\[[^\]]*\])?\\label\{([^}]*)\}|"
+                     r"\\begin\{(table|figure)\}|\\label\{(tab:[^}]*|fig:[^}]*)\}")
+    for mt in tok.finditer(supp):
+        if mt.group(1) == "section":
+            cnt["sec"] += 1
+            cnt["sub"] = 0
+            snum[mt.group(2)] = f"S{cnt['sec']}"
+        elif mt.group(1) == "subsection":
+            cnt["sub"] += 1
+            snum[mt.group(2)] = f"S{cnt['sec']}.{cnt['sub']}"
+        elif mt.group(3):
+            cnt["thm"] += 1
+            snum[mt.group(4)] = f"S{cnt['thm']}"
+        elif mt.group(6):
+            key = "tab" if mt.group(6).startswith("tab:") else "fig"
+            cnt[key] += 1
+            snum[mt.group(6)] = f"S{cnt[key]}"
 
     def to_supp(t):
         t = t.replace("Appendix~\\ref{app:more}", "the Supplementary Material")
@@ -56,8 +76,9 @@ if "\\label{app:more}" in appendix:
         for lab, sn in snum.items():
             t = t.replace("\\ref{" + lab + "}", sn)
         return t
-    body, appendix = to_supp(body), to_supp(appendix)
-    supp = supp.replace("\\section{Additional results}\\label{app:more}", "")
+    body, appendix, abstract = to_supp(body), to_supp(appendix), to_supp(abstract)
+    supp = supp.replace("%SUPPLEMENT-START", "").replace("\\section{Additional results}\\label{app:more}",
+                                                         "\\section{Additional results}")
 
 preamble = r"""\documentclass[preprint,review,12pt,authoryear]{elsarticle}
 \usepackage{amsmath,amssymb,amsthm}
@@ -125,17 +146,20 @@ if supp:
     sp = preamble[:preamble.index("\\journal")] + r"""
 \usepackage{xr}
 \externaldocument{manuscript}
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thetheorem}{S\arabic{theorem}}
 \renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\theequation}{S\arabic{equation}}
 \begin{document}
 \begin{center}{\large\bfseries Supplementary Material\\[2pt]
 Walk-unbiased doubly robust graph propagation for recommendation from
 exposure-biased logs}\end{center}
 
-Additional results referred to in the main text. Theorem, table and section
-numbers without the prefix S refer to the main text.
+Theorem, table, section and equation numbers without the prefix S refer to the
+main text.
 
-""" + supp.replace("Theorem~\\ref{thm:var}", "Theorem~6").replace("Assumption~\\ref{as:unconf}", "Assumption~1") \
-        .replace("Theorem~\\ref{thm:robust}", "Theorem~10") + "\n\\end{document}\n"
+""" + supp + "\n\\bibliographystyle{elsarticle-harv}\n\\bibliography{../refs}\n\\end{document}\n"
     open("ipm/supplementary.tex", "w").write(sp)
 print("wrote ipm/manuscript.tex", len(out.split()), "words (approx.)",
       "| abstract", len(re.sub(r"\\[a-zA-Z]+|[{}$]", " ", abstract).split()), "words")

@@ -90,7 +90,7 @@ interventions on exposure.
 \section{Related work}
 %======================================================================
 
-We review six lines of work that DRUP touches. Table~\ref{tab:related}
+We review the lines of work that DRUP touches. Table~\ref{tab:related}
 summarises how DRUP relates to representative methods.
 
 \paragraph{Graph-based recommendation.}
@@ -103,7 +103,9 @@ UltraGCN~\cite{mao2021ultragcn} approximates infinite-layer propagation with a
 constraint loss, and SGL~\cite{wu2021sgl} and SimGCL~\cite{yu2022simgcl} add
 contrastive views. Closed-form models are strong competitors of trained
 propagation: EASE~\cite{steck2019ease} learns an item--item matrix with a
-zero diagonal in closed form, GF-CF~\cite{shen2021gfcf} and
+zero diagonal in closed form, and EDLAE~\cite{steck2020edlae} generalises the
+constraint by penalising the diagonal, which, like our diagonal correction of
+$G$, removes an item's own contribution to its score; GF-CF~\cite{shen2021gfcf} and
 BSPM~\cite{choi2023bspm} interpret collaborative filtering as graph signal
 filtering, and graph convolutions can trade accuracy for
 diversity~\cite{isufi2021accuracy}. Reproducibility studies show that carefully
@@ -144,7 +146,9 @@ Closest to our work are methods that change neighbour aggregation.
 NAVIP~\cite{kim2022navip} weights each edge by its inverse propensity inside
 LightGCN. r-AdjNorm~\cite{zhao2022radjnorm} shows that the normalisation
 exponent of the adjacency controls how strongly popularity is amplified, and
-tunes it. APDA~\cite{zhou2023apda} learns an adaptive inverse-popularity
+tunes it; graph convolutions provably amplify popularity
+bias~\cite{chen2024gcnpop}, and deconfounding can reduce the amplification of
+user-level biases~\cite{wang2021decrs}. APDA~\cite{zhou2023apda} learns an adaptive inverse-popularity
 weight per edge, CAGED~\cite{que2025caged} derives aggregation weights from a
 backdoor adjustment, and DPAA~\cite{dpaa2026} learns interaction- and
 layer-wise weights to counter the amplification of popularity by repeated
@@ -168,8 +172,18 @@ analogue for inverse-propensity and DR edges with heterogeneous propensities.
 Unbiased subgraph counts from sampled edges~\cite{tsourakakis2009doulion},
 and the passage from homomorphism counts to injective counts by Möbius
 inversion on the partition lattice~\cite{rota1964}, are the combinatorial
-counterparts of our $K$-hop construction. What is new here is the combination of these
-tools with DR edge estimates and degree weights for recommendation, the
+counterparts of our $K$-hop construction. Removing walks that revisit vertices
+or edges is also standard in network analysis: non-backtracking
+operators~\cite{krzakala2013} and self-avoiding-walk
+statistics~\cite{hopkins2017bayesian} discard backtracking walks to control
+the spectrum or the variance. Our correction differs in that it keeps the
+repeated walks and replaces each repeated factor by its unbiased
+counterpart, so that the estimator targets the full walk sum, repeats
+included. In recommendation, \citet{schnabel2020item} debias item-to-item
+co-occurrence statistics with propensities and a small annotated sample. The
+reduction itself is therefore not new. What is new is its combination with
+inverse-propensity and DR edge estimates and degree weights in graph
+recommendation, the exact bias of the uncorrected operators, the
 public-operator form, and the consequences for exposure invariance. Our
 treatment of nuisances follows double machine learning, whose cross-fitting we
 adopt~\cite{chernozhukov2018dml}, and our clipping and control-variate choices
@@ -184,16 +198,21 @@ in~\cite{gomez2022provider,deldjoo2021explaining}. On the item side, exposure ca
 in proportion to merit~\cite{singh2018exposure}, amortised over
 time~\cite{biega2018equity} or under uncertainty about
 merit~\cite{singh2021uncertainty}, and two-sided allocations can be guaranteed
-by constrained matching~\cite{patro2020fairrec}. Fairness can also be audited by counterfactual
+by constrained matching~\cite{patro2020fairrec}; expected exposure evaluates
+stochastic rankings against merit~\cite{diaz2020expected}, and
+multi-stakeholder views weigh users, providers and the
+platform~\cite{abdollahpouri2020multistakeholder,ekstrand2022fairness}.
+Fairness can also be audited by counterfactual
 reasoning~\cite{cornacchia2023auditing}. DRUP contributes a
-causal item-side property, \emph{exposure invariance}: its expected scores do
-not respond to interventions on an item's exposure (Theorem~\ref{thm:fair}).
-Exposure invariance is a necessary condition for merit-based exposure
-fairness, not a distributive criterion: it removes the dependence of scores on
-exposure history but can increase the concentration of recommendations. The
-exposure-capped allocation (Theorem~\ref{thm:alloc}) is the distributive
-mechanism; like the matching view of~\cite{patro2020fairrec} it is a
-$b$-matching.
+causal item-side property of the merit \emph{estimate}, exposure invariance:
+its expected scores do not respond to interventions on an item's exposure
+(Theorem~\ref{thm:fair}). It is not a fairness criterion. Merit-based
+allocation can be applied to any merit estimate, and what it requires is an
+estimate whose errors do not depend on past exposure; exposure invariance is
+one such property, relative to the full-exposure target $F^*$ as the notion of
+merit. It can increase the concentration of recommendations, and the
+distributive mechanism is an explicit allocation such as the exposure-capped
+$b$-matching of Theorem~\ref{thm:alloc}, related to~\cite{patro2020fairrec}.
 
 \paragraph{Explanations, robustness and privacy.}
 Explainable recommendation is surveyed by~\cite{zhang2020explainable}. For graph models,
@@ -211,44 +230,40 @@ PORE~\cite{jia2023pore} certifies robustness by ensembling models trained on
 sub-sampled data. Private recommenders perturb item--item
 statistics~\cite{mcsherry2009netflix}, factorisation models~\cite{liu2024dpmf} or
 matrix completion under joint differential privacy~\cite{jain2018dpmc}, and
-federated approaches keep ratings on the device~\cite{chai2021fedmf}. Because a
-DRUP score with fixed nuisances is linear in each user's own interactions, its
-attributions are exact and its minimal counterfactual explanations are found by
-sorting (Proposition~\ref{prop:affine}, Theorem~\ref{thm:cf}); the same linearity
-gives closed-form certificates against injected profiles
-(Theorem~\ref{thm:robust}) and a jointly private release of one item operator
-with an analytically calibrated Gaussian mechanism~\cite{balle2018analytic,hsu2014matchings}
-(Theorem~\ref{thm:dp}). These properties hold for any linear propagation
-operator.
+federated approaches keep ratings on the device~\cite{chai2021fedmf}. Any
+linear propagation operator with fixed nuisances, DRUP included, admits exact
+removal attributions, closed-form certificates and a jointly private release
+of its item operator with an analytically calibrated Gaussian
+mechanism~\cite{balle2018analytic,hsu2014matchings}; we state and test these
+properties in the Supplementary Material.
 
 \begin{table}[t]\centering\footnotesize
 \caption{DRUP and representative related methods. ``loss'': the correction
 acts on the training objective; ``output'': it acts on the predictions;
-``learned'': learned aggregation weights; ``lin.'': follows from linearity with
-fixed nuisances and holds for any linear propagation operator (including
-linear LightGCN, GF-CF and DR adjacency); ``--'': not applicable.}\label{tab:related}
+``learned'': learned aggregation weights; ``--'': not applicable. Properties
+that follow from linearity (exact attributions, certificates, joint DP) hold
+for every linear operator, including linear LightGCN, GF-CF and DR adjacency,
+and are not listed.}\label{tab:related}
 \setlength{\tabcolsep}{4pt}
 \begin{adjustbox}{max width=\textwidth}
-\begin{tabular}{lcccccc}
+\begin{tabular}{lcccc}
 \toprule
 Method & \shortstack{debiases\\propagation} & \shortstack{unbiased\\beyond 1 hop} & \shortstack{doubly\\robust} &
-\shortstack{exposure\\invariance} & \shortstack{exact\\attributions} & \shortstack{certificates /\\joint DP}\\
+\shortstack{exposure\\invariance}\\
 \midrule
-\shortstack[l]{LightGCN, NGCF,\\UltraGCN, SGL, SimGCL} & no & no & no & no & no & no\\[2pt]
-\shortstack[l]{linear LightGCN,\\EASE, GF-CF, BSPM} & no & no & no & no & lin. & lin.\\[2pt]
-\shortstack[l]{IPS, SNIPS, DR,\\MRDR, StableDR} & loss & -- & DR variants & no & no & no\\[2pt]
-MACR, PDA, DICE & output & -- & no & no & no & no\\
-NAVIP & edge weights & no & no & no & no & no\\
-\shortstack[l]{r-AdjNorm, APDA,\\CAGED, DPAA} & learned & no & no & no & no & no\\[2pt]
-\shortstack[l]{GNNExplainer,\\CF-GNNExplainer} & -- & -- & -- & -- & approx. & no\\[2pt]
-PORE & -- & -- & -- & -- & -- & certified\\
-DP / federated MF & -- & -- & -- & -- & -- & privacy\\
+\shortstack[l]{LightGCN, NGCF,\\UltraGCN, SGL, SimGCL} & no & no & no & no\\[2pt]
+\shortstack[l]{linear LightGCN,\\EASE, GF-CF, BSPM} & no & no & no & no\\[2pt]
+\shortstack[l]{IPS, SNIPS, DR,\\MRDR, StableDR} & loss & -- & DR variants & no\\[2pt]
+MACR, PDA, DICE & output & -- & no & no\\
+NAVIP & edge weights & no & no & no\\
+\shortstack[l]{r-AdjNorm, APDA,\\CAGED, DPAA} & learned & no & no & no\\[2pt]
+DR adjacency (uncorrected) & DR edges & no & edge-wise & no$^\ast$\\
 \midrule
-\textbf{DRUP (ours)} & \textbf{DR edges} & \textbf{any odd $K$} & \textbf{yes} & \textbf{in expectation$^\ast$} & \textbf{lin.} & \textbf{lin.$^\dagger$}\\
+DRUP (ours) & DR edges & any odd $K$ & yes$^\dagger$ & in expectation$^\dagger$\\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
 \par\smallskip
-\raggedright\scriptsize $^\ast$Under Assumptions~\ref{as:unconf}--\ref{as:fixed} and unclipped propensities (Theorem~\ref{thm:fair}).
-$^\dagger$Frozen nuisances for certificates; public nuisances for joint DP.
+\raggedright\scriptsize $^\ast$Over-corrects (Theorem~\ref{thm:fair}); invariant in our real-data audits.
+$^\dagger$Under Assumptions~\ref{as:unconf}--\ref{as:fixed} (e.g., the sample split) and unclipped propensities.
 \end{table}

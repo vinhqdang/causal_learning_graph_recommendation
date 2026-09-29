@@ -12,6 +12,8 @@ Methods (the propagation operators share the 1-hop + beta * 3-hop form):
     DR-5hop / DRUP-5hop   the same with an added 5-hop term
     EASE, GF-CF           closed-form item models on the logged graph
     EASE-DR, GF-CF-DR     the same models on the doubly robust matrix W
+    BSPM, BSPM-DR         blurring-sharpening filter (Choi et al., 2023) on the
+                          logged and on the doubly robust graph
 
 Protocol (v2):
   * all nuisances (propensity model, imputation) are cross-fitted over K
@@ -50,7 +52,8 @@ BETAS = [0.0, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 1e3]
 GAMMAS = [0.03, 0.1, 0.3, 1.0, 3.0]          # weight of the 5-hop term
 EASE_LAMS = [10.0, 100.0, 1000.0]
 GFCF = [(0.0, 0), (0.3, 64), (0.3, 256), (1.0, 256)]   # (weight of ideal low-pass, rank)
-DR_FAMILY = ("DR", "DRUP", "DR-5hop", "DRUP-5hop", "EASE-DR", "GF-CF-DR")
+DR_FAMILY = ("DR", "DRUP", "DR-5hop", "DRUP-5hop", "EASE-DR", "GF-CF-DR", "BSPM-DR")
+BSPM_GRID = [(tb, ts, w) for tb in (1.0, 2.0) for ts in (0.0, 0.1, 0.3) for w in (0.0, 0.3)]
 SPLIT = ("DR-split", "DRUP-split")
 
 
@@ -128,16 +131,47 @@ def gfcf(X, rows, D, weights_ranks):
     return out
 
 
+def bspm(X, rows, D, grid, steps=4, rank=256):
+    """Blurring-sharpening process (Choi et al., SIGIR 2023) on the normalised
+    item Gram matrix P = R~^T R~ (R~ as in GF-CF): Euler steps of the heat
+    equation dx/dt = x (P - I) for time T_b (blurring, optionally with the
+    ideal low-pass term of GF-CF with weight w), then of dx/dt = -x P for time
+    T_s (sharpening)."""
+    du = D.sum(1).clamp_min(1.0).pow(-0.5)
+    di = D.sum(0).clamp_min(1.0).pow(-0.5)
+    Rt = du[:, None] * X * di[None, :]
+    Pm = Rt.T @ Rt
+    x0 = X[rows]
+    V = None
+    if any(w > 0 for _, _, w in grid):
+        _, _, V = torch.svd_lowrank(Rt, q=rank + 10, niter=4)
+        V = V[:, :rank]
+    out = []
+    for tb, ts, w in grid:
+        x = x0.clone()
+        h = tb / steps
+        for _ in range(steps):
+            dx = x @ Pm - x
+            if w > 0:
+                dx = dx + w * (((x * di[None, :]) @ V) @ (V.T / di[None, :]))
+            x = x + h * dx
+        hs = ts / steps
+        for _ in range(steps if ts > 0 else 0):
+            x = x - hs * (x @ Pm)
+        out.append(({"tb": tb, "ts": ts, "w": w}, x))
+    return out
+
+
 def configs(method, a):
     if method == "Pop":
         grid = {}
     elif method == "Impute":
         grid = {"lam": a.lams, "imp": a.imps}
-    elif method in ("Obs", "EASE", "GF-CF"):
+    elif method in ("Obs", "EASE", "GF-CF", "BSPM"):
         grid = {"alpha": a.alphas} if method == "Obs" else {}
     elif method.startswith("IPS"):
         grid = {"floor": a.floors, "lam": a.lams, "alpha": a.alphas, "deg": a.degs}
-    elif method in ("EASE-DR", "GF-CF-DR"):
+    elif method in ("EASE-DR", "GF-CF-DR", "BSPM-DR"):
         grid = {"floor": a.floors, "lam": a.lams, "imp": a.imps, "cv": a.cvs}
     elif method in SPLIT:
         grid = {"floor": a.floors, "lam": a.lams, "imp": a.imps, "alpha": a.alphas, "cv": a.cvs}
@@ -156,6 +190,9 @@ def score_bank(d, method, cfg, nz, rows):
         return [(dict(cfg), (O * Y).sum(0, keepdim=True).expand(len(rows), -1))]
     if method == "Impute":
         return [(dict(cfg), nz.imputation(0.05, cfg)[rows])]
+    if method == "BSPM":
+        X = O * Y
+        return [(dict(cfg, **h), sc) for h, sc in bspm(X, rows, X, BSPM_GRID)]
     if method in ("EASE", "GF-CF"):
         X = O * Y
         if method == "EASE":
@@ -185,6 +222,8 @@ def score_bank(d, method, cfg, nz, rows):
         W = edge_estimate(O, Y, P, Yd if dr else None, cfg.get("cv", 1.0) if dr else 1.0)
         if method == "EASE-DR":
             return [(dict(cfg, lam_e=l), ease(W, rows, l)) for l in EASE_LAMS]
+        if method == "BSPM-DR":
+            return [(dict(cfg, **h), sc) for h, sc in bspm(W, rows, Yd, BSPM_GRID)]
         if method == "GF-CF-DR":
             return [(dict(cfg, **h), s) for h, s in gfcf(W, rows, Yd, GFCF)]
         C = edge_weights(nz, W, Yd, cfg["alpha"], cfg.get("deg", "Yhat"))
@@ -208,6 +247,9 @@ def load_dataset(name, dt):
         d, ks, key, by = load_coat(), (5, 10), "ndcg@5", "entry"
     elif name == "yahoo":
         d, ks, key, by = load_yahoo(), (5, 10), "ndcg@5", "user"
+    elif name == "kuairand":
+        d = torch.load("data/raw/kuairand.pt", weights_only=False)
+        ks, key, by = (5, 10, 20), "ndcg@10", "user"
     else:
         d = torch.load("data/raw/kuairec.pt", weights_only=False)
         ks, key, by = (10, 20, 50), "ndcg@20", "user"
@@ -236,6 +278,7 @@ def main():
     ap.add_argument("--dtype", default="float64")
     ap.add_argument("--out", default=None)
     ap.add_argument("--redo", action="store_true", help="recompute methods already in --out")
+    ap.add_argument("--split_seed", type=int, default=0, help="seed of the sample split A")
     ap.add_argument("--split", type=float, default=0.2,
                     help="fraction of pairs used for the nuisances of DR-split / DRUP-split")
     ap.add_argument("--dump_bank", default=None,
@@ -249,7 +292,7 @@ def main():
     todo0 = [mth for mth in a.methods]
     nz = (Nuisance(d, d["O"], d["Y"], a.prop, K=a.xfit, seed=0)
           if any(mth not in SPLIT for mth in todo0) else None)
-    nzs = SplitNuisance(d, d["O"], d["Y"], a.prop, a.split) if any(mth in SPLIT for mth in todo0) else None
+    nzs = SplitNuisance(d, d["O"], d["Y"], a.prop, a.split, seed=a.split_seed) if any(mth in SPLIT for mth in todo0) else None
     print(f"nuisance setup (xfit={a.xfit}) {time.time() - t0:.0f}s", flush=True)
     rows_users = sorted({u for u, _, _ in d["test"]})
     rows = torch.tensor(rows_users)
@@ -262,7 +305,7 @@ def main():
     # Group the work by imputation key so that every cross-fitted imputation
     # is computed once and shared by all methods that use it.
     def nkey(method, cfg):
-        if method in ("Pop", "Obs", "EASE", "GF-CF"):
+        if method in ("Pop", "Obs", "EASE", "GF-CF", "BSPM"):
             return None
         if method == "Impute":
             return (0.05, cfg["lam"], cfg.get("imp", "add"))

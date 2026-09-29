@@ -30,30 +30,41 @@ over five hops or more, should use the corrected operator. In both cases, most o
 the accuracy comes from training-free propagation over a doubly robust graph.
 
 \paragraph{Stakeholders.}
-For \emph{item providers}, exposure invariance means that an item is not
-penalised in expectation for having been shown rarely in the past. It does not
-mean equal exposure: when quality is concentrated, DRUP's lists can be more
-concentrated than those of the logged graph (Table~\ref{tab:fair}), and the
-scores of rarely exposed items have a larger variance
-(Theorem~\ref{thm:var}(a)), so their realised rankings are noisier. Providers
-who need exposure guarantees need an explicit mechanism such as the
-exposure-capped allocation. For \emph{users}, the attributions show which of
-their own interactions drive a recommendation, or certify that none can
-overturn it; the population-level part of the score
-remains unexplained (it decides 94\% of the top recommendations on Coat and 52\% on KuaiRec), and explaining it through $G$ would conflict with the
-privacy guarantee. For the \emph{platform}, DRUP is cheap and training-free
-but needs propensities, and the clip $\tau$ and the control-variate weight
-$\lambda$ trade exposure invariance against accuracy. This trade-off is a policy
-choice rather than a tuning detail. One option is to select the most accurate
-configuration subject to a bound on the elasticity measured in a thinning
-audit such as ours. For \emph{auditors and regulators}, DRUP produces concrete
-artefacts: a single item operator, a thinning audit with a known answer, and
-certificates. Under the EU Digital Services Act~\cite{dsa2022}, platforms must
-explain the main parameters of their recommender systems (Art.~27), assess and
-mitigate systemic risks (Arts.~34--35), undergo independent audits (Art.~37)
-and give vetted researchers access to data (Art.~40). Our artefacts fit the
-last three, but the audit of exposure invariance needs the platform's
-propensities, which an external auditor usually does not have.
+For \emph{item providers}, exposure invariance means that an item's expected
+score does not depend on how often it was observed in the log. It does not
+mean equal exposure. When estimated quality is concentrated, DRUP's lists are
+more concentrated than those of the logged graph (Table~\ref{tab:fair}), and in
+a system that is retrained on its own recommendations this concentration can
+entrench a small set of items, because rarely recommended items then gain few
+new observations; the scores of rarely exposed items also have a larger
+variance (Theorem~\ref{thm:var}(a)). Invariance without an allocation mechanism
+may therefore worsen provider concentration, and a deployment should report
+concentration next to invariance and use an explicit mechanism such as the
+exposure-capped allocation. For \emph{users}, the removal attributions of the
+Supplementary Material describe the model with its nuisances frozen; deleting
+an interaction and re-fitting the nuisances gives a different answer, so they
+are not an account of data deletion. For the \emph{platform}, DRUP is cheap
+and training-free but needs propensities, and the guarantees need
+propensities that are correct and nuisances that do not depend on the log: in
+simulation with nuisances from an independent log, estimated and misspecified
+propensities bias the corrected
+operator by 2 to 7 times the mean target and the uncorrected ones by up to 90
+times, at least as much as the repeated walks do (Table~\ref{tab:protocolfull}).
+The clip $\tau$ and the control-variate weight $\lambda$ trade exposure invariance
+against accuracy; this is a policy choice, and one option is to select the
+most accurate configuration subject to a bound on the elasticity measured in a
+thinning audit. For \emph{auditors and regulators}, the thinning audit is a
+first-party instrument: it needs the log, the platform's propensities, the
+deployed $\tau$, $\lambda$ and grid, and the ability to re-run the pipeline. An
+external party can run it only with such access, for instance as a vetted
+researcher under Article~40 of the Digital Services Act~\cite{dsa2022}.
+Independent audits under Article~37 assess compliance with the Act's
+obligations according to Delegated Regulation (EU) 2024/436~\cite{eu2024audit}
+rather than properties of estimators, and the audit results of
+Section~\ref{sec:fair} can at most support the risk assessment of
+Articles~34--35. User-facing explanations of the main parameters (Article~27)
+and the option of a recommender not based on profiling (Article~38) are
+outside the scope of this work.
 
 \paragraph{Limitations.}
 The analysis is static. It assumes a single logging policy and fixed potential
