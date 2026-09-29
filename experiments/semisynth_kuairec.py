@@ -137,7 +137,15 @@ def main():
     def add(key, name, val):
         acc.setdefault(key, {}).setdefault(name, []).append(val)
 
-    for rep in range(a.reps):
+    path = a.out or f"results/v3/semisynth_kuairec_d{a.density}.json"
+    ckpt = path + ".ckpt.pt"
+    start = 0
+    if os.path.exists(ckpt):                 # resume after a restart
+        cp = torch.load(ckpt, weights_only=False)
+        rows, acc, cu, start = cp["rows"], cp["acc"], cp["cu"], cp["rep"]
+        g.set_state(cp["g"])
+        print(f"resuming at rep {start}", flush=True)
+    for rep in range(start, a.reps):
         tr = time.time()
         O = (torch.rand(m, n, generator=g, dtype=DT) < P).to(DT)
         O2 = (torch.rand(m, n, generator=g, dtype=DT) < P).to(DT)
@@ -198,6 +206,8 @@ def main():
                                     "dT": torch.zeros(m, n)})
                                 r5["dT"] += (T5e - T5).float()
         print(f"rep {rep + 1}/{a.reps} [{time.time() - tr:.0f}s]", flush=True)
+        torch.save({"rows": rows, "acc": acc, "cu": cu, "rep": rep + 1, "g": g.get_state()}, ckpt + ".tmp")
+        os.replace(ckpt + ".tmp", ckpt)
     out = {"config": vars(a), "info": {"m": m, "n": n, "p_mean": float(P.mean()), "p_median": float(P.median()),
                                        "frac_p_below_tau": float((P < a.tau).double().mean()),
                                        "pos_rate": float(Y.mean())}, "results": {}}
@@ -224,7 +234,6 @@ def main():
             out["results"].setdefault(key, {})[name] = res
             print(key, name, json.dumps({k: (v if not isinstance(v, dict) else round(v["mean"], 4)) for k, v in res.items()}),
                   flush=True)
-    path = a.out or f"results/v3/semisynth_kuairec_d{a.density}.json"
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w") as f:
         json.dump(out, f, indent=1)

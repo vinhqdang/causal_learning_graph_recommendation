@@ -287,9 +287,15 @@ def main():
     a = ap.parse_args()
 
     dt = getattr(torch, a.dtype)
+    if a.out and os.path.exists(a.out) and not a.redo and not a.dump_bank:
+        done = json.load(open(a.out)).get("results", {})
+        if all(mth in done for mth in a.methods):
+            print(f"{a.methods} already in {a.out}", flush=True)
+            return
     d, ks, key, by = load_dataset(a.dataset, dt)
     t0 = time.time()
-    todo0 = [mth for mth in a.methods]
+    todo0 = [mth for mth in a.methods if a.redo or not (a.out and os.path.exists(a.out))
+             or mth not in json.load(open(a.out)).get("results", {})]
     nz = (Nuisance(d, d["O"], d["Y"], a.prop, K=a.xfit, seed=0)
           if any(mth not in SPLIT for mth in todo0) else None)
     nzs = SplitNuisance(d, d["O"], d["Y"], a.prop, a.split, seed=a.split_seed) if any(mth in SPLIT for mth in todo0) else None

@@ -141,6 +141,9 @@ def main():
     bank_path = a.dump_bank or os.path.join(os.path.dirname(out), "bank_" + os.path.basename(out))
     dumps = json.load(open(bank_path))["banks"] if os.path.exists(bank_path) else {}
     for name in a.methods:
+        if name in results:
+            print(f"{name}: already in {out}, skipped", flush=True)
+            continue
         kind, loss, extra = METHODS[name]
         t0 = time.time()
         wide = name in a.wide
@@ -154,9 +157,19 @@ def main():
         best = [(-1.0, None, None, None) for _ in splits]       # (val, cfg, test agg, test per-user)
         bank = []
         n_cfg = 0
+        # checkpoint after every configuration, so that a restarted run resumes
+        ckpt = out + f".{name}.partial.json"
+        done_cfgs = []
+        if os.path.exists(ckpt):
+            cp = json.load(open(ckpt))
+            done_cfgs, bank = cp["done"], cp["bank"]
+            best = [(b[0], b[1], b[2], {int(k): v for k, v in b[3].items()} if b[3] else None) for b in cp["best"]]
+            print(f"  {name}: resuming after {len(done_cfgs)} configurations", flush=True)
         for vals in itertools.product(*grid_vals):
             cfg = dict(zip(grid_keys, vals))
             n_cfg += 1
+            if cfg in done_cfgs:
+                continue
             st = {"best": [-1.0] * len(splits), "bad": [0] * len(splits), "done": [False] * len(splits)}
 
             def record(vs, S, ep, cfg=cfg, st=st):
@@ -179,6 +192,12 @@ def main():
             run(kind, loss, cfg, 0, record)
             print(f"  {name} {cfg} done [{time.time() - tc:.0f}s] best split0 val {best[0][0]:.4f}",
                   flush=True)
+            done_cfgs.append(cfg)
+            with open(ckpt + ".tmp", "w") as f:
+                json.dump({"done": done_cfgs, "bank": bank,
+                           "best": [(b[0], b[1], b[2], {str(k): v for k, v in b[3].items()} if b[3] else None)
+                                    for b in best]}, f)
+            os.replace(ckpt + ".tmp", ckpt)
         dumps[name] = bank
         with open(bank_path, "w") as f:
             json.dump({"args": vars(a), "key": key, "banks": dumps}, f)
@@ -206,6 +225,8 @@ def main():
             res["seed_check"] = {"cfg": cfg0, "test": tv, "mean": float(np.mean(tv)),
                                  "std": float(np.std(tv))}
         results[name] = res
+        if os.path.exists(ckpt):
+            os.remove(ckpt)
         txt = "  ".join(f"{k}={v[0]:.4f}±{v[1]:.4f}" for k, v in agg.items())
         sc = res.get("seed_check", {})
         print(f"{name:12s} {txt}   [{time.time() - t0:.0f}s, {n_cfg} cfgs] seeds {sc.get('mean', 0):.4f}"
