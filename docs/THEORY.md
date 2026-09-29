@@ -30,9 +30,14 @@ ten random folds of pairs: the nuisance used at a pair of fold $k$ is fitted on
 the other nine folds (`drup/pipeline.py`, class `Nuisance`). The degree weights
 come either from $\hat Y$ or from cross-fitted edge estimates (row and column
 sums of $W$ over the other folds); the degree source is a searched and reported
-hyper-parameter. This removes the dependence of every nuisance on its own pair;
-the remaining dependence on other pairs is diffuse and is measured by
-re-fitting experiments.
+hyper-parameter. This removes the dependence of every nuisance on its own pair,
+which is enough for one-hop terms, but not the dependence on the other edges of
+a walk: a product of several cross-fitted edge estimates can be biased although
+each of them is unbiased. Cross-fitted $W$-degrees make $C$ depend on the log,
+and the scale constants $c_1,c_3$ of the score are computed from the scores.
+The theorems below therefore hold for nuisances from an independent log and
+are an approximation for the experimental protocol;
+`experiments/mc_protocol.py` measures the gap by Monte Carlo.
 
 **Target.** A graph recommender propagates preference along walks of the
 *counterfactual full-exposure* graph $Y$, not along walks of the logged graph
@@ -87,8 +92,10 @@ is $G$; every other term uses the user's own row. See
 `propagation.local_three_hop`; the relative error against the direct formula
 is $4\times10^{-15}$.
 
-**Cost.** One $n\times n$ Gram product plus $O(mn)$ reductions, the same cost as
-the uncorrected operator. There is no training.
+**Cost.** At three hops, one $n\times n$ Gram product plus $O(mn)$ reductions,
+the same cost as the uncorrected operator. There is no training. The $K$-hop
+correction evaluates one contraction per pair of equality patterns (99 at
+$K=5$); `experiments/bench_khop.py` measures its cost.
 
 ---
 
@@ -309,7 +316,7 @@ $$
 s_{ui}=\text{const}+\sum_{j\ne i}\big(c_{uj}G^{(-u)}_{ji}+c_{ui}w_{ui}c_{uj}^2\big)\,w_{uj}.
 $$
 So "un-logging" interaction $j$ ($w_{uj}\to\hat Y_{uj}$) changes the score by
-exactly $\phi_j=a_j(w_{uj}-\hat Y_{uj})$, and removal effects are **additive over any
+exactly $\phi_j=\omega_j(w_{uj}-\hat Y_{uj})$ with $\omega_j=b\,a_j$ ($b$ the weight of the three-hop term), and removal effects are **additive over any
 subset**. The $\phi_j$ are also the exact Shapley values of the interactions,
 since the game is additive. Completeness holds exactly:
 $\sum_j\phi_j=s_{ui}-s_{ui}(\text{nothing logged})$.
@@ -349,6 +356,8 @@ $w_{vj}\in[\hat Y_{vj}-\hat Y_{vj}/\tau,\ \hat Y_{vj}+(1-\hat Y_{vj})/\tau]$
 (DR), and unlogged ones equal $\hat Y_{vj}$. Therefore $D$ lies in an interval computed from the $L$
 most favourable slots, and $\Delta_k$ is bounded in closed form by its
 extremes over the box of $(D,x_k)$: it is linear in $D$ and quadratic in $x_k$.
+The box contains every feasible $(D,x_k)$ but ignores that both depend on the
+same $L$ entries, so the bounds are conservative, not exact.
 Effects add up over fake users. Consequently, item $t$ is **certified** to stay
 out of $u$'s top-$K$ against any $F$ fake profiles if
 $$
@@ -420,8 +429,10 @@ and at least $RK/\max\mathrm{cap}$ items are recommended.
 (b) Deterministically,
 $U(\hat x)\ge\max_{x\in\mathcal X}U(x)-\Gamma-2\max_{x\in\mathcal X}|\langle x,s-F^*\rangle|$.
 (c) For DRUP, $\mathbb E s=F^*$ and Theorem 3(d) apply. With probability at least
-$1-\delta$, $|s_{ui}-F^*_{ui}|\le t_\delta=\sqrt{\tfrac12\max_{ui}\sum_ec_e^2\log(2RN/\delta)}$
-for all entries (up to the clipping bias of Theorem 3(c)), hence
+$1-\delta$, $|s_{ui}-F^*_{ui}|\le t_\delta=\sqrt{\tfrac12\max_{ui}\sum_e\bar c_e^2\log(2mn/\delta)}$
+for all entries, where $\bar c_e(u,i)=b\,c_e(u,i)+a\,C_{ui}\varepsilon_{ui}\mathbb 1[e=(u,i)]/\tau$
+adds the sensitivity of the one-hop term to the three-hop constant $c_e$ and
+the union runs over all $mn$ pairs because the candidate set depends on the log (up to the clipping bias of Theorem 3(c)), hence
 $U(\hat x)\ge\mathrm{OPT}-\Gamma-2RKt_\delta$. For logged-graph propagation,
 $s$ concentrates around the exposure-weighted $F^*(P\odot Y)$ instead
 (Theorem 4). The extra term $2\max_x|\langle x,\mathbb Es-F^*\rangle|$ does

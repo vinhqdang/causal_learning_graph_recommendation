@@ -3,12 +3,13 @@
 method in {"Obs", "IPS", "IPS+WC", "DR", "DRUP"}; the configuration keys are
 those selected by experiments/run_filters.py (alpha, floor, lam, imp, cv, beta).
 
-Nuisances (propensities, imputation and the degree weights C) are fixed
-functions of data that do not involve the pair they are used at: with
-``Nuisance(..., K>1)`` every nuisance at a pair in fold k is fitted on the
-other K-1 folds (cross-fitting, Assumption 2). The degree weights of every
-debiased operator come from the imputation Yhat or from cross-fitted edge
-estimates (deg = 'Wx'), so C at a pair never uses that pair's exposure.
+With ``Nuisance(..., K>1)`` the propensity and the imputation at a pair in
+fold k are fitted on the other K-1 folds (cross-fitting over pairs), so they
+do not use that pair's own exposure. This is weaker than Assumption 2 of the
+paper: the nuisances still depend on the exposures of the other edges of a
+walk, and the degree weights C, which sum the imputation (deg = 'Yhat') or the
+edge estimates (deg = 'Wx') over a user's or an item's pairs, depend on the
+log as well. experiments/mc_protocol.py measures the resulting bias.
 """
 
 import torch
@@ -32,8 +33,8 @@ class Nuisance:
     K <= 1: no cross-fitting (nuisances fitted on the whole log).
     K > 1 : pairs are split into K random folds; for a pair in fold k the
             propensity model and the imputation are both fitted on the pairs
-            outside fold k, so the nuisance at a pair is independent of that
-            pair's exposure and outcome.
+            outside fold k, so the nuisance at a pair does not use that
+            pair's exposure and outcome (it still uses the other pairs).
     """
 
     def __init__(self, d, O, Y, prop, K=0, seed=0):
@@ -106,7 +107,8 @@ def as_nuisance(d, O, Y, P_or_nuis):
 def crossfit_degree_weights(W, alpha, folds, floor=1.0):
     """Degree weights from cross-fitted edge estimates: at a pair of fold k,
     d_u and d_i are the row and column sums of W over the other folds
-    (rescaled by K / (K - 1)), so C at a pair never uses that pair's exposure."""
+    (rescaled by K / (K - 1)). C at a pair does not use that pair's exposure
+    directly, but W over the other folds contains cross-fitted imputations that do."""
     K = int(folds.max()) + 1
     C = torch.empty_like(W)
     for k in range(K):

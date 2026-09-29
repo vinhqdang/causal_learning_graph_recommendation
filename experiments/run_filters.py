@@ -18,7 +18,8 @@ Protocol (v2):
     random folds of pairs when --xfit K > 1;
   * the degree weights of every debiased operator come from the imputation
     Yhat or from cross-fitted edge estimates (deg = Wx: row / column sums of
-    W over the other folds), so C at a pair never uses that pair's exposure;
+    W over the other folds); both still depend on the log (see
+    experiments/mc_protocol.py for the resulting gap to Assumption 2);
   * the 1-hop and 3-hop terms are combined with *global* constants
     (score = s1 / c1 + beta * s3 / c3, c = mean |term| over all scored users),
     i.e. a fixed linear combination;
@@ -39,10 +40,10 @@ import torch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from drup.data import load_coat, load_yahoo, split_test  # noqa: E402
-from drup.estimation import clip_propensity  # noqa: E402
+from drup.estimation import clip_propensity, popularity_propensity  # noqa: E402
 from drup.khop import khop  # noqa: E402
 from drup.metrics import evaluate  # noqa: E402
-from drup.pipeline import Nuisance, edge_weights  # noqa: E402
+from drup.pipeline import Nuisance, _impute, edge_weights  # noqa: E402
 from drup.propagation import degree_weights, edge_estimate, three_hop  # noqa: E402
 
 BETAS = [0.0, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 1e3]
@@ -50,6 +51,35 @@ GAMMAS = [0.03, 0.1, 0.3, 1.0, 3.0]          # weight of the 5-hop term
 EASE_LAMS = [10.0, 100.0, 1000.0]
 GFCF = [(0.0, 0), (0.3, 64), (0.3, 256), (1.0, 256)]   # (weight of ideal low-pass, rank)
 DR_FAMILY = ("DR", "DRUP", "DR-5hop", "DRUP-5hop", "EASE-DR", "GF-CF-DR")
+SPLIT = ("DR-split", "DRUP-split")
+
+
+class SplitNuisance:
+    """Sample split (Assumption 2 on the rest of the log): the propensity model
+    and the imputation are fitted on a random fraction q of the pairs (mask A),
+    the edge estimates of those pairs are replaced by the imputation, and the
+    degree weights and the score constants come from the imputation. Given the
+    split and the exposures in A, the remaining edge estimates are independent
+    of every nuisance, and Theorem 1 applies with delta_e = Yhat_e - Y_e on A."""
+
+    def __init__(self, d, O, Y, prop, q, seed=0):
+        g = torch.Generator().manual_seed(seed + 12345)
+        self.A = torch.rand(O.shape, generator=g) < q
+        self.O, self.Y = O, Y
+        Am = self.A.to(O.dtype)
+        if prop == "given" and d.get("P_given") is not None:
+            self.P = d["P_given"].to(O.dtype)
+        else:
+            self.P = popularity_propensity(O, mask=Am)[0]
+        self._cache = {}
+
+    def imputation(self, floor, cfg):
+        key = (floor, cfg["lam"], cfg.get("imp", "add"))
+        if key not in self._cache:
+            self._cache.clear()
+            self._cache[key] = _impute(self.O, self.Y, clip_propensity(self.P, floor), cfg,
+                                       mask=self.A.to(self.O.dtype))
+        return self._cache[key]
 
 
 def gmean(x):
@@ -109,6 +139,8 @@ def configs(method, a):
         grid = {"floor": a.floors, "lam": a.lams, "alpha": a.alphas, "deg": a.degs}
     elif method in ("EASE-DR", "GF-CF-DR"):
         grid = {"floor": a.floors, "lam": a.lams, "imp": a.imps, "cv": a.cvs}
+    elif method in SPLIT:
+        grid = {"floor": a.floors, "lam": a.lams, "imp": a.imps, "alpha": a.alphas, "cv": a.cvs}
     else:
         grid = {"floor": a.floors, "lam": a.lams, "imp": a.imps, "alpha": a.alphas, "cv": a.cvs,
                 "deg": a.degs}
@@ -133,6 +165,19 @@ def score_bank(d, method, cfg, nz, rows):
         W = O * Y
         C = degree_weights(W, cfg["alpha"])
         parts = propagate(W, C, False, rows)
+    elif method in SPLIT:
+        P = clip_propensity(nz.P, cfg["floor"])
+        Yd = nz.imputation(cfg["floor"], dict(cfg, imp=cfg.get("imp", "add")))
+        W = torch.where(nz.A, Yd, edge_estimate(O, Y, P, Yd, cfg.get("cv", 1.0)))
+        C = degree_weights(W, cfg["alpha"], D=Yd)
+        correct = method == "DRUP-split"
+        s1 = (C * W)[rows]
+        s3 = three_hop(W, C, rows=rows, correct=correct)
+        # constants from the imputed graph, so that the score is a fixed
+        # function of the edge estimates given the nuisances
+        c1 = gmean((C * Yd)[rows])
+        c3 = gmean(three_hop(Yd, C, rows=rows, correct=correct))
+        parts = [s1 / c1, s3 / c3]
     else:
         P = clip_propensity(nz.P, cfg["floor"])
         Yd = nz.imputation(cfg["floor"], dict(cfg, imp=cfg.get("imp", "add")))
@@ -191,12 +236,20 @@ def main():
     ap.add_argument("--dtype", default="float64")
     ap.add_argument("--out", default=None)
     ap.add_argument("--redo", action="store_true", help="recompute methods already in --out")
+    ap.add_argument("--split", type=float, default=0.2,
+                    help="fraction of pairs used for the nuisances of DR-split / DRUP-split")
+    ap.add_argument("--dump_bank", default=None,
+                    help="also write every configuration's validation and test score per split "
+                         "(for tuning-budget curves)")
     a = ap.parse_args()
 
     dt = getattr(torch, a.dtype)
     d, ks, key, by = load_dataset(a.dataset, dt)
     t0 = time.time()
-    nz = Nuisance(d, d["O"], d["Y"], a.prop, K=a.xfit, seed=0)
+    todo0 = [mth for mth in a.methods]
+    nz = (Nuisance(d, d["O"], d["Y"], a.prop, K=a.xfit, seed=0)
+          if any(mth not in SPLIT for mth in todo0) else None)
+    nzs = SplitNuisance(d, d["O"], d["Y"], a.prop, a.split) if any(mth in SPLIT for mth in todo0) else None
     print(f"nuisance setup (xfit={a.xfit}) {time.time() - t0:.0f}s", flush=True)
     rows_users = sorted({u for u, _, _ in d["test"]})
     rows = torch.tensor(rows_users)
@@ -213,6 +266,8 @@ def main():
             return None
         if method == "Impute":
             return (0.05, cfg["lam"], cfg.get("imp", "add"))
+        if method in SPLIT:
+            return ("split", cfg["floor"], cfg["lam"], cfg.get("imp", "add"))
         return (cfg["floor"], cfg["lam"], cfg.get("imp", "add"))
     todo = [mth for mth in a.methods if mth not in results or a.redo]
     jobs = {}
@@ -226,7 +281,7 @@ def main():
         tk = time.time()
         for method, cfg in jobs[key_]:
             t0 = time.time()
-            for c, s in score_bank(d, method, cfg, nz, rows):
+            for c, s in score_bank(d, method, cfg, nzs if method in SPLIT else nz, rows):
                 vm = [evaluate(s, v, ks, row_of)[key] for v, _ in splits]
                 tm = []
                 for _, t in splits:
@@ -252,6 +307,14 @@ def main():
                            "n_configs": len(bank)}
         txt = "  ".join(f"{m}={v[0]:.4f}±{v[1]:.4f}" for m, v in agg.items())
         print(f"{method:9s} {txt}   [{times[method]:.0f}s, {len(bank)} cfgs] e.g. {chosen[0]}", flush=True)
+    if a.dump_bank:
+        dump = {mth: [{"cfg": c, "val": vm, "test": [t[0][key] for t in tm]} for c, vm, tm in banks[mth]]
+                for mth in todo}
+        os.makedirs(os.path.dirname(a.dump_bank), exist_ok=True)
+        with open(a.dump_bank, "w") as f:
+            json.dump({"args": vars(a), "key": key, "banks": dump}, f)
+        if a.out is None:
+            return
     out = a.out or f"results/v2/filters_{a.dataset}_{a.prop}.json"
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w") as f:

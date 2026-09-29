@@ -83,6 +83,7 @@ preamble = r"""\documentclass[preprint,review,12pt,authoryear]{elsarticle}
 \newcommand{\diag}{\operatorname{diag}}
 \newcommand{\tW}{\tilde W}
 \newcommand{\tY}{\tilde Y}
+\setlength{\emergencystretch}{3em}
 
 \journal{Information Processing \& Management}
 

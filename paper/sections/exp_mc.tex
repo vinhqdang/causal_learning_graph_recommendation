@@ -29,7 +29,10 @@ and the uncorrected DR operator is biased at both depths (1.1 and 5.1). The
 exposure elasticity is $+1.78$ for the logged graph, $-0.19$ for DR adjacency and
 $+0.005$ for DRUP. The $K$-hop engine reproduces the closed-form three-hop
 operator to $7\times10^{-15}$ and brute-force enumeration of all five-hop walks to
-$10^{-13}$.
+$10^{-13}$. On a dense matrix of KuaiRec's size (7{,}176 users, 10{,}728 items,
+1{,}411 scored users, four CPU cores) the corrected three-hop operator takes 1.9\,s
+against 1.4\,s for the plug-in one, and the corrected five-hop operator 85\,s
+against 2.9\,s: the $K$-hop correction is exact but not free.
 
 Unbiasedness does not buy ranking accuracy in this model. The rank agreement
 of a single realisation with the target is higher for the uncorrected DR
@@ -41,6 +44,50 @@ operator removes this term and, with it, some useful signal. For IPS edges,
 whose bias does not involve the imputation, the correction leaves the rank
 agreement unchanged (0.061 against 0.059 at five hops).
 
+
+\begin{table}[t]\centering\small
+\caption{Monte-Carlo check of the nuisance protocol (Remark~\ref{rem:xfit}): relative
+$|$bias$|$ of the three-hop term against the full-exposure target with the same
+weights $C$, over all entries, with true propensities. Nuisances are fitted on
+an independent log (Assumption~\ref{as:fixed}), cross-fitted over ten folds of
+pairs of the same log (the protocol of the main experiments), or fitted on a
+random 50\% or 20\% of the pairs of the same log (sample split). Model: users
+$\times$ items and mean exposures per user; the last model has four times larger
+propensities. The last two columns give the bias of the full score
+$s=s_1/c_1+s_3/c_3$ with constants computed from the scores or from the imputed
+graph (2{,}000--3{,}000 replications).}\label{tab:protocol}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/protocol.tex}
+\end{adjustbox}
+\end{table}
+
+\paragraph{Theory against protocol.} Table~\ref{tab:protocol} measures how far the
+guarantees carry over to the way nuisances are fitted in practice. With
+nuisances from an independent log, the corrected operator's bias is at the
+Monte-Carlo error (0.01--0.10) while the uncorrected operators are biased by
+0.09--2.2 times the mean target. With the cross-fitted protocol of our main
+experiments this advantage disappears: the corrected operator is biased by
+0.17--0.80 and the uncorrected one by 0.11--0.61, because the nuisances, and in
+particular the degree weights, depend on the exposures of the walk edges, and
+this dependence partly offsets the repeated-walk excess of the uncorrected
+operator. The dependence bias shrinks as users have more exposures (from 0.80
+at 11 to 0.18 at 60 per user) but does not vanish. Degrees from edge estimates
+make the uncorrected operators much worse (up to 4.1). The sample split
+restores the guarantee: relative to the target of
+Theorem~\ref{thm:unbiased} with $\hat Y$ on the imputed pairs, the bias of
+DRUP-split is 0.007--0.065, and relative to the full-exposure target it is
+0.07--0.18 with $q=0.2$, against 0.07--1.09 for the uncorrected operator under the same
+split; $q=0.5$ imputes too many pairs (0.13--0.42). The data-dependent
+constants matter as well: with independent nuisances and DR edges, the full
+score is biased by 0.18--0.35 when $c_1,c_3$ are computed from the scores and by
+0.02--0.11 when they come from the imputed graph. On
+unexposed candidates, the conditional target of Corollary~\ref{cor:cand}
+differs from the full-exposure target by 12\% (three hops) and 6\% (five hops)
+of the mean target in this model, and it agrees with it in within-user order
+only up to Kendall $\tau=0.63$ and 0.77: this is the part of $F^*$ that no
+estimator can recover on the candidates actually ranked. Results with
+estimated propensities, which are misspecified in this model and bias every
+operator, are in Table~\ref{tab:protocolfull} of Appendix~\ref{app:more}.
 
 Stress tests outside the assumptions of Theorem~\ref{thm:unbiased} are in
 Appendix~\ref{app:more} (Table~\ref{tab:stress}). With fixed-size slates, which

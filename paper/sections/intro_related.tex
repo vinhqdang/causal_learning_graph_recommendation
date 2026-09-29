@@ -29,16 +29,22 @@ $u\to j\to u$ of a three-hop walk is one. Their excess is largest where the
 propensity is smallest, that is, on the rarely exposed edges that debiasing is
 meant to recover.
 
-We make this observation precise and remove the resulting bias exactly. Two
+We make this observation precise and remove the resulting bias exactly. Three
 points qualify its practical reach, and we state them up front. First, for
 ranking the \emph{unexposed} candidates of a user with inverse-propensity
 edges, the repeated walks through the candidate vanish at three hops (the
 candidate's own estimate is zero), and the bias only appears from five hops
 on; for DR edges it is present at three hops. Second, on the three public
-benchmarks we use, removing the bias does not change top-$K$ accuracy. The
-value of the correction is therefore that the propagated scores become
-unbiased estimates of a well-defined counterfactual quantity, with guarantees
-that can be checked, rather than an accuracy gain.
+benchmarks we use, removing the bias does not change top-$K$ accuracy, and we
+found no setting in which it changes rankings. The contribution is therefore at
+the level of scores: with nuisances that do not depend on the log, the
+propagated scores become unbiased estimates of a well-defined counterfactual
+quantity (on unexposed candidates, up to the imputation error at the
+candidate itself), with guarantees that can be checked. It is not an accuracy
+gain. Third, the guarantees need nuisances that do not depend on the log. Our
+main experiments cross-fit the nuisances on the same log and are not covered;
+in simulation the correction then no longer reduces bias. A sample-split
+variant, DRUP-split, is covered, and we evaluate it as well.
 
 \paragraph{Contributions.}
 \begin{enumerate}
@@ -49,11 +55,11 @@ $\Theta(1/\tau)$ (Theorem~\ref{thm:lower}).
 \item \emph{Estimator.} DRUP (Doubly Robust, walk-Unbiased Propagation) uses
 $Y_e^2=Y_e$ for binary outcomes and replaces every repeated edge by its
 idempotent unbiased counterpart. The three-hop operator has the cost of one
-item Gram matrix and factorises into a public item operator and per-user
+item Gram matrix, as the uncorrected one, and factorises into a public item operator and per-user
 corrections. Möbius inversion over the coincidence patterns of walk indices
 makes the correction exact for any odd number of hops
 (Theorem~\ref{thm:khop}).
-\item \emph{Guarantees.} With fixed nuisances DRUP is edge-wise doubly robust
+\item \emph{Guarantees.} With nuisances that do not depend on the log, DRUP is edge-wise doubly robust
 for propagation over the full-exposure graph (Theorem~\ref{thm:unbiased}); on
 unexposed candidates it is unbiased up to the imputation error at the
 candidate itself, which no estimator can remove
@@ -74,8 +80,9 @@ Yahoo!\,R3~\cite{marlin2009collaborative} and KuaiRec~\cite{gao2022kuairec},
 whose test data are random or fully observed, we compare 23 methods under
 one protocol: cross-fitted nuisances, per-split validation for every method,
 and user-level significance tests with Holm correction. We check each
-guarantee by Monte Carlo, including stress tests outside its assumptions, and
-by real-data interventions on exposure.
+guarantee by Monte Carlo, including stress tests outside its assumptions and
+the gap between the theory and the cross-fitted protocol, and by real-data
+interventions on exposure.
 \end{enumerate}
 
 %======================================================================

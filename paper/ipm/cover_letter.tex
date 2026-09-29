@@ -15,19 +15,24 @@ Graph-based recommenders propagate preferences over interaction graphs that the
 platform's own exposure policy has filtered. The manuscript shows that the
 inverse-propensity and doubly robust corrections used inside graph propagation
 are themselves biased once propagation spans more than one hop, gives the exact
-bias, and removes it with an operator (DRUP) that is exact for any odd number
-of hops at no extra cost and without training. It states the guarantees that
-follow, with their assumptions: edge-wise double robustness, robustness to
+bias, and removes it with a training-free operator (DRUP) that is exact for any
+odd number of hops and, at three hops, costs no more than the uncorrected
+operator. It states the guarantees that follow, with their assumptions: edge-wise double robustness, robustness to
 within-user exposure dependence, and exposure invariance in expectation, plus
 the properties that any linear operator with fixed nuisances shares (exact
 attributions, certificates against injected profiles, joint differential
-privacy with public nuisances, capped allocation).
+privacy with public nuisances, capped allocation). It also shows, by
+simulation, that these guarantees require nuisances fitted independently of
+the log: they hold for an independent log or a sample split, but not for
+nuisances cross-fitted on the same log, and a sample-split variant is
+evaluated alongside.
 
 The evaluation is deliberately conservative. On Coat, Yahoo!\ R3 and KuaiRec,
 whose test data are random or fully observed, DRUP is compared with 22 methods
 under one protocol (cross-fitted nuisances, per-split tuning of every method,
 user-level tests with Holm correction). The manuscript reports that the walk
-correction does not change top-$K$ accuracy, that training-free propagation over
+correction does not change top-$K$ accuracy or rankings, so that its
+contribution is at the level of scores, that training-free propagation over
 the doubly robust graph is the most accurate method on KuaiRec while trained
 graph models are better on Yahoo!\ R3, and that exposure invariance holds on
 Coat and KuaiRec but not at the selected configuration on Yahoo!\ R3.

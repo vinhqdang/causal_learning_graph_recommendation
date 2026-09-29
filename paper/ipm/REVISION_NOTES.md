@@ -98,3 +98,52 @@ revision roadmap (REV-n).
   normative target, scale).
 - User-group gaps reported with bootstrap intervals and group sizes.
 - Shapley exactness presented as a consequence of linearity with its baseline.
+
+# Round 2 (external pre-submission review of commit 5ca6629, 13 points)
+
+1. **Pair-level cross-fitting does not make products of edge estimates
+   unbiased.** Agreed. Remark 1 now states that the guarantees need nuisances
+   that do not depend on the log and that the cross-fitted protocol gives no
+   guarantee; it also notes that the degree weights sum the imputation over all
+   pairs of a user or item and therefore depend on the pair's own exposure.
+   New Monte-Carlo study (`experiments/mc_protocol.py`, Table "protocol"):
+   with independent-log nuisances DRUP is unbiased to Monte-Carlo error, with
+   the cross-fitted protocol it is *not* less biased than the uncorrected
+   operator. New sample-split variant DRUP-split (nuisances on a random 20% of
+   the pairs, those pairs imputed, degrees and constants from the imputation)
+   satisfies Assumption 2 exactly; it is evaluated in simulation and on all
+   three datasets.
+2. **W-degrees.** Stated as outside Assumption 2 (Remark 1, Appendix B,
+   accuracy section); the Yahoo!R3 result with imputation degrees (0.632) is
+   reported; W-degrees are included in the Monte-Carlo study.
+3. **Data-dependent c1, c3.** Assumption 2 now includes the constants a, b;
+   Section 4 states that data-dependent constants only rescale beta for
+   within-user rankings but break the score-level statements; constants from
+   the imputed graph satisfy the assumption (used by DRUP-split) and are
+   compared in the Monte-Carlo study.
+4. **Candidate-level target.** Discussion and introduction narrowed; the gap
+   between the conditional target of Corollary 2 and F* is quantified
+   (12% / 6% of the mean target at 3 / 5 hops, Kendall 0.63 / 0.77;
+   `experiments/mc_candidate_gap.py`).
+5. **Allocation theorem.** t_delta now uses bounded differences of the full
+   score (b c_e plus the one-hop sensitivity a C eps / tau) and a union bound
+   over all mn pairs, since the candidate set depends on the log; proof updated.
+6. **Certificates.** "exact" replaced by "conservative" in Theorem 10, its
+   proof, `drup/fat.py` and `docs/THEORY.md`: the box ignores the coupling of
+   D and x_k through the same L entries.
+7. **Attribution factor b.** Proposition 8 now has omega_j = b(...); the code
+   already applied b / c3.
+8. **"Equal potential outcomes receive equal expected scores"** removed;
+   replaced by the statement actually proved.
+9. **Cost for K > 3.** "Same cost" restricted to three hops; the five-hop cost
+   is measured (`experiments/bench_khop.py`).
+10. **Table bold.** DRUP labels are no longer bold; the configuration table no
+    longer shows duplicate "MF (trained)" / "LightGCN (trained)" labels.
+11. **Score-level framing.** Abstract, introduction, discussion and conclusion
+    state that the correction changes neither accuracy nor rankings (also under
+    caps) and that the contribution is at the level of scores.
+12. **p-values conditional on the log.** Stated in the protocol and in
+    Appendix B.
+13. **Tuning budgets.** Expected test score as a function of the number of
+    configurations (`experiments/budget_curve.py`); DRUP at the budget of the
+    best trained model is reported (Appendix B).

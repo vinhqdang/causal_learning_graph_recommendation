@@ -6,7 +6,7 @@ logged graph. Its properties are proved in `docs/THEORY.md`:
 
 | property | statement | check |
 |---|---|---|
-| Unbiasedness | Edge-wise doubly robust; exactly unbiased for multi-hop propagation on the full-exposure graph (Thm 1) | `experiments/mc_unbiasedness.py` |
+| Unbiasedness | Edge-wise doubly robust; exactly unbiased for multi-hop propagation on the full-exposure graph, for nuisances that do not depend on the log (Thm 1) | `experiments/mc_unbiasedness.py`, `experiments/mc_protocol.py` |
 | Bias lower bound | Inverse-propensity or DR adjacencies without the walk correction carry an item bias that is Ω(1/τ) (Thm 2) | same |
 | Variance / concentration | Efron–Stein variance bound, clipping-bias bound and McDiarmid ranking bound (Thm 3) | – |
 | Fairness (causal, item side) | Exposure elasticity 0: E[score \| do(exposure)] does not depend on exposure (Thm 4) | `experiments/mc_elasticity.py`, `run_fat.py --sections intervene` |
@@ -16,7 +16,7 @@ logged graph. Its properties are proved in `docs/THEORY.md`:
 
 ## Main results (protocol v2)
 
-All nuisances are cross-fitted over ten folds, every method (trained or not) is
+All nuisances are cross-fitted over ten folds of pairs (except DRUP-split), every method (trained or not) is
 tuned per split on the same validation data, and differences are tested per
 user with a Holm correction (`experiments/significance.py`).
 
@@ -27,6 +27,7 @@ user with a Holm correction (`experiments/significance.py`).
 | GF-CF, logged graph / DR graph | 0.551 / 0.560 | 0.657 / 0.631 | 0.614 / 0.637 |
 | DR adjacency (no walk correction) | 0.546 | 0.657 | 0.638 |
 | DRUP | 0.547 | 0.657 | 0.638 |
+| DRUP-split (sample split, Assumption 2 holds) | 0.558 | 0.593 | 0.634 |
 
 - The walk correction does not change top-K accuracy (DRUP vs DR adjacency:
   n.s. on all three datasets; identical on Yahoo!R3, where validation selects
@@ -34,6 +35,12 @@ user with a Holm correction (`experiments/significance.py`).
   method on KuaiRec (+0.010 over the best trained model, p < 1e-3); graph models
   trained with BPR are better on Yahoo!R3; nothing is significant on Coat after
   Holm correction.
+- The guarantees need nuisances that do not depend on the log. In simulation
+  (`experiments/mc_protocol.py`) DRUP is unbiased to MC error with nuisances
+  from an independent log, but with nuisances cross-fitted over pairs of the
+  same log it is not less biased than the uncorrected operator. DRUP-split
+  fits the nuisances on a random 20% of the pairs and imputes those pairs; it
+  satisfies the assumptions exactly.
 - Monte Carlo: uncorrected IPS/DR propagation is biased by 2.3/1.8 times the
   target at 3 hops and 15/8 at 5 hops; corrected estimators stay within MC
   error, also with fixed-size slates (DR) and misspecified propensities

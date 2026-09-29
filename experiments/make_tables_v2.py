@@ -40,8 +40,10 @@ ROWS = [
                                      ("GF-CF", "GF-CF")]),
     ("Training-free, debiased graph", [("IPS", "IPS adjacency (NAVIP-style)"), ("IPS+WC", "IPS + walk correction"),
                                        ("EASE-DR", "EASE on DR graph"), ("GF-CF-DR", "GF-CF on DR graph"),
-                                       ("DR", "DR adjacency"), ("DRUP", "\\textbf{DRUP}"),
-                                       ("DR-5hop", "DR adjacency, 5 hops"), ("DRUP-5hop", "\\textbf{DRUP}, 5 hops")]),
+                                       ("DR", "DR adjacency"), ("DRUP", "DRUP"),
+                                       ("DR-5hop", "DR adjacency, 5 hops"), ("DRUP-5hop", "DRUP, 5 hops")]),
+    ("Training-free, sample split (Assumption 2 holds)", [("DR-split", "DR adjacency, sample split"),
+                                                          ("DRUP-split", "DRUP-split")]),
 ]
 
 
@@ -77,7 +79,9 @@ def accuracy():
     for group, rows in ROWS:
         for mth, label in rows:
             cells = [str(res[ds].get(mth, {}).get("n_configs", "--")) for ds, _, _, _ in DS]
-            lines.append(f"{label} ({group.split(',')[0].lower()}) & " + " & ".join(cells) + "\\\\")
+            short = {"Trained, pointwise loss": "trained, pointwise", "Trained, pairwise loss (BPR)": "trained, BPR",
+                     "Training-free, sample split (Assumption 2 holds)": "training-free"}
+            lines.append(f"{label} ({short.get(group, group.split(',')[0].lower())}) & " + " & ".join(cells) + "\\\\")
     lines += ["\\bottomrule", "\\end{tabular}"]
     open(f"{T}/configs.tex", "w").write("\n".join(lines) + "\n")
 
@@ -122,7 +126,7 @@ def mc():
     el = json.load(open("results/mc_elasticity.json")) if os.path.exists("results/mc_elasticity.json") else None
     bounds = load("mc_bounds.json")
     names = [("IPS", "IPS adjacency"), ("IPS+WC", "IPS + walk correction"), ("DR", "DR adjacency"),
-             ("DRUP", "\\textbf{DRUP}")]
+             ("DRUP", "DRUP")]
     lines = ["\\begin{tabular}{lcccccc}", "\\toprule",
              " & \\multicolumn{2}{c}{rel.\\ $|$bias$|$, $K=3$} & \\multicolumn{2}{c}{rel.\\ $|$bias$|$, $K=5$} & Kendall $\\tau$ & elasticity\\\\",
              "Estimator & all & unexposed & all & unexposed & ($K=3$) & $\\eta$\\\\", "\\midrule"]
@@ -140,7 +144,7 @@ def mc():
     open(f"{T}/mc.tex", "w").write("\n".join(lines) + "\n")
     # stress tests
     lines = ["\\begin{tabular}{lcccc}", "\\toprule",
-             "Scenario ($K=3$, rel.\\ $|$bias$|$ on unexposed candidates) & IPS & IPS + WC & DR & \\textbf{DRUP}\\\\",
+             "Scenario ($K=3$, rel.\\ $|$bias$|$ on unexposed candidates) & IPS & IPS + WC & DR & DRUP\\\\",
              "\\midrule"]
     sc = [("indep", "independent exposures (Assumption~\\ref{as:unconf})"),
           ("fixedrow", "fixed-size slates per user (Proposition~\\ref{prop:dep})"),
@@ -360,9 +364,93 @@ def sparse():
     lines += ["\\bottomrule", "\\end{tabular}"]
     open(f"{T}/sparse.tex", "w").write("\n".join(lines) + "\n")
 
+def protocol():
+    """Monte-Carlo gap between Assumption 2 and the cross-fitted protocol."""
+    settings = [("", "_split_m40n60_p1", "40$\\times$60, 11"),
+                ("_m60n120_p1", "_split_m60n120_p1", "60$\\times$120, 23"),
+                ("_m60n120_p3", "_split_m60n120_p3", "60$\\times$120, 60")]
+    rows = [("indep", "Yhat", "independent log"), ("xfit", "Yhat", "cross-fitted (protocol)"),
+            ("xfit", "Wx", "cross-fitted, $W$-degrees"), ("split50", "Yhat", "sample split, 50\\%"),
+            ("split20", "Yhat", "sample split, 20\\%")]
+    lines = ["\\begin{tabular}{llcccccc}", "\\toprule",
+             " & & \\multicolumn{2}{c}{IPS edges} & \\multicolumn{4}{c}{DR edges}\\\\",
+             "Model & Nuisances & uncorr. & DRUP & uncorr. & DRUP & $s$, data $c$ & $s$, $\\hat Y$ $c$\\\\", "\\midrule"]
+    for base, split, lab in settings:
+        jb, js = load(f"mc_protocol{base}.json"), load(f"mc_protocol{split}.json")
+        if not jb:
+            continue
+        r = dict(jb["results"])
+        if js:
+            r.update(js["results"])
+        first = True
+        for src, deg, slab in rows:
+            k = f"{src}/true/{deg}"
+            if f"{k}/IPS" not in r:
+                continue
+            a, b = r[f"{k}/IPS"], r[f"{k}/DR"]
+            cells = [a["rel_bias_T_uncorrected"], a["rel_bias_T_corrected"], b["rel_bias_T_uncorrected"],
+                     b["rel_bias_T_corrected"], b["rel_bias_s_data_consts"], b["rel_bias_s_yhat_consts"]]
+            lines.append(f"{lab if first else ''} & {slab} & " + " & ".join(f"{c:.2f}" for c in cells) + "\\\\")
+            first = False
+        lines.append("\\midrule")
+    lines[-1] = "\\bottomrule"
+    lines.append("\\end{tabular}")
+    open(f"{T}/protocol.tex", "w").write("\n".join(lines) + "\n")
+    # full table for the smallest model: estimated propensities and in-sample nuisances
+    j = load("mc_protocol.json")
+    if not j:
+        return
+    r = j["results"]
+    lines = ["\\begin{tabular}{lllcccccc}", "\\toprule",
+             " & & & \\multicolumn{3}{c}{IPS edges} & \\multicolumn{3}{c}{DR edges}\\\\",
+             "Propensities & Nuisances & degrees & uncorr. & DRUP & $s$, data $c$ & uncorr. & DRUP & $s$, data $c$\\\\", "\\midrule"]
+    for prop, plab in (("true", "true"), ("pop", "estimated")):
+        first = True
+        for src, slab in (("indep", "independent log"), ("xfit", "cross-fitted"), ("insample", "same log")):
+            for deg, dlab in (("Yhat", "$\\hat Y$"), ("Wx", "$W$")):
+                cells = []
+                for edge in ("IPS", "DR"):
+                    x = r[f"{src}/{prop}/{deg}/{edge}"]
+                    cells += [x["rel_bias_T_uncorrected"], x["rel_bias_T_corrected"], x["rel_bias_s_data_consts"]]
+                lines.append(f"{plab if first else ''} & {slab} & {dlab} & " + " & ".join(f"{c:.2f}" for c in cells) + "\\\\")
+                first = False
+        lines.append("\\midrule")
+    lines[-1] = "\\bottomrule"
+    lines.append("\\end{tabular}")
+    open(f"{T}/protocol_full.tex", "w").write("\n".join(lines) + "\n")
+
+
+BUDGET_TRAINED = ["LightGCN-pt", "LightGCN", "r-AdjNorm", "NAVIP", "DR-LightGCN", "PDA", "BPR-MF", "DR-MF"]
+
+
+def budget():
+    """Expected test score of DRUP under the tuning budget of the trained models."""
+    lines = ["\\begin{tabular}{lccccc}", "\\toprule",
+             "Data & budget $k$ & DRUP, $k$ configs & DRUP, all configs & best trained model & linear LightGCN, $k$ configs\\\\",
+             "\\midrule"]
+    for ds, prop, key, nm in DS:
+        j = load(f"budget_{ds}.json")
+        if not j:
+            continue
+        res = results(ds, prop)
+        tr = [(res[m]["test"][key][0], m, res[m]["n_configs"]) for m in BUDGET_TRAINED if m in res]
+        bt = max(tr)
+        k = min(bt[2], j["DRUP"]["n_configs"])   # budget of the best trained model
+        kk = str(k)
+        dr_k = j["DRUP"]["curve"].get(kk)
+        ob = j.get("Obs", {}).get("curve", {})
+        obk = ob.get(kk, ob.get(str(max(int(x) for x in ob))) if ob else None)
+        lines.append(f"{nm} & {k} & {dr_k:.4f} & {res['DRUP']['test'][key][0]:.4f} & "
+                     f"{bt[0]:.4f} ({NAMES.get(bt[1], bt[1])}, {bt[2]}) & " + (f"{obk:.4f}" if obk else "--") + "\\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    open(f"{T}/budget.tex", "w").write("\n".join(lines) + "\n")
+
+
+NAMES = {"LightGCN-pt": "LightGCN, pointwise", "LightGCN": "LightGCN, BPR", "r-AdjNorm": "r-AdjNorm"}
+
 
 if __name__ == "__main__":
-    for f in (accuracy, significance, mc, fat, tau, rerank, frontier, explain_attack_privacy, sparse):
+    for f in (accuracy, significance, mc, fat, tau, rerank, frontier, explain_attack_privacy, sparse, protocol, budget):
         try:
             f()
         except Exception as e:           # a missing result should not block the others

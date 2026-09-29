@@ -60,6 +60,9 @@ def main():
     ap.add_argument("--key", default=None)
     ap.add_argument("--ref", nargs="+", default=["DRUP"])
     ap.add_argument("--frac_val", type=float, default=0.3)
+    ap.add_argument("--others", nargs="+", default=None, help="compare only with these methods")
+    ap.add_argument("--exclude", nargs="+", default=["DR-split", "DRUP-split"],
+                    help="methods left out of the default family (reported with --others)")
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
     key = a.key or ("ndcg@20" if a.dataset == "kuairec" else "ndcg@5")
@@ -70,6 +73,8 @@ def main():
             continue
         for m, r in res.items():
             if m == ref or "per_user" not in r:
+                continue
+            if (a.others is not None and m not in a.others) or (a.others is None and m in a.exclude):
                 continue
             d = user_diffs(res[ref], r)
             if len(d) < 3:

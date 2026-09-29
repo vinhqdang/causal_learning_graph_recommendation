@@ -22,6 +22,7 @@
 \newcommand{\diag}{\operatorname{diag}}
 \newcommand{\tW}{\tilde W}
 \newcommand{\tY}{\tilde Y}
+\setlength{\emergencystretch}{3em}
 
 
 \usepackage{xr}
@@ -47,9 +48,21 @@ candidates.}\label{tab:stress}
 \end{table}
 
 \begin{table}[h]\centering\small
+\caption{Nuisance protocol in the 40-user, 60-item model of Table~\ref{tab:protocol}
+with true and with estimated (logistic exposure model, misspecified here)
+propensities, nuisances from an independent log, cross-fitted, or fitted on the
+same log without cross-fitting, and degrees from $\hat Y$ or from edge
+estimates. Relative $|$bias$|$ of the three-hop term and of the full score with
+data-dependent constants (3{,}000 replications).}\label{tab:protocolfull}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/protocol_full.tex}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[h]\centering\small
 \caption{Tightness of Theorem~6 in a 12-user, 15-item model (20{,}000
 replications, all propensities $\ge\tau$), over all $(u,i)$.}\label{tab:bounds}
-\input{../tables/bounds.tex}
+\begin{adjustbox}{max width=\textwidth}\input{../tables/bounds.tex}\end{adjustbox}
 \end{table}
 
 \begin{table}[h]\centering\small

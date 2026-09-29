@@ -1,0 +1,18 @@
+{
+ "K3/DR": {
+  "rel_gap": 0.12167105983713715,
+  "kendall_tau_cond_vs_full": 0.628974358974359
+ },
+ "K3/IPS": {
+  "rel_gap": 0.13623063005597838,
+  "kendall_tau_cond_vs_full": 0.6516239316239318
+ },
+ "K5/DR": {
+  "rel_gap": 0.06486917112733406,
+  "kendall_tau_cond_vs_full": 0.7678632478632478
+ },
+ "K5/IPS": {
+  "rel_gap": 0.07258022874058183,
+  "kendall_tau_cond_vs_full": 0.7738461538461539
+ }
+}

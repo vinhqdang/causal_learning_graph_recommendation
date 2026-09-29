@@ -137,7 +137,7 @@ def logged_weight_range(yh, tau, kind):
 
 def fake_user_effect_bounds(wt_u, c_lo, c_hi, yh_v, tau, n_logged, kind, corrected=True,
                             return_unlogged=False):
-    """Box-exact bounds on the change of the un-normalised 3-hop scores of the
+    """Conservative bounds on the change of the un-normalised 3-hop scores of the
     users in ``wt_u`` (rows, n) caused by ONE injected user who logs at most
     ``n_logged`` interactions with arbitrary items, labels and propensities
     >= tau (Theorem 7).
@@ -145,7 +145,7 @@ def fake_user_effect_bounds(wt_u, c_lo, c_hi, yh_v, tau, n_logged, kind, correct
     With frozen nuisances the injected row v changes s_u by
         Delta_k = x_k (D + a_k c_vk) - a_k x_k^2,  x = c_v w_v, D = <a, x>,
     where a = wt_u. We bound D using the n_logged most favourable slots and
-    then maximise / minimise Delta_k exactly over the box (D, x_k): it is
+    then maximise / minimise Delta_k over the box (D, x_k): it is
     linear in D and a quadratic in x_k. Unlogged items keep w_vk = yh_vk
     (DR) or 0 (IPS / Obs); the fake user's normalisation c_v is only known to
     lie in [c_lo, c_hi] (exactly known when degrees come from the imputation).
@@ -186,7 +186,9 @@ def fake_user_effect_bounds(wt_u, c_lo, c_hi, yh_v, tau, n_logged, kind, correct
 
 
 def _box_extremes(a, D_lo, D_hi, x_lo, x_hi, c_lo, c_hi, corrected):
-    """Exact extremes of Delta = x (D + a c) - a x^2 (or x D) over the box."""
+    """Extremes of Delta = x (D + a c) - a x^2 (or x D) over the box (D, x). The box
+    contains every feasible (D, x_k) but ignores that both depend on the same
+    logged entries, so the result bounds the feasible range conservatively."""
     best_hi = torch.full_like(a, -float("inf"))
     best_lo = torch.full_like(a, float("inf"))
     for D in (D_lo.expand_as(a), D_hi.expand_as(a)):

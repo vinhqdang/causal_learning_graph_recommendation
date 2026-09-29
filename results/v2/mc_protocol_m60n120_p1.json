@@ -1,0 +1,71 @@
+{
+ "config": {
+  "m": 60,
+  "n": 120,
+  "reps": 2000,
+  "seed": 0,
+  "tau": 0.02,
+  "lam": 5.0,
+  "alpha": 0.5,
+  "beta": 1.0,
+  "pmult": 1.0,
+  "sources": [
+   "indep",
+   "xfit"
+  ],
+  "props": [
+   "true"
+  ],
+  "out": "results/v2/mc_protocol_m60n120_p1.json"
+ },
+ "results": {
+  "indep/true/Yhat/IPS": {
+   "rel_bias_T_corrected": 0.0677530834217247,
+   "rel_bias_T_uncorrected": 0.9794564955216257,
+   "rel_bias_s_data_consts": 0.04610194283305298,
+   "rel_bias_s_yhat_consts": 0.07771823843099257
+  },
+  "indep/true/Yhat/DR": {
+   "rel_bias_T_corrected": 0.05799436532181487,
+   "rel_bias_T_uncorrected": 0.8165379293682423,
+   "rel_bias_s_data_consts": 0.29618102190463286,
+   "rel_bias_s_yhat_consts": 0.06966665068769554
+  },
+  "indep/true/Wx/IPS": {
+   "rel_bias_T_corrected": 0.1721731912361117,
+   "rel_bias_T_uncorrected": 2.2767463449848035,
+   "rel_bias_s_data_consts": 0.07996096421407198,
+   "rel_bias_s_yhat_consts": 0.26542998761733466
+  },
+  "indep/true/Wx/DR": {
+   "rel_bias_T_corrected": 0.10002087724843531,
+   "rel_bias_T_uncorrected": 1.3285072719373643,
+   "rel_bias_s_data_consts": 0.31094223301809515,
+   "rel_bias_s_yhat_consts": 0.14473185063935456
+  },
+  "xfit/true/Yhat/IPS": {
+   "rel_bias_T_corrected": 0.5195695046987641,
+   "rel_bias_T_uncorrected": 0.3080421912320356,
+   "rel_bias_s_data_consts": 0.1197960766280549,
+   "rel_bias_s_yhat_consts": 0.499260325193887
+  },
+  "xfit/true/Yhat/DR": {
+   "rel_bias_T_corrected": 0.6074273096500242,
+   "rel_bias_T_uncorrected": 0.41790142174278677,
+   "rel_bias_s_data_consts": 0.41889422304388585,
+   "rel_bias_s_yhat_consts": 0.5811154702618494
+  },
+  "xfit/true/Wx/IPS": {
+   "rel_bias_T_corrected": 0.6910217197868332,
+   "rel_bias_T_uncorrected": 1.5057966348066467,
+   "rel_bias_s_data_consts": 0.08662995216397722,
+   "rel_bias_s_yhat_consts": 1.122000894960391
+  },
+  "xfit/true/Wx/DR": {
+   "rel_bias_T_corrected": 0.5828661075779553,
+   "rel_bias_T_uncorrected": 1.7967285837877331,
+   "rel_bias_s_data_consts": 0.3964922695393046,
+   "rel_bias_s_yhat_consts": 1.0937031752500113
+  }
+ }
+}

@@ -1,0 +1,71 @@
+{
+ "config": {
+  "m": 60,
+  "n": 120,
+  "reps": 2000,
+  "seed": 0,
+  "tau": 0.02,
+  "lam": 5.0,
+  "alpha": 0.5,
+  "beta": 1.0,
+  "pmult": 3.0,
+  "sources": [
+   "indep",
+   "xfit"
+  ],
+  "props": [
+   "true"
+  ],
+  "out": "results/v2/mc_protocol_m60n120_p3.json"
+ },
+ "results": {
+  "indep/true/Yhat/IPS": {
+   "rel_bias_T_corrected": 0.009211231946566836,
+   "rel_bias_T_uncorrected": 0.14526978512211353,
+   "rel_bias_s_data_consts": 0.014550426890888486,
+   "rel_bias_s_yhat_consts": 0.015278886719826195
+  },
+  "indep/true/Yhat/DR": {
+   "rel_bias_T_corrected": 0.007324989942412809,
+   "rel_bias_T_uncorrected": 0.09389502311959749,
+   "rel_bias_s_data_consts": 0.18389898617379108,
+   "rel_bias_s_yhat_consts": 0.015095263024777445
+  },
+  "indep/true/Wx/IPS": {
+   "rel_bias_T_corrected": 0.01651304401180586,
+   "rel_bias_T_uncorrected": 0.19573592341874377,
+   "rel_bias_s_data_consts": 0.01672434323657178,
+   "rel_bias_s_yhat_consts": 0.019229869775152442
+  },
+  "indep/true/Wx/DR": {
+   "rel_bias_T_corrected": 0.01047514011164605,
+   "rel_bias_T_uncorrected": 0.11396805437686476,
+   "rel_bias_s_data_consts": 0.1839963962533899,
+   "rel_bias_s_yhat_consts": 0.016380818981627753
+  },
+  "xfit/true/Yhat/IPS": {
+   "rel_bias_T_corrected": 0.1660916404885908,
+   "rel_bias_T_uncorrected": 0.11358909233755703,
+   "rel_bias_s_data_consts": 0.041067364091513556,
+   "rel_bias_s_yhat_consts": 0.10944982607836119
+  },
+  "xfit/true/Yhat/DR": {
+   "rel_bias_T_corrected": 0.18089461087350392,
+   "rel_bias_T_uncorrected": 0.11807736472953191,
+   "rel_bias_s_data_consts": 0.20047718500764183,
+   "rel_bias_s_yhat_consts": 0.11838022958352575
+  },
+  "xfit/true/Wx/IPS": {
+   "rel_bias_T_corrected": 0.18263868199788705,
+   "rel_bias_T_uncorrected": 0.1651140791212952,
+   "rel_bias_s_data_consts": 0.02293744103987444,
+   "rel_bias_s_yhat_consts": 0.11488934580665608
+  },
+  "xfit/true/Wx/DR": {
+   "rel_bias_T_corrected": 0.12200738444846992,
+   "rel_bias_T_uncorrected": 0.11394625356947684,
+   "rel_bias_s_data_consts": 0.1825704012566084,
+   "rel_bias_s_yhat_consts": 0.0771145099746207
+  }
+ }
+}

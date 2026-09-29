@@ -67,6 +67,9 @@ def main():
     ap.add_argument("--seed_check", type=int, default=3,
                     help="re-train the split-0 selection with this many seeds (0: skip)")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--dump_bank", default=None,
+                    help="write every (configuration, epoch)'s validation and test score per split "
+                         "instead of the result file (for tuning-budget curves)")
     a = ap.parse_args()
     torch.set_num_threads(a.threads)
 
@@ -107,18 +110,24 @@ def main():
                      patience=a.patience, pairs_per_epoch=a.pairs_per_epoch, seed=seed,
                      item_pop=item_pop, gamma=cfg.get("gamma", 0.1))
 
+    dumps = {}
     for name in a.methods:
         kind, loss, extra = METHODS[name]
         t0 = time.time()
         grid_keys = ["lr", "wd", "dim", "layers"] + list(extra)
         grid_vals = [a.lrs, a.wds, a.dims, a.layers if kind != "mf" else [0]] + [extra[k] for k in extra]
         best = [(-1.0, None, None, None) for _ in splits]       # (val, cfg, test agg, test per-user)
+        bank = []
         n_cfg = 0
         for vals in itertools.product(*grid_vals):
             cfg = dict(zip(grid_keys, vals))
             n_cfg += 1
 
             def record(vs, S, ep, cfg=cfg):
+                if a.dump_bank:
+                    bank.append({"cfg": dict(cfg, epoch=ep), "val": vs,
+                                 "test": [evaluate(S, t, ks, row_of)[key] for _, t in splits]})
+                    return
                 for s, v in enumerate(vs):
                     if v > best[s][0]:
                         agg, pu = evaluate(S, splits[s][1], ks, row_of, per_user=key)
@@ -127,6 +136,13 @@ def main():
             run(kind, loss, cfg, 0, record)
             print(f"  {name} {cfg} done [{time.time() - tc:.0f}s] best split0 val {best[0][0]:.4f}",
                   flush=True)
+        if a.dump_bank:
+            dumps[name] = bank
+            os.makedirs(os.path.dirname(a.dump_bank), exist_ok=True)
+            with open(a.dump_bank, "w") as f:
+                json.dump({"args": vars(a), "key": key, "banks": dumps}, f)
+            print(f"{name:12s} dumped {len(bank)} (cfg, epoch) rows [{time.time() - t0:.0f}s]", flush=True)
+            continue
         per_split = [b[2] for b in best]
         agg = {k: (float(np.mean([r[k] for r in per_split])), float(np.std([r[k] for r in per_split])))
                for k in per_split[0]}

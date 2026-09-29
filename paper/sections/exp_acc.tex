@@ -4,7 +4,8 @@
 \caption{Accuracy on unbiased test data (mean$\pm$std over splits). Best in bold,
 second underlined. ``--'': not run (five hops only where the three-hop DR
 operators are competitive). Every method is tuned per split on the same
-validation data; Table~\ref{tab:configs} lists the number of configurations.}\label{tab:acc}
+validation data; Table~\ref{tab:configs} lists the number of configurations.
+Only the sample-split variants satisfy Assumption~\ref{as:fixed}.}\label{tab:acc}
 \begin{adjustbox}{max width=\textwidth}
 \input{tables/accuracy.tex}
 \end{adjustbox}
@@ -55,12 +56,43 @@ settings DRUP (0.657) is on par with linear propagation over the logged graph
 (0.659) and GF-CF (0.657), and it is significantly behind the three graph models
 trained with BPR: r-AdjNorm (0.671; $-0.015$, $p_{\mathrm{Holm}}=0.004$), NAVIP and LightGCN
 (0.669; $p_{\mathrm{Holm}}\le0.04$). With degrees taken from the imputation instead, DRUP
-drops to 0.62--0.63 on this dataset, so the degree source matters here. On Coat
+drops to 0.632 on this dataset, so the degree source matters here; the
+selected $W$-degrees lie outside Assumption~\ref{as:fixed}. On Coat
 (290 users, 15 candidates per user) DRUP is significantly better than pointwise MF and IPS-MF, and no other
 difference survives the Holm correction except GF-CF on the DR graph, which
 is better by 0.013 ($p_{\mathrm{Holm}}=0.03$); the best models are again the BPR
 graph models (r-AdjNorm 0.575, LightGCN 0.570), but their advantage over DRUP is
 not significant at the user level.
+
+\paragraph{Sample split.} DRUP-split, the variant covered by the guarantees,
+reaches 0.634 on KuaiRec, 0.558 on Coat and 0.593 on Yahoo!\,R3, and DR adjacency
+under the same split reaches the same values (0.634, 0.560, 0.593;
+$p_{\mathrm{Holm}}\ge0.31$), so the correction again changes nothing. On KuaiRec the
+split costs 0.004 against the cross-fitted DRUP ($p_{\mathrm{Holm}}<10^{-3}$), and
+DRUP-split remains above the best trained model (pointwise LightGCN, $+0.006$;
+$p<10^{-3}$ with the $t$-test, $p=0.30$ with the Wilcoxon test). On Coat it is on par
+with the cross-fitted DRUP ($+0.009$, $p=0.46$). On the sparse Yahoo!\,R3 log it
+loses 0.066 ($p<10^{-3}$), because a fifth of the few logged exposures is spent on
+the nuisances and the imputation that replaces them is poor. The guarantees
+thus cost little accuracy on the larger and denser logs and much on the
+sparse one.
+
+\paragraph{Tuning budgets.} The training-free operators search many more
+configurations than the trained models (Table~\ref{tab:configs}), because
+each configuration costs seconds rather than a training run. The expected test
+score of the configuration selected from $k$ random configurations
+(Table~\ref{tab:budget} in Appendix~\ref{app:details}) separates the two
+effects. On Coat and Yahoo!\,R3 the larger grids do not help DRUP: with the
+budget of the best trained model it reaches 0.548 (36 configurations; all
+1{,}440: 0.547) and 0.649 (18; 0.657), still below r-AdjNorm. On KuaiRec they
+matter: with four random configurations, the budget of the pointwise
+LightGCN, DRUP reaches only 0.602 against 0.628, and it overtakes LightGCN from
+about 16 configurations (0.632). Once the nuisances are fitted (about 14
+minutes on four CPU cores, shared by all configurations), a DRUP configuration
+costs about 3\,s, against 130--210\,s for training one LightGCN configuration;
+the full DRUP search took about 35 minutes and the four LightGCN runs about 11.
+The advantage of DR propagation on KuaiRec thus holds for a larger but cheap
+search, not at an equal number of configurations.
 
 \paragraph{Baselines.} Two changes of the baselines matter. First, pairwise
 training is decisive on Yahoo!\,R3: pointwise MF variants stay near 0.51, below

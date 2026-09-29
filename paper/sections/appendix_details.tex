@@ -11,8 +11,11 @@ $\{0.05,0.1,0.2\}$ (KuaiRec); imputation ridge $\lambda\in\{1,5,20\}$ (Coat),
 $\{20\}$ (Yahoo!\,R3) and $\{5,20\}$ (KuaiRec); additive or low-rank
 (rank 32) imputation; control-variate weight $\in\{0,0.25,0.5,1\}$ on Yahoo!\,R3
 and $1$ elsewhere; and degree source $\in\{\hat Y,\ \text{cross-fitted }W\}$ for
-the debiased operators. The degree source is a searched hyper-parameter; both
-options satisfy Remark~\ref{rem:xfit}, and only $\hat Y$-degrees make the
+the debiased operators. The degree source is a searched hyper-parameter.
+$\hat Y$-degrees satisfy Assumption~\ref{as:fixed} whenever $\hat Y$ does;
+cross-fitted $W$-degrees do not, since the weight at a pair then depends on
+the exposures of other pairs, so configurations with $W$-degrees (selected on
+Yahoo!\,R3) lie outside the theorems. Only $\hat Y$-degrees make the
 certificates of Theorem~\ref{thm:robust} informative. EASE uses
 $\lambda\in\{10,100,1000\}$; GF-CF uses the ideal low-pass weight
 $\in\{0,0.3,1\}$ with $64$ or $256$ singular vectors. On the DR graph, EASE and
@@ -45,6 +48,18 @@ selected from.
 \input{tables/configs.tex}
 \end{table}
 
+\begin{table}[h]\centering\footnotesize
+\caption{Tuning budget. Expected test score of the configuration with the best
+validation score among $k$ configurations drawn at random from the grid
+(exact, averaged over splits), for DRUP and for linear LightGCN on the logged
+graph (all its configurations where it has fewer than $k$), with $k$ the number
+of configurations of the best trained model, whose score is given for
+comparison.}\label{tab:budget}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/budget.tex}
+\end{adjustbox}
+\end{table}
+
 \paragraph{Evaluation and tests.}
 Coat splits each user's candidates (30\% validation), Yahoo!\,R3 and KuaiRec
 split the test users (30\% validation), over 10, 5 and 5 random splits.
@@ -56,6 +71,7 @@ of a dataset. The Wilcoxon signed-rank test gives the same conclusions except fo
 five-hop DRUP against DR comparison on KuaiRec ($p=0.66$ against 0.011). The
 corrected resampled $t$-test over split means~\cite{nadeau2003} is far more
 conservative with five or ten splits and is reported in the result files.
+All tests condition on the training log and the fitted nuisances.
 
 \paragraph{Hardware and code.}
 All experiments ran on four CPU cores with 16\,GB of memory, without a GPU.

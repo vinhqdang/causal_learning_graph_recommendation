@@ -12,11 +12,20 @@ one user's list: when scores are compared across users, as in the
 exposure-capped allocation; when they are aggregated into an estimate of
 full-exposure utility; and when an auditor wants to verify that expected
 scores do not depend on exposure. In these uses the uncorrected estimate is
-biased by 1.8 to 15 times the target in our simulations, and the bias grows with the
-number of hops and with small propensities. A practitioner who only needs
-within-user rankings from a dense log loses nothing by using the uncorrected
-DR adjacency; one who needs calibrated, auditable scores, or propagates over
-five hops or more, should use the corrected operator. In both cases, most of
+biased by 1.8 to 15 times the target over all pairs in our simulations, and the
+bias grows with the number of hops and with small propensities. Two limits
+apply. On the unexposed candidates that are actually recommended, DRUP
+estimates the full-exposure score only up to the imputation error at the
+candidate (Corollary~\ref{cor:cand}), which is 12\% of the mean target at three
+hops in our simulation. And the guarantees assume nuisances that do not depend
+on the log: with nuisances cross-fitted on the same log, the corrected
+operator is not less biased than the uncorrected one in simulation
+(Section~\ref{sec:mc}), so a user of the score values needs an independent
+log or the sample split of DRUP-split. We have no evidence that the correction changes
+rankings, within users or under exposure caps. A practitioner who only needs
+rankings loses nothing by using the uncorrected DR adjacency; one who uses
+score values across users or pairs, audits exposure invariance, or propagates
+over five hops or more, should use the corrected operator. In both cases, most of
 the accuracy comes from training-free propagation over a doubly robust graph.
 
 \paragraph{Stakeholders.}
@@ -55,8 +64,15 @@ Proposition~\ref{prop:dep} covers dependence within a user's history, not
 dependence across users. The idempotent correction relies on binary outcomes;
 graded relevance would need separate unbiased estimates of the powers of $Y$.
 Items that were never exposed fall outside $\pi p\ge\tau$ and are scored by the
-imputation only. The nuisances are cross-fitted rather than fitted on an
-independent log, the joint-DP guarantee requires public nuisances, and on the
+imputation only. In our main protocol the nuisances are cross-fitted on the
+same log, the Yahoo!\,R3 configuration takes degrees from edge estimates, and
+the score constants are computed from the log, so the theorems do not cover
+these experiments (Remark~\ref{rem:xfit}); the sample split restores them at
+the price of an imputation bias on the split-off pairs and, on sparse logs,
+of accuracy. The significance tests are conditional
+on the single log and its fitted nuisances, and the methods searched grids of
+different sizes, which we analyse but cannot fully equalise
+(Section~\ref{sec:acc}). The joint-DP guarantee requires public nuisances, and on the
 small Coat data the public-nuisance variant loses much of its accuracy. The
 certificates are informative only against a handful of fake profiles (on
 KuaiRec, 95\% of users at five profiles, none at fifty), and the variance
@@ -85,10 +101,13 @@ exposure invariance can be tested on real data by thinning exposures with a
 known factor.
 
 \paragraph{For practice.}
-DRUP runs at the cost of one item Gram matrix and needs no gradient training,
+At three hops DRUP runs at the cost of one item Gram matrix and needs no gradient training,
 so it can serve as an auditable baseline or as a candidate scorer. The
 choice between the corrected and the uncorrected operator depends on whether
-score values or only within-user orders matter. On sparse logs, exact exposure
+score values or only within-user orders matter; score values need nuisances
+that do not depend on the log, such as those of DRUP-split, since with
+nuisances cross-fitted on the same log they carry no unbiasedness guarantee.
+On sparse logs, exact exposure
 invariance requires small clips and costs accuracy (Table~\ref{tab:tau}). The
 structural properties (exact attributions, certificates, a private item
 operator and capped allocation) come with any linear propagation operator and
@@ -103,13 +122,16 @@ Inverse-propensity and doubly robust graph propagation are biased beyond one
 hop because walks that repeat an edge multiply its estimate with itself. We
 gave the exact bias, whose worst case grows as the inverse of the propensity
 clip, and removed it with an idempotent correction that is exact for any odd
-number of hops and costs no more than the uncorrected operator. With fixed
-nuisances the resulting estimator, DRUP, is edge-wise doubly robust for
+number of hops and, at three hops, costs no more than the uncorrected operator.
+With nuisances that do not depend on the log, for instance from a sample
+split, the resulting estimator, DRUP, is edge-wise doubly robust for
 propagation over the full-exposure graph, robust to within-user exposure
 dependence to second order in the imputation error, and exposure-invariant in
-expectation. On three benchmarks with unbiased test data, training-free DR
+expectation; in simulation, cross-fitting the nuisances on the same log does
+not preserve these guarantees. On three benchmarks with unbiased test data, training-free DR
 propagation is competitive with tuned trained and closed-form baselines, while
-the correction itself leaves top-$K$ accuracy unchanged. Future work includes
+the correction itself leaves top-$K$ accuracy and rankings unchanged; its
+contribution is at the level of scores. Future work includes
 private nuisance models, certificates that remain informative for large
 catalogues, guarantees under adaptive logging, and combining the correction with
 learned propagation weights.

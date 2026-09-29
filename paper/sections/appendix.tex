@@ -134,8 +134,11 @@ With frozen nuisances, substitute
 $G=G^{(-u)}+\tilde w_u^\top\tilde w_u-\diag(\tilde w_u^2)+\diag(c_u^2w_u)$
 into~\eqref{eq:local}. The terms $\tilde w_{ui}\sum_j\tilde w_{uj}^2$ cancel against the
 local correction, leaving $\tilde w_{ui}\sum_jc_{uj}^2w_{uj}$, and every remaining term
-involving $w_{uj}$ ($j\neq i$) is linear. Un-logging $j$ replaces $w_{uj}$ by
-$\hat Y_{uj}$, which changes $s_{ui}$ by $a_j(w_{uj}-\hat Y_{uj})$; the game is additive, so
+involving $w_{uj}$ ($j\neq i$) is linear, with coefficient
+$c_{uj}G^{(-u)}_{ji}+c_{ui}w_{ui}c_{uj}^2$ in $\hat T_{ui}$. Since $O_{ui}=0$, the one-hop
+term $a\tW_{ui}$ does not involve $w_{uj}$, so the coefficient in $s_{ui}=a\tW_{ui}+b\hat T_{ui}$
+is $\omega_j$. Un-logging $j$ replaces $w_{uj}$ by
+$\hat Y_{uj}$, which changes $s_{ui}$ by $\omega_j(w_{uj}-\hat Y_{uj})$; the game is additive, so
 its Shapley values are the individual effects. For Theorem~\ref{thm:cf}, the
 margin after removing $S$ is $s_{ui}-s_{uk}-\sum_{j\in S}g_j$, so minimising $|S|$
 under $\sum_Sg_j>$ margin selects the largest $g_j$. \qed
@@ -146,9 +149,15 @@ unchanged, so $\Delta=\tilde w_u\,\mathrm{contrib}_v=(a\cdot x)x-a\odot x^2+a\od
 A logged DR entry satisfies $w\in[\hat Y-\hat Y/\tau,\hat Y+(1-\hat Y)/\tau]$ for any label
 and any $p\ge\tau$, and an unlogged one equals $\hat Y$. $D$ is maximised
 (minimised) by assigning the $L$ slots to the largest positive (negative)
-deviations. For fixed $x_k$ the effect is linear in $D$, so its extremes are at
-the ends of the $D$ interval; for fixed $D$ it is quadratic in $x_k$, with
-extremes at the ends or at the clamped vertex. Effects add over fake users. For
+deviations, and $x_k$ ranges over the values of a logged or unlogged entry.
+Every feasible profile gives a point $(D,x_k)$ of the product of the two
+intervals, so the extremes of $\Delta_k$ over this box bound its feasible
+extremes; they are not attained in general, because the box treats $D$ and
+$x_k$ as free although both depend on the same at most $L$ entries. For fixed
+$x_k$ the effect is linear in $D$, so its extremes over the box are at the ends
+of the $D$ interval; for fixed $D$ it is quadratic in $x_k$, with extremes at the
+ends or at the clamped vertex. With frozen nuisances $G$ is a sum of
+per-user contributions, so effects add over fake users. For
 unclipped IPS, $|W_e|=1/p_e$ is unbounded. \qed
 
 \paragraph{Theorem~\ref{thm:dp}.}
@@ -175,7 +184,13 @@ $\langle x^\star,s\rangle\le\langle x^\star,\tilde s\rangle+NKh/2\le\langle\hat 
 $\Gamma\le NKh$. Each item is recommended at most $\max_i\mathrm{cap}_i$ times and $NK$
 slots are filled, which gives the coverage bound. With $x_F$ optimal for $U$,
 $U(\hat x)\ge\langle\hat x,s\rangle-|\langle\hat x,s-F^*\rangle|\ge\langle x_F,s\rangle-\Gamma-|\langle\hat x,s-F^*\rangle|
-\ge U(x_F)-\Gamma-2\max_x|\langle x,s-F^*\rangle|$. If $\E s=F^*$, Theorem~\ref{thm:var}(d)
-applied to every candidate pair and a union bound give
-$|s_{ui}-F^*_{ui}|\le t_\delta$ for all candidate pairs with probability $1-\delta$, and an
-allocation sums $NK$ such terms. \qed
+\ge U(x_F)-\Gamma-2\max_x|\langle x,s-F^*\rangle|$. For the concentration step,
+$s_{ui}=a\tW_{ui}+b\hat T_{ui}$ is a function of the independent exposures.
+Changing $O_e$ moves $b\hat T_{ui}$ by at most $b\,c_e(u,i)$ (proof of
+Theorem~\ref{thm:var}(d)) and, for $e=(u,i)$, moves $a\tW_{ui}$ by at most
+$aC_{ui}\varepsilon_{ui}/\tau$, so $s_{ui}$ has bounded differences $\bar c_e(u,i)$. If
+$\E s=F^*$, McDiarmid's inequality gives
+$\Pr(|s_{ui}-F^*_{ui}|\ge t)\le2\exp(-2t^2/\sum_e\bar c_e(u,i)^2)$. The candidate set
+depends on $O$, so we take a union bound over all $mn$ pairs: with probability
+$1-\delta$, $|s_{ui}-F^*_{ui}|\le t_\delta$ for every pair, in particular for every
+candidate, and an allocation sums $NK$ such terms. \qed
