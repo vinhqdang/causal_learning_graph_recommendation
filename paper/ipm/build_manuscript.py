@@ -107,7 +107,13 @@ exposure-biased logs}
 
 """
 
-bib = r"""\bibliographystyle{elsarticle-harv}
+bib = r"""\section*{Declaration of generative AI and AI-assisted technologies in the writing process}
+During the preparation of this work the author used generative AI tools to
+support code development and the development of ideas for the paper. After
+using these tools, the author reviewed and edited the content as needed and
+takes full responsibility for the content of the publication.
+
+\bibliographystyle{elsarticle-harv}
 \bibliography{../refs}
 
 """

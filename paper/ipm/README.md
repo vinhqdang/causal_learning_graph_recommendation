@@ -21,10 +21,8 @@ Checklist before submitting:
 - The abstract has 243 words (limit 250). Keywords: 7.
 - Review is double-anonymised. The manuscript has no author names, affiliations,
   acknowledgements or repository link. The code link is on the title page only.
-- Confirm the funding statement and the competing-interest statement on the
-  title page.
-- Elsevier asks every author to add a declaration on the use of generative AI
-  tools in the writing process when such tools were used. Decide whether this
-  applies and add it to the title page if it does.
+- Funding: none. Competing interests: none (both stated on the title page).
+- The Elsevier declaration on generative AI is included on the title page and
+  at the end of the manuscript, before the references.
 - LaTeX sources (`manuscript.tex`, `../refs.bib`, `../tables/*.tex`) are
   uploaded together with the PDF.
