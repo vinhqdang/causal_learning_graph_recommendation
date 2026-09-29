@@ -235,3 +235,4 @@ paper/ipm/*.out
 paper/ipm/*.spl
 results/v2/log_*.txt
 results/v3/log_*.txt
+results/v3/*.partial.json
