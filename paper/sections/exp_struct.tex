@@ -23,7 +23,7 @@ are exact to floating-point precision (Table~\ref{tab:explain}), and removing th
 interactions with the largest attribution moves the top item further down than
 removing random or similar ones, so the attributions are faithful. The
 counterfactual analysis mostly certifies that no explanation from the user's
-own data exists: \EXPLAINNOCF{} Such recommendations rest on population-level
+own data exists: on Coat 94\% of the top recommendations cannot be overturned by removing any subset of the user's own interactions, on KuaiRec 52\%, and on Yahoo!\,R3 11\%; the minimal explanation otherwise has a median size of 2, 7 and 1 interactions. Such recommendations rest on population-level
 evidence (through $G$), which the attribution to a user's own interactions does
 not explain.
 
@@ -48,7 +48,7 @@ the target reaches 39\% of KuaiRec users under DR and DRUP, more than under IPS
 (10\%) and the logged graph (29\%). On Yahoo!\,R3, where DRUP selects IPS edges with
 cross-fitted $W$-degrees, the fake users' degrees are attacker-controlled and no
 user is certified. When the nuisances are re-fitted on the poisoned log, which
-the certificates do not cover, none of the \CERTPAIRS{} certified user--target pairs
+the certificates do not cover, none of the certified user--target pairs of DRUP (5{,}196 on Coat, 2{,}821 on KuaiRec)
 was violated, and the realised hit rates were lower than with frozen nuisances
 (Table~\ref{tab:refit} in Appendix~\ref{app:more}), because the fake users' own
 imputation raises their degree and lowers their weight.
@@ -66,4 +66,13 @@ Table~\ref{tab:privfull}.}\label{tab:privacy}
 
 \paragraph{Privacy.} Table~\ref{tab:privacy} reports the jointly private variant of
 Theorem~\ref{thm:dp}, in which only public users inform the population-level
-nuisances. \PRIVACYTEXT{}
+nuisances. Useful privacy needs a large user base and a weak
+guarantee. On KuaiRec, private DRUP reaches nDCG@20 of 0.596 at $\epsilon=16$ and 0.530 at
+$\epsilon=8$, against 0.637 without privacy and 0.577 for popularity, and it falls below
+popularity for $\epsilon\le4$. On Yahoo!\,R3 it reaches 0.574 at $\epsilon=16$ (non-private
+0.652, popularity 0.525). On Coat the public-nuisance model itself is weak, because
+29 public users cannot estimate the item parameters: without any noise it
+reaches only 0.454, below popularity. These numbers are lower than a variant
+that treats all nuisances as public would suggest, and they show the cost of an
+honest privacy accounting; privatising the nuisance models with a composed
+budget is left open.
