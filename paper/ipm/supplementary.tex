@@ -1,0 +1,92 @@
+\documentclass[preprint,review,12pt,authoryear]{elsarticle}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{adjustbox}
+\usepackage{tikz}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{assumption}{Assumption}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\tW}{\tilde W}
+\newcommand{\tY}{\tilde Y}
+
+
+\usepackage{xr}
+\externaldocument{manuscript}
+\renewcommand{\thetable}{S\arabic{table}}
+\begin{document}
+\begin{center}{\large\bfseries Supplementary Material\\[2pt]
+Walk-unbiased doubly robust graph propagation for recommendation from
+exposure-biased logs}\end{center}
+
+Additional results referred to in the main text. Theorem, table and section
+numbers without the prefix S refer to the main text.
+
+
+
+\begin{table}[h]\centering\small
+\caption{Stress tests outside Assumption~1 and with misspecified
+propensities (log-normal noise with $\sigma=0.5$). Relative $|$bias$|$ on unexposed
+candidates.}\label{tab:stress}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/mc_stress.tex}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[h]\centering\small
+\caption{Tightness of Theorem~6 in a 12-user, 15-item model (20{,}000
+replications, all propensities $\ge\tau$), over all $(u,i)$.}\label{tab:bounds}
+\input{../tables/bounds.tex}
+\end{table}
+
+\begin{table}[h]\centering\small
+\caption{Exposure-capped re-ranking for all caps. Cells: nDCG@$K$ (Gini@$K$).}\label{tab:rerankfull}
+\begin{adjustbox}{max width=\textwidth}\input{../tables/rerank_coat.tex}\end{adjustbox}
+
+\medskip
+\begin{adjustbox}{max width=\textwidth}\input{../tables/rerank_kuairec.tex}\end{adjustbox}
+
+\medskip
+\begin{adjustbox}{max width=\textwidth}\input{../tables/rerank_yahoo.tex}\end{adjustbox}
+\end{table}
+
+\begin{table}[h]\centering\small
+\caption{Best nDCG over each operator's hyper-parameter grid under a cap on the
+Gini coefficient of top-$K$ exposure.}\label{tab:frontier}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/frontier.tex}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[h]\centering\small
+\caption{Certificates under re-fitted nuisances: the nuisances are re-fitted on the
+poisoned log (no cross-fitting) and the realised top-$K$ is checked against the
+frozen-nuisance certificates of the clean system.}\label{tab:refit}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/attack_refit.tex}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[h]\centering\small
+\caption{Jointly private DRUP for all fixed denoising ranks ($\delta=10^{-5}$).}\label{tab:privfull}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/privacy.tex}
+\end{adjustbox}
+\end{table}
+
+
+
+\end{document}

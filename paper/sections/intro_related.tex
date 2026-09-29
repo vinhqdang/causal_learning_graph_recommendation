@@ -98,8 +98,7 @@ propagation: EASE~\cite{steck2019ease} learns an item--item matrix with a
 zero diagonal in closed form, GF-CF~\cite{shen2021gfcf} and
 BSPM~\cite{choi2023bspm} interpret collaborative filtering as graph signal
 filtering, and graph convolutions can trade accuracy for
-diversity~\cite{isufi2021accuracy}. Surveys are given
-by~\cite{wu2022gnnsurvey}, and reproducibility studies show that carefully
+diversity~\cite{isufi2021accuracy}. Reproducibility studies show that carefully
 tuned simple baselines often match graph models~\cite{anelli2023myth}. All these
 models propagate over the \emph{logged} graph. DRUP keeps the linear
 propagation form of LightGCN and of closed-form filters but propagates over an
@@ -119,7 +118,7 @@ latent variable. Doubly robust learning combines inverse propensities with
 an imputation model~\cite{wang2019drjl}, and later variants reduce its bias
 and variance~\cite{guo2021mrdr,dai2022gdr,li2023stabledr} or learn
 information-theoretic representations~\cite{wang2020cvib}. A small uniformly
-logged sample can supervise the debiasing itself~\cite{bonner2018cause,chen2021autodebias}.
+logged sample can supervise the debiasing itself~\cite{chen2021autodebias}.
 Causal approaches to popularity bias remove its direct effect by
 counterfactual inference~\cite{wei2021macr}, adjust for it as a
 confounder~\cite{zhang2021pda}, or disentangle interest from
@@ -161,9 +160,7 @@ analogue for inverse-propensity and DR edges with heterogeneous propensities.
 Unbiased subgraph counts from sampled edges~\cite{tsourakakis2009doulion},
 and the passage from homomorphism counts to injective counts by Möbius
 inversion on the partition lattice~\cite{rota1964}, are the combinatorial
-counterparts of our $K$-hop construction, and non-backtracking operators
-remove immediate returns of walks for spectral
-clustering~\cite{krzakala2013}. What is new here is the combination of these
+counterparts of our $K$-hop construction. What is new here is the combination of these
 tools with DR edge estimates and degree weights for recommendation, the
 public-operator form, and the consequences for exposure invariance. Our
 treatment of nuisances follows double machine learning, whose cross-fitting we
@@ -175,16 +172,12 @@ Fairness notions in recommendation cover users and items, groups and
 individuals, and outcomes and exposure~\cite{wang2023fairness}; a unifying
 account of their measurement is given by~\cite{amigo2023fairness}, and
 provider fairness and its relation to data characteristics have been analysed
-in~\cite{gomez2022provider,deldjoo2021explaining}. On the item side,
-popularity bias can be reduced by regularising
-learning-to-rank~\cite{abdollahpouri2017popularity}, exposure can be allocated
+in~\cite{gomez2022provider,deldjoo2021explaining}. On the item side, exposure can be allocated
 in proportion to merit~\cite{singh2018exposure}, amortised over
 time~\cite{biega2018equity} or under uncertainty about
 merit~\cite{singh2021uncertainty}, and two-sided allocations can be guaranteed
-by constrained matching~\cite{patro2020fairrec}. On the user side,
-counterfactually fair recommenders learn representations invariant to
-sensitive attributes~\cite{li2021personalized}, and fairness can be audited by
-counterfactual reasoning~\cite{cornacchia2023auditing}. DRUP contributes a
+by constrained matching~\cite{patro2020fairrec}. Fairness can also be audited by counterfactual
+reasoning~\cite{cornacchia2023auditing}. DRUP contributes a
 causal item-side property, \emph{exposure invariance}: its expected scores do
 not respond to interventions on an item's exposure (Theorem~\ref{thm:fair}).
 Exposure invariance is a necessary condition for merit-based exposure
@@ -195,9 +188,7 @@ mechanism; like the matching view of~\cite{patro2020fairrec} it is a
 $b$-matching.
 
 \paragraph{Explanations, robustness and privacy.}
-Explainable recommendation is surveyed by~\cite{zhang2020explainable} and the
-evaluation of explanations by~\cite{tintarev2012}; what makes an explanation
-useful to people is discussed by~\cite{miller2019explanation}. For graph models,
+Explainable recommendation is surveyed by~\cite{zhang2020explainable}. For graph models,
 GNNExplainer~\cite{ying2019gnnexplainer} and CF-GNNExplainer~\cite{lucic2022cfgnn}
 search for important or minimal sets of edges, PRINCE~\cite{ghazimatin2020prince}
 finds minimal sets of a user's actions whose removal changes a random-walk

@@ -42,3 +42,11 @@ whose bias does not involve the imputation, the correction leaves the rank
 agreement unchanged (0.061 against 0.059 at five hops).
 
 
+Stress tests outside the assumptions of Theorem~\ref{thm:unbiased} are in
+Appendix~\ref{app:more} (Table~\ref{tab:stress}). With fixed-size slates, which
+make exposures within a user negatively dependent, IPS picks up a first-order
+bias (0.22) whereas DRUP stays at 0.024, as Proposition~\ref{prop:dep} predicts;
+with misspecified propensities DRUP is exactly unbiased when the imputation is
+exact and biased by 0.16 when it is noisy, against 0.57 for IPS and 1.9 for the
+uncorrected DR operator. The bounds of Theorem~\ref{thm:var} were never violated
+but are loose by two to four orders of magnitude (Table~\ref{tab:bounds}).

@@ -9,20 +9,6 @@ candidates.}\label{tab:stress}
 \end{adjustbox}
 \end{table}
 
-Table~\ref{tab:stress} leaves the assumptions of Theorem~\ref{thm:unbiased}. With
-fixed-size slates (every user sees exactly $k_u$ items, drawn without
-replacement, so exposures within a user are negatively dependent with
-$\rho\approx0.29$), IPS picks up a first-order bias (0.22 at three hops), whereas
-DRUP stays at 0.024, as Proposition~\ref{prop:dep} predicts for DR edges. With
-misspecified propensities and an exact imputation, both DR operators remain
-exactly unbiased, the double robustness of Theorem~\ref{thm:unbiased}; with a
-noisy imputation DRUP's bias is 0.16, against 0.57 for IPS and 1.9 for the
-uncorrected DR operator. Finally, the variance and concentration bounds of
-Theorem~\ref{thm:var} were never violated, but they are loose
-(Table~\ref{tab:bounds}): by a factor of $5\cdot10^2$--$8\cdot10^3$ for the variance and
-$7\cdot10^1$--$2\cdot10^3$ for the deviation at level 0.05. They describe how the error
-scales with $\tau$ and the imputation error, not its size.
-
 \begin{table}[h]\centering\small
 \caption{Tightness of Theorem~\ref{thm:var} in a 12-user, 15-item model (20{,}000
 replications, all propensities $\ge\tau$), over all $(u,i)$.}\label{tab:bounds}

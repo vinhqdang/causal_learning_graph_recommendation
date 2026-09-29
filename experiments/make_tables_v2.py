@@ -86,11 +86,11 @@ SIG = [("DRUP", "DR", "DR adjacency (effect of the correction)"),
        ("DRUP-5hop", "DR-5hop", "DR adjacency (effect of the correction), both 5 hops"),
        ("DRUP", "Obs", "linear LightGCN on the logged graph"),
        ("DRUP", "Impute", "imputation only"),
-       ("DRUP", "GF-CF", "GF-CF"), ("DRUP", "EASE", "EASE"),
-       ("DRUP", "GF-CF-DR", "GF-CF on DR graph"), ("DRUP", "EASE-DR", "EASE on DR graph"),
+       ("DRUP", "GF-CF", "GF-CF"),
+       ("DRUP", "GF-CF-DR", "GF-CF on DR graph"),
        ("DRUP", "LightGCN-pt", "LightGCN (pointwise)"), ("DRUP", "LightGCN", "LightGCN (BPR)"), ("DRUP", "r-AdjNorm", "r-AdjNorm"),
-       ("DRUP", "NAVIP", "NAVIP"), ("DRUP", "BPR-MF", "MF (BPR)"), ("DRUP", "DR-MF", "DR-MF"),
-       ("DRUP", "PDA", "PDA"), ("DRUP", "DR-LightGCN", "DR-LightGCN")]
+       ("DRUP", "NAVIP", "NAVIP"), ("DRUP", "BPR-MF", "MF (BPR)"),
+       ("DRUP", "PDA", "PDA")]
 
 
 def significance():

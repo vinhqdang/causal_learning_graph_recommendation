@@ -35,7 +35,25 @@ exposure-biased logs}
 % separate title page (title_page.tex).
 
 \begin{abstract}
-Draft abstract.
+Graph recommenders propagate preferences along multi-hop walks of a logged
+graph whose edges exist only where an item was exposed. Propagation-level debiasing re-weights these edges by inverse propensities
+or completes them with doubly robust (DR) estimates. We show that such
+corrections are biased for multi-hop propagation: a walk that traverses an edge
+several times multiplies that edge's estimate with itself. We give the exact bias, whose worst case grows as the
+inverse of the propensity clip, and remove it with DRUP (Doubly Robust,
+walk-Unbiased Propagation), which replaces every repeated edge by its idempotent
+unbiased counterpart. Möbius inversion over walk-index coincidences makes the correction exact for any odd number of hops at the cost of
+the uncorrected operator. With fixed nuisances, DRUP is edge-wise doubly robust
+for propagation over the full-exposure graph, its bias under within-user
+exposure dependence is of second order in the imputation error, and its expected
+scores do not respond to interventions on exposure. As a linear operator it also admits exact
+attributions, certificates against injected profiles and a jointly private
+release, within a stated scope. On Coat, Yahoo!\,R3 and KuaiRec,
+against 22 tuned methods, the correction leaves top-$K$ accuracy unchanged. Training-free propagation over the DR graph is the most accurate
+method on KuaiRec (fully observed test matrix) while graph models trained
+with pairwise losses are better on Yahoo!\,R3. Real-data interventions confirm
+exposure invariance on Coat and KuaiRec; on the sparse Yahoo!\,R3 log it requires
+small clips that cost accuracy.
 \end{abstract}
 
 \begin{keyword}
@@ -130,7 +148,7 @@ by real-data interventions on exposure.
 \section{Related work}
 %======================================================================
 
-We review seven lines of work that DRUP touches. Table~\ref{tab:related}
+We review six lines of work that DRUP touches. Table~\ref{tab:related}
 summarises how DRUP relates to representative methods.
 
 \paragraph{Graph-based recommendation}
@@ -146,8 +164,7 @@ propagation: EASE~\citep{steck2019ease} learns an item--item matrix with a
 zero diagonal in closed form, GF-CF~\citep{shen2021gfcf} and
 BSPM~\citep{choi2023bspm} interpret collaborative filtering as graph signal
 filtering, and graph convolutions can trade accuracy for
-diversity~\citep{isufi2021accuracy}. Surveys are given
-by~\citet{wu2022gnnsurvey}, and reproducibility studies show that carefully
+diversity~\citep{isufi2021accuracy}. Reproducibility studies show that carefully
 tuned simple baselines often match graph models~\citep{anelli2023myth}. All these
 models propagate over the \emph{logged} graph. DRUP keeps the linear
 propagation form of LightGCN and of closed-form filters but propagates over an
@@ -167,7 +184,7 @@ latent variable. Doubly robust learning combines inverse propensities with
 an imputation model~\citep{wang2019drjl}, and later variants reduce its bias
 and variance~\citep{guo2021mrdr,dai2022gdr,li2023stabledr} or learn
 information-theoretic representations~\citep{wang2020cvib}. A small uniformly
-logged sample can supervise the debiasing itself~\citep{bonner2018cause,chen2021autodebias}.
+logged sample can supervise the debiasing itself~\citep{chen2021autodebias}.
 Causal approaches to popularity bias remove its direct effect by
 counterfactual inference~\citep{wei2021macr}, adjust for it as a
 confounder~\citep{zhang2021pda}, or disentangle interest from
@@ -209,9 +226,7 @@ analogue for inverse-propensity and DR edges with heterogeneous propensities.
 Unbiased subgraph counts from sampled edges~\citep{tsourakakis2009doulion},
 and the passage from homomorphism counts to injective counts by Möbius
 inversion on the partition lattice~\citep{rota1964}, are the combinatorial
-counterparts of our $K$-hop construction, and non-backtracking operators
-remove immediate returns of walks for spectral
-clustering~\citep{krzakala2013}. What is new here is the combination of these
+counterparts of our $K$-hop construction. What is new here is the combination of these
 tools with DR edge estimates and degree weights for recommendation, the
 public-operator form, and the consequences for exposure invariance. Our
 treatment of nuisances follows double machine learning, whose cross-fitting we
@@ -223,16 +238,12 @@ Fairness notions in recommendation cover users and items, groups and
 individuals, and outcomes and exposure~\citep{wang2023fairness}; a unifying
 account of their measurement is given by~\citet{amigo2023fairness}, and
 provider fairness and its relation to data characteristics have been analysed
-in~\citet{gomez2022provider,deldjoo2021explaining}. On the item side,
-popularity bias can be reduced by regularising
-learning-to-rank~\citep{abdollahpouri2017popularity}, exposure can be allocated
+in~\citet{gomez2022provider,deldjoo2021explaining}. On the item side, exposure can be allocated
 in proportion to merit~\citep{singh2018exposure}, amortised over
 time~\citep{biega2018equity} or under uncertainty about
 merit~\citep{singh2021uncertainty}, and two-sided allocations can be guaranteed
-by constrained matching~\citep{patro2020fairrec}. On the user side,
-counterfactually fair recommenders learn representations invariant to
-sensitive attributes~\citep{li2021personalized}, and fairness can be audited by
-counterfactual reasoning~\citep{cornacchia2023auditing}. DRUP contributes a
+by constrained matching~\citep{patro2020fairrec}. Fairness can also be audited by counterfactual
+reasoning~\citep{cornacchia2023auditing}. DRUP contributes a
 causal item-side property, \emph{exposure invariance}: its expected scores do
 not respond to interventions on an item's exposure (Theorem~\ref{thm:fair}).
 Exposure invariance is a necessary condition for merit-based exposure
@@ -242,50 +253,31 @@ exposure-capped allocation (Theorem~\ref{thm:alloc}) is the distributive
 mechanism; like the matching view of~\citet{patro2020fairrec} it is a
 $b$-matching.
 
-\paragraph{Explainable recommendation}
-Explainable recommendation is surveyed by~\citet{zhang2020explainable}, and the
-evaluation of explanations by~\citet{tintarev2012}; what makes an explanation
-useful to people is discussed by~\citet{miller2019explanation}. For graph
-models, GNNExplainer~\citep{ying2019gnnexplainer} learns a soft mask over edges
-and CF-GNNExplainer~\citep{lucic2022cfgnn} searches for minimal edge deletions.
-PRINCE~\citep{ghazimatin2020prince} finds minimal sets of a user's actions whose
-removal changes a random-walk recommendation, and CountER~\citep{tan2021counter}
-solves an optimisation problem for aspect-based recommenders. Counterfactual
-explanations have a legal motivation~\citep{wachter2018counterfactual} and
-hidden assumptions~\citep{barocas2020hidden}, and Shapley-value attributions
-depend on the choice of the baseline~\citep{kumar2020shapley}. Because a DRUP
-score is affine in each user's own interactions when the nuisances are held
-fixed, its attributions are exact and its minimal counterfactual
-explanations are found by sorting (Proposition~\ref{prop:affine},
-Theorem~\ref{thm:cf}). This holds for any linear propagation operator and does
-not explain the population-level part of a score.
-
-\paragraph{Robustness and privacy}
-Recommenders can be manipulated by injected
-profiles~\citep{lam2004shilling}; optimised attacks exist for factorisation
-models~\citep{li2016poisoning} and graph-based recommenders~\citep{fang2018poisoning},
-and shilling groups can be detected with graph convolutions~\citep{wang2022shilling}.
+\paragraph{Explanations, robustness and privacy}
+Explainable recommendation is surveyed by~\citet{zhang2020explainable}. For graph models,
+GNNExplainer~\citep{ying2019gnnexplainer} and CF-GNNExplainer~\citep{lucic2022cfgnn}
+search for important or minimal sets of edges, PRINCE~\citep{ghazimatin2020prince}
+finds minimal sets of a user's actions whose removal changes a random-walk
+recommendation, and CountER~\citep{tan2021counter} optimises counterfactual
+explanations of aspect-based models. Counterfactual explanations have a legal
+motivation~\citep{wachter2018counterfactual} and hidden
+assumptions~\citep{barocas2020hidden}, and Shapley attributions depend on their
+baseline~\citep{kumar2020shapley}. Recommenders can be manipulated by injected
+profiles~\citep{lam2004shilling,li2016poisoning,fang2018poisoning}, and shilling
+groups can be detected with graph convolutions~\citep{wang2022shilling};
 PORE~\citep{jia2023pore} certifies robustness by ensembling models trained on
-sub-sampled data. DRUP instead gives a closed-form bound, for a single model
-with frozen nuisances, on the effect of any bounded set of injected profiles
-(Theorem~\ref{thm:robust}). Differentially private recommenders perturb
-item--item statistics~\citep{mcsherry2009netflix}, factorisation
-models~\citep{liu2024dpmf} or matrix completion under joint differential
-privacy~\citep{jain2018dpmc}, and federated approaches keep ratings on the
-device~\citep{chai2021fedmf}. DRUP releases one item operator with a Gaussian
-mechanism calibrated analytically~\citep{balle2018analytic} and scores locally,
-which gives joint differential privacy~\citep{hsu2014matchings} conditional on
-public nuisances (Theorem~\ref{thm:dp}); privacy guarantees of this kind can be
-audited empirically~\citep{jagielski2020auditing}.
-
-\paragraph{Evaluation methodology}
-Progress claims in top-$N$ recommendation have repeatedly failed against
-well-tuned simple baselines~\citep{dacrema2019progress,rendle2019baselines,anelli2023myth}.
-Paired tests over re-sampled splits are anti-conservative because the splits
-overlap~\citep{dietterich1998,nadeau2003}. We therefore tune every method per
-split on the same validation data, report the number of configurations each
-method was searched over, and test differences at the level of users with a
-correction for multiple comparisons.
+sub-sampled data. Private recommenders perturb item--item
+statistics~\citep{mcsherry2009netflix}, factorisation models~\citep{liu2024dpmf} or
+matrix completion under joint differential privacy~\citep{jain2018dpmc}, and
+federated approaches keep ratings on the device~\citep{chai2021fedmf}. Because a
+DRUP score with fixed nuisances is linear in each user's own interactions, its
+attributions are exact and its minimal counterfactual explanations are found by
+sorting (Proposition~\ref{prop:affine}, Theorem~\ref{thm:cf}); the same linearity
+gives closed-form certificates against injected profiles
+(Theorem~\ref{thm:robust}) and a jointly private release of one item operator
+with an analytically calibrated Gaussian mechanism~\citep{balle2018analytic,hsu2014matchings}
+(Theorem~\ref{thm:dp}). These properties hold for any linear propagation
+operator.
 
 \begin{table}[t]\centering\footnotesize
 \caption{DRUP and representative related methods. ``loss'': the correction
@@ -740,8 +732,14 @@ candidates on Coat, 30\% of the test users otherwise) and a test part, over 10
 validation part of each split, and trained models also select their epoch
 there. All fitted nuisances are cross-fitted over ten folds of pairs
 (Remark~\ref{rem:xfit}). We report the mean and standard deviation over splits
-of the test metric. Differences are tested at the level of users with a
-Holm correction over all comparisons of a dataset (\ref{app:details}).
+of the test metric. Because paired tests over re-sampled splits are anti-conservative when the
+splits overlap~\citep{nadeau2003}, differences are tested at the level
+of users, with a Holm correction over all comparisons of a dataset
+(\ref{app:details}). Progress claims in top-$N$ recommendation have
+repeatedly failed against well-tuned simple
+baselines~\citep{dacrema2019progress,rendle2019baselines,anelli2023myth}; we therefore
+tune every method on the same validation data and report how many
+configurations each one searched.
 
 \paragraph{Methods}
 We compare 23 methods. \emph{Non-personalised}: popularity and the imputation
@@ -804,34 +802,15 @@ operator removes this term and, with it, some useful signal. For IPS edges,
 whose bias does not involve the imputation, the correction leaves the rank
 agreement unchanged (0.061 against 0.059 at five hops).
 
-\begin{table}[t]\centering\small
-\caption{Stress tests outside Assumption~\ref{as:unconf} and with misspecified
-propensities (log-normal noise with $\sigma=0.5$). Relative $|$bias$|$ on unexposed
-candidates.}\label{tab:stress}
-\begin{adjustbox}{max width=\textwidth}
-\input{../tables/mc_stress.tex}
-\end{adjustbox}
-\end{table}
 
-Table~\ref{tab:stress} leaves the assumptions of Theorem~\ref{thm:unbiased}. With
-fixed-size slates (every user sees exactly $k_u$ items, drawn without
-replacement, so exposures within a user are negatively dependent with
-$\rho\approx0.29$), IPS picks up a first-order bias (0.22 at three hops), whereas
-DRUP stays at 0.024, as Proposition~\ref{prop:dep} predicts for DR edges. With
-misspecified propensities and an exact imputation, both DR operators remain
-exactly unbiased, the double robustness of Theorem~\ref{thm:unbiased}; with a
-noisy imputation DRUP's bias is 0.16, against 0.57 for IPS and 1.9 for the
-uncorrected DR operator. Finally, the variance and concentration bounds of
-Theorem~\ref{thm:var} were never violated, but they are loose
-(Table~\ref{tab:bounds}): by a factor of $5\cdot10^2$--$8\cdot10^3$ for the variance and
-$7\cdot10^1$--$2\cdot10^3$ for the deviation at level 0.05. They describe how the error
-scales with $\tau$ and the imputation error, not its size.
-
-\begin{table}[t]\centering\small
-\caption{Tightness of Theorem~\ref{thm:var} in a 12-user, 15-item model (20{,}000
-replications, all propensities $\ge\tau$), over all $(u,i)$.}\label{tab:bounds}
-\input{../tables/bounds.tex}
-\end{table}
+Stress tests outside the assumptions of Theorem~\ref{thm:unbiased} are in
+the Supplementary Material (Table~S1). With fixed-size slates, which
+make exposures within a user negatively dependent, IPS picks up a first-order
+bias (0.22) whereas DRUP stays at 0.024, as Proposition~\ref{prop:dep} predicts;
+with misspecified propensities DRUP is exactly unbiased when the imputation is
+exact and biased by 0.16 when it is noisy, against 0.57 for IPS and 1.9 for the
+uncorrected DR operator. The bounds of Theorem~\ref{thm:var} were never violated
+but are loose by two to four orders of magnitude (Table~S2).
 
 \subsection{Accuracy}\label{sec:acc}
 
@@ -849,8 +828,8 @@ validation data; Table~\ref{tab:configs} lists the number of configurations.}\la
 \caption{User-level paired comparisons of DRUP with each method: mean
 difference of the test metric over users with a 95\% interval, and the
 $t$-test $p$-value, Holm-adjusted over all comparisons of the dataset
-(225, 2{,}310 and 1{,}410 users). The first two rows isolate the walk
-correction.}\label{tab:sig}
+(225, 2{,}310 and 1{,}410 users); selected rows, all comparisons are in the
+result files. The first two rows isolate the walk correction.}\label{tab:sig}
 \begin{adjustbox}{max width=\textwidth}
 \input{../tables/significance.tex}
 \end{adjustbox}
@@ -908,6 +887,8 @@ $0.547\pm0.018$; on Yahoo!\,R3 and KuaiRec the seed standard deviation is below 
 Across the three datasets, the best trained model is thus a BPR graph model on
 Coat and Yahoo!\,R3 and a pointwise one on KuaiRec, while DR propagation without
 training is the most accurate method on the largest and most complete test set.
+
+
 
 \subsection{Exposure invariance on real data}\label{sec:fair}
 
@@ -988,35 +969,111 @@ operators on any dataset.
 \begin{table}[t]\centering\small
 \caption{Exposure-capped re-ranking (Theorem~\ref{thm:alloc}, exact min-cost flow).
 Each item may be recommended to at most $c$ times its fair share $NK/n$ of users.
-Cells: nDCG@$K$ (Gini@$K$). Every cap held.}\label{tab:rerank}
+Cells: nDCG@$K$ (Gini@$K$). Every cap held; the full range of caps and the
+accuracy--concentration frontier are in the Supplementary Material.}\label{tab:rerank}
 \begin{adjustbox}{max width=\textwidth}
-\input{../tables/rerank_coat.tex}
-\end{adjustbox}
-
-\medskip
-\begin{adjustbox}{max width=\textwidth}
-\input{../tables/rerank_kuairec.tex}
-\end{adjustbox}
-
-\medskip
-\begin{adjustbox}{max width=\textwidth}
-\input{../tables/rerank_yahoo.tex}
+\input{../tables/rerank_compact.tex}
 \end{adjustbox}
 \end{table}
 
-\begin{table}[t]\centering\small
-\caption{Best nDCG over each operator's hyper-parameter grid under a cap on the
-Gini coefficient of top-$K$ exposure.}\label{tab:frontier}
-\begin{adjustbox}{max width=\textwidth}
-\input{../tables/frontier.tex}
-\end{adjustbox}
-\end{table}
-
-
+Table~\ref{tab:rerank} applies the exposure-capped allocation of
+Theorem~\ref{thm:alloc} to every operator. The min-cost-flow solver returns the
+optimum up to its rounding gap (a relative gap below $4\cdot10^{-5}$ in every run), all
+caps hold, and coverage never falls below the guaranteed $NK/\max\mathrm{cap}$; a
+dual-subgradient solver we tried first left gaps of up to 35\%, which the
+certificate exposed. On KuaiRec, where exposure is extremely concentrated,
+DR adjacency and DRUP are the most accurate operators under every cap, for
+example 0.199 against 0.173 (logged graph) and 0.178 (IPS) at $c=5$, and 0.140
+against 0.115 and 0.121 at $c=2$. Under the same cap, however, their lists
+remain more concentrated (Gini 0.80 against 0.72 at $c=5$), and at equal Gini
+the frontier over each operator's grid (Table~S4) favours the
+correlation-based operators on Coat. On Coat, whose random test items are already
+diverse, capping costs DRUP more accuracy than it costs the logged graph; on
+Yahoo!\,R3 exposure is not concentrated (Gini 0.27) and caps down to twice the
+fair share cost every operator at most 0.002. The allocation is thus the
+mechanism that controls concentration, and the DR graph is the better input to
+it when exposure in the log is very uneven.
 
 
 \subsection{Structural properties}\label{sec:struct}
-(in preparation)
+
+The properties of Section~\ref{sec:structth} hold for the model with frozen
+(explanations, certificates) or public (privacy) nuisances, and for any linear
+operator; we check them for DRUP and report where they are informative.
+
+\begin{table}[t]\centering\small
+\caption{Exact explanations (Proposition~\ref{prop:affine}, Theorem~\ref{thm:cf}) on 200 random
+test users: largest relative error of completeness and subset additivity
+against re-propagation; rank of the top-1 item after un-logging the five
+interactions with the largest attribution, five random ones, or the five most
+similar ones (0 = still first); share of top-1 recommendations for which no
+subset of the user's own interactions makes the second item overtake it; median
+size of the minimal counterfactual explanation otherwise. Every explanation
+was verified by re-scoring.}\label{tab:explain}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/explain.tex}
+\end{adjustbox}
+\end{table}
+
+\paragraph{Explanations} Attributions recomputed against full re-propagation
+are exact to floating-point precision (Table~\ref{tab:explain}), and removing the
+interactions with the largest attribution moves the top item further down than
+removing random or similar ones, so the attributions are faithful. The
+counterfactual analysis mostly certifies that no explanation from the user's
+own data exists: on Coat 94\% of the top recommendations cannot be overturned by removing any subset of the user's own interactions, on KuaiRec 52\%, and on Yahoo!\,R3 11\%; the minimal explanation otherwise has a median size of 2, 7 and 1 interactions. Such recommendations rest on population-level
+evidence (through $G$), which the attribution to a user's own interactions does
+not explain.
+
+\begin{table}[t]\centering\small
+\caption{Injection attack: $F$ fake users log a low-popularity target and the most
+popular items. Realised hit rate of the target in real users' top-$K$, and the
+fraction of real users for whom Theorem~\ref{thm:robust} certifies that the target
+cannot enter the top-$K$ against \emph{any} $F$ profiles of that size (frozen
+nuisances). No certificate was violated.}\label{tab:attack}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/attack_compact.tex}
+\end{adjustbox}
+\end{table}
+
+\paragraph{Robustness} No certificate was violated in any run
+(Table~\ref{tab:attack}). With imputation-based degrees, DR adjacency and DRUP
+certify every Coat user against one or two fake profiles and 93--95\% of users on
+Coat and KuaiRec against five, and realised attacks with up to 100 fake users
+never placed the target in a KuaiRec top-20. Certificates are informative only
+for small budgets: at $F=20$ they cover 10--26\% of users, and at 200 fake users
+the target reaches 39\% of KuaiRec users under DR and DRUP, more than under IPS
+(10\%) and the logged graph (29\%). On Yahoo!\,R3, where DRUP selects IPS edges with
+cross-fitted $W$-degrees, the fake users' degrees are attacker-controlled and no
+user is certified. When the nuisances are re-fitted on the poisoned log, which
+the certificates do not cover, none of the certified user--target pairs of DRUP (5{,}196 on Coat, 2{,}821 on KuaiRec)
+was violated, and the realised hit rates were lower than with frozen nuisances
+(Table~S5 in the Supplementary Material), because the fake users' own
+imputation raises their degree and lowers their weight.
+
+\begin{table}[t]\centering\small
+\caption{nDCG of jointly private DRUP ($\delta=10^{-5}$, analytic Gaussian mechanism,
+denoising rank 32 fixed in advance). Population-level nuisances come from a
+public 10\% of the non-test users; ``all nuisances'' is the non-private model
+with all nuisances fitted on the whole log. Other ranks in
+Table~S6.}\label{tab:privacy}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/privacy_compact.tex}
+\end{adjustbox}
+\end{table}
+
+\paragraph{Privacy} Table~\ref{tab:privacy} reports the jointly private variant of
+Theorem~\ref{thm:dp}, in which only public users inform the population-level
+nuisances. Useful privacy needs a large user base and a weak
+guarantee. On KuaiRec, private DRUP reaches nDCG@20 of 0.596 at $\epsilon=16$ and 0.530 at
+$\epsilon=8$, against 0.637 without privacy and 0.577 for popularity, and it falls below
+popularity for $\epsilon\le4$. On Yahoo!\,R3 it reaches 0.574 at $\epsilon=16$ (non-private
+0.652, popularity 0.525). On Coat the public-nuisance model itself is weak, because
+29 public users cannot estimate the item parameters: without any noise it
+reaches only 0.454, below popularity. These numbers are lower than a variant
+that treats all nuisances as public would suggest, and they show the cost of an
+honest privacy accounting; privatising the nuisance models with a composed
+budget is left open.
+
 
 %======================================================================
 \section{Discussion}\label{sec:disc}
@@ -1381,6 +1438,5 @@ conservative with five or ten splits and is reported in the result files.
 All experiments ran on four CPU cores with 16\,GB of memory, without a GPU.
 Code, configurations and result files are available at the repository given
 on the title page.
-
 
 \end{document}

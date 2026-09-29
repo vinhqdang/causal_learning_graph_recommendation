@@ -42,6 +42,23 @@ def natbib(t):
 
 body, appendix, abstract = natbib(body), natbib(appendix), natbib(abstract)
 
+# Additional results go to a separate Supplementary Material file.
+supp = ""
+if "\\label{app:more}" in appendix:
+    k = appendix.index("\\section{Additional results}")
+    supp, appendix = appendix[k:], appendix[:k]
+    labels = re.findall(r"\\label\{(tab:[^}]*)\}", supp)
+    snum = {lab: f"S{n}" for n, lab in enumerate(labels, start=1)}
+
+    def to_supp(t):
+        t = t.replace("Appendix~\\ref{app:more}", "the Supplementary Material")
+        t = t.replace("\\ref{app:more}", "the Supplementary Material")
+        for lab, sn in snum.items():
+            t = t.replace("\\ref{" + lab + "}", sn)
+        return t
+    body, appendix = to_supp(body), to_supp(appendix)
+    supp = supp.replace("\\section{Additional results}\\label{app:more}", "")
+
 preamble = r"""\documentclass[preprint,review,12pt,authoryear]{elsarticle}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{booktabs}
@@ -97,5 +114,21 @@ bib = r"""\bibliographystyle{elsarticle-harv}
 
 out = preamble + body + bib + appendix + "\\end{document}\n"
 open("ipm/manuscript.tex", "w").write(out)
+if supp:
+    sp = preamble[:preamble.index("\\journal")] + r"""
+\usepackage{xr}
+\externaldocument{manuscript}
+\renewcommand{\thetable}{S\arabic{table}}
+\begin{document}
+\begin{center}{\large\bfseries Supplementary Material\\[2pt]
+Walk-unbiased doubly robust graph propagation for recommendation from
+exposure-biased logs}\end{center}
+
+Additional results referred to in the main text. Theorem, table and section
+numbers without the prefix S refer to the main text.
+
+""" + supp.replace("Theorem~\\ref{thm:var}", "Theorem~6").replace("Assumption~\\ref{as:unconf}", "Assumption~1") \
+        .replace("Theorem~\\ref{thm:robust}", "Theorem~10") + "\n\\end{document}\n"
+    open("ipm/supplementary.tex", "w").write(sp)
 print("wrote ipm/manuscript.tex", len(out.split()), "words (approx.)",
       "| abstract", len(re.sub(r"\\[a-zA-Z]+|[{}$]", " ", abstract).split()), "words")
