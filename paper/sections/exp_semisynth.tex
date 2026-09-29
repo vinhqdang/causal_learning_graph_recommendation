@@ -60,3 +60,12 @@ against the fixed-weight target, corrected or not, so score values need
 weights fixed a priori. With estimated propensities all estimators
 overstate utility by 100--540\%, and the propensity model, not the walk
 correction, dominates the error (Table~\ref{tab:semisynthest}).
+
+\paragraph{A sparser log.} At a density of 3\% (median propensity 0.008, 58\% of
+the propensities below the clip $\tau=0.01$) the conditions of the theorems
+fail, and clipping dominates (Table~\ref{tab:semisynthsparse}). The correction
+still lowers the three-hop RMSE by a factor of 7 to 32, but every utility
+estimate is biased: IPS with the correction by $-28\%$, DR adjacency by $+331\%$
+and DRUP by $+164\%$ with an independent log, in line with the clipping bias of
+Theorem~\ref{thm:var}(c).
+

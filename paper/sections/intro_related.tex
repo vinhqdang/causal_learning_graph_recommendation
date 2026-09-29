@@ -29,23 +29,24 @@ $u\to j\to u$ of a three-hop walk is one. Their excess is largest where the
 propensity is smallest, that is, on the rarely exposed edges that debiasing is
 meant to recover.
 
-We make this observation precise and remove the resulting bias exactly. Three
-points qualify its practical reach, and we state them up front. First, for
-ranking the \emph{unexposed} candidates of a user with inverse-propensity
-edges, the repeated walks through the candidate vanish at three hops (the
-candidate's own estimate is zero), and the bias only appears from five hops
-on; for DR edges it is present at three hops. Second, on the three public
-benchmarks we use, removing the bias does not change top-$K$ accuracy, and we
-found no setting in which it changes rankings. The contribution is therefore at
-the level of scores: with nuisances that do not depend on the log, the
-propagated scores become unbiased estimates of a well-defined counterfactual
-quantity (on unexposed candidates, up to the imputation error at the
-candidate itself), with guarantees that can be checked. It is not an accuracy
-gain. Third, the guarantees need nuisances that do not depend on the log. Our
-main experiments cross-fit the nuisances on the same log and are not covered;
-in simulation the correction then no longer reduces bias. A sample-split
-variant, DRUP-split, is covered for a target in which the split-off pairs are
-imputed, and we evaluate it as well.
+We make this observation precise and remove the resulting bias exactly. Four
+points qualify its practical reach, and we state them up front. First, the
+guarantees need nuisances (propensities, imputation, degree weights and score
+constants) that do not depend on the log. Cross-fitting over pairs, the
+standard remedy, does not provide them for products of several edge
+estimates, and in simulation the correction then no longer reduces bias; a
+sample split does, and we treat this variant, DRUP-split, as the estimator
+that the theory covers. Second, for ranking the \emph{unexposed} candidates of
+a user with inverse-propensity edges, the repeated walks through the candidate
+vanish at three hops, and the bias only appears from five hops on; for DR
+edges it is present at three hops. Third, on four public benchmarks removing
+the bias does not change top-$K$ accuracy or rankings, also under exposure
+caps. Fourth, the correction does matter where score values are used: on a
+semi-synthetic log built from KuaiRec's fully observed matrix, uncorrected
+propagation overestimates the full-exposure utility of an allocation by
+18--29\%, and the corrected operator is within 2\%, provided that the
+propensities are correct and the propagation weights are fixed a priori. The
+contribution is therefore at the level of scores, not accuracy.
 
 \paragraph{Contributions.}
 \begin{enumerate}
@@ -56,34 +57,31 @@ $\Theta(1/\tau)$ (Theorem~\ref{thm:lower}).
 \item \emph{Estimator.} DRUP (Doubly Robust, walk-Unbiased Propagation) uses
 $Y_e^2=Y_e$ for binary outcomes and replaces every repeated edge by its
 idempotent unbiased counterpart. The three-hop operator has the asymptotic
-cost of the uncorrected one (one item Gram matrix plus $O(mn)$ reductions) and factorises into a public item operator and per-user
-corrections. Möbius inversion over the coincidence patterns of walk indices
-makes the correction exact for any odd number of hops
-(Theorem~\ref{thm:khop}).
-\item \emph{Guarantees.} With nuisances that do not depend on the log, DRUP is edge-wise doubly robust
-for propagation over the full-exposure graph (Theorem~\ref{thm:unbiased}); on
-unexposed candidates it is unbiased up to the imputation error at the
-candidate itself, which no estimator can remove
-(Corollary~\ref{cor:cand}); its bias under exposure dependence within a
-user's history is of second order in the imputation error
-(Proposition~\ref{prop:dep}); we bound its variance and clipping bias
-(Theorem~\ref{thm:var}); and its expected scores do not respond to
-interventions on an item's exposure (Theorem~\ref{thm:fair}).
-\item \emph{Structural properties.} As a linear operator with fixed nuisances,
-DRUP also admits exact attributions and optimal counterfactual explanations,
-closed-form certificates against injected profiles, a jointly private release
-of its item operator and an exposure-capped allocation. These properties
-follow from linearity and hold for any linear propagation operator, including
-the uncorrected ones; we state them with their scope (frozen or public
-nuisances) and report where they are vacuous.
-\item \emph{Evaluation.} On Coat~\cite{schnabel2016},
-Yahoo!\,R3~\cite{marlin2009collaborative} and KuaiRec~\cite{gao2022kuairec},
-whose test data are random or fully observed, we compare 23 methods under
-one protocol: cross-fitted nuisances, per-split validation for every method,
-and user-level significance tests with Holm correction. We check each
-guarantee by Monte Carlo, including stress tests outside its assumptions and
-the gap between the theory and the cross-fitted protocol, and by real-data
-interventions on exposure.
+cost of the uncorrected one (one item Gram matrix plus $O(mn)$ reductions) and
+factorises into a public item operator and per-user corrections. Möbius
+inversion over the coincidence patterns of walk indices makes the correction
+exact for any odd number of hops (Theorem~\ref{thm:khop}). A sample split
+supplies nuisances that do not depend on the edge estimates.
+\item \emph{Guarantees.} With nuisances that do not depend on the log, DRUP is
+edge-wise doubly robust for propagation over the full-exposure graph
+(Theorem~\ref{thm:unbiased}); on unexposed candidates it is unbiased up to the
+imputation error at the candidate itself (Corollary~\ref{cor:cand}); its bias
+under exposure dependence within a user's history is of second order in the
+imputation error (Proposition~\ref{prop:dep}); we bound its variance and
+clipping bias (Theorem~\ref{thm:var}); and its expected scores do not respond
+to interventions on an item's exposure (Theorem~\ref{thm:fair}). Properties
+that follow from linearity alone (attributions, certificates, joint
+differential privacy, capped allocation) hold for any linear operator and are
+in the Supplementary Material.
+\item \emph{Evaluation.} We check the guarantees and their scope by Monte
+Carlo, including the gap between the theory and cross-fitted nuisances; test
+score values and score-based decisions on a semi-synthetic KuaiRec log with
+known propensities; and compare 30 methods on Coat~\cite{schnabel2016},
+Yahoo!\,R3~\cite{marlin2009collaborative}, KuaiRand~\cite{gao2022kuairand} and
+KuaiRec~\cite{gao2022kuairec}, whose test data are random or fully observed,
+with per-split validation for every method, an analysis of tuning budgets,
+and user-level tests with Holm correction. Real-data thinning interventions,
+with a negative control, test exposure invariance.
 \end{enumerate}
 
 %======================================================================

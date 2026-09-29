@@ -40,7 +40,7 @@ METHODS = {
     "MRDR": ("mf", "mrdr", {}),
     "MACR": ("macr", "macr", {"c": [0.1, 0.3]}),
     "SimGCL": ("simgcl", "simgcl", {"cl": [0.1, 0.5]}),
-    "iALS": ("ials", None, {"alpha": [3.0, 10.0, 30.0], "reg": [0.1, 1.0, 10.0]}),
+    "iALS": ("ials", None, {"alpha": [3.0, 10.0, 30.0], "reg": [1.0, 10.0, 100.0, 1000.0]}),
 }
 GRAPH = ("lgn", "navip", "simgcl")
 

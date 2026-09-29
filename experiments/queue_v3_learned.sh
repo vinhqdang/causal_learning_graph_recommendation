@@ -11,6 +11,8 @@ case "$1" in
 kuA) OMP_NUM_THREADS=2 python3 experiments/run_learned.py $KU --threads 2 \
       --methods LightGCN-pt iALS SimGCL DR-JL MRDR MACR MF IPS-MF DR-MF --wide LightGCN-pt \
       --out results/v3/learned_kuairec_pop_A.json ;;
+kuC) OMP_NUM_THREADS=2 python3 experiments/run_learned.py $KU --threads 2 --methods iALS \
+      --out results/v3/learned_kuairec_pop_C.json ;;
 kuB) OMP_NUM_THREADS=2 python3 experiments/run_learned.py $KU --threads 2 \
       --methods LightGCN r-AdjNorm NAVIP DR-LightGCN BPR-MF PDA --wide LightGCN \
       --out results/v3/learned_kuairec_pop_B.json ;;
