@@ -20,7 +20,7 @@ propagation: with frozen nuisances $\eta=+1.00$ to $+1.03$ on all three datasets
 thinned items drop by 0.07--0.24 in mean within-user rank. On KuaiRec and Coat,
 DRUP is invariant to within a few hundredths ($\eta=-0.012$ and $-0.008$) and stays
 so when its nuisances are re-fitted on the thinned log, with the known or with
-re-estimated propensities ($|\eta|\le0.022$). IPS adjacency is far from invariant
+re-estimated propensities where they are estimated ($|\eta|\le0.022$). IPS adjacency is far from invariant
 ($\eta=+0.14$ on KuaiRec, $+0.90$ on Coat). The uncorrected DR adjacency is as
 invariant as DRUP on these data; its over-correction ($\eta=-0.19$ in
 Table~\ref{tab:mc}) scales with $(1-p)/p\cdot\varepsilon^2$ (Theorem~\ref{thm:lower}), and
@@ -53,9 +53,9 @@ intervention, with frozen nuisances ($\eta$: mean$\pm$std over draws).}\label{ta
 \caption{Exposure concentration and user groups. PRU: popularity--rank
 correlation. ECB (KuaiRec, where item quality is known from the fully observed
 matrix): partial correlation between an item's mean rank and its log exposure,
-controlling for its true like rate. User gap: nDCG gap between user groups
-(gender on Coat, activity elsewhere) with a bootstrap interval of the signed
-difference.}\label{tab:fair}
+controlling for its true like rate. User gap: nDCG of group 0 minus group 1
+(men minus women on Coat, inactive minus active users elsewhere) with a
+bootstrap 95\% interval.}\label{tab:fair}
 \begin{adjustbox}{max width=\textwidth}
 \input{tables/fat.tex}
 \end{adjustbox}
@@ -69,8 +69,9 @@ concentrated on 1.2\% of the candidate items, against 15\% for the logged graph,
 because the estimated full-exposure scores are themselves concentrated on few items; on Coat its Gini
 coefficient is 0.60 against 0.34. Exposure invariance and exposure concentration
 are different properties, and DRUP improves the first at the expense of the
-second. The user-group gaps have wide intervals and do not differ between
-operators on any dataset.
+second. The user-group gaps do not differ between operators. They are clearly
+non-zero on Coat (men 0.11 above women) and on Yahoo!\,R3 (inactive users 0.046
+below active ones), under every operator, and not on KuaiRec.
 
 \subsection{Exposure-capped allocation}\label{sec:rerank}
 

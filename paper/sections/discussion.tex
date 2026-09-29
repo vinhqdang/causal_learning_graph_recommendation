@@ -12,7 +12,7 @@ one user's list: when scores are compared across users, as in the
 exposure-capped allocation; when they are aggregated into an estimate of
 full-exposure utility; and when an auditor wants to verify that expected
 scores do not depend on exposure. In these uses the uncorrected estimate is
-biased by 2 to 15 times the target in our simulations, and the bias grows with the
+biased by 1.8 to 15 times the target in our simulations, and the bias grows with the
 number of hops and with small propensities. A practitioner who only needs
 within-user rankings from a dense log loses nothing by using the uncorrected
 DR adjacency; one who needs calibrated, auditable scores, or propagates over
@@ -58,7 +58,8 @@ Items that were never exposed fall outside $\pi p\ge\tau$ and are scored by the
 imputation only. The nuisances are cross-fitted rather than fitted on an
 independent log, the joint-DP guarantee requires public nuisances, and on the
 small Coat data the public-nuisance variant loses much of its accuracy. The
-certificates are vacuous for catalogues of our KuaiRec size, and the variance
+certificates are informative only against a handful of fake profiles (on
+KuaiRec, 95\% of users at five profiles, none at fifty), and the variance
 and concentration bounds are loose by several orders of magnitude
 (Section~\ref{sec:mc}). The target $F^*$ is a linear LightGCN score of the
 full-exposure world, a normative choice that other stakeholders may not

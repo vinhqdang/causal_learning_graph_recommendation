@@ -32,8 +32,8 @@ three-hop repeated-walk bias on unexposed candidates (Corollary~\ref{cor:cand}).
 The IPS adjacency and IPS with the correction give identical rankings on all
 three datasets for the same reason. At five hops on KuaiRec, where the
 correction is active for both edge types, the corrected operator is lower by
-$0.0003$ nDCG@20 ($p_{\mathrm{Holm}}=0.04$), a negligible but consistent difference in
-line with the ranking agreement of Section~\ref{sec:mc}. Five hops themselves do
+$0.0003$ nDCG@20 ($p_{\mathrm{Holm}}=0.04$ with the $t$-test, $p=0.66$ with the Wilcoxon test), a
+negligible difference in line with the ranking agreement of Section~\ref{sec:mc}. Five hops themselves do
 not add accuracy over three (0.6376 against 0.6378).
 
 \paragraph{Propagation over the DR graph is what helps on KuaiRec.} On KuaiRec,
@@ -56,9 +56,9 @@ settings DRUP (0.657) is on par with linear propagation over the logged graph
 trained with BPR: r-AdjNorm (0.671; $-0.015$, $p_{\mathrm{Holm}}=0.004$), NAVIP and LightGCN
 (0.669; $p_{\mathrm{Holm}}\le0.04$). With degrees taken from the imputation instead, DRUP
 drops to 0.62--0.63 on this dataset, so the degree source matters here. On Coat
-(290 users, 15 candidates per user) no difference between DRUP and a trained or
-training-free baseline survives the Holm correction except GF-CF on the DR
-graph, which is better by 0.013 ($p_{\mathrm{Holm}}=0.03$); the best models are again the BPR
+(290 users, 15 candidates per user) DRUP is significantly better than pointwise MF and IPS-MF, and no other
+difference survives the Holm correction except GF-CF on the DR graph, which
+is better by 0.013 ($p_{\mathrm{Holm}}=0.03$); the best models are again the BPR
 graph models (r-AdjNorm 0.575, LightGCN 0.570), but their advantage over DRUP is
 not significant at the user level.
 
@@ -69,7 +69,8 @@ KuaiRec the ordering reverses: pointwise LightGCN (0.628) and MF (0.623) beat
 their BPR versions (0.609, 0.591). Second, per-split selection of configuration
 and epoch benefits the trained models on the small Coat data, where re-training
 the split-0 selection with other seeds lowers LightGCN from 0.581 to
-$0.547\pm0.018$; on Yahoo!\,R3 and KuaiRec the seed standard deviation is below 0.005.
+$0.547\pm0.018$; on KuaiRec and for the BPR graph models on Yahoo!\,R3 the seed standard
+deviation is below 0.005 (at most 0.010 for the other Yahoo!\,R3 models).
 Across the three datasets, the best trained model is thus a BPR graph model on
 Coat and Yahoo!\,R3 and a pointwise one on KuaiRec, while DR propagation without
 training is the most accurate method on the largest and most complete test set.

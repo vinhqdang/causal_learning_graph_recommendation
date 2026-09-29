@@ -412,7 +412,7 @@ $\mathcal X=\{x\in\{0,1\}^{R\times N}:\sum_ix_{ui}=K,\ \sum_ux_{ui}\le\mathrm{ca
 $b$-matching: its constraint matrix is totally unimodular, so the LP has an
 integral optimum. We solve it exactly by min-cost flow (OR-Tools) on the
 scores rounded to $L=10^6$ levels, which is optimal up to
-$\Gamma\le RK(\max s-\min s)/L$. (A dual-subgradient solver left gaps of up to 35%.)
+$\Gamma\le RK(\max s-\min s)/L$.
 
 **Theorem 9.** Let $\hat x$ be the returned allocation, $\Gamma$ the rounding gap, and $U(x)=\sum x_{ui}F^*_{ui}$ the full-exposure utility.
 (a) Every cap holds, so each item's share is at most $\max\mathrm{cap}/R$

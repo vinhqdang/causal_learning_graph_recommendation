@@ -191,7 +191,7 @@ def fat():
             ci = r.get("group_gap_ci95", [None, None])
             ecb = fmt(r["ECB"], 3) if ds == "kuairec" else "--"
             lines.append(f"{nm if mth == 'Obs' else ''} & {lab} & {r[kk]:.4f} & {r['PRU']:.3f} & {ecb} & "
-                         f"{r[gk]:.3f} & {r['group_gap']:.3f} [{ci[0]:+.3f}, {ci[1]:+.3f}] & {r[ck]:.3f}\\\\")
+                         f"{r[gk]:.3f} & {r['group0'] - r['group1']:+.3f} [{ci[0]:+.3f}, {ci[1]:+.3f}] & {r[ck]:.3f}\\\\")
         lines.append("\\midrule")
     lines[-1] = "\\bottomrule"
     lines.append("\\end{tabular}")

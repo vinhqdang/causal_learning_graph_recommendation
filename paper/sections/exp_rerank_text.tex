@@ -1,9 +1,7 @@
 Table~\ref{tab:rerank} applies the exposure-capped allocation of
 Theorem~\ref{thm:alloc} to every operator. The min-cost-flow solver returns the
 optimum up to its rounding gap (a relative gap below $4\cdot10^{-5}$ in every run), all
-caps hold, and coverage never falls below the guaranteed $NK/\max\mathrm{cap}$; a
-dual-subgradient solver we tried first left gaps of up to 35\%, which the
-certificate exposed. On KuaiRec, where exposure is extremely concentrated,
+caps hold, and coverage never falls below the guaranteed $NK/\max\mathrm{cap}$. On KuaiRec, where exposure is extremely concentrated,
 DR adjacency and DRUP are the most accurate operators under every cap, for
 example 0.199 against 0.173 (logged graph) and 0.178 (IPS) at $c=5$, and 0.140
 against 0.115 and 0.121 at $c=2$. Under the same cap, however, their lists
