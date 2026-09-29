@@ -4,10 +4,10 @@
 \begin{document}
 \section*{Highlights}
 \begin{itemize}
-\item Inverse-propensity graph propagation is biased beyond one hop.
-\item The repeated-walk bias grows as the inverse of the propensity clip.
-\item DRUP removes this bias exactly for any number of hops, with no training.
-\item One structure yields fairness, explanation, robustness and privacy results.
-\item DRUP beats tuned GNN baselines on Yahoo! R3 and KuaiRec unbiased tests.
+\item Inverse-propensity and doubly robust graph propagation are biased beyond one hop.
+\item DRUP removes the repeated-walk bias exactly for any odd number of hops.
+\item Under slate dependence its bias is second order in the imputation error.
+\item Training-free DR propagation beats tuned trained models on KuaiRec.
+\item Thinning audits confirm exposure invariance on Coat and KuaiRec only.
 \end{itemize}
 \end{document}

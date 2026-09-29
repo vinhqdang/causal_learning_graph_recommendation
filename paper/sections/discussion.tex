@@ -12,7 +12,7 @@ one user's list: when scores are compared across users, as in the
 exposure-capped allocation; when they are aggregated into an estimate of
 full-exposure utility; and when an auditor wants to verify that expected
 scores do not depend on exposure. In these uses the uncorrected estimate is
-biased by a factor of 2--80 in our simulations, and the bias grows with the
+biased by 2 to 15 times the target in our simulations, and the bias grows with the
 number of hops and with small propensities. A practitioner who only needs
 within-user rankings from a dense log loses nothing by using the uncorrected
 DR adjacency; one who needs calibrated, auditable scores, or propagates over
@@ -29,8 +29,8 @@ scores of rarely exposed items have a larger variance
 who need exposure guarantees need an explicit mechanism such as the
 exposure-capped allocation. For \emph{users}, the attributions show which of
 their own interactions drive a recommendation, or certify that none can
-overturn it; the population-level part of the score, which dominates on Coat,
-remains unexplained, and explaining it through $G$ would conflict with the
+overturn it; the population-level part of the score
+remains unexplained (it decides 94\% of the top recommendations on Coat and 52\% on KuaiRec), and explaining it through $G$ would conflict with the
 privacy guarantee. For the \emph{platform}, DRUP is cheap and training-free
 but needs propensities, and the clip $\tau$ and the control-variate weight
 $\lambda$ trade exposure invariance against accuracy. This trade-off is a policy

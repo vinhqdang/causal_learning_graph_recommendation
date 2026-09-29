@@ -8,23 +8,29 @@
 \opening{Dear Editor,}
 
 Please consider the enclosed manuscript, ``Walk-unbiased doubly robust graph
-propagation: provably fair, transparent, accountable and private
-recommendation from exposure-biased logs'', for publication in
+propagation for recommendation from exposure-biased logs'', for publication in
 \emph{Information Processing \& Management}.
 
-Graph-based recommenders propagate preferences over interaction graphs that
-the platform's own exposure policy has already filtered. The manuscript shows
-that the inverse-propensity and doubly robust corrections now used inside graph
-propagation are themselves biased once propagation spans more than one hop,
-and it gives the exact bias and a lower bound. It then proposes DRUP, an
-operator that is exactly unbiased and edge-wise doubly robust for any number of
-hops at no extra cost and without training. The same structure yields provable
-properties: causal exposure invariance, exact and optimal explanations,
-certified robustness to injected profiles, joint differential privacy and
-exposure-capped allocation with a certified gap. Every claim is checked on Coat,
-Yahoo!\ R3 and KuaiRec, whose test data are random or fully observed, against
-tuned trained baselines. The manuscript also reports where the guarantees stop
-holding.
+Graph-based recommenders propagate preferences over interaction graphs that the
+platform's own exposure policy has filtered. The manuscript shows that the
+inverse-propensity and doubly robust corrections used inside graph propagation
+are themselves biased once propagation spans more than one hop, gives the exact
+bias, and removes it with an operator (DRUP) that is exact for any odd number
+of hops at no extra cost and without training. It states the guarantees that
+follow, with their assumptions: edge-wise double robustness, robustness to
+within-user exposure dependence, and exposure invariance in expectation, plus
+the properties that any linear operator with fixed nuisances shares (exact
+attributions, certificates against injected profiles, joint differential
+privacy with public nuisances, capped allocation).
+
+The evaluation is deliberately conservative. On Coat, Yahoo!\ R3 and KuaiRec,
+whose test data are random or fully observed, DRUP is compared with 22 methods
+under one protocol (cross-fitted nuisances, per-split tuning of every method,
+user-level tests with Holm correction). The manuscript reports that the walk
+correction does not change top-$K$ accuracy, that training-free propagation over
+the doubly robust graph is the most accurate method on KuaiRec while trained
+graph models are better on Yahoo!\ R3, and that exposure invariance holds on
+Coat and KuaiRec but not at the selected configuration on Yahoo!\ R3.
 
 We believe the work fits the journal's interest in trustworthy information
 access and recommender systems. The manuscript is original, has not been

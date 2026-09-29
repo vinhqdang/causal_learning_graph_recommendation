@@ -17,7 +17,7 @@ revision roadmap (REV-n).
   New evidence: Monte-Carlo bias on unexposed candidates (IPS is unbiased there
   at 3 hops, not at 5), ranking agreement with the target (the uncorrected DR
   operator agrees slightly better in simulation; reported and explained), and a
-  real-data sparsity sweep on KuaiRec (log thinned to 30%, 10% and 3%) with
+  real-data sparsity sweep on KuaiRec (log thinned to 10% and 3%) with
   top-20 overlap and rank correlation between DR and DRUP. The Discussion
   states when to use the corrected operator (score values, cross-user
   comparisons, allocation, audits, K >= 5) and when the uncorrected one suffices.
@@ -28,7 +28,7 @@ revision roadmap (REV-n).
   cross-fitted edge estimates, and the degree source is now a disclosed,
   searched hyper-parameter (Appendix B). Raw W-degrees are no longer used for
   any debiased operator. On Yahoo!R3 the previous 0.662 depended on raw
-  W-degrees; with imputation degrees DRUP drops to about 0.62, and with
+  W-degrees; with imputation degrees DRUP drops to 0.62-0.63, and with
   cross-fitted W-degrees it reaches 0.657.
 
 ## Methodology (R1)
@@ -82,6 +82,7 @@ revision roadmap (REV-n).
 - One suggested reference (Islam, Zheleva and Wang, WWW 2026, DOI
   10.1145/3774904.3792670) could not be verified (the DOI does not resolve) and
   is not cited.
+- Additional tables moved to a separate Supplementary Material file.
 - Title and abstract no longer claim "provably fair, transparent, accountable
   and private"; "every guarantee is verified empirically" removed.
 - The trust properties that follow from linearity are grouped in one section

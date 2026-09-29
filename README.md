@@ -14,63 +14,39 @@ logged graph. Its properties are proved in `docs/THEORY.md`:
 | Accountability | Certified bound on the effect of any F injected fake profiles (Thm 7) | `run_fat.py --sections attack` |
 | Privacy | One public item operator plus local scoring gives (ε,δ)-joint DP (Thm 8) | `run_fat.py --sections privacy` |
 
-## Main results
+## Main results (protocol v2)
 
-Accuracy on unbiased test data (mean over splits; on KuaiRec the trained
-baselines are tuned and paired with DRUP on the same 5 splits):
+All nuisances are cross-fitted over ten folds, every method (trained or not) is
+tuned per split on the same validation data, and differences are tested per
+user with a Holm correction (`experiments/significance.py`).
 
 | | Coat nDCG@5 | Yahoo!R3 nDCG@5 | KuaiRec nDCG@20 |
 |---|---|---|---|
-| MF / IPS-MF / DR-MF | 0.462 / 0.457 / 0.536 | 0.507 / 0.512 / 0.509 | 0.632 / 0.629 / 0.619 |
-| LightGCN / NAVIP / DR-LightGCN | 0.508 / 0.499 / 0.556 | 0.588 / 0.591 / 0.561 | 0.630 / 0.630 / 0.625 |
-| imputation only (additive) | 0.566 | 0.524 | 0.622 |
-| linear LightGCN on the logged graph | 0.557 | 0.659 | 0.604 |
-| DR adjacency (no walk correction) | 0.559 | 0.662 | 0.632 |
-| DRUP, additive imputation | 0.553 | **0.662** (λ = 0) | 0.633 |
-| DRUP, low-rank imputation, 5 hops | 0.555 (additive) | – | **0.640** |
+| best trained model | r-AdjNorm (BPR) 0.575 | r-AdjNorm (BPR) 0.671 | LightGCN (pointwise) 0.628 |
+| linear LightGCN, logged graph | 0.557 | 0.659 | 0.604 |
+| GF-CF, logged graph / DR graph | 0.551 / 0.560 | 0.657 / 0.631 | 0.614 / 0.637 |
+| DR adjacency (no walk correction) | 0.546 | 0.657 | 0.638 |
+| DRUP | 0.547 | 0.657 | 0.638 |
 
-DRUP (no gradient training) significantly beats every tuned trained
-baseline on KuaiRec and Yahoo!R3 (paired t-test, p < 0.01). On Coat it ties
-with the best trained model but is below the additive imputation alone
-(`paper/tables/significance.tex`). On Yahoo!R3 (2% dense), validation picks the
-IPS end (λ = 0) of the control-variate family.
-
-Guarantees and their checks:
-
-- **Unbiasedness, any number of hops.** The correction is exact for any odd
-  K (Möbius inversion over walk-index coincidence patterns, `drup/khop.py`).
-  Uncorrected IPS/DR propagation has relative bias 2.4 / 1.9 at 3 hops and
-  78 / 70 at 5 hops. The corrected estimators stay within Monte-Carlo error.
-- **Causal item fairness.** Under a real do(p ← p/2) intervention with frozen
-  nuisances, the mean-score elasticity of the logged graph is +1.00 on every
-  dataset. DRUP's is −0.02 (Coat) and −0.01 (KuaiRec). On Yahoo!R3 it is +0.95
-  at the validated clip τ = 0.2 and +0.006 at τ ≤ 5e-4, at an nDCG cost of
-  0.04 (`paper/tables/tau.tex`). In Monte-Carlo, exposure elasticity is +0.005 (logged graph +1.78,
-  DR adjacency −0.19). Under a real exposure intervention on KuaiRec, DRUP's rank
-  shift is +0.0005 ± 0.0008, against −0.134 for the logged graph. The
-  exposure-conditional bias drops from 0.83 to 0.42, and to 0.29 with low-rank
-  imputation.
-- **Exposure caps.** An exact min-cost-flow re-ranker enforces per-item
-  exposure caps (certified gap < 5e-6). Under every cap on KuaiRec, DRUP-LR is
-  the most accurate operator (e.g. 0.260 vs 0.228 for the logged graph at
-  c = 10).
-- **Transparency.** Explanations are exact (error 1e-15). Minimal
-  counterfactual explanations exist for 18% (Coat) and 55% (KuaiRec) of top
-  recommendations.
-- **Accountability.** No attack with up to 100 fake users placed the target in
-  any KuaiRec top-20. On Coat, 100% of users are certified against one fake
-  profile.
-- **Privacy.** Joint DP: nDCG@20 is 0.613 at ε = 8 and 0.629 at ε = 16 on
-  KuaiRec (non-private 0.633).
-
-Limitations:
-
-- At equal Gini, logged-graph propagation keeps slightly more accuracy under
-  re-ranking.
-- Certificates are vacuous for KuaiRec-sized catalogs.
-- A re-fitted low-rank imputation leaves a small exposure sensitivity
-  (+0.008), because it violates the fixed-nuisance assumption.
-- The number of correction terms grows with the Bell numbers (2,790 at 7 hops).
+- The walk correction does not change top-K accuracy (DRUP vs DR adjacency:
+  n.s. on all three datasets; identical on Yahoo!R3, where validation selects
+  IPS edges). Training-free propagation over the DR graph is the most accurate
+  method on KuaiRec (+0.010 over the best trained model, p < 1e-3); graph models
+  trained with BPR are better on Yahoo!R3; nothing is significant on Coat after
+  Holm correction.
+- Monte Carlo: uncorrected IPS/DR propagation is biased by 2.3/1.8 times the
+  target at 3 hops and 15/8 at 5 hops; corrected estimators stay within MC
+  error, also with fixed-size slates (DR) and misspecified propensities
+  (exact imputation).
+- Exposure invariance under a real do(p <- p/2): DRUP eta = -0.012 (KuaiRec) and
+  -0.008 (Coat), also with re-fitted nuisances; logged graph +1.00. On Yahoo!R3
+  the selected clip binds for 82% of pairs and DRUP inherits eta = +0.96; small
+  clips reduce it to about +0.2 at a cost of 0.044 nDCG@5.
+- Certificates (frozen nuisances): 100% of Coat and KuaiRec users certified
+  against 1-2 fake profiles, 93-95% against 5; no violation, also with
+  re-fitted nuisances.
+- Joint DP with public nuisances (analytic Gaussian): KuaiRec nDCG@20 0.596 at
+  epsilon = 16 (non-private 0.637, popularity 0.577).
 
 ## Layout
 
