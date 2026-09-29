@@ -1,20 +1,20 @@
-Graph recommenders propagate preferences along multi-hop walks of a logged
-graph whose edges exist only where an item was exposed. Debiasing re-weights
+Graph recommenders propagate preferences along walks of a logged graph whose
+edges exist only where an item was exposed. Debiasing re-weights
 edges by inverse propensities or completes them with doubly robust (DR)
 estimates. Such corrections are biased for multi-hop propagation: a walk that
-traverses an edge several times multiplies that edge's estimate with itself. We give the exact bias, whose worst case
+traverses an edge several times multiplies its estimate with itself. We give the exact bias, whose worst case
 grows as the inverse of the propensity clip, and remove it with DRUP (Doubly
 Robust, walk-Unbiased Propagation), which replaces each repeated edge by its
-idempotent counterpart; at three hops the correction costs no more than the
-uncorrected operator, and Möbius inversion extends it exactly to any odd number
-of hops. With
+idempotent counterpart; at three hops the correction has the asymptotic cost
+of the uncorrected operator, and Möbius inversion extends it exactly to any odd
+number of hops. With
 nuisances that do not depend on the log, DRUP is edge-wise doubly robust for
-propagation over the full-exposure graph, second-order robust to within-user
-exposure dependence, and exposure-invariant in expectation; as a linear
+full-exposure propagation, second-order robust to within-user exposure
+dependence, and exposure-invariant in expectation; as a linear
 operator it also admits exact attributions, certificates against injected
 profiles and private release. In simulation these guarantees hold
-for nuisances from an independent log or a sample split, but not for
-nuisances cross-fitted on the same log. The contribution concerns
+for nuisances from an independent log or a sample split (for a target with
+imputed split-off pairs), not for nuisances cross-fitted on the same log. The contribution concerns
 scores: on Coat, Yahoo!\,R3 and KuaiRec, against 22 tuned methods, the
 correction leaves accuracy and rankings unchanged, also under exposure caps. Training-free DR propagation is the most accurate method on
 KuaiRec, while graph models trained with pairwise losses are better on

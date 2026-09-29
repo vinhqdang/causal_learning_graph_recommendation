@@ -29,8 +29,8 @@ candidates on Coat, 30\% of the test users otherwise) and a test part, over 10
 (Coat) or 5 random splits. Every method selects its configuration on the
 validation part of each split, and trained models also select their epoch
 there. All fitted nuisances are cross-fitted over ten folds of pairs, except
-for the sample-split variants, whose nuisances are fitted on a random 20\% of
-the pairs; only the latter satisfy the assumptions of the theory
+for the sample-split variants, whose imputation (and propensity model, where
+it is estimated) is fitted on a random 20\% of the pairs; only the latter satisfy the assumptions of the theory
 (Remark~\ref{rem:xfit}). We report the mean and standard deviation over splits
 of the test metric. Because paired tests over re-sampled splits are anti-conservative when the
 splits overlap~\cite{nadeau2003}, differences are tested at the level
@@ -51,7 +51,7 @@ DR-MF~\cite{wang2019drjl}, LightGCN and DR-LightGCN (LightGCN with the DR loss).
 \emph{Trained with a pairwise (BPR) loss}: MF, PDA~\cite{zhang2021pda},
 LightGCN~\cite{he2020lightgcn}, r-AdjNorm~\cite{zhao2022radjnorm} and
 NAVIP~\cite{kim2022navip}. \emph{Training-free on the logged graph}: linear LightGCN
-(the one- plus three-hop form of Section~4 on $O\odot Y$; with the searched
+(the one- plus three-hop form of Section~\ref{sec:drup} on $O\odot Y$; with the searched
 normalisation exponent it is a linear r-AdjNorm), EASE~\cite{steck2019ease} and
 GF-CF~\cite{shen2021gfcf}. \emph{Training-free on a debiased graph}: IPS adjacency
 (NAVIP-style), IPS adjacency with the walk correction, EASE and GF-CF on the DR

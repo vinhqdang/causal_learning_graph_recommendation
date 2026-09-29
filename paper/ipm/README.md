@@ -18,7 +18,7 @@ pdflatex title_page && pdflatex highlights && pdflatex cover_letter
 
 Checklist before submitting:
 
-- The abstract has 248 words (limit 250). Keywords: 7.
+- The abstract has 250 words (limit 250). Keywords: 7.
 - Review is double-anonymised. The manuscript has no author names, affiliations,
   acknowledgements or repository link. The code link is on the title page only.
 - Funding: none. Competing interests: none (both stated on the title page).

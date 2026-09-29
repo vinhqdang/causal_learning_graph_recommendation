@@ -44,7 +44,8 @@ candidate itself), with guarantees that can be checked. It is not an accuracy
 gain. Third, the guarantees need nuisances that do not depend on the log. Our
 main experiments cross-fit the nuisances on the same log and are not covered;
 in simulation the correction then no longer reduces bias. A sample-split
-variant, DRUP-split, is covered, and we evaluate it as well.
+variant, DRUP-split, is covered for a target in which the split-off pairs are
+imputed, and we evaluate it as well.
 
 \paragraph{Contributions.}
 \begin{enumerate}
@@ -54,8 +55,8 @@ propensities vanish, and under a propensity clip $\tau$ its worst case is
 $\Theta(1/\tau)$ (Theorem~\ref{thm:lower}).
 \item \emph{Estimator.} DRUP (Doubly Robust, walk-Unbiased Propagation) uses
 $Y_e^2=Y_e$ for binary outcomes and replaces every repeated edge by its
-idempotent unbiased counterpart. The three-hop operator has the cost of one
-item Gram matrix, as the uncorrected one, and factorises into a public item operator and per-user
+idempotent unbiased counterpart. The three-hop operator has the asymptotic
+cost of the uncorrected one (one item Gram matrix plus $O(mn)$ reductions) and factorises into a public item operator and per-user
 corrections. Möbius inversion over the coincidence patterns of walk indices
 makes the correction exact for any odd number of hops
 (Theorem~\ref{thm:khop}).
@@ -152,7 +153,7 @@ target popularity-related metrics. None of them analyses what happens to an
 unbiased edge estimate when the re-weighted adjacency is multiplied with
 itself over several hops. Theorem~\ref{thm:lower} shows that the product is
 then biased, by a term of order $1/p$ that concentrates on rarely exposed
-items, and DRUP removes this term exactly for any number of hops. Our linear
+items, and DRUP removes this term exactly for any odd number of hops. Our linear
 propagation baseline over the logged graph searches the normalisation exponent
 and is therefore a training-free r-AdjNorm; we also train r-AdjNorm and NAVIP.
 

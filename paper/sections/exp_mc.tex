@@ -52,7 +52,7 @@ weights $C$, over all entries, with true propensities. Nuisances are fitted on
 an independent log (Assumption~\ref{as:fixed}), cross-fitted over ten folds of
 pairs of the same log (the protocol of the main experiments), or fitted on a
 random 50\% or 20\% of the pairs of the same log (sample split). Model: users
-$\times$ items and mean exposures per user; the last model has four times larger
+$\times$ items and mean exposures per user; the last model has three times larger
 propensities. The last two columns give the bias of the full score
 $s=s_1/c_1+s_3/c_3$ with constants computed from the scores or from the imputed
 graph (2{,}000--3{,}000 replications).}\label{tab:protocol}
@@ -72,7 +72,7 @@ particular the degree weights, depend on the exposures of the walk edges, and
 this dependence partly offsets the repeated-walk excess of the uncorrected
 operator. The dependence bias shrinks as users have more exposures (from 0.80
 at 11 to 0.18 at 60 per user) but does not vanish. Degrees from edge estimates
-make the uncorrected operators much worse (up to 4.1). The sample split
+make the uncorrected operators much worse at low exposure (up to 4.1). The sample split
 restores the guarantee: relative to the target of
 Theorem~\ref{thm:unbiased} with $\hat Y$ on the imputed pairs, the bias of
 DRUP-split is 0.007--0.065, and relative to the full-exposure target it is

@@ -12,7 +12,8 @@ one user's list: when scores are compared across users, as in the
 exposure-capped allocation; when they are aggregated into an estimate of
 full-exposure utility; and when an auditor wants to verify that expected
 scores do not depend on exposure. In these uses the uncorrected estimate is
-biased by 1.8 to 15 times the target over all pairs in our simulations, and the
+biased by 1.8 to 15 times the target over all pairs in the model of
+Table~\ref{tab:mc} (0.09 to 2.2 times in the models of Table~\ref{tab:protocol}), and the
 bias grows with the number of hops and with small propensities. Two limits
 apply. On the unexposed candidates that are actually recommended, DRUP
 estimates the full-exposure score only up to the imputation error at the
@@ -101,7 +102,7 @@ exposure invariance can be tested on real data by thinning exposures with a
 known factor.
 
 \paragraph{For practice.}
-At three hops DRUP runs at the cost of one item Gram matrix and needs no gradient training,
+At three hops DRUP runs at the asymptotic cost of one item Gram matrix and needs no gradient training,
 so it can serve as an auditable baseline or as a candidate scorer. The
 choice between the corrected and the uncorrected operator depends on whether
 score values or only within-user orders matter; score values need nuisances
@@ -122,7 +123,8 @@ Inverse-propensity and doubly robust graph propagation are biased beyond one
 hop because walks that repeat an edge multiply its estimate with itself. We
 gave the exact bias, whose worst case grows as the inverse of the propensity
 clip, and removed it with an idempotent correction that is exact for any odd
-number of hops and, at three hops, costs no more than the uncorrected operator.
+number of hops and, at three hops, has the asymptotic cost of the uncorrected
+operator.
 With nuisances that do not depend on the log, for instance from a sample
 split, the resulting estimator, DRUP, is edge-wise doubly robust for
 propagation over the full-exposure graph, robust to within-user exposure

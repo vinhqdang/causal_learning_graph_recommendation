@@ -87,12 +87,13 @@ budget of the best trained model it reaches 0.548 (36 configurations; all
 1{,}440: 0.547) and 0.649 (18; 0.657), still below r-AdjNorm. On KuaiRec they
 matter: with four random configurations, the budget of the pointwise
 LightGCN, DRUP reaches only 0.602 against 0.628, and it overtakes LightGCN from
-about 16 configurations (0.632). Once the nuisances are fitted (about 14
-minutes on four CPU cores, shared by all configurations), a DRUP configuration
-costs about 3\,s, against 130--210\,s for training one LightGCN configuration;
-the full DRUP search took about 35 minutes and the four LightGCN runs about 11.
-The advantage of DR propagation on KuaiRec thus holds for a larger but cheap
-search, not at an equal number of configurations.
+about 16 configurations (0.632). On four CPU cores, fitting the nuisances takes
+about 50 minutes (14 for the cross-fitted propensity model and about 35 for the
+cross-fitted imputations of the grid, shared by all DR-type operators), after
+which a DRUP configuration costs about 3\,s (21 minutes for all 384), against
+130--210\,s for training one LightGCN configuration (11 minutes for all four).
+The advantage of DR propagation on KuaiRec thus holds for a larger search, not
+at an equal number of configurations or an equal computing time.
 
 \paragraph{Baselines.} Two changes of the baselines matter. First, pairwise
 training is decisive on Yahoo!\,R3: pointwise MF variants stay near 0.51, below
