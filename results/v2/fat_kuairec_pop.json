@@ -1,26 +1,6 @@
 {
  "dataset": "kuairec",
  "configs": {
-  "Obs": {
-   "alpha": 0.5,
-   "beta": 0.03
-  },
-  "IPS": {
-   "alpha": 0.5,
-   "beta": 0.03,
-   "deg": "Yhat",
-   "floor": 0.2,
-   "lam": 20.0
-  },
-  "DR": {
-   "alpha": 0.5,
-   "beta": 10.0,
-   "cv": 1.0,
-   "deg": "Yhat",
-   "floor": 0.1,
-   "imp": "lr",
-   "lam": 20.0
-  },
   "DRUP": {
    "alpha": 0.5,
    "beta": 10.0,
@@ -362,7 +342,7 @@
   }
  },
  "explain": {
-  "max_rel_error_completeness_additivity": 3.054057515328168e-06,
+  "max_rel_error_completeness_additivity": 3.0540577427018434e-06,
   "deletion_rank_of_top1": {
    "DRUP-attribution": {
     "1": 0.01,
@@ -375,8 +355,8 @@
     "1": 0.0,
     "2": 0.005,
     "3": 0.005,
-    "5": 0.005,
-    "10": 0.0
+    "5": 0.01,
+    "10": 0.01
    },
    "item-similarity": {
     "1": 0.0,
@@ -386,9 +366,10 @@
     "10": 0.035
    }
   },
-  "minimal_cf_size_mean": 7.146551724137931,
-  "minimal_cf_size_median": 0.0,
-  "frac_no_cf": 0.42
+  "minimal_cf_size_mean": 17.864583333333332,
+  "minimal_cf_size_median": 7.0,
+  "frac_no_cf": 0.52,
+  "cf_verified_frac": 1.0
  },
  "attack": {
   "K": 20,
