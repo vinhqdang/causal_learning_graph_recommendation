@@ -1,1 +1,23 @@
+\subsection{Does the correction matter on sparser logs?}\label{sec:sparse}
 
+\begin{table}[t]\centering\small
+\caption{KuaiRec with the log thinned to a fraction $q$ of its exposures
+(nuisances re-fitted, additive imputation, $\tau\in\{0.05,0.01\}$, $\lambda\in\{0,1\}$,
+selected on validation). nDCG@20 of the uncorrected and corrected operators, and
+the lowest top-20 overlap and Spearman correlation between the two rankings at
+matched configurations.}\label{tab:sparse}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/sparse.tex}
+\end{adjustbox}
+\end{table}
+
+Theorem~\ref{thm:lower} predicts a larger bias when propensities are small. We
+therefore thinned the KuaiRec log to 10\% and 3\% of its exposures, which lowers the
+median logged propensity from 0.48 to 0.045 and 0.013, re-fitted the nuisances
+and re-selected every operator (Table~\ref{tab:sparse}). The corrected and the
+uncorrected operators still rank almost identically: their top-20 lists overlap
+by at least 93\%, the rank correlation is at least 0.999, and the accuracy
+differences stay below 0.0005 nDCG@20 in either direction, at three and at five
+hops. On these data the repeated-walk term is small compared with the score
+differences that decide the ranking, and the value of the correction lies in
+the properties of the scores, not in the rankings they induce.
