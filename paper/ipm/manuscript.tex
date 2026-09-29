@@ -810,7 +810,7 @@ bias (0.22) whereas DRUP stays at 0.024, as Proposition~\ref{prop:dep} predicts;
 with misspecified propensities DRUP is exactly unbiased when the imputation is
 exact and biased by 0.16 when it is noisy, against 0.57 for IPS and 1.9 for the
 uncorrected DR operator. The bounds of Theorem~\ref{thm:var} were never violated
-but are loose by two to four orders of magnitude (Table~S2).
+but are loose by a factor of 70 to 8{,}000 (Table~S2).
 
 \subsection{Accuracy}\label{sec:acc}
 
@@ -846,8 +846,8 @@ three-hop repeated-walk bias on unexposed candidates (Corollary~\ref{cor:cand}).
 The IPS adjacency and IPS with the correction give identical rankings on all
 three datasets for the same reason. At five hops on KuaiRec, where the
 correction is active for both edge types, the corrected operator is lower by
-$0.0003$ nDCG@20 ($p_{\mathrm{Holm}}=0.04$), a negligible but consistent difference in
-line with the ranking agreement of Section~\ref{sec:mc}. Five hops themselves do
+$0.0003$ nDCG@20 ($p_{\mathrm{Holm}}=0.04$ with the $t$-test, $p=0.66$ with the Wilcoxon test), a
+negligible difference in line with the ranking agreement of Section~\ref{sec:mc}. Five hops themselves do
 not add accuracy over three (0.6376 against 0.6378).
 
 \paragraph{Propagation over the DR graph is what helps on KuaiRec} On KuaiRec,
@@ -870,9 +870,9 @@ settings DRUP (0.657) is on par with linear propagation over the logged graph
 trained with BPR: r-AdjNorm (0.671; $-0.015$, $p_{\mathrm{Holm}}=0.004$), NAVIP and LightGCN
 (0.669; $p_{\mathrm{Holm}}\le0.04$). With degrees taken from the imputation instead, DRUP
 drops to 0.62--0.63 on this dataset, so the degree source matters here. On Coat
-(290 users, 15 candidates per user) no difference between DRUP and a trained or
-training-free baseline survives the Holm correction except GF-CF on the DR
-graph, which is better by 0.013 ($p_{\mathrm{Holm}}=0.03$); the best models are again the BPR
+(290 users, 15 candidates per user) DRUP is significantly better than pointwise MF and IPS-MF, and no other
+difference survives the Holm correction except GF-CF on the DR graph, which
+is better by 0.013 ($p_{\mathrm{Holm}}=0.03$); the best models are again the BPR
 graph models (r-AdjNorm 0.575, LightGCN 0.570), but their advantage over DRUP is
 not significant at the user level.
 
@@ -883,12 +883,35 @@ KuaiRec the ordering reverses: pointwise LightGCN (0.628) and MF (0.623) beat
 their BPR versions (0.609, 0.591). Second, per-split selection of configuration
 and epoch benefits the trained models on the small Coat data, where re-training
 the split-0 selection with other seeds lowers LightGCN from 0.581 to
-$0.547\pm0.018$; on Yahoo!\,R3 and KuaiRec the seed standard deviation is below 0.005.
+$0.547\pm0.018$; on KuaiRec and for the BPR graph models on Yahoo!\,R3 the seed standard
+deviation is below 0.005 (at most 0.010 for the other Yahoo!\,R3 models).
 Across the three datasets, the best trained model is thus a BPR graph model on
 Coat and Yahoo!\,R3 and a pointwise one on KuaiRec, while DR propagation without
 training is the most accurate method on the largest and most complete test set.
 
+\subsection{Does the correction matter on sparser logs?}\label{sec:sparse}
 
+\begin{table}[t]\centering\small
+\caption{KuaiRec with the log thinned to a fraction $q$ of its exposures
+(nuisances re-fitted, additive imputation, $\tau\in\{0.05,0.01\}$, $\lambda\in\{0,1\}$,
+selected on validation). nDCG@20 of the uncorrected and corrected operators, and
+the lowest top-20 overlap and Spearman correlation between the two rankings at
+matched configurations.}\label{tab:sparse}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/sparse.tex}
+\end{adjustbox}
+\end{table}
+
+Theorem~\ref{thm:lower} predicts a larger bias when propensities are small. We
+therefore thinned the KuaiRec log to 10\% and 3\% of its exposures, which lowers the
+median logged propensity from 0.48 to 0.045 and 0.013, re-fitted the nuisances
+and re-selected every operator (Table~\ref{tab:sparse}). The corrected and the
+uncorrected operators still rank almost identically: their top-20 lists overlap
+by at least 93\%, the rank correlation is at least 0.999, and the accuracy
+differences stay below 0.0005 nDCG@20 in either direction, at three and at five
+hops. On these data the repeated-walk term is small compared with the score
+differences that decide the ranking, and the value of the correction lies in
+the properties of the scores, not in the rankings they induce.
 
 \subsection{Exposure invariance on real data}\label{sec:fair}
 
@@ -912,7 +935,7 @@ propagation: with frozen nuisances $\eta=+1.00$ to $+1.03$ on all three datasets
 thinned items drop by 0.07--0.24 in mean within-user rank. On KuaiRec and Coat,
 DRUP is invariant to within a few hundredths ($\eta=-0.012$ and $-0.008$) and stays
 so when its nuisances are re-fitted on the thinned log, with the known or with
-re-estimated propensities ($|\eta|\le0.022$). IPS adjacency is far from invariant
+re-estimated propensities where they are estimated ($|\eta|\le0.022$). IPS adjacency is far from invariant
 ($\eta=+0.14$ on KuaiRec, $+0.90$ on Coat). The uncorrected DR adjacency is as
 invariant as DRUP on these data; its over-correction ($\eta=-0.19$ in
 Table~\ref{tab:mc}) scales with $(1-p)/p\cdot\varepsilon^2$ (Theorem~\ref{thm:lower}), and
@@ -945,9 +968,9 @@ intervention, with frozen nuisances ($\eta$: mean$\pm$std over draws).}\label{ta
 \caption{Exposure concentration and user groups. PRU: popularity--rank
 correlation. ECB (KuaiRec, where item quality is known from the fully observed
 matrix): partial correlation between an item's mean rank and its log exposure,
-controlling for its true like rate. User gap: nDCG gap between user groups
-(gender on Coat, activity elsewhere) with a bootstrap interval of the signed
-difference.}\label{tab:fair}
+controlling for its true like rate. User gap: nDCG of group 0 minus group 1
+(men minus women on Coat, inactive minus active users elsewhere) with a
+bootstrap 95\% interval.}\label{tab:fair}
 \begin{adjustbox}{max width=\textwidth}
 \input{../tables/fat.tex}
 \end{adjustbox}
@@ -961,8 +984,9 @@ concentrated on 1.2\% of the candidate items, against 15\% for the logged graph,
 because the estimated full-exposure scores are themselves concentrated on few items; on Coat its Gini
 coefficient is 0.60 against 0.34. Exposure invariance and exposure concentration
 are different properties, and DRUP improves the first at the expense of the
-second. The user-group gaps have wide intervals and do not differ between
-operators on any dataset.
+second. The user-group gaps do not differ between operators. They are clearly
+non-zero on Coat (men 0.11 above women) and on Yahoo!\,R3 (inactive users 0.046
+below active ones), under every operator, and not on KuaiRec.
 
 \subsection{Exposure-capped allocation}\label{sec:rerank}
 
@@ -979,9 +1003,7 @@ accuracy--concentration frontier are in the Supplementary Material.}\label{tab:r
 Table~\ref{tab:rerank} applies the exposure-capped allocation of
 Theorem~\ref{thm:alloc} to every operator. The min-cost-flow solver returns the
 optimum up to its rounding gap (a relative gap below $4\cdot10^{-5}$ in every run), all
-caps hold, and coverage never falls below the guaranteed $NK/\max\mathrm{cap}$; a
-dual-subgradient solver we tried first left gaps of up to 35\%, which the
-certificate exposed. On KuaiRec, where exposure is extremely concentrated,
+caps hold, and coverage never falls below the guaranteed $NK/\max\mathrm{cap}$. On KuaiRec, where exposure is extremely concentrated,
 DR adjacency and DRUP are the most accurate operators under every cap, for
 example 0.199 against 0.173 (logged graph) and 0.178 (IPS) at $c=5$, and 0.140
 against 0.115 and 0.121 at $c=2$. Under the same cap, however, their lists
@@ -1016,11 +1038,12 @@ was verified by re-scoring.}\label{tab:explain}
 \end{table}
 
 \paragraph{Explanations} Attributions recomputed against full re-propagation
-are exact to floating-point precision (Table~\ref{tab:explain}), and removing the
+are exact to floating-point precision (relative error $10^{-16}$ in float64 on
+Coat and Yahoo!\,R3, $3\cdot10^{-6}$ in float32 on KuaiRec; Table~\ref{tab:explain}), and removing the
 interactions with the largest attribution moves the top item further down than
 removing random or similar ones, so the attributions are faithful. The
 counterfactual analysis mostly certifies that no explanation from the user's
-own data exists: on Coat 94\% of the top recommendations cannot be overturned by removing any subset of the user's own interactions, on KuaiRec 52\%, and on Yahoo!\,R3 11\%; the minimal explanation otherwise has a median size of 2, 7 and 1 interactions. Such recommendations rest on population-level
+own data exists: on Coat 94\% of the top recommendations cannot be overturned by removing any subset of the user's own interactions, on KuaiRec 52\%, and on Yahoo!\,R3 10\%; the minimal explanation otherwise has a median size of 2, 7 and 1 interactions. Such recommendations rest on population-level
 evidence (through $G$), which the attribution to a user's own interactions does
 not explain.
 
@@ -1053,7 +1076,8 @@ imputation raises their degree and lowers their weight.
 \begin{table}[t]\centering\small
 \caption{nDCG of jointly private DRUP ($\delta=10^{-5}$, analytic Gaussian mechanism,
 denoising rank 32 fixed in advance). Population-level nuisances come from a
-public 10\% of the non-test users; ``all nuisances'' is the non-private model
+public 10\% of the users (non-test users where available; on Coat, whose
+users are all test users, the public users are excluded from evaluation); ``all nuisances'' is the non-private model
 with all nuisances fitted on the whole log. Other ranks in
 Table~S6.}\label{tab:privacy}
 \begin{adjustbox}{max width=\textwidth}
@@ -1065,8 +1089,8 @@ Table~S6.}\label{tab:privacy}
 Theorem~\ref{thm:dp}, in which only public users inform the population-level
 nuisances. Useful privacy needs a large user base and a weak
 guarantee. On KuaiRec, private DRUP reaches nDCG@20 of 0.596 at $\epsilon=16$ and 0.530 at
-$\epsilon=8$, against 0.637 without privacy and 0.577 for popularity, and it falls below
-popularity for $\epsilon\le4$. On Yahoo!\,R3 it reaches 0.574 at $\epsilon=16$ (non-private
+$\epsilon=8$, against 0.637 without privacy and 0.577 for popularity, and it is below
+popularity for $\epsilon\le8$. On Yahoo!\,R3 it reaches 0.574 at $\epsilon=16$ (non-private
 0.652, popularity 0.525). On Coat the public-nuisance model itself is weak, because
 29 public users cannot estimate the item parameters: without any noise it
 reaches only 0.454, below popularity. These numbers are lower than a variant
@@ -1089,7 +1113,7 @@ one user's list: when scores are compared across users, as in the
 exposure-capped allocation; when they are aggregated into an estimate of
 full-exposure utility; and when an auditor wants to verify that expected
 scores do not depend on exposure. In these uses the uncorrected estimate is
-biased by a factor of 2--80 in our simulations, and the bias grows with the
+biased by 1.8 to 15 times the target in our simulations, and the bias grows with the
 number of hops and with small propensities. A practitioner who only needs
 within-user rankings from a dense log loses nothing by using the uncorrected
 DR adjacency; one who needs calibrated, auditable scores, or propagates over
@@ -1106,8 +1130,8 @@ scores of rarely exposed items have a larger variance
 who need exposure guarantees need an explicit mechanism such as the
 exposure-capped allocation. For \emph{users}, the attributions show which of
 their own interactions drive a recommendation, or certify that none can
-overturn it; the population-level part of the score, which dominates on Coat,
-remains unexplained, and explaining it through $G$ would conflict with the
+overturn it; the population-level part of the score
+remains unexplained (it decides 94\% of the top recommendations on Coat and 52\% on KuaiRec), and explaining it through $G$ would conflict with the
 privacy guarantee. For the \emph{platform}, DRUP is cheap and training-free
 but needs propensities, and the clip $\tau$ and the control-variate weight
 $\lambda$ trade exposure invariance against accuracy. This trade-off is a policy
@@ -1135,7 +1159,8 @@ Items that were never exposed fall outside $\pi p\ge\tau$ and are scored by the
 imputation only. The nuisances are cross-fitted rather than fitted on an
 independent log, the joint-DP guarantee requires public nuisances, and on the
 small Coat data the public-nuisance variant loses much of its accuracy. The
-certificates are vacuous for catalogues of our KuaiRec size, and the variance
+certificates are informative only against a handful of fake profiles (on
+KuaiRec, 95\% of users at five profiles, none at fifty), and the variance
 and concentration bounds are loose by several orders of magnitude
 (Section~\ref{sec:mc}). The target $F^*$ is a linear LightGCN score of the
 full-exposure world, a normative choice that other stakeholders may not
@@ -1403,9 +1428,10 @@ over ten random folds of pairs.
 
 \paragraph{Trained models}
 Embeddings have 64 dimensions (Coat: 32 or 64) and LightGCN-type models two
-layers. The grid is learning rate $\{10^{-2},3\cdot10^{-3},10^{-3}\}$ $\times$ weight
-decay $\{10^{-5},10^{-4},10^{-3}\}$ on Coat and Yahoo!\,R3 and
-$\{10^{-2},3\cdot10^{-3}\}\times\{10^{-5},10^{-4}\}$ on KuaiRec, plus
+layers. The grid combines the learning rates $10^{-2}$, $3\cdot10^{-3}$ and $10^{-3}$ with
+the weight decays $10^{-5}$, $10^{-4}$ and $10^{-3}$ on Coat and Yahoo!\,R3, and the
+learning rates $10^{-2}$ and $3\cdot10^{-3}$ with the weight decays $10^{-5}$ and $10^{-4}$ on
+KuaiRec, plus
 $\gamma\in\{0.1,0.2\}$ for PDA and $r\in\{0.3,0.7\}$ for r-AdjNorm. BPR models draw
 one uniformly sampled negative per positive. Batch sizes are 256 (Coat), 1{,}024
 (Yahoo!\,R3) and 32{,}768 (KuaiRec, with 2M sampled pairs per epoch for the
@@ -1430,7 +1456,8 @@ Users without a positive candidate are skipped. For a pair of methods, each
 test user's metric difference is averaged over the splits in which the user
 is in the test part, and we report the mean difference over users with a
 95\% $t$-interval and the paired $t$-test, Holm-adjusted over all comparisons
-of a dataset. The Wilcoxon signed-rank test gives the same conclusions. The
+of a dataset. The Wilcoxon signed-rank test gives the same conclusions except for the
+five-hop DRUP against DR comparison on KuaiRec ($p=0.66$ against 0.011). The
 corrected resampled $t$-test over split means~\citep{nadeau2003} is far more
 conservative with five or ten splits and is reported in the result files.
 

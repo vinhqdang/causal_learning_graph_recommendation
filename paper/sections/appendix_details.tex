@@ -24,9 +24,10 @@ over ten random folds of pairs.
 
 \paragraph{Trained models.}
 Embeddings have 64 dimensions (Coat: 32 or 64) and LightGCN-type models two
-layers. The grid is learning rate $\{10^{-2},3\cdot10^{-3},10^{-3}\}$ $\times$ weight
-decay $\{10^{-5},10^{-4},10^{-3}\}$ on Coat and Yahoo!\,R3 and
-$\{10^{-2},3\cdot10^{-3}\}\times\{10^{-5},10^{-4}\}$ on KuaiRec, plus
+layers. The grid combines the learning rates $10^{-2}$, $3\cdot10^{-3}$ and $10^{-3}$ with
+the weight decays $10^{-5}$, $10^{-4}$ and $10^{-3}$ on Coat and Yahoo!\,R3, and the
+learning rates $10^{-2}$ and $3\cdot10^{-3}$ with the weight decays $10^{-5}$ and $10^{-4}$ on
+KuaiRec, plus
 $\gamma\in\{0.1,0.2\}$ for PDA and $r\in\{0.3,0.7\}$ for r-AdjNorm. BPR models draw
 one uniformly sampled negative per positive. Batch sizes are 256 (Coat), 1{,}024
 (Yahoo!\,R3) and 32{,}768 (KuaiRec, with 2M sampled pairs per epoch for the
