@@ -1,0 +1,38 @@
+\begin{tabular}{llllccccc}
+\toprule
+ & & & & & \multicolumn{2}{c}{utility error (\%)} & & \\
+$p$ & Nuisances & $C$ & Estimator & RMSE $T$ & random & popular & regret & nDCG@20\\
+\midrule
+true & independent log & fixed & IPS & 22.8 & +17.8$\pm$4.0 & +10.3$\pm$0.4 & 0.795 & 0.097\\
+ &  &  & IPS+WC & 2.9 & +0.4$\pm$1.2 & +0.4$\pm$0.3 & 0.795 & 0.097\\
+ &  &  & DR & 28.2 & +23.0$\pm$4.9 & +17.8$\pm$0.5 & 0.791 & 0.097\\
+ &  &  & DRUP & 6.3 & -1.8$\pm$1.4 & -0.0$\pm$0.4 & 0.795 & 0.107\\
+\midrule
+true & independent log & $\hat Y$ & IPS & -- & -44.0$\pm$1.0 & -41.3$\pm$0.2 & -- & 0.120\\
+ &  &  & IPS+WC & -- & -48.4$\pm$0.8 & -44.4$\pm$0.2 & -- & 0.120\\
+ &  &  & DR & -- & -44.0$\pm$1.0 & -40.4$\pm$0.2 & -- & 0.377\\
+ &  &  & DRUP & -- & -49.3$\pm$0.8 & -44.6$\pm$0.2 & -- & 0.370\\
+\midrule
+true & cross-fitted & fixed & IPS & 22.8 & +17.8$\pm$4.0 & +10.3$\pm$0.4 & 0.795 & 0.097\\
+ &  &  & IPS+WC & 2.9 & +0.4$\pm$1.2 & +0.4$\pm$0.3 & 0.795 & 0.097\\
+ &  &  & DR & 35.3 & +28.6$\pm$4.7 & +18.9$\pm$0.5 & 0.821 & 0.051\\
+ &  &  & DRUP & 8.5 & -0.1$\pm$1.6 & +0.8$\pm$0.4 & 0.819 & 0.068\\
+\midrule
+true & cross-fitted & $\hat Y$ & IPS & -- & -54.0$\pm$0.7 & -46.5$\pm$0.1 & -- & 0.191\\
+ &  &  & IPS+WC & -- & -56.3$\pm$0.6 & -48.5$\pm$0.1 & -- & 0.191\\
+ &  &  & DR & -- & -53.7$\pm$0.9 & -45.4$\pm$0.1 & -- & 0.320\\
+ &  &  & DRUP & -- & -57.4$\pm$0.8 & -48.8$\pm$0.1 & -- & 0.322\\
+\midrule
+true & sample split & fixed & IPS & 20.6 & +53.2$\pm$3.9 & +55.9$\pm$0.6 & 0.822 & 0.093\\
+ &  &  & IPS+WC & 2.5 & +37.9$\pm$1.2 & +47.2$\pm$0.6 & 0.821 & 0.091\\
+ &  &  & DR & 103.6 & +63.3$\pm$5.0 & +63.7$\pm$0.8 & 0.840 & 0.030\\
+ &  &  & DRUP & 8.8 & +37.9$\pm$1.5 & +47.0$\pm$0.6 & 0.837 & 0.048\\
+\midrule
+true & sample split & $\hat Y$ & IPS & -- & +0.8$\pm$1.9 & -10.4$\pm$0.6 & -- & 0.154\\
+ &  &  & IPS+WC & -- & -10.7$\pm$1.3 & -17.1$\pm$0.5 & -- & 0.150\\
+ &  &  & DR & -- & +0.9$\pm$1.8 & -10.3$\pm$0.6 & -- & 0.274\\
+ &  &  & DRUP & -- & -10.8$\pm$1.2 & -17.2$\pm$0.5 & -- & 0.272\\
+\midrule
+\multicolumn{9}{l}{Five hops (independent log, true $p$, fixed $C$): relative $|$bias$|$ of $T_5$, DR 3.46, DRUP 0.32.}\\
+\bottomrule
+\end{tabular}

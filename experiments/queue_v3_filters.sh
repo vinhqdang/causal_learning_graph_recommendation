@@ -4,9 +4,9 @@
 # groups; a group whose methods are already in the result file is skipped, so
 # the script can be restarted.
 cd "$(dirname "$0")/.."
-GROUPS=("Pop Impute Obs EASE GF-CF BSPM" "IPS IPS+WC" "DR DRUP" "EASE-DR GF-CF-DR BSPM-DR" "DR-split DRUP-split")
+MGROUPS=("Pop Impute Obs EASE GF-CF BSPM" "IPS IPS+WC" "DR DRUP" "EASE-DR GF-CF-DR BSPM-DR" "DR-split DRUP-split")
 run_groups() {   # $1 = common args, $2 = out
-  for g in "${GROUPS[@]}"; do python3 experiments/run_filters.py $1 --methods $g --out $2; done
+  for g in "${MGROUPS[@]}"; do python3 experiments/run_filters.py $1 --methods $g --out $2; done
 }
 run_seeds() {
   for s in 1 2 3 4; do python3 experiments/run_filters.py $1 --split_seed $s --methods DR-split DRUP-split \

@@ -1,0 +1,62 @@
+\subsection{Score values on a semi-synthetic KuaiRec log}\label{sec:semisynth}
+
+\begin{table}[t]\centering\small
+\caption{Semi-synthetic KuaiRec (30 draws of the log). RMSE $T$: root mean
+squared error of the three-hop term over all pairs, relative to the root
+mean square of the target (only for fixed $C$, where estimator and target use
+the same weights). Utility error: relative error (mean $\pm$ standard error over
+draws) of the estimated full-exposure utility $\sum_x s$ of a fixed random and a
+fixed popular allocation of 20 unexposed items per user. Regret: loss of
+full-exposure utility of the exposure-capped allocation computed from the
+estimated scores, relative to the one computed from $F^*$. nDCG@20 against $Y$
+on unexposed items. True propensities; estimated ones and a sparser log are
+in the Supplementary Material.}\label{tab:semisynth}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/semisynth.tex}
+\end{adjustbox}
+\end{table}
+
+The real benchmarks cannot show whether score values are right, because
+$F^*$ is unknown. We therefore use KuaiRec's fully observed small matrix
+(1{,}411 users, 3{,}327 items, 4.6\% positives) as the potential outcomes $Y$ and
+draw exposure logs from a known MNAR mechanism fitted to the big matrix,
+$\operatorname{logit}p_{ui}=c+z_u+1.5z_i+Y_{ui}$, with $z$ the standardised logit
+exposure rates of the user and the item in the big log and $c$ set for a
+density of 13\% as in the big matrix (median propensity 0.064, all
+propensities at least $\tau=0.02$). The target uses weights $C$ fixed a priori
+(degrees of $Y$, $\alpha=0.5$) and $a,b$ fixed from the target. Each estimator
+uses either the same fixed $C$ or degrees from its imputation (as in our
+real-data configurations), a rank-16 IPS-weighted imputation, and nuisances
+from an independent log, cross-fitted on the same log, or from the 20\% sample
+split. Table~\ref{tab:semisynth} reports score errors and three uses of the
+scores.
+
+\paragraph{Score values.} With true propensities and fixed weights, the
+correction lowers the relative RMSE of the three-hop term by a factor of 4 to
+12 (IPS 22.8 to 2.9, DR 28.2 to 6.3 with an independent log; DR 35.3 to 8.5
+cross-fitted): the repeated factors of rarely exposed edges dominate the error
+as well as the bias. With 30 draws the remaining three-hop bias of the
+corrected operators is within Monte-Carlo error; at five hops the relative
+bias drops from 3.46 (DR) to 0.32 (DRUP). The difference is visible in the
+quantity a score-level user cares about. Summing the scores of a fixed
+allocation estimates its full-exposure utility, and the uncorrected operators
+overestimate it by 18--29\% (random allocation) and 10--19\% (popular items),
+whereas IPS with the correction and DRUP are within 2\% of the truth. This
+holds with an independent log and, because $C$ is fixed, also with
+cross-fitted nuisances (DRUP $-0.1\pm1.6\%$ against DR $+28.6\pm4.7\%$). The
+sample split removes the dependence but imputes a fifth of the pairs, and its
+imputation bias shifts the corrected estimates up by 38--47\% (uncorrected:
+53--64\%).
+
+\paragraph{What does not change.} Two uses of the scores are unaffected. The
+exposure-capped allocation, which compares scores across users, loses 79--84\%
+of the achievable full-exposure utility under every estimator: per-pair noise,
+not the repeated-walk bias, decides which pairs are allocated. Rankings do not
+improve either: with imputation-based weights, DR adjacency and DRUP reach
+nDCG@20 of 0.377 and 0.370. With weights taken from the imputation, finally,
+every operator estimates a different, imputation-indexed quantity; with an
+independent log or cross-fitted nuisances it is off by 40--57\% in utility
+against the fixed-weight target, corrected or not, so score values need
+weights fixed a priori. With estimated propensities all estimators
+overstate utility by 100--540\%, and the propensity model, not the walk
+correction, dominates the error (Table~\ref{tab:semisynthest}).

@@ -5,7 +5,10 @@ random without replacement, the configuration with the best validation score
 among the k is the j-th best overall with probability C(N-j, k-1) / C(N, k).
 The expected test score of the selected configuration is computed exactly per
 split and averaged over splits (expected validation performance, Dodge et al.
-2019). For trained models a configuration keeps its best epoch on each split.
+2019). Two units of budget: 'config' (a trained configuration keeps its
+best epoch on each split; every value of beta is a configuration of DRUP) and
+'eval' (every validation evaluation counts, i.e. every (configuration, epoch)
+of a trained model and every configuration of a training-free operator).
 """
 
 import argparse
@@ -43,12 +46,16 @@ def main():
     ap.add_argument("--banks", nargs="+", required=True)
     ap.add_argument("--budgets", type=int, nargs="+", default=[1, 2, 4, 8, 9, 16, 18, 36, 64, 128, 384, 512, 1440])
     ap.add_argument("--out", required=True)
+    ap.add_argument("--unit", default="config", choices=["config", "eval"])
     a = ap.parse_args()
     res = {}
     for path in a.banks:
         j = json.load(open(path))
         for mth, rows in j["banks"].items():
-            cfgs = collapse(rows) if rows and "epoch" in rows[0]["cfg"] else [list(zip(r["val"], r["test"])) for r in rows]
+            if rows and "epoch" in rows[0]["cfg"] and a.unit == "config":
+                cfgs = collapse(rows)
+            else:
+                cfgs = [list(zip(r["val"], r["test"])) for r in rows]
             N = len(cfgs)
             curve = {k: expected(cfgs, k) for k in sorted(set(a.budgets) | {N}) if k <= N}
             res[mth] = {"n_configs": N, "curve": curve}

@@ -28,22 +28,33 @@ imputation (and propensity model, where it is estimated) is fitted on a random
 20\% of the pairs.
 
 \paragraph{Trained models.}
-Embeddings have 64 dimensions (Coat: 32 or 64) and LightGCN-type models two
-layers. The grid combines the learning rates $10^{-2}$, $3\cdot10^{-3}$ and $10^{-3}$ with
-the weight decays $10^{-5}$, $10^{-4}$ and $10^{-3}$ on Coat and Yahoo!\,R3, and the
-learning rates $10^{-2}$ and $3\cdot10^{-3}$ with the weight decays $10^{-5}$ and $10^{-4}$ on
-KuaiRec, plus
-$\gamma\in\{0.1,0.2\}$ for PDA and $r\in\{0.3,0.7\}$ for r-AdjNorm. BPR models draw
-one uniformly sampled negative per positive. Batch sizes are 256 (Coat), 1{,}024
-(Yahoo!\,R3) and 32{,}768 (KuaiRec, with 2M sampled pairs per epoch for the
-pointwise losses); training runs for at most 100, 60 and 30 epochs with
-patience 5, 5 and 3 on the mean validation score. Because the training log is
-the same for every split, each configuration is trained once and evaluated
-after every epoch on the validation part of every split; each split then
-selects its own configuration and epoch. The split-0 selection is re-trained
-with three (KuaiRec: two) further seeds to measure seed variance.
-Table~\ref{tab:configs} lists the number of configurations each method was
-selected from.
+The grid combines the learning rates $10^{-2}$, $3\cdot10^{-3}$ and $10^{-3}$ with the
+weight decays $10^{-5}$, $10^{-4}$ and (Coat, and the MF models on Yahoo!\,R3)
+$10^{-3}$. Embeddings have 64 dimensions (Coat: 32 or 64). The graph models with
+the widest search (LightGCN, r-AdjNorm and SimGCL on Yahoo!\,R3, the pointwise
+and BPR LightGCN on KuaiRec, all graph models on Coat) also search one to three
+layers and 64 or 128 dimensions (Coat: 32 or 64); the others use two layers.
+PDA searches $\gamma\in\{0.1,0.2\}$, r-AdjNorm $r\in\{0.3,0.7\}$, SimGCL the
+contrastive weight $\in\{0.1,0.5\}$ (noise $0.1$, temperature $0.2$, InfoNCE over at
+most 2{,}048 users and items of a batch) and MACR $c\in\{0.1,0.3\}$; iALS searches
+the confidence $\alpha\in\{3,10,30\}$ and the ridge $\in\{0.1,1,10\}$. DR-JL and MRDR
+learn an MF imputation model jointly with the prediction
+model~\cite{wang2019drjl,guo2021mrdr}. BPR models draw one uniformly sampled
+negative per positive. Batch sizes are 256 (Coat), 1{,}024 (Yahoo!\,R3), 8{,}192
+(KuaiRand) and 32{,}768 (KuaiRec, with 2M sampled pairs per epoch for the
+pointwise losses); training runs for at most 100, 60, 40 and 30 epochs. Because
+the training log is the same for every split, each configuration is trained
+once and evaluated after every epoch on the validation part of every split.
+Each split stops on its own validation score (patience 5 on Coat and
+Yahoo!\,R3, 3 otherwise) and selects its own configuration and epoch; training
+continues until every split has stopped, and a split never uses epochs after
+its own stopping point, so no split's selection depends on another split's
+validation users, who may be its test users. The split-0 selection is
+re-trained with three (KuaiRec, KuaiRand: two) further seeds to measure seed
+variance. We did not run DICE, StableDR and methods that train on the uniform
+data (CausE, AutoDebias): in our protocol the uniform data serve only for
+selection and testing, for every method. Table~\ref{tab:configs} lists the
+number of configurations each method was selected from.
 
 \begin{table}[h]\centering\footnotesize
 \caption{Number of configurations searched per method (per split).}\label{tab:configs}

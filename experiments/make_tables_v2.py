@@ -6,15 +6,19 @@ import os
 import numpy as np
 
 R = "results/v2"
+R3 = "results/v3"          # round-3 results take precedence where they exist
 T = "paper/tables"
 os.makedirs(T, exist_ok=True)
 DS = [("coat", "given", "ndcg@5", "Coat"), ("yahoo", "pop", "ndcg@5", "Yahoo!\\,R3"),
-      ("kuairec", "pop", "ndcg@20", "KuaiRec")]
+      ("kuairand", "pop", "ndcg@10", "KuaiRand"), ("kuairec", "pop", "ndcg@20", "KuaiRec")]
 
 
 def load(path):
-    p = os.path.join(R, path)
-    return json.load(open(p)) if os.path.exists(p) else None
+    for root in (R3, R):
+        p = os.path.join(root, path)
+        if os.path.exists(p):
+            return json.load(open(p))
+    return None
 
 
 def results(ds, prop):
@@ -419,6 +423,58 @@ def protocol():
     lines.append("\\end{tabular}")
     open(f"{T}/protocol_full.tex", "w").write("\n".join(lines) + "\n")
 
+def semisynth_table(fname, outname, props=("true",)):
+    """Semi-synthetic KuaiRec: score errors and score-based decisions."""
+    path = f"results/v3/{fname}"
+    if not os.path.exists(path):
+        return
+    j = json.load(open(path))
+    r = j["results"]
+    src_lab = {"indep": "independent log", "xfit": "cross-fitted", "split": "sample split"}
+    c_lab = {"fixed": "fixed", "yhat": "$\\hat Y$"}
+    lines = ["\\begin{tabular}{llllccccc}", "\\toprule",
+             " & & & & & \\multicolumn{2}{c}{utility error (\\%)} & & \\\\",
+             "$p$ & Nuisances & $C$ & Estimator & RMSE $T$ & random & popular & regret & nDCG@20\\\\",
+             "\\midrule"]
+    for prop in props:
+        for src in ("indep", "xfit", "split"):
+            for cdeg in ("fixed", "yhat"):
+                key = f"{src}/{prop}/{cdeg}"
+                if key not in r:
+                    continue
+                first = True
+                for nm in ("IPS", "IPS+WC", "DR", "DRUP"):
+                    x = r[key][nm]
+
+                    def u(k):
+                        if k not in x:
+                            return "--"
+                        return f"{100 * x[k]['mean']:+.1f}$\\pm${100 * x[k]['se']:.1f}"
+
+                    def v(k, d=3):
+                        return f"{x[k]['mean']:.{d}f}" if k in x else "--"
+                    lab = "true" if prop == "true" else "est."
+                    rm = f"{x['rel_rmse_T']:.1f}" if cdeg == "fixed" else "--"
+                    lines.append(f"{lab if first else ''} & {src_lab[src] if first else ''} & "
+                                 f"{c_lab[cdeg] if first else ''} & {nm} & {rm} & "
+                                 f"{u('util_rand')} & {u('util_pop')} & {v('cap_regret')} & {v('ndcg20')}\\\\")
+                    first = False
+                lines.append("\\midrule")
+    k5 = [k for k in r if k.endswith("/K5")]
+    for k in k5:
+        lines.append(f"\\multicolumn{{9}}{{l}}{{Five hops (independent log, true $p$, fixed $C$): relative $|$bias$|$ "
+                     f"of $T_5$, DR {r[k]['DR']['rel_bias_T5']:.2f}, DRUP {r[k]['DRUP']['rel_bias_T5']:.2f}.}}\\\\")
+    if lines[-1] == "\\midrule":
+        lines.pop()
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    open(f"{T}/{outname}", "w").write("\n".join(lines) + "\n")
+
+
+def semisynth():
+    semisynth_table("semisynth_kuairec_dense.json", "semisynth.tex")
+    semisynth_table("semisynth_kuairec_dense.json", "semisynth_est.tex", props=("est",))
+    semisynth_table("semisynth_kuairec_sparse.json", "semisynth_sparse.tex", props=("true", "est"))
+
 
 BUDGET_TRAINED = ["LightGCN-pt", "LightGCN", "r-AdjNorm", "NAVIP", "DR-LightGCN", "PDA", "BPR-MF", "DR-MF"]
 
@@ -450,7 +506,7 @@ NAMES = {"LightGCN-pt": "LightGCN, pointwise", "LightGCN": "LightGCN, BPR", "r-A
 
 
 if __name__ == "__main__":
-    for f in (accuracy, significance, mc, fat, tau, rerank, frontier, explain_attack_privacy, sparse, protocol, budget):
+    for f in (accuracy, significance, mc, fat, tau, rerank, frontier, explain_attack_privacy, sparse, protocol, budget, semisynth):
         try:
             f()
         except Exception as e:           # a missing result should not block the others
