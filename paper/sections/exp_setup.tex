@@ -17,18 +17,32 @@ them have a positive. \emph{KuaiRec}~\cite{gao2022kuairec} provides the big matr
 (7{,}176 users, 10{,}728 items, 10.3M logged views, 13.4\% dense) as the MNAR log and
 a fully observed small matrix (1{,}411 users, 3{,}327 items) as the test set. We rank
 all small-matrix items that the user never viewed in the log (3{,}314 candidates
-per user, 154 of them positive on average). Positives are ratings $\ge4$ (Coat,
-Yahoo!\,R3) and a watch ratio $\ge2$ (KuaiRec). A random ranking reaches nDCG@5
-of 0.306 on Coat and 0.352 on Yahoo!\,R3 and nDCG@20 of 0.046 on KuaiRec. The
-candidate sets of Coat and Yahoo!\,R3 are small, so their metric differences
-are compressed; KuaiRec ranks thousands of candidates.
+per user, 154 of them positive on average). \emph{KuaiRand-Pure}~\cite{gao2022kuairand}
+is the only one of the four datasets whose log records platform exposure rather
+than self-selection: $O$ is an impression of the standard recommendation feed and
+$Y$ a click. We keep a random 10{,}000 of the users who also received randomly
+exposed videos, and all 7{,}583 videos; the standard log then has 511{,}863
+impressions (0.68\% dense, click rate 47\%). The random impressions of the same
+period, restricted to videos the user was not shown in the standard log, are
+the test set (43.6 candidates per user, 17.5\% clicked; 8{,}347 users have a
+positive). Positives are ratings $\ge4$ (Coat, Yahoo!\,R3), a watch ratio $\ge2$
+(KuaiRec) and a click (KuaiRand). A random ranking reaches nDCG@5 of 0.306 on
+Coat and 0.352 on Yahoo!\,R3 and nDCG@20 of 0.046 on KuaiRec. The candidate sets
+of Coat and Yahoo!\,R3 are small, so their metric differences are compressed;
+KuaiRec ranks thousands of candidates. We report nDCG@5 on Coat and
+Yahoo!\,R3, nDCG@10 on KuaiRand and nDCG@20 on KuaiRec, and AUC and Recall in
+the Supplementary Material. On Coat and Yahoo!\,R3 the log is self-selected
+ratings: ``exposure'' there means that the user chose to rate the item, and
+exposure invariance is invariance to that choice, not to a platform's
+allocation.
 
 \paragraph{Protocol.}
 The unbiased data are split into a validation part (30\% of each user's
 candidates on Coat, 30\% of the test users otherwise) and a test part, over 10
 (Coat) or 5 random splits. Every method selects its configuration on the
 validation part of each split, and trained models also select their epoch
-there. All fitted nuisances are cross-fitted over ten folds of pairs, except
+there: each split stops on its own validation score and never sees the
+validation or test users of another split. All fitted nuisances are cross-fitted over ten folds of pairs, except
 for the sample-split variants, whose imputation (and propensity model, where
 it is estimated) is fitted on a random 20\% of the pairs; only the latter satisfy the assumptions of the theory
 (Remark~\ref{rem:xfit}). We report the mean and standard deviation over splits
@@ -45,20 +59,24 @@ tune every method on the same validation data and report how many
 configurations each one searched.
 
 \paragraph{Methods.}
-We compare 23 methods. \emph{Non-personalised}: popularity and the imputation
+We compare DRUP with 26 baselines. \emph{Non-personalised}: popularity and the imputation
 $\hat Y$ alone. \emph{Trained with a pointwise loss}: MF, IPS-MF~\cite{schnabel2016},
-DR-MF~\cite{wang2019drjl}, LightGCN and DR-LightGCN (LightGCN with the DR loss).
-\emph{Trained with a pairwise (BPR) loss}: MF, PDA~\cite{zhang2021pda},
-LightGCN~\cite{he2020lightgcn}, r-AdjNorm~\cite{zhao2022radjnorm} and
-NAVIP~\cite{kim2022navip}. \emph{Training-free on the logged graph}: linear LightGCN
+DR-MF, DR-JL~\cite{wang2019drjl}, MRDR~\cite{guo2021mrdr}, iALS~\cite{hu2008ials},
+LightGCN and DR-LightGCN (LightGCN with the DR loss).
+\emph{Trained with a pairwise or contrastive loss}: MF, PDA~\cite{zhang2021pda},
+MACR~\cite{wei2021macr}, LightGCN~\cite{he2020lightgcn}, r-AdjNorm~\cite{zhao2022radjnorm},
+NAVIP~\cite{kim2022navip} and SimGCL~\cite{yu2022simgcl}, all with BPR.
+\emph{Training-free on the logged graph}: linear LightGCN
 (the one- plus three-hop form of Section~\ref{sec:drup} on $O\odot Y$; with the searched
-normalisation exponent it is a linear r-AdjNorm), EASE~\cite{steck2019ease} and
-GF-CF~\cite{shen2021gfcf}. \emph{Training-free on a debiased graph}: IPS adjacency
-(NAVIP-style), IPS adjacency with the walk correction, EASE and GF-CF on the DR
-graph $W$, DR adjacency, DRUP, and the five-hop versions of DR adjacency and
-DRUP. In addition, we run DR adjacency and DRUP with the sample split of
-Section~\ref{sec:drup}. Grids, the number of configurations per method, and training details are
-in Appendix~\ref{app:details}. The training-free methods search between 3 and
-6{,}300 configurations and the trained ones between 4 and 36; each trained
-configuration is trained once and evaluated after every epoch on every split,
-so that it is also tuned per split.
+normalisation exponent it is a linear r-AdjNorm), EASE~\cite{steck2019ease},
+GF-CF~\cite{shen2021gfcf} and BSPM~\cite{choi2023bspm}. \emph{Training-free on a debiased graph}: IPS adjacency
+(NAVIP-style), IPS adjacency with the walk correction, EASE, GF-CF and BSPM on the DR
+graph $W$, the uncorrected DR adjacency, and the five-hop DR adjacency. Besides
+DRUP we report its five-hop version and DR adjacency and DRUP with the sample
+split of Section~\ref{sec:drup} (DRUP-split), over five draws of the split-off
+pairs. Grids, the number of configurations per method, and training details are
+in Appendix~\ref{app:details}. The training-free methods search between 1 and
+6{,}300 configurations and the trained ones between 6 and 108. Trained models
+are evaluated after every epoch; each split keeps the best (configuration,
+epoch) on its own validation part and stops once its validation score has not
+improved for a fixed number of epochs.

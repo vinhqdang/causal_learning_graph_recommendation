@@ -24,7 +24,7 @@ yaC) OMP_NUM_THREADS=1 python3 experiments/run_learned.py $YA --threads 1 --lrs 
       --methods NAVIP LightGCN-pt DR-LightGCN --wide NAVIP --out results/v3/learned_yahoo_pop_C.json ;;
 yaD) OMP_NUM_THREADS=1 python3 experiments/run_learned.py $YA --threads 1 --lrs 1e-2 3e-3 1e-3 --wds 1e-5 1e-4 1e-3 \
       --methods iALS MF IPS-MF DR-MF BPR-MF PDA DR-JL MRDR MACR --out results/v3/learned_yahoo_pop_D.json ;;
-rand) OMP_NUM_THREADS=2 python3 experiments/run_learned.py --dataset kuairand --prop pop --seeds 5 --threads 2 \
+rand) OMP_NUM_THREADS=1 python3 experiments/run_learned.py --dataset kuairand --prop pop --seeds 5 --threads 1 \
       --epochs 40 --patience 3 --batch 8192 --lrs 1e-2 3e-3 1e-3 --wds 1e-5 1e-4 --seed_check 2 \
       --methods LightGCN-pt LightGCN r-AdjNorm SimGCL iALS MF DR-MF BPR-MF NAVIP DR-JL MACR \
       --out results/v3/learned_kuairand_pop.json ;;

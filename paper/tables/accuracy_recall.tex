@@ -3,30 +3,30 @@
  & Method & Coat Recall@5 & Yahoo!\,R3 Recall@5 & KuaiRand Recall@10 & KuaiRec Recall@20\\
 \midrule
 \multicolumn{6}{l}{\emph{Non-personalised}}\\
- & Popularity & 0.644 & 0.679 & -- & 0.166\\
- & Imputation only & 0.663 & 0.678 & -- & 0.186\\
+ & Popularity & 0.644 & 0.679 & 0.509 & 0.166\\
+ & Imputation only & 0.663 & 0.678 & 0.480 & 0.186\\
 \multicolumn{6}{l}{\emph{Trained, pointwise loss}}\\
- & MF & 0.579 & 0.668 & -- & 0.191\\
- & IPS-MF & 0.573 & 0.671 & -- & 0.193\\
- & DR-MF & 0.624 & 0.677 & -- & 0.187\\
- & DR-JL & 0.593 & -- & -- & --\\
- & MRDR & 0.592 & -- & -- & --\\
- & iALS & \textbf{0.681} & -- & -- & --\\
- & LightGCN & 0.638 & 0.734 & -- & 0.194\\
- & DR-LightGCN & 0.671 & 0.699 & -- & 0.191\\
+ & MF & 0.579 & 0.670 & -- & 0.189\\
+ & IPS-MF & 0.573 & 0.671 & -- & 0.192\\
+ & DR-MF & 0.624 & 0.675 & -- & 0.188\\
+ & DR-JL & 0.593 & 0.688 & -- & 0.194\\
+ & MRDR & 0.592 & 0.689 & -- & 0.193\\
+ & iALS & \textbf{0.681} & \underline{0.790} & -- & 0.183\\
+ & LightGCN & 0.638 & -- & -- & 0.193\\
+ & DR-LightGCN & 0.671 & -- & -- & 0.190\\
 \multicolumn{6}{l}{\emph{Trained, pairwise or sampled loss}}\\
- & MF (BPR) & 0.622 & 0.778 & -- & 0.179\\
- & PDA & 0.623 & 0.787 & -- & 0.179\\
- & MACR & 0.645 & -- & -- & --\\
- & LightGCN (BPR) & 0.659 & \underline{0.799} & -- & 0.181\\
- & r-AdjNorm & 0.662 & \textbf{0.800} & -- & 0.180\\
- & NAVIP & 0.661 & 0.799 & -- & 0.185\\
- & SimGCL & 0.656 & -- & -- & --\\
+ & MF (BPR) & 0.622 & 0.778 & -- & 0.178\\
+ & PDA & 0.623 & 0.787 & -- & 0.176\\
+ & MACR & 0.645 & 0.750 & -- & 0.179\\
+ & LightGCN (BPR) & 0.659 & -- & -- & 0.180\\
+ & r-AdjNorm & 0.662 & \textbf{0.802} & -- & 0.180\\
+ & NAVIP & 0.661 & -- & -- & 0.185\\
+ & SimGCL & 0.656 & -- & -- & 0.162\\
 \multicolumn{6}{l}{\emph{Training-free, logged graph}}\\
- & linear LightGCN / r-AdjNorm & 0.646 & 0.781 & -- & 0.181\\
- & EASE & 0.620 & 0.767 & -- & 0.154\\
- & GF-CF & 0.657 & 0.777 & -- & 0.183\\
- & BSPM & 0.675 & 0.779 & -- & --\\
+ & linear LightGCN / r-AdjNorm & 0.646 & 0.781 & 0.529 & 0.181\\
+ & EASE & 0.620 & 0.767 & 0.509 & 0.154\\
+ & GF-CF & 0.657 & 0.777 & \textbf{0.532} & 0.183\\
+ & BSPM & 0.675 & 0.779 & \underline{0.531} & --\\
 \multicolumn{6}{l}{\emph{Training-free, debiased graph}}\\
  & IPS adjacency (NAVIP-style) & 0.645 & 0.783 & -- & 0.185\\
  & IPS + walk correction & 0.645 & 0.783 & -- & 0.185\\
