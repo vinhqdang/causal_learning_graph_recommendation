@@ -147,3 +147,81 @@ revision roadmap (REV-n).
 13. **Tuning budgets.** Expected test score as a function of the number of
     configurations (`experiments/budget_curve.py`); DRUP at the budget of the
     best trained model is reported (Appendix B).
+
+# Round 3 (internal five-seat review of commit 58d3778; decision Major Revision)
+
+## Critical issues
+
+- **DA-C1 (no evidence that score values matter).** New semi-synthetic test on
+  KuaiRec (Section "Score values on a semi-synthetic KuaiRec log"): the fully
+  observed small matrix is the outcome matrix, and exposure logs are drawn from
+  a known MNAR mechanism fitted to the big matrix (30 draws; a sparser variant
+  in the supplement). With true propensities and fixed weights the correction
+  lowers the relative RMSE of the three-hop term by a factor of 4 to 12, and the
+  full-exposure utility of fixed allocations is overestimated by 18-29%
+  without the correction and estimated within 2% with it. Rankings,
+  nDCG and exposure-capped allocation are not changed. The limits are reported
+  too: estimated propensities, a sparse log, and imputation-indexed weights.
+- **DA-C2 (the guarantees do not cover the main experiments).** DRUP-split, the
+  sample-split variant that satisfies Assumption 2, is reported next to the
+  cross-fitted operators in every table, over five draws of the split-off
+  pairs. The text states that the guarantee holds per configuration, not after
+  selection. The abstract and introduction name the cross-fitted operators a
+  heuristic.
+
+## Methodology (R1)
+
+- Thm 6(a) now gives the general bound eps^2/(4 tau^2) and states eps^2/tau
+  when p_hat = p. Parts (b) and (c) assume p_hat = p. The appendix gives a
+  counterexample.
+- Thm 7 and Definition 6 use post-intervention propensities. The logged-graph
+  clause requires fixed C.
+- JDP: the configuration is fixed a priori, and the constants c1, c3 come from
+  public users. Hyper-parameters, a and b are public. Privacy results were
+  rerun.
+- Holm is applied over all comparisons of a dataset (all references
+  together), for both the t-test and the Wilcoxon test. Within-reference
+  values are in the result files.
+- Early stopping is per split: each split stops on its own validation score.
+  All trained baselines were retrained.
+- Budget curves are given per configuration and per evaluation.
+- The Monte-Carlo tables report standard errors.
+- Cor 2 now states its condition (p_e depends on Y only through Y_e). The
+  delta overload is renamed xi. Assumption 2 includes a and b.
+- Target dependence on the nuisance (C from Yhat-degrees) is now stated. The
+  semi-synthetic test uses weights fixed a priori and quantifies the
+  difference.
+
+## Audit (R1-W4, R3-W2, DA-M3)
+
+- New controls for the thinning audit (table "Controls for the thinning
+  audit"):
+  - a negative control with propensities not updated;
+  - popularity and imputation-only rows;
+  - DRUP-split rows;
+  - rank correlation with Yhat.
+- The text states that the audit cannot detect a misspecified propensity model
+  on Coat, where the scores are almost a function of the imputation.
+
+## Baselines and budgets (R2, DA-M1/M2, EIC)
+
+- New baselines: iALS, DR-JL, MRDR, MACR, SimGCL, BSPM and BSPM on the DR graph.
+- The LightGCN, r-AdjNorm, NAVIP and SimGCL grids were widened with layers and
+  dimensions.
+- New dataset: KuaiRand-Pure, the only dataset whose log records platform
+  exposure.
+- New metrics: AUC and Recall, in the supplement.
+- DICE, StableDR, CausE and AutoDebias were not run, with the reason stated.
+
+## Scope, positioning, construct validity
+
+- The structural results (Thm 8-12) and the exposure-capped allocation
+  experiment moved to the supplement, which has S-numbered sections.
+- Table 1 columns are fixed, and a DR-adjacency row is added.
+- Related work adds EDLAE, Schnabel & Bennett 2020, non-backtracking and
+  self-avoiding walks, gcnpop, DecRS, and multistakeholder and expected-exposure
+  fairness.
+- The meaning of O (self-selection on Coat and Yahoo!R3) is stated. Fairness
+  claims are weakened to "not a fairness criterion". The DSA mapping is
+  tightened (first-party audit; Art. 37 per Delegated Regulation 2024/436;
+  Art. 40).
