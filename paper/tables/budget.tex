@@ -1,9 +1,10 @@
-\begin{tabular}{lccccc}
+\begin{tabular}{llcccccc}
 \toprule
-Data & budget $k$ & DRUP, $k$ configs & DRUP, all configs & best trained model & linear LightGCN, $k$ configs\\
+ & & \multicolumn{2}{c}{configurations} & \multicolumn{2}{c}{evaluations} & & \\
+Data & best trained model & $k$ & DRUP & $k$ & DRUP & DRUP, all & trained\\
 \midrule
-Coat & 36 & 0.5481 & 0.5467 & 0.5746 (r-AdjNorm, 36) & 0.5571\\
-Yahoo!\,R3 & 18 & 0.6485 & 0.6567 & 0.6713 (r-AdjNorm, 18) & 0.6585\\
-KuaiRec & 4 & 0.6020 & 0.6378 & 0.6277 (LightGCN, pointwise, 4) & 0.5863\\
+Coat & iALS & 24 & 0.5487 & 295 & 0.5451 & 0.5467 & 0.5812\\
+Yahoo!\,R3 & r-AdjNorm & 72 & 0.6565 & 1765 & 0.6567 & 0.6567 & 0.6742\\
+KuaiRec & DR-JL & 6 & 0.6182 & 103 & 0.6362 & 0.6378 & 0.6332\\
 \bottomrule
 \end{tabular}

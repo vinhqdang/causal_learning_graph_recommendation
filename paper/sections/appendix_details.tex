@@ -66,12 +66,13 @@ number of configurations each method was selected from.
 \end{table}
 
 \begin{table}[h]\centering\footnotesize
-\caption{Tuning budget. Expected test score of the configuration with the best
-validation score among $k$ configurations drawn at random from the grid
-(exact, averaged over splits), for DRUP and for linear LightGCN on the logged
-graph (all its configurations where it has fewer than $k$), with $k$ the number
-of configurations of the best trained model, whose score is given for
-comparison.}\label{tab:budget}
+\caption{Tuning budget. Expected test score of DRUP when its configuration is
+selected on validation data among $k$ configurations drawn at random from its
+grid (exact, averaged over splits; Dodge et al.~\cite{dodge2019showyourwork}), with
+$k$ the budget of the most accurate trained model. Configurations: a trained
+configuration keeps its best epoch per split, and every value of $\beta$ is a
+separate DRUP configuration. Evaluations: every (configuration, epoch) of a
+trained model counts as one validation evaluation.}\label{tab:budget}
 \begin{adjustbox}{max width=\textwidth}
 \input{tables/budget.tex}
 \end{adjustbox}

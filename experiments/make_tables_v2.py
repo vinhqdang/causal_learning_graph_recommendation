@@ -520,28 +520,38 @@ def intervene_extra():
     open(f"{T}/intervene_extra.tex", "w").write("\n".join(lines) + "\n")
 
 
-BUDGET_TRAINED = ["LightGCN-pt", "LightGCN", "r-AdjNorm", "NAVIP", "DR-LightGCN", "PDA", "BPR-MF", "DR-MF"]
+BUDGET_TRAINED = ["LightGCN-pt", "LightGCN", "r-AdjNorm", "NAVIP", "DR-LightGCN", "PDA", "BPR-MF", "DR-MF", "MF", "IPS-MF",
+                  "DR-JL", "MRDR", "iALS", "MACR", "SimGCL"]
 
 
 def budget():
-    """Expected test score of DRUP under the tuning budget of the trained models."""
-    lines = ["\\begin{tabular}{lccccc}", "\\toprule",
-             "Data & budget $k$ & DRUP, $k$ configs & DRUP, all configs & best trained model & linear LightGCN, $k$ configs\\\\",
+    """Expected test score of DRUP under the tuning budget of the best trained
+    model, counted in configurations and in validation evaluations."""
+    lines = ["\\begin{tabular}{llcccccc}", "\\toprule",
+             " & & \\multicolumn{2}{c}{configurations} & \\multicolumn{2}{c}{evaluations} & & \\\\",
+             "Data & best trained model & $k$ & DRUP & $k$ & DRUP & DRUP, all & trained\\\\",
              "\\midrule"]
+
+    def at(curve, k):
+        ks = sorted(int(x) for x in curve)
+        kk = max([x for x in ks if x <= k] or [ks[0]])
+        return curve[str(kk)], kk
+
     for ds, prop, key, nm in DS:
-        j = load(f"budget_{ds}.json")
-        if not j:
+        j, je = load(f"budget_{ds}.json"), load(f"budget_eval_{ds}.json")
+        if not j or not je:
             continue
         res = results(ds, prop)
-        tr = [(res[m]["test"][key][0], m, res[m]["n_configs"]) for m in BUDGET_TRAINED if m in res]
-        bt = max(tr)
-        k = min(bt[2], j["DRUP"]["n_configs"])   # budget of the best trained model
-        kk = str(k)
-        dr_k = j["DRUP"]["curve"].get(kk)
-        ob = j.get("Obs", {}).get("curve", {})
-        obk = ob.get(kk, ob.get(str(max(int(x) for x in ob))) if ob else None)
-        lines.append(f"{nm} & {k} & {dr_k:.4f} & {res['DRUP']['test'][key][0]:.4f} & "
-                     f"{bt[0]:.4f} ({NAMES.get(bt[1], bt[1])}, {bt[2]}) & " + (f"{obk:.4f}" if obk else "--") + "\\\\")
+        tr = [(res[m]["test"][key][0], m) for m in BUDGET_TRAINED if m in res and m in j]
+        if not tr:
+            continue
+        bt, m = max(tr)
+        kc = j[m]["n_configs"]
+        ke = je[m]["n_configs"]
+        dc, kc2 = at(j["DRUP"]["curve"], kc)
+        de, ke2 = at(je["DRUP"]["curve"], ke)
+        lines.append(f"{nm} & {NAMES.get(m, m)} & {kc} & {dc:.4f} & {ke} & {de:.4f} & "
+                     f"{res['DRUP']['test'][key][0]:.4f} & {bt:.4f}\\\\")
     lines += ["\\bottomrule", "\\end{tabular}"]
     open(f"{T}/budget.tex", "w").write("\n".join(lines) + "\n")
 

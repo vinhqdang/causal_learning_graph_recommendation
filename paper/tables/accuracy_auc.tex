@@ -11,22 +11,22 @@
  & DR-MF & 0.620 & 0.645 & -- & \underline{0.801}\\
  & DR-JL & 0.584 & 0.656 & -- & 0.797\\
  & MRDR & 0.589 & 0.657 & -- & 0.793\\
- & iALS & \textbf{0.667} & \underline{0.761} & -- & 0.727\\
- & LightGCN & 0.632 & -- & -- & 0.799\\
- & DR-LightGCN & 0.658 & -- & -- & 0.781\\
+ & iALS & \textbf{0.667} & 0.761 & -- & 0.727\\
+ & LightGCN & 0.632 & 0.705 & 0.559 & 0.799\\
+ & DR-LightGCN & 0.658 & 0.675 & -- & 0.781\\
 \multicolumn{6}{l}{\emph{Trained, pairwise or sampled loss}}\\
  & MF (BPR) & 0.614 & 0.751 & -- & 0.782\\
  & PDA & 0.612 & 0.758 & -- & 0.781\\
  & MACR & 0.639 & 0.729 & -- & 0.762\\
- & LightGCN (BPR) & 0.657 & -- & -- & 0.785\\
- & r-AdjNorm & 0.658 & \textbf{0.775} & -- & 0.778\\
- & NAVIP & 0.653 & -- & -- & 0.796\\
+ & LightGCN (BPR) & 0.657 & \underline{0.771} & \underline{0.614} & 0.785\\
+ & r-AdjNorm & 0.658 & \textbf{0.775} & \textbf{0.617} & 0.778\\
+ & NAVIP & 0.653 & 0.771 & -- & 0.796\\
  & SimGCL & 0.646 & -- & -- & 0.765\\
 \multicolumn{6}{l}{\emph{Training-free, logged graph}}\\
  & linear LightGCN / r-AdjNorm & 0.648 & 0.759 & 0.599 & --\\
  & EASE & 0.614 & 0.745 & 0.569 & --\\
- & GF-CF & 0.638 & 0.756 & \underline{0.603} & --\\
- & BSPM & 0.665 & 0.756 & \textbf{0.604} & --\\
+ & GF-CF & 0.638 & 0.756 & 0.603 & --\\
+ & BSPM & 0.665 & 0.756 & 0.604 & --\\
 \multicolumn{6}{l}{\emph{Training-free, debiased graph}}\\
  & IPS adjacency (NAVIP-style) & 0.641 & 0.756 & -- & --\\
  & IPS + walk correction & 0.641 & 0.756 & -- & --\\
