@@ -33,6 +33,7 @@ Protocol (v2):
 import argparse
 import itertools
 import json
+import pickle
 import os
 import sys
 import time
@@ -326,7 +327,17 @@ def main():
     banks = {mth: [] for mth in todo}
     times = {mth: 0.0 for mth in todo}
     order = sorted(jobs, key=lambda k: (k is not None, str(k)))
+    # checkpoint after every nuisance group: a restart resumes instead of recomputing
+    ckpt = (a.out + "." + "-".join(sorted(todo)) + ".ckpt.pkl") if a.out else None
+    done_keys = set()
+    if ckpt and os.path.exists(ckpt):
+        with open(ckpt, "rb") as f:
+            saved = pickle.load(f)
+        banks, times, done_keys = saved["banks"], saved["times"], saved["done"]
+        print(f"resumed {len(done_keys)}/{len(order)} nuisance groups from {ckpt}", flush=True)
     for kk, key_ in enumerate(order):
+        if str(key_) in done_keys:
+            continue
         tk = time.time()
         for method, cfg in jobs[key_]:
             t0 = time.time()
@@ -340,6 +351,11 @@ def main():
                 banks[method].append((c, vm, tm))
             times[method] += time.time() - t0
         print(f"[{kk + 1}/{len(order)}] nuisance {key_} done [{time.time() - tk:.0f}s]", flush=True)
+        done_keys.add(str(key_))
+        if ckpt:
+            with open(ckpt + ".tmp", "wb") as f:
+                pickle.dump({"banks": banks, "times": times, "done": done_keys}, f)
+            os.replace(ckpt + ".tmp", ckpt)
     for method in todo:
         bank = banks[method]
         per_split, chosen, val_best, per_user = [], [], [], []
