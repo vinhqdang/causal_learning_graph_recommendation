@@ -41,7 +41,7 @@ layers and 64 or 128 dimensions (Coat: 32 or 64); the others use two layers.
 PDA searches $\gamma\in\{0.1,0.2\}$, r-AdjNorm $r\in\{0.3,0.7\}$, SimGCL the
 contrastive weight $\in\{0.1,0.5\}$ (noise $0.1$, temperature $0.2$, InfoNCE over at
 most 2{,}048 users and items of a batch) and MACR $c\in\{0.1,0.3\}$; iALS searches
-the confidence $\alpha\in\{3,10,30\}$ and the ridge $\in\{0.1,1,10\}$. DR-JL and MRDR
+the confidence $\alpha\in\{3,10,30\}$ and the ridge $\in\{1,10,100,1000\}$. DR-JL and MRDR
 learn an MF imputation model jointly with the prediction
 model~\cite{wang2019drjl,guo2021mrdr}. BPR models draw one uniformly sampled
 negative per positive. Batch sizes are 256 (Coat), 1{,}024 (Yahoo!\,R3), 8{,}192
