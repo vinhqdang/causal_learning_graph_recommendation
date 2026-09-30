@@ -1,5 +1,6 @@
 """LaTeX tables for the manuscript from results/v2/*.json (protocol v2)."""
 
+import glob
 import json
 import os
 
@@ -22,11 +23,31 @@ def load(path):
 
 
 def results(ds, prop):
+    """Training-free: round-2 results updated by round-3 ones (same protocol, AUC
+    added); trained: round-3 results only where they exist (round-2 models
+    stopped on all splits jointly). Sample-split rows: mean and standard
+    deviation over the draws of the split-off pairs."""
     out = {}
-    for f in (f"filters_{ds}_{prop}.json", f"learned_{ds}_{prop}.json"):
-        j = load(f)
-        if j:
-            out.update(j["results"])
+    for root in (R, R3):
+        p = os.path.join(root, f"filters_{ds}_{prop}.json")
+        if os.path.exists(p):
+            out.update(json.load(open(p))["results"])
+    j = load(f"learned_{ds}_{prop}.json")
+    if j:
+        out.update(j["results"])
+    draws = [json.load(open(p))["results"] for p in
+             sorted(glob.glob(os.path.join(R3, f"filters_{ds}_{prop}_split[1-9].json")))]
+    for m in ("DR-split", "DRUP-split"):
+        if m not in out or not all(m in d for d in draws) or not draws:
+            continue
+        r = dict(out[m])
+        r["draw0"] = out[m]["test"]
+        r["test"] = {}
+        for k, (v0, _) in out[m]["test"].items():
+            v = [v0] + [d[m]["test"][k][0] for d in draws if k in d[m]["test"]]
+            r["test"][k] = [float(np.mean(v)), float(np.std(v, ddof=1))]
+        r["n_draws"] = 1 + len(draws)
+        out[m] = r
     return out
 
 

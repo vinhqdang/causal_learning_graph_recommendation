@@ -1,8 +1,9 @@
 \subsection{Accuracy}\label{sec:acc}
 
 \begin{table}[t]\centering\small
-\caption{Accuracy on unbiased test data (mean$\pm$std over splits). Best in bold,
-second underlined. ``--'': not run (five hops only where the three-hop DR
+\caption{Accuracy on unbiased test data (mean$\pm$std over splits; for the
+sample-split rows, mean$\pm$std over five draws of the split-off pairs). Best in
+bold, second underlined. ``--'': not run (five hops only where the three-hop DR
 operators are competitive). Every method is tuned per split on the same
 validation data; Table~\ref{tab:configs} lists the number of configurations.
 Only the sample-split variants satisfy Assumption~\ref{as:fixed}.}\label{tab:acc}
@@ -12,98 +13,119 @@ Only the sample-split variants satisfy Assumption~\ref{as:fixed}.}\label{tab:acc
 \end{table}
 
 \begin{table}[t]\centering\small
-\caption{User-level paired comparisons of DRUP with each method: mean
-difference of the test metric over users with a 95\% interval, and the
-$t$-test $p$-value, Holm-adjusted over all comparisons of the dataset
-(225, 2{,}310 and 1{,}410 users); selected rows, all comparisons are in the
-result files. The first two rows isolate the walk correction.}\label{tab:sig}
+\caption{User-level paired comparisons: mean difference of the test metric
+over users with a 95\% interval, and the $t$-test $p$-value, Holm-adjusted over
+all comparisons run for the dataset (four references against every other
+method: %KR-NCMP
+124 on Coat, 87 on Yahoo!\,R3, 120 on KuaiRec). Users with a positive
+candidate who are in the test part of at least one split (225, 2{,}310, %KR-NUSERS
+1{,}410); sample-split rows use the first draw. Selected rows; all comparisons
+are in the result files.}\label{tab:sig}
 \begin{adjustbox}{max width=\textwidth}
 \input{tables/significance.tex}
 \end{adjustbox}
 \end{table}
 
-Tables~\ref{tab:acc} and~\ref{tab:sig} report accuracy and the user-level tests.
+Tables~\ref{tab:acc} and~\ref{tab:sig} report accuracy and the user-level
+tests; AUC and Recall are in the Supplementary Material and lead to the same
+conclusions.
 
 \paragraph{The walk correction does not change accuracy.} On every dataset DRUP
 and the uncorrected DR adjacency with the same grid are statistically
-indistinguishable (Coat $+0.0014$, KuaiRec $-0.0001$ with $p_{\mathrm{Holm}}=0.45$), and
-on Yahoo!\,R3 they coincide exactly, because validation selects the IPS end
-of the control-variate family ($\lambda=0$) on every split and IPS edges have no
-three-hop repeated-walk bias on unexposed candidates (Corollary~\ref{cor:cand}).
-The IPS adjacency and IPS with the correction give identical rankings on all
-three datasets for the same reason. At five hops on KuaiRec, where the
-correction is active for both edge types, the corrected operator is lower by
-$0.0003$ nDCG@20 ($p_{\mathrm{Holm}}=0.04$ with the $t$-test, $p=0.66$ with the Wilcoxon test), a
-negligible difference in line with the ranking agreement of Section~\ref{sec:mc}. Five hops themselves do
-not add accuracy over three (0.6376 against 0.6378).
+indistinguishable (Coat $+0.0014$, KuaiRec $-0.0001$, %KR-CORR
+$p_{\mathrm{Holm}}=1$), and on Yahoo!\,R3 they coincide exactly, because
+validation selects the IPS end of the control-variate family ($\lambda=0$) on
+every split and IPS edges have no three-hop repeated-walk bias on unexposed
+candidates (Corollary~\ref{cor:cand}). The IPS adjacency and IPS with the
+correction give identical rankings on all datasets for the same reason. At five
+hops, where the correction is active for both edge types, the corrected
+operator is lower by 0.0003 nDCG@20 on KuaiRec ($p=0.011$ before and
+$p_{\mathrm{Holm}}=0.16$ after the adjustment) and by 0.008 nDCG@5 on Coat
+($p_{\mathrm{Holm}}=1$). The same holds under the sample split (Coat $-0.003$,
+Yahoo!\,R3 $-0.001$, KuaiRec $-0.0001$; all $p_{\mathrm{Holm}}=1$). Five hops do not add
+accuracy over three (KuaiRec 0.6376 against 0.6378).
+
+\paragraph{The sample split.} DRUP-split, the only variant covered by the
+guarantees, costs little on the larger and denser logs and much on the sparse
+one. On KuaiRec it reaches $0.6337\pm0.0013$ over draws of the split-off pairs,
+0.0035 below the cross-fitted DRUP ($p_{\mathrm{Holm}}=0.003$), and remains
+significantly above pointwise LightGCN ($+0.007$, $p_{\mathrm{Holm}}<10^{-3}$; Wilcoxon
+$p_{\mathrm{Holm}}=0.48$) and on par with DR-JL and MRDR ($p_{\mathrm{Holm}}=1$). %KR-SPLIT
+On Coat its accuracy depends on the draw ($0.544\pm0.011$, from 0.527 to 0.558):
+with 24 logged ratings per user, which fifth of them is spent on the nuisances
+matters, and the first draw is not significantly different from the
+cross-fitted DRUP ($+0.009$, $p_{\mathrm{Holm}}=1$). On Yahoo!\,R3 it loses 0.062
+($0.595\pm0.004$; $p_{\mathrm{Holm}}<10^{-3}$ for the first draw), because a fifth of the
+few logged exposures goes to the nuisances and the imputation that replaces
+them is poor. Section~\ref{sec:semisynth} shows the corresponding cost for
+score values: the imputed pairs bias the utility estimates upwards.
 
 \paragraph{Propagation over the DR graph is what helps on KuaiRec.} On KuaiRec,
 whose test matrix is fully observed and whose candidate sets have 3{,}314 items,
 training-free propagation over the DR graph reaches nDCG@20 of 0.638 and is
-significantly better than every trained model (the best, LightGCN with a
-pointwise loss, reaches 0.628; $+0.010$, 95\% CI $[0.007,0.013]$), every operator on
-the logged graph (GF-CF 0.614, IPS adjacency 0.613, linear LightGCN 0.604) and the
-low-rank imputation used alone (0.619). GF-CF applied to the same DR graph
-performs as well as DRUP (0.637), which confirms that the gain comes from the
-DR graph and not from a particular filter. The selected DR configurations use
-the low-rank imputation on all five splits.
+significantly better than every trained model: the best are the jointly
+learned doubly robust models DR-JL and MRDR (0.633; $+0.004$, $p_{\mathrm{Holm}}=0.003$),
+followed by pointwise LightGCN (0.627; $+0.010$, $p_{\mathrm{Holm}}<10^{-3}$). It is also
+better than every operator on the logged graph (GF-CF 0.614, BSPM 0.614, linear
+LightGCN 0.604) and than the imputation used alone (0.619). GF-CF on the same DR
+graph performs as well as DRUP (0.637, $p_{\mathrm{Holm}}=1$), so the gain comes from
+the DR graph and not from a particular filter.
 
-\paragraph{Yahoo!\,R3 and Coat.} On Yahoo!\,R3 the log is 2\% dense and the
-imputation alone is below popularity (0.516 against 0.533), so almost every edge
-of a DR graph would be imputed from a poor model; validation therefore selects
-IPS edges ($\lambda=0$) with cross-fitted $W$-degrees on every split. With these
-settings DRUP (0.657) is on par with linear propagation over the logged graph
-(0.659) and GF-CF (0.657), and it is significantly behind the three graph models
-trained with BPR: r-AdjNorm (0.671; $-0.015$, $p_{\mathrm{Holm}}=0.004$), NAVIP and LightGCN
-(0.669; $p_{\mathrm{Holm}}\le0.04$). With degrees taken from the imputation instead, DRUP
-drops to 0.632 on this dataset, so the degree source matters here; the
-selected $W$-degrees lie outside Assumption~\ref{as:fixed}. On Coat
-(290 users, 15 candidates per user) DRUP is significantly better than pointwise MF and IPS-MF, and no other
-difference survives the Holm correction except GF-CF on the DR graph, which
-is better by 0.013 ($p_{\mathrm{Holm}}=0.03$); the best models are again the BPR
-graph models (r-AdjNorm 0.575, LightGCN 0.570), but their advantage over DRUP is
-not significant at the user level.
+%KR-PARA KuaiRand paragraph to be written when its results are complete.
 
-\paragraph{Sample split.} DRUP-split, the variant covered by the guarantees,
-reaches 0.634 on KuaiRec, 0.558 on Coat and 0.593 on Yahoo!\,R3, and DR adjacency
-under the same split reaches the same values (0.634, 0.560, 0.593;
-$p_{\mathrm{Holm}}\ge0.31$), so the correction again changes nothing. On KuaiRec the
-split costs 0.004 against the cross-fitted DRUP ($p_{\mathrm{Holm}}<10^{-3}$), and
-DRUP-split remains above the best trained model (pointwise LightGCN, $+0.006$;
-$p<10^{-3}$ with the $t$-test, $p=0.30$ with the Wilcoxon test). On Coat it is on par
-with the cross-fitted DRUP ($+0.009$, $p=0.46$). On the sparse Yahoo!\,R3 log it
-loses 0.066 ($p<10^{-3}$), because a fifth of the few logged exposures is spent on
-the nuisances and the imputation that replaces them is poor. The guarantees
-thus cost little accuracy on the larger and denser logs and much on the
-sparse one.
+\paragraph{Coat and Yahoo!\,R3.} On Coat (290 users, 15 candidates per user) the
+most accurate method is iALS (0.581), followed by BSPM on the logged graph,
+DR-LightGCN and the BPR graph models (0.566--0.573); DRUP reaches 0.547. With the Holm
+adjustment over all 124 comparisons, DRUP is significantly better than the
+pointwise MF, IPS-MF, DR-JL and MRDR and not significantly different from any
+other method, including iALS ($-0.037$, $p=0.033$ before adjustment) and GF-CF on
+the DR graph ($-0.014$, $p=0.001$ before and $0.11$ after adjustment). On
+Yahoo!\,R3 the log is 2\% dense and the imputation alone is below popularity
+(0.516 against 0.533), so almost every edge of a DR graph would be imputed from
+a poor model; validation therefore selects IPS edges ($\lambda=0$) with
+cross-fitted $W$-degrees on every split, which lie outside
+Assumption~\ref{as:fixed}. DRUP (0.657) is then on par with linear propagation
+over the logged graph (0.659), GF-CF (0.655) and iALS (0.663), and significantly
+behind the three graph models trained with BPR: r-AdjNorm (0.674; $-0.019$,
+$p_{\mathrm{Holm}}<10^{-3}$), LightGCN (0.671; $p_{\mathrm{Holm}}=0.021$) and NAVIP (0.670;
+$p_{\mathrm{Holm}}=0.029$). SimGCL (0.635) is below DRUP on this dataset
+($p_{\mathrm{Holm}}<10^{-3}$).
 
 \paragraph{Tuning budgets.} The training-free operators search many more
-configurations than the trained models (Table~\ref{tab:configs}), because
-each configuration costs seconds rather than a training run. The expected test
-score of the configuration selected from $k$ random configurations
-(Table~\ref{tab:budget} in Appendix~\ref{app:details}) separates the two
-effects. On Coat and Yahoo!\,R3 the larger grids do not help DRUP: with the
-budget of the best trained model it reaches 0.548 (36 configurations; all
-1{,}440: 0.547) and 0.649 (18; 0.657), still below r-AdjNorm. On KuaiRec they
-matter: with four random configurations, the budget of the pointwise
-LightGCN, DRUP reaches only 0.602 against 0.628, and it overtakes LightGCN from
-about 16 configurations (0.632). On four CPU cores, fitting the nuisances takes
-about 50 minutes (14 for the cross-fitted propensity model and about 35 for the
-cross-fitted imputations of the grid, shared by all DR-type operators), after
-which a DRUP configuration costs about 3\,s (21 minutes for all 384), against
-130--210\,s for training one LightGCN configuration (11 minutes for all four).
-The advantage of DR propagation on KuaiRec thus holds for a larger search, not
-at an equal number of configurations or an equal computing time.
+configurations than the trained models (Table~\ref{tab:configs}), because each
+configuration costs seconds rather than a training run. Table~\ref{tab:budget}
+(Appendix~\ref{app:details}) gives the expected test score of DRUP when its
+configuration is selected from as many random configurations, or as many
+validation evaluations, as the most accurate trained model used. On Coat and
+Yahoo!\,R3 the larger grid does not help DRUP: with the budget of iALS (24
+configurations) it reaches 0.549 on Coat, and with that of r-AdjNorm (72) 0.657
+on Yahoo!\,R3, still below both. On KuaiRec the budget matters in
+configurations and not in evaluations. Counting a trained configuration with
+all its epochs as one, DRUP with the six configurations of DR-JL reaches only
+0.618 against 0.633; counting every validation evaluation, as each epoch of a
+trained model is one, DRUP with the 103 evaluations of DR-JL reaches 0.636.
+On four CPU cores, fitting the nuisances takes about 50 minutes (14 for the
+cross-fitted propensity model and about 35 for the cross-fitted imputations of
+the grid, shared by all DR-type operators), after which a DRUP configuration
+costs about 3\,s (21 minutes for all 384), against 130--210\,s for training one
+LightGCN configuration.
 
-\paragraph{Baselines.} Two changes of the baselines matter. First, pairwise
-training is decisive on Yahoo!\,R3: pointwise MF variants stay near 0.51, below
-popularity, whereas BPR-MF reaches 0.646 and BPR-trained LightGCN 0.669. On
-KuaiRec the ordering reverses: pointwise LightGCN (0.628) and MF (0.623) beat
-their BPR versions (0.609, 0.591). Second, per-split selection of configuration
-and epoch benefits the trained models on the small Coat data, where re-training
-the split-0 selection with other seeds lowers LightGCN from 0.581 to
-$0.547\pm0.018$; on KuaiRec and for the BPR graph models on Yahoo!\,R3 the seed standard
-deviation is below 0.005 (at most 0.010 for the other Yahoo!\,R3 models).
-Across the three datasets, the best trained model is thus a BPR graph model on
-Coat and Yahoo!\,R3 and a pointwise one on KuaiRec, while DR propagation without
-training is the most accurate method on the largest and most complete test set.
+\paragraph{Baselines.} Three observations concern the baselines. First, the loss
+matters more than the architecture, and in opposite directions on the two
+explicit-feedback datasets and KuaiRec: pairwise training is decisive on
+Yahoo!\,R3 (pointwise MF variants stay near 0.51, below popularity, whereas BPR-MF
+reaches 0.646 and BPR-trained LightGCN 0.671), whereas on KuaiRec the pointwise
+models beat their BPR versions (LightGCN 0.627 against 0.609, MF 0.622 against
+0.596). Second, iALS is the strongest trained model on Coat and competitive on
+Yahoo!\,R3, but weak on KuaiRec (0.613), and the jointly learned DR models are
+the strongest trained models on KuaiRec but weak on the two small logs.
+%KR-BASE
+No single trained baseline is strong on all datasets. Third, re-training the
+split-0 selection with other seeds shows how much of a trained model's score
+is seed luck. On Yahoo!\,R3 and for the LightGCN variants on KuaiRec the
+seeds lie within 0.007 of each other; on Coat they spread by up to 0.05 for the
+graph models (r-AdjNorm 0.521--0.566), and on KuaiRec by 0.009 and 0.015 for
+DR-JL and MRDR, which learn their imputation jointly. The margin of DRUP over
+DR-JL and MRDR on KuaiRec (0.004) is therefore smaller than their seed
+variation, and differences on Coat should be read with this in mind; iALS and
+the training-free operators are deterministic given the log.

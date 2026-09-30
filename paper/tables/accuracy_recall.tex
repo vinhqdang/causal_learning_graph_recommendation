@@ -6,16 +6,16 @@
  & Popularity & 0.644 & 0.679 & 0.509 & 0.166\\
  & Imputation only & 0.663 & 0.678 & 0.480 & 0.186\\
 \multicolumn{6}{l}{\emph{Trained, pointwise loss}}\\
- & MF & 0.579 & 0.670 & -- & 0.189\\
+ & MF & 0.579 & 0.670 & 0.469 & 0.189\\
  & IPS-MF & 0.573 & 0.671 & -- & 0.192\\
- & DR-MF & 0.624 & 0.675 & -- & 0.188\\
+ & DR-MF & 0.624 & 0.675 & 0.481 & 0.188\\
  & DR-JL & 0.593 & 0.688 & -- & 0.194\\
  & MRDR & 0.592 & 0.689 & -- & 0.193\\
- & iALS & \textbf{0.681} & 0.790 & -- & 0.183\\
+ & iALS & \textbf{0.681} & 0.790 & 0.531 & 0.183\\
  & LightGCN & 0.638 & 0.731 & 0.494 & 0.193\\
  & DR-LightGCN & 0.671 & 0.704 & -- & 0.190\\
 \multicolumn{6}{l}{\emph{Trained, pairwise or sampled loss}}\\
- & MF (BPR) & 0.622 & 0.778 & -- & 0.178\\
+ & MF (BPR) & 0.622 & 0.778 & 0.531 & 0.178\\
  & PDA & 0.623 & 0.787 & -- & 0.176\\
  & MACR & 0.645 & 0.750 & -- & 0.179\\
  & LightGCN (BPR) & 0.659 & 0.799 & \underline{0.542} & 0.180\\
@@ -26,7 +26,7 @@
  & linear LightGCN / r-AdjNorm & 0.646 & 0.781 & 0.529 & 0.181\\
  & EASE & 0.620 & 0.767 & 0.509 & 0.154\\
  & GF-CF & 0.657 & 0.777 & 0.532 & 0.183\\
- & BSPM & 0.675 & 0.779 & 0.531 & --\\
+ & BSPM & 0.675 & 0.779 & 0.531 & 0.183\\
 \multicolumn{6}{l}{\emph{Training-free, debiased graph}}\\
  & IPS adjacency (NAVIP-style) & 0.645 & 0.783 & -- & 0.185\\
  & IPS + walk correction & 0.645 & 0.783 & -- & 0.185\\
@@ -38,7 +38,7 @@
  & DR adjacency, 5 hops & 0.662 & -- & -- & 0.194\\
  & DRUP, 5 hops & 0.655 & -- & -- & 0.194\\
 \multicolumn{6}{l}{\emph{Training-free, sample split (Assumption 2 holds)}}\\
- & DR adjacency, sample split & 0.663 & 0.743 & -- & 0.193\\
- & DRUP-split & 0.664 & 0.741 & -- & 0.193\\
+ & DR adjacency, sample split & 0.659 & 0.745 & -- & 0.193\\
+ & DRUP-split & 0.658 & 0.744 & -- & 0.193\\
 \bottomrule
 \end{tabular}
