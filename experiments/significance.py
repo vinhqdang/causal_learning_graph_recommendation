@@ -66,7 +66,10 @@ def main():
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
     key = a.key or {"kuairec": "ndcg@20", "kuairand": "ndcg@10"}.get(a.dataset, "ndcg@5")
-    res = load([f"results/v2/filters_{a.dataset}_{a.prop}.json", f"results/v2/learned_{a.dataset}_{a.prop}.json"])
+    # round-3 results (per-split stopping, new baselines) replace round-2 ones;
+    # round-2 trained models are not used, they stopped on all splits jointly
+    res = load([f"results/v2/filters_{a.dataset}_{a.prop}.json", f"results/v3/filters_{a.dataset}_{a.prop}.json",
+                f"results/v3/learned_{a.dataset}_{a.prop}.json"])
     rows = []
     for ref in a.ref:
         if ref not in res:
@@ -112,7 +115,7 @@ def main():
         print(f"{r['ref']:10s} vs {r['other']:12s} n={r['n_users']:5d} diff={r['diff']:+.4f} "
               f"[{r['ci95'][0]:+.4f},{r['ci95'][1]:+.4f}] p={r['p_t']:.2g} holm={r['p_holm']:.2g} "
               f"wilc={r['p_wilcoxon']:.2g} wholm={r['p_wilcoxon_holm']:.2g} nb={r['p_nb_splits']:.2g}")
-    out = a.out or f"results/v2/significance_{a.dataset}_{a.prop}.json"
+    out = a.out or f"results/v3/significance_{a.dataset}_{a.prop}.json"
     with open(out, "w") as f:
         json.dump({"key": key, "rows": rows}, f, indent=1)
 

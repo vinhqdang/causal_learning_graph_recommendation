@@ -103,20 +103,29 @@ def accuracy():
     open(f"{T}/configs.tex", "w").write("\n".join(lines) + "\n")
 
 
-SIG = [("DRUP", "DR", "DR adjacency (effect of the correction)"),
-       ("DRUP-5hop", "DR-5hop", "DR adjacency (effect of the correction), both 5 hops"),
-       ("DRUP", "Obs", "linear LightGCN on the logged graph"),
-       ("DRUP", "Impute", "imputation only"),
-       ("DRUP", "GF-CF", "GF-CF"),
-       ("DRUP", "GF-CF-DR", "GF-CF on DR graph"),
-       ("DRUP", "LightGCN-pt", "LightGCN (pointwise)"), ("DRUP", "LightGCN", "LightGCN (BPR)"), ("DRUP", "r-AdjNorm", "r-AdjNorm"),
-       ("DRUP", "NAVIP", "NAVIP"), ("DRUP", "BPR-MF", "MF (BPR)"),
-       ("DRUP", "PDA", "PDA")]
+SIG = [("DRUP", "DR", "DRUP vs DR adjacency (the correction)"),
+       ("DRUP-5hop", "DR-5hop", "DRUP vs DR adjacency, both 5 hops"),
+       ("DRUP-split", "DR-split", "DRUP-split vs DR adjacency, sample split"),
+       ("DRUP-split", "DRUP", "DRUP-split vs DRUP (cost of the split)"),
+       ("DRUP", "Obs", "DRUP vs linear LightGCN, logged graph"),
+       ("DRUP", "Impute", "DRUP vs imputation only"),
+       ("DRUP", "GF-CF", "DRUP vs GF-CF"),
+       ("DRUP", "BSPM", "DRUP vs BSPM"),
+       ("DRUP", "GF-CF-DR", "DRUP vs GF-CF on DR graph"),
+       ("DRUP", "iALS", "DRUP vs iALS"),
+       ("DRUP", "DR-JL", "DRUP vs DR-JL"),
+       ("DRUP", "LightGCN-pt", "DRUP vs LightGCN (pointwise)"), ("DRUP", "LightGCN", "DRUP vs LightGCN (BPR)"),
+       ("DRUP", "r-AdjNorm", "DRUP vs r-AdjNorm"), ("DRUP", "NAVIP", "DRUP vs NAVIP"),
+       ("DRUP", "SimGCL", "DRUP vs SimGCL"),
+       ("DRUP-split", "iALS", "DRUP-split vs iALS"),
+       ("DRUP-split", "DR-JL", "DRUP-split vs DR-JL"),
+       ("DRUP-split", "LightGCN-pt", "DRUP-split vs LightGCN (pointwise)"),
+       ("DRUP-split", "r-AdjNorm", "DRUP-split vs r-AdjNorm")]
 
 
 def significance():
     lines = ["\\begin{tabular}{l" + "cc" * len(DS) + "}", "\\toprule",
-             "DRUP against & " + " & ".join(f"\\multicolumn{{2}}{{c}}{{{nm}}}" for _, _, _, nm in DS) + "\\\\",
+             "Comparison & " + " & ".join(f"\\multicolumn{{2}}{{c}}{{{nm}}}" for _, _, _, nm in DS) + "\\\\",
              " & " + " & ".join("$\\Delta$ [95\\% CI] & $p_{\\mathrm{Holm}}$" for _ in DS) + "\\\\", "\\midrule"]
     tabs = {}
     for ds, prop, _, _ in DS:
