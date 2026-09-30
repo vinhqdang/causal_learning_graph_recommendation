@@ -19,7 +19,7 @@ kuB) OMP_NUM_THREADS=2 python3 experiments/run_learned.py $KU --threads 2 \
 yaA) OMP_NUM_THREADS=1 python3 experiments/run_learned.py $YA --threads 1 --lrs 1e-2 3e-3 1e-3 --wds 1e-5 1e-4 \
       --methods r-AdjNorm --wide r-AdjNorm --out results/v3/learned_yahoo_pop_A.json ;;
 yaB) OMP_NUM_THREADS=1 python3 experiments/run_learned.py $YA --threads 1 --lrs 1e-2 3e-3 1e-3 --wds 1e-5 1e-4 \
-      --methods LightGCN SimGCL --wide LightGCN SimGCL --out results/v3/learned_yahoo_pop_B.json ;;
+      --methods LightGCN SimGCL --wide LightGCN --out results/v3/learned_yahoo_pop_B.json ;;
 yaC) OMP_NUM_THREADS=1 python3 experiments/run_learned.py $YA --threads 1 --lrs 1e-2 3e-3 1e-3 --wds 1e-5 1e-4 \
       --methods NAVIP LightGCN-pt DR-LightGCN --wide NAVIP --out results/v3/learned_yahoo_pop_C.json ;;
 yaD) OMP_NUM_THREADS=1 python3 experiments/run_learned.py $YA --threads 1 --lrs 1e-2 3e-3 1e-3 --wds 1e-5 1e-4 1e-3 \

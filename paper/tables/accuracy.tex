@@ -1,37 +1,44 @@
-\begin{tabular}{llccc}
+\begin{tabular}{llcccc}
 \toprule
- & Method & Coat nDCG@5 & Yahoo!\,R3 nDCG@5 & KuaiRec nDCG@20\\
+ & Method & Coat nDCG@5 & Yahoo!\,R3 nDCG@5 & KuaiRand nDCG@10 & KuaiRec nDCG@20\\
 \midrule
-\multicolumn{5}{l}{\emph{Non-personalised}}\\
- & Popularity & -- & 0.5331$\pm$0.0059 & -- & 0.5766$\pm$0.0023\\
- & Imputation only & -- & 0.5162$\pm$0.0044 & -- & 0.6194$\pm$0.0018\\
-\multicolumn{5}{l}{\emph{Trained, pointwise loss}}\\
- & MF & 0.4766$\pm$0.0166 & 0.5076$\pm$0.0060 & -- & 0.6227$\pm$0.0029\\
- & IPS-MF & 0.4691$\pm$0.0163 & 0.5098$\pm$0.0048 & -- & 0.6258$\pm$0.0025\\
- & DR-MF & 0.5259$\pm$0.0132 & 0.5116$\pm$0.0020 & -- & 0.6191$\pm$0.0020\\
- & LightGCN & 0.5261$\pm$0.0123 & 0.5935$\pm$0.0059 & -- & 0.6277$\pm$0.0027\\
- & DR-LightGCN & 0.5500$\pm$0.0168 & 0.5440$\pm$0.0029 & -- & 0.6246$\pm$0.0016\\
-\multicolumn{5}{l}{\emph{Trained, pairwise loss (BPR)}}\\
- & MF & 0.5133$\pm$0.0211 & 0.6460$\pm$0.0041 & -- & 0.5913$\pm$0.0028\\
- & PDA & 0.5198$\pm$0.0160 & 0.6516$\pm$0.0052 & -- & 0.5822$\pm$0.0020\\
- & LightGCN & \underline{0.5703$\pm$0.0141} & 0.6693$\pm$0.0045 & -- & 0.6086$\pm$0.0028\\
- & r-AdjNorm & \textbf{0.5746$\pm$0.0132} & \textbf{0.6713$\pm$0.0050} & -- & 0.6086$\pm$0.0031\\
- & NAVIP & 0.5665$\pm$0.0133 & \underline{0.6694$\pm$0.0059} & -- & 0.6183$\pm$0.0024\\
-\multicolumn{5}{l}{\emph{Training-free, logged graph}}\\
- & linear LightGCN / r-AdjNorm & -- & 0.6585$\pm$0.0058 & -- & 0.6036$\pm$0.0028\\
- & EASE & -- & 0.6478$\pm$0.0061 & -- & 0.5213$\pm$0.0032\\
- & GF-CF & -- & 0.6569$\pm$0.0051 & -- & 0.6141$\pm$0.0025\\
-\multicolumn{5}{l}{\emph{Training-free, debiased graph}}\\
- & IPS adjacency (NAVIP-style) & -- & 0.6567$\pm$0.0063 & -- & 0.6132$\pm$0.0030\\
- & IPS + walk correction & -- & 0.6567$\pm$0.0063 & -- & 0.6132$\pm$0.0030\\
- & EASE on DR graph & -- & 0.6072$\pm$0.0033 & -- & 0.6026$\pm$0.0022\\
- & GF-CF on DR graph & -- & 0.6313$\pm$0.0051 & -- & 0.6371$\pm$0.0021\\
- & DR adjacency & -- & 0.6567$\pm$0.0063 & -- & \underline{0.6378$\pm$0.0020}\\
- & DRUP & -- & 0.6567$\pm$0.0063 & -- & 0.6378$\pm$0.0019\\
+\multicolumn{6}{l}{\emph{Non-personalised}}\\
+ & Popularity & 0.5367$\pm$0.0095 & 0.5331$\pm$0.0059 & -- & 0.5766$\pm$0.0023\\
+ & Imputation only & 0.5532$\pm$0.0097 & 0.5162$\pm$0.0044 & -- & 0.6194$\pm$0.0018\\
+\multicolumn{6}{l}{\emph{Trained, pointwise loss}}\\
+ & MF & 0.4780$\pm$0.0168 & 0.5076$\pm$0.0060 & -- & 0.6227$\pm$0.0029\\
+ & IPS-MF & 0.4713$\pm$0.0160 & 0.5098$\pm$0.0048 & -- & 0.6258$\pm$0.0025\\
+ & DR-MF & 0.5237$\pm$0.0111 & 0.5116$\pm$0.0020 & -- & 0.6191$\pm$0.0020\\
+ & DR-JL & 0.4811$\pm$0.0164 & -- & -- & --\\
+ & MRDR & 0.4869$\pm$0.0187 & -- & -- & --\\
+ & iALS & \textbf{0.5812$\pm$0.0101} & -- & -- & --\\
+ & LightGCN & 0.5389$\pm$0.0107 & 0.5935$\pm$0.0059 & -- & 0.6277$\pm$0.0027\\
+ & DR-LightGCN & 0.5724$\pm$0.0205 & 0.5440$\pm$0.0029 & -- & 0.6246$\pm$0.0016\\
+\multicolumn{6}{l}{\emph{Trained, pairwise or sampled loss}}\\
+ & MF (BPR) & 0.5174$\pm$0.0206 & 0.6460$\pm$0.0041 & -- & 0.5913$\pm$0.0028\\
+ & PDA & 0.5181$\pm$0.0138 & 0.6516$\pm$0.0052 & -- & 0.5822$\pm$0.0020\\
+ & MACR & 0.5418$\pm$0.0134 & -- & -- & --\\
+ & LightGCN (BPR) & 0.5683$\pm$0.0132 & 0.6693$\pm$0.0045 & -- & 0.6086$\pm$0.0028\\
+ & r-AdjNorm & 0.5722$\pm$0.0134 & \textbf{0.6713$\pm$0.0050} & -- & 0.6086$\pm$0.0031\\
+ & NAVIP & 0.5664$\pm$0.0163 & \underline{0.6694$\pm$0.0059} & -- & 0.6183$\pm$0.0024\\
+ & SimGCL & 0.5528$\pm$0.0141 & -- & -- & --\\
+\multicolumn{6}{l}{\emph{Training-free, logged graph}}\\
+ & linear LightGCN / r-AdjNorm & 0.5571$\pm$0.0100 & 0.6585$\pm$0.0058 & -- & 0.6036$\pm$0.0028\\
+ & EASE & 0.5401$\pm$0.0138 & 0.6478$\pm$0.0061 & -- & 0.5213$\pm$0.0032\\
+ & GF-CF & 0.5513$\pm$0.0123 & 0.6552$\pm$0.0039 & -- & 0.6141$\pm$0.0025\\
+ & BSPM & \underline{0.5727$\pm$0.0090} & 0.6507$\pm$0.0047 & -- & --\\
+\multicolumn{6}{l}{\emph{Training-free, debiased graph}}\\
+ & IPS adjacency (NAVIP-style) & 0.5510$\pm$0.0224 & 0.6567$\pm$0.0063 & -- & 0.6132$\pm$0.0030\\
+ & IPS + walk correction & 0.5510$\pm$0.0224 & 0.6567$\pm$0.0063 & -- & 0.6132$\pm$0.0030\\
+ & EASE on DR graph & 0.5564$\pm$0.0141 & 0.6072$\pm$0.0033 & -- & 0.6026$\pm$0.0022\\
+ & GF-CF on DR graph & 0.5608$\pm$0.0083 & 0.6312$\pm$0.0051 & -- & 0.6371$\pm$0.0021\\
+ & BSPM on DR graph & 0.5624$\pm$0.0112 & 0.6262$\pm$0.0071 & -- & --\\
+ & DR adjacency & 0.5459$\pm$0.0244 & 0.6567$\pm$0.0063 & -- & \underline{0.6378$\pm$0.0020}\\
+ & DRUP & 0.5467$\pm$0.0235 & 0.6567$\pm$0.0063 & -- & 0.6378$\pm$0.0019\\
  & DR adjacency, 5 hops & 0.5524$\pm$0.0245 & -- & -- & \textbf{0.6379$\pm$0.0011}\\
  & DRUP, 5 hops & 0.5451$\pm$0.0204 & -- & -- & 0.6376$\pm$0.0011\\
-\multicolumn{5}{l}{\emph{Training-free, sample split (Assumption 2 holds)}}\\
- & DR adjacency, sample split & -- & 0.5934$\pm$0.0063 & -- & 0.6338$\pm$0.0013\\
- & DRUP-split & -- & 0.5925$\pm$0.0051 & -- & 0.6337$\pm$0.0013\\
+\multicolumn{6}{l}{\emph{Training-free, sample split (Assumption 2 holds)}}\\
+ & DR adjacency, sample split & 0.5604$\pm$0.0132 & 0.5934$\pm$0.0063 & -- & 0.6338$\pm$0.0013\\
+ & DRUP-split & 0.5578$\pm$0.0144 & 0.5925$\pm$0.0051 & -- & 0.6337$\pm$0.0013\\
 \bottomrule
 \end{tabular}

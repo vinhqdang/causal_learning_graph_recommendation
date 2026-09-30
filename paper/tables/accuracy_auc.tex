@@ -1,0 +1,44 @@
+\begin{tabular}{llcccc}
+\toprule
+ & Method & Coat AUC & Yahoo!\,R3 AUC & KuaiRand AUC & KuaiRec AUC\\
+\midrule
+\multicolumn{6}{l}{\emph{Non-personalised}}\\
+ & Popularity & 0.644 & 0.655 & -- & --\\
+ & Imputation only & 0.654 & 0.652 & -- & --\\
+\multicolumn{6}{l}{\emph{Trained, pointwise loss}}\\
+ & MF & 0.575 & -- & -- & --\\
+ & IPS-MF & 0.570 & -- & -- & --\\
+ & DR-MF & 0.620 & -- & -- & --\\
+ & DR-JL & 0.584 & -- & -- & --\\
+ & MRDR & 0.589 & -- & -- & --\\
+ & iALS & \textbf{0.667} & -- & -- & --\\
+ & LightGCN & 0.632 & -- & -- & --\\
+ & DR-LightGCN & 0.658 & -- & -- & --\\
+\multicolumn{6}{l}{\emph{Trained, pairwise or sampled loss}}\\
+ & MF (BPR) & 0.614 & -- & -- & --\\
+ & PDA & 0.612 & -- & -- & --\\
+ & MACR & 0.639 & -- & -- & --\\
+ & LightGCN (BPR) & 0.657 & -- & -- & --\\
+ & r-AdjNorm & 0.658 & -- & -- & --\\
+ & NAVIP & 0.653 & -- & -- & --\\
+ & SimGCL & 0.646 & -- & -- & --\\
+\multicolumn{6}{l}{\emph{Training-free, logged graph}}\\
+ & linear LightGCN / r-AdjNorm & 0.648 & \textbf{0.759} & -- & --\\
+ & EASE & 0.614 & 0.745 & -- & --\\
+ & GF-CF & 0.638 & 0.756 & -- & --\\
+ & BSPM & 0.665 & 0.756 & -- & --\\
+\multicolumn{6}{l}{\emph{Training-free, debiased graph}}\\
+ & IPS adjacency (NAVIP-style) & 0.641 & \underline{0.756} & -- & --\\
+ & IPS + walk correction & 0.641 & \underline{0.756} & -- & --\\
+ & EASE on DR graph & 0.663 & 0.702 & -- & --\\
+ & GF-CF on DR graph & 0.664 & 0.739 & -- & --\\
+ & BSPM on DR graph & \underline{0.666} & 0.737 & -- & --\\
+ & DR adjacency & 0.652 & \underline{0.756} & -- & --\\
+ & DRUP & 0.653 & \underline{0.756} & -- & --\\
+ & DR adjacency, 5 hops & 0.655 & -- & -- & --\\
+ & DRUP, 5 hops & 0.649 & -- & -- & --\\
+\multicolumn{6}{l}{\emph{Training-free, sample split (Assumption 2 holds)}}\\
+ & DR adjacency, sample split & 0.659 & 0.708 & -- & --\\
+ & DRUP-split & 0.658 & 0.708 & -- & --\\
+\bottomrule
+\end{tabular}

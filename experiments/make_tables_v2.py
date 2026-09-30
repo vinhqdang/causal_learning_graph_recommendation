@@ -36,14 +36,17 @@ def fmt(x, d=4):
 
 ROWS = [
     ("Non-personalised", [("Pop", "Popularity"), ("Impute", "Imputation only")]),
-    ("Trained, pointwise loss", [("MF", "MF"), ("IPS-MF", "IPS-MF"), ("DR-MF", "DR-MF"),
-                                 ("LightGCN-pt", "LightGCN"), ("DR-LightGCN", "DR-LightGCN")]),
-    ("Trained, pairwise loss (BPR)", [("BPR-MF", "MF"), ("PDA", "PDA"), ("LightGCN", "LightGCN"),
-                                      ("r-AdjNorm", "r-AdjNorm"), ("NAVIP", "NAVIP")]),
+    ("Trained, pointwise loss", [("MF", "MF"), ("IPS-MF", "IPS-MF"), ("DR-MF", "DR-MF"), ("DR-JL", "DR-JL"),
+                                 ("MRDR", "MRDR"), ("iALS", "iALS"), ("LightGCN-pt", "LightGCN"),
+                                 ("DR-LightGCN", "DR-LightGCN")]),
+    ("Trained, pairwise or sampled loss", [("BPR-MF", "MF (BPR)"), ("PDA", "PDA"), ("MACR", "MACR"),
+                                           ("LightGCN", "LightGCN (BPR)"), ("r-AdjNorm", "r-AdjNorm"),
+                                           ("NAVIP", "NAVIP"), ("SimGCL", "SimGCL")]),
     ("Training-free, logged graph", [("Obs", "linear LightGCN / r-AdjNorm"), ("EASE", "EASE"),
-                                     ("GF-CF", "GF-CF")]),
+                                     ("GF-CF", "GF-CF"), ("BSPM", "BSPM")]),
     ("Training-free, debiased graph", [("IPS", "IPS adjacency (NAVIP-style)"), ("IPS+WC", "IPS + walk correction"),
                                        ("EASE-DR", "EASE on DR graph"), ("GF-CF-DR", "GF-CF on DR graph"),
+                                       ("BSPM-DR", "BSPM on DR graph"),
                                        ("DR", "DR adjacency"), ("DRUP", "DRUP"),
                                        ("DR-5hop", "DR adjacency, 5 hops"), ("DRUP-5hop", "DRUP, 5 hops")]),
     ("Training-free, sample split (Assumption 2 holds)", [("DR-split", "DR adjacency, sample split"),
@@ -53,38 +56,48 @@ ROWS = [
 
 def accuracy():
     res = {ds: results(ds, prop) for ds, prop, _, _ in DS}
-    best = {}
-    for ds, prop, key, _ in DS:
-        vals = sorted([r["test"][key][0] for r in res[ds].values() if key in r["test"]], reverse=True)
-        best[ds] = vals[:2] if vals else []
-    lines = ["\\begin{tabular}{llccc}", "\\toprule",
-             " & Method & Coat nDCG@5 & Yahoo!\\,R3 nDCG@5 & KuaiRec nDCG@20\\\\", "\\midrule"]
-    for group, rows in ROWS:
-        lines.append(f"\\multicolumn{{5}}{{l}}{{\\emph{{{group}}}}}\\\\")
-        for mth, label in rows:
-            cells = []
-            for ds, prop, key, _ in DS:
-                r = res[ds].get(mth)
-                if r is None or key not in r["test"]:
-                    cells.append("--")
-                    continue
-                m, s = r["test"][key]
-                c = f"{m:.4f}$\\pm${s:.4f}"
-                if best[ds] and abs(m - best[ds][0]) < 1e-12:
-                    c = "\\textbf{" + c + "}"
-                elif len(best[ds]) > 1 and abs(m - best[ds][1]) < 1e-12:
-                    c = "\\underline{" + c + "}"
-                cells.append(c)
-            lines.append(f" & {label} & " + " & ".join(cells) + "\\\\")
-    lines += ["\\bottomrule", "\\end{tabular}"]
-    open(f"{T}/accuracy.tex", "w").write("\n".join(lines) + "\n")
+    nd = len(DS)
+
+    def table(metric_of, fname, header, digits=4, std=True):
+        best = {}
+        for ds, prop, key, _ in DS:
+            k = metric_of(key)
+            vals = sorted([r["test"][k][0] for r in res[ds].values() if k in r["test"]], reverse=True)
+            best[ds] = vals[:2]
+        lines = ["\\begin{tabular}{ll" + "c" * nd + "}", "\\toprule",
+                 " & Method & " + " & ".join(header(nm, key) for _, _, key, nm in DS) + "\\\\", "\\midrule"]
+        for group, rows in ROWS:
+            lines.append(f"\\multicolumn{{{nd + 2}}}{{l}}{{\\emph{{{group}}}}}\\\\")
+            for mth, label in rows:
+                cells = []
+                for ds, prop, key, _ in DS:
+                    r = res[ds].get(mth)
+                    k = metric_of(key)
+                    if r is None or k not in r["test"]:
+                        cells.append("--")
+                        continue
+                    m, sd = r["test"][k]
+                    c = f"{m:.{digits}f}$\\pm${sd:.{digits}f}" if std else f"{m:.{digits}f}"
+                    if best[ds] and abs(m - best[ds][0]) < 1e-12:
+                        c = "\\textbf{" + c + "}"
+                    elif len(best[ds]) > 1 and abs(m - best[ds][1]) < 1e-12:
+                        c = "\\underline{" + c + "}"
+                    cells.append(c)
+                lines.append(f" & {label} & " + " & ".join(cells) + "\\\\")
+        lines += ["\\bottomrule", "\\end{tabular}"]
+        open(f"{T}/{fname}", "w").write("\n".join(lines) + "\n")
+    table(lambda key: key, "accuracy.tex", lambda nm, key: f"{nm} {key.replace('ndcg', 'nDCG')}")
+    table(lambda key: "auc", "accuracy_auc.tex", lambda nm, key: f"{nm} AUC", digits=3, std=False)
+    table(lambda key: key.replace("ndcg", "recall"), "accuracy_recall.tex",
+          lambda nm, key: f"{nm} {key.replace('ndcg', 'Recall')}", digits=3, std=False)
     # configuration counts
-    lines = ["\\begin{tabular}{lccc}", "\\toprule", "Method & Coat & Yahoo!\\,R3 & KuaiRec\\\\", "\\midrule"]
+    lines = ["\\begin{tabular}{l" + "c" * nd + "}", "\\toprule",
+             "Method & " + " & ".join(nm for _, _, _, nm in DS) + "\\\\", "\\midrule"]
+    short = {"Trained, pointwise loss": "trained, pointwise", "Trained, pairwise or sampled loss": "trained, pairwise",
+             "Training-free, sample split (Assumption 2 holds)": "training-free"}
     for group, rows in ROWS:
         for mth, label in rows:
             cells = [str(res[ds].get(mth, {}).get("n_configs", "--")) for ds, _, _, _ in DS]
-            short = {"Trained, pointwise loss": "trained, pointwise", "Trained, pairwise loss (BPR)": "trained, BPR",
-                     "Training-free, sample split (Assumption 2 holds)": "training-free"}
             lines.append(f"{label} ({short.get(group, group.split(',')[0].lower())}) & " + " & ".join(cells) + "\\\\")
     lines += ["\\bottomrule", "\\end{tabular}"]
     open(f"{T}/configs.tex", "w").write("\n".join(lines) + "\n")
@@ -475,6 +488,37 @@ def semisynth():
     semisynth_table("semisynth_kuairec_dense.json", "semisynth_est.tex", props=("est",))
     semisynth_table("semisynth_kuairec_sparse.json", "semisynth_sparse.tex", props=("true", "est"))
 
+def intervene_extra():
+    """Audit controls: popularity, imputation only, DRUP-split, and the negative
+    control in which the auditor's propensities are not updated."""
+    rows = [("Pop/refit", "popularity (re-fitted)"), ("Impute/refit_known", "imputation only (re-fitted)"),
+            ("IPS/misspecified", "IPS adjacency, propensities not updated"),
+            ("DR/misspecified", "DR adjacency, propensities not updated"),
+            ("DRUP/misspecified", "DRUP, propensities not updated"),
+            ("DRUP-split/frozen", "DRUP-split, $\\hat Y$ and $C$ frozen"),
+            ("DRUP-split/refit_known", "DRUP-split, re-fitted (known change)"),
+            ("DRUP-split/refit_estimated", "DRUP-split, re-fitted (estimated)")]
+    dss = [(ds, prop, nm) for ds, prop, _, nm in DS]
+    js = {ds: load(f"fat_{ds}_{prop}_v3.json") for ds, prop, _ in dss}
+    js = {k: v for k, v in js.items() if v and "intervene_extra" in v}
+    if not js:
+        return
+    cols = [(ds, nm) for ds, _, nm in dss if ds in js]
+    lines = ["\\begin{tabular}{l" + "c" * len(cols) + "}", "\\toprule",
+             "$\\eta$ & " + " & ".join(nm for _, nm in cols) + "\\\\", "\\midrule"]
+    for key, lab in rows:
+        cells = []
+        for ds, _ in cols:
+            x = js[ds]["intervene_extra"]["results"].get(key)
+            cells.append(f"{x['eta']['mean']:+.3f}" if x and "eta" in x else "--")
+        lines.append(f"{lab} & " + " & ".join(cells) + "\\\\")
+    lines.append("\\midrule")
+    for nm, lab in (("Obs", "logged graph"), ("DR", "DR adjacency"), ("DRUP", "DRUP"), ("DRUP-split", "DRUP-split")):
+        cells = [f"{js[ds]['intervene_extra']['spearman_with_imputation'].get(nm, float('nan')):.2f}" for ds, _ in cols]
+        lines.append(f"rank corr.\\ with $\\hat Y$: {lab} & " + " & ".join(cells) + "\\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    open(f"{T}/intervene_extra.tex", "w").write("\n".join(lines) + "\n")
+
 
 BUDGET_TRAINED = ["LightGCN-pt", "LightGCN", "r-AdjNorm", "NAVIP", "DR-LightGCN", "PDA", "BPR-MF", "DR-MF"]
 
@@ -506,7 +550,7 @@ NAMES = {"LightGCN-pt": "LightGCN, pointwise", "LightGCN": "LightGCN, BPR", "r-A
 
 
 if __name__ == "__main__":
-    for f in (accuracy, significance, mc, fat, tau, rerank, frontier, explain_attack_privacy, sparse, protocol, budget, semisynth):
+    for f in (accuracy, significance, mc, fat, tau, rerank, frontier, explain_attack_privacy, sparse, protocol, budget, semisynth, intervene_extra):
         try:
             f()
         except Exception as e:           # a missing result should not block the others

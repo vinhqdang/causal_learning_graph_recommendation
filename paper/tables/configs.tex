@@ -1,31 +1,38 @@
-\begin{tabular}{lccc}
+\begin{tabular}{lcccc}
 \toprule
-Method & Coat & Yahoo!\,R3 & KuaiRec\\
+Method & Coat & Yahoo!\,R3 & KuaiRand & KuaiRec\\
 \midrule
-Popularity (non-personalised) & -- & 1 & -- & 1\\
-Imputation only (non-personalised) & -- & 2 & -- & 4\\
+Popularity (non-personalised) & 1 & 1 & -- & 1\\
+Imputation only (non-personalised) & 6 & 2 & -- & 4\\
 MF (trained, pointwise) & 18 & 9 & -- & 4\\
 IPS-MF (trained, pointwise) & 18 & 9 & -- & 4\\
 DR-MF (trained, pointwise) & 18 & 9 & -- & 4\\
-LightGCN (trained, pointwise) & 18 & 9 & -- & 4\\
-DR-LightGCN (trained, pointwise) & 18 & 9 & -- & 4\\
-MF (trained, BPR) & 18 & 9 & -- & 4\\
-PDA (trained, BPR) & 36 & 18 & -- & 8\\
-LightGCN (trained, BPR) & 18 & 9 & -- & 4\\
-r-AdjNorm (trained, BPR) & 36 & 18 & -- & 8\\
-NAVIP (trained, BPR) & 18 & 9 & -- & 4\\
-linear LightGCN / r-AdjNorm (training-free) & -- & 16 & -- & 16\\
-EASE (training-free) & -- & 3 & -- & 3\\
-GF-CF (training-free) & -- & 4 & -- & 4\\
-IPS adjacency (NAVIP-style) (training-free) & -- & 64 & -- & 192\\
-IPS + walk correction (training-free) & -- & 64 & -- & 192\\
-EASE on DR graph (training-free) & -- & 48 & -- & 36\\
-GF-CF on DR graph (training-free) & -- & 64 & -- & 48\\
-DR adjacency (training-free) & -- & 512 & -- & 384\\
-DRUP (training-free) & -- & 512 & -- & 384\\
+DR-JL (trained, pointwise) & 18 & -- & -- & --\\
+MRDR (trained, pointwise) & 18 & -- & -- & --\\
+iALS (trained, pointwise) & 24 & -- & -- & --\\
+LightGCN (trained, pointwise) & 54 & 9 & -- & 4\\
+DR-LightGCN (trained, pointwise) & 54 & 9 & -- & 4\\
+MF (BPR) (trained, pairwise) & 18 & 9 & -- & 4\\
+PDA (trained, pairwise) & 36 & 18 & -- & 8\\
+MACR (trained, pairwise) & 36 & -- & -- & --\\
+LightGCN (BPR) (trained, pairwise) & 54 & 9 & -- & 4\\
+r-AdjNorm (trained, pairwise) & 108 & 18 & -- & 8\\
+NAVIP (trained, pairwise) & 54 & 9 & -- & 4\\
+SimGCL (trained, pairwise) & 108 & -- & -- & --\\
+linear LightGCN / r-AdjNorm (training-free) & 24 & 16 & -- & 16\\
+EASE (training-free) & 3 & 3 & -- & 3\\
+GF-CF (training-free) & 4 & 4 & -- & 4\\
+BSPM (training-free) & 12 & 12 & -- & --\\
+IPS adjacency (NAVIP-style) (training-free) & 720 & 64 & -- & 192\\
+IPS + walk correction (training-free) & 720 & 64 & -- & 192\\
+EASE on DR graph (training-free) & 90 & 48 & -- & 36\\
+GF-CF on DR graph (training-free) & 120 & 64 & -- & 48\\
+BSPM on DR graph (training-free) & 360 & 192 & -- & --\\
+DR adjacency (training-free) & 1440 & 512 & -- & 384\\
+DRUP (training-free) & 1440 & 512 & -- & 384\\
 DR adjacency, 5 hops (training-free) & 6300 & -- & -- & 420\\
 DRUP, 5 hops (training-free) & 6300 & -- & -- & 420\\
-DR adjacency, sample split (training-free) & -- & 256 & -- & 192\\
-DRUP-split (training-free) & -- & 256 & -- & 192\\
+DR adjacency, sample split (training-free) & 720 & 256 & -- & 192\\
+DRUP-split (training-free) & 720 & 256 & -- & 192\\
 \bottomrule
 \end{tabular}
