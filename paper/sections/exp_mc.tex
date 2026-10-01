@@ -71,7 +71,15 @@ experiments this advantage disappears: the corrected operator is biased by
 particular the degree weights, depend on the exposures of the walk edges, and
 this dependence partly offsets the repeated-walk excess of the uncorrected
 operator. The dependence bias shrinks as users have more exposures (from 0.80
-at 11 to 0.18 at 60 per user) but does not vanish. Degrees from edge estimates
+at 11 to 0.18 at 60 per user) but does not vanish. A control that fixes the degree
+weights a priori (Table~\ref{tab:protocolfixed} in the Supplementary Material)
+isolates the cause: with fixed weights, cross-fitting the propensity and the imputation
+alone preserves the correction (IPS with the correction 0.05 against 1.10 uncorrected;
+DRUP 0.05 against 0.89), whereas degrees taken from the cross-fitted $\hat Y$ or from
+the edge estimates destroy it (0.64--0.80 and 0.74--0.82). The failure of the main protocol is thus
+due to log-dependent degree weights, not to cross-fitting as such; fitting the
+nuisances in sample, without cross-fitting, breaks the correction even with fixed
+weights for DR edges (0.23). Degrees from edge estimates
 make the uncorrected operators much worse at low exposure (up to 4.1). The sample split
 restores the guarantee: relative to the target of
 Theorem~\ref{thm:unbiased} with $\hat Y$ on the imputed pairs, the bias of

@@ -216,6 +216,11 @@ def score_bank(d, method, cfg, nz, rows):
         c1 = gmean((C * Yd)[rows])
         c3 = gmean(three_hop(Yd, C, rows=rows, correct=correct))
         parts = [s1 / c1, s3 / c3]
+    elif method == "ImputeProp":
+        # control: propagation over the imputation alone (every edge is Yhat, no residual)
+        Yd = nz.imputation(cfg["floor"], dict(cfg, imp=cfg.get("imp", "add")))
+        C = degree_weights(Yd, cfg["alpha"], D=Yd)
+        parts = propagate(Yd, C, False, rows)
     else:
         P = clip_propensity(nz.P, cfg["floor"])
         Yd = nz.imputation(cfg["floor"], dict(cfg, imp=cfg.get("imp", "add")))

@@ -92,3 +92,14 @@ propensities below the clip $\tau=0.01$), true and estimated propensities
 \input{tables/accuracy_recall.tex}
 \end{adjustbox}
 \end{table}
+
+\begin{table}[t]\centering\small
+\caption{Which nuisance breaks the correction under cross-fitting. Relative absolute bias of the three-hop term
+(40 users, 60 items, true propensities, 1{,}500 replications) with the degree weights $C$ fixed a priori
+(degrees of $Y$), taken from the imputation $\hat Y$, or from the edge estimates $W$; nuisances from an
+independent log, cross-fitted, fitted in sample, or from the 20\% sample split. Compare IPS and DR with
+and without the walk correction.}\label{tab:protocolfixed}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/protocol_fixed.tex}
+\end{adjustbox}
+\end{table}

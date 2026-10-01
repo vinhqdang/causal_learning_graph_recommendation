@@ -180,6 +180,63 @@ def significance():
     open(f"{T}/significance.tex", "w").write("\n".join(lines) + "\n")
 
 
+NBT = [("DRUP", "DR", "DRUP vs DR adjacency"), ("DRUP-5hop", "DR-5hop", "DRUP vs DR adjacency, 5 hops"),
+       ("DRUP-split", "DR-split", "DRUP-split vs DR-split"), ("DRUP", "GF-CF-DR", "DRUP vs GF-CF on DR graph"),
+       ("DRUP-split", "DRUP", "DRUP-split vs DRUP"), ("DRUP", "DR-JL", "DRUP vs DR-JL"),
+       ("DRUP", "LightGCN-pt", "DRUP vs LightGCN (pointwise)"), ("DRUP", "iALS", "DRUP vs iALS"),
+       ("DRUP", "r-AdjNorm", "DRUP vs r-AdjNorm")]
+
+
+def nbtost():
+    """Key comparisons under three tests: user-level t-test (Holm over the dataset), Nadeau-Bengio
+    corrected resampled t-test over split means, and equivalence (TOST, margin 0.005 nDCG)."""
+    def f(p):
+        return "$<10^{-3}$" if p < 1e-3 else f"{p:.3f}"
+    lines = ["\\begin{tabular}{l" + "c" * len(DS) + "}", "\\toprule",
+             "Comparison ($\\Delta$; $p_{\\mathrm{Holm}}$ / $p_{\\mathrm{NB}}$ / $p_{\\mathrm{TOST}}$) & " + " & ".join(nm for _, _, _, nm in DS) + "\\\\", "\\midrule"]
+    tabs = {}
+    for ds, prop, _, _ in DS:
+        j = load(f"significance_{ds}_{prop}.json")
+        tabs[ds] = {(r["ref"], r["other"]): r for r in j["rows"]} if j else {}
+    for ref, other, label in NBT:
+        cells = []
+        for ds, _, _, _ in DS:
+            r = tabs[ds].get((ref, other))
+            cells.append("--" if r is None or "tost_p" not in r else
+                         f"{r['diff']:+.4f}; {f(r['p_holm'])} / {f(r['p_nb_splits'])} / {f(r['tost_p'])}")
+        lines.append(f"{label} & " + " & ".join(cells) + "\\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    open(f"{T}/nbtost.tex", "w").write("\n".join(lines) + "\n")
+
+
+def protocol_fixed():
+    """Which nuisance breaks Theorem 1 under cross-fitting: degree weights C fixed a priori
+    (target degrees) vs from the imputation vs from the cross-fitted edge estimates."""
+    j = load("mc_protocol_fixedC.json")
+    if not j:
+        return
+    r = j["results"]
+    src_nm = {"indep": "independent log", "xfit": "cross-fitted", "insample": "in-sample", "split20": "sample split 20\\%"}
+    deg_nm = {"Yfix": "fixed a priori", "Yhat": "from $\\hat Y$", "Wx": "from $W$"}
+    lines = ["\\begin{tabular}{llcccc}", "\\toprule",
+             "Nuisances & Degree weights $C$ & IPS, uncorrected & IPS+WC & DR, uncorrected & DRUP\\\\", "\\midrule"]
+    for src in src_nm:
+        first = True
+        for deg in deg_nm:
+            keys = [f"{src}/true/{deg}/{e}" for e in ("IPS", "DR")]
+            if keys[0] not in r:
+                continue
+            c = lambda k, f: r[k][f]
+            lines.append(f"{src_nm[src] if first else ''} & {deg_nm[deg]} & {c(keys[0], 'rel_bias_T_uncorrected'):.2f} & "
+                         f"{c(keys[0], 'rel_bias_T_corrected'):.2f} & {c(keys[1], 'rel_bias_T_uncorrected'):.2f} & "
+                         f"{c(keys[1], 'rel_bias_T_corrected'):.2f}\\\\")
+            first = False
+        lines.append("\\midrule")
+    lines[-1] = "\\bottomrule"
+    lines.append("\\end{tabular}")
+    open(f"{T}/protocol_fixed.tex", "w").write("\n".join(lines) + "\n")
+
+
 def mc():
     k3, k5 = load("mc_stress_K3_p1.0.json"), load("mc_stress_K5_p1.0.json")
     el = json.load(open("results/mc_elasticity.json")) if os.path.exists("results/mc_elasticity.json") else None
@@ -604,7 +661,7 @@ NAMES = {"LightGCN-pt": "LightGCN, pointwise", "LightGCN": "LightGCN, BPR", "r-A
 
 
 if __name__ == "__main__":
-    for f in (accuracy, significance, mc, fat, tau, rerank, frontier, explain_attack_privacy, sparse, protocol, budget, semisynth, intervene_extra):
+    for f in (accuracy, significance, mc, fat, tau, rerank, frontier, explain_attack_privacy, sparse, protocol, budget, semisynth, intervene_extra, nbtost, protocol_fixed):
         try:
             f()
         except Exception as e:           # a missing result should not block the others

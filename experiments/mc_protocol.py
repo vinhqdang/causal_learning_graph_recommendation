@@ -81,6 +81,8 @@ def main():
     ap.add_argument("--alpha", type=float, default=0.5)
     ap.add_argument("--beta", type=float, default=1.0)
     ap.add_argument("--pmult", type=float, default=1.0, help="scales all propensities")
+    ap.add_argument("--degs", nargs="+", default=["Yhat", "Wx"],
+                    help="degree source: Yhat, Wx, or Yfix (weights fixed a priori from the target graph)")
     ap.add_argument("--sources", nargs="+", default=["indep", "xfit", "insample"])
     ap.add_argument("--props", nargs="+", default=["true", "pop"])
     ap.add_argument("--out", default="results/v2/mc_protocol.json")
@@ -90,9 +92,9 @@ def main():
           flush=True)
     sources = a.sources
     keys = [(src, prop, deg, edge) for src in sources for prop in a.props
-            for deg in ("Yhat", "Wx") for edge in ("IPS", "DR")]
+            for deg in a.degs for edge in ("IPS", "DR")]
     keys = [k for k in keys if not (k[0].startswith("split") and k[2] == "Wx")]
-    acc = {k: {n_: torch.zeros(a.m, a.n, dtype=DT) for n_ in ("T", "T0", "Th", "s_data", "s_yhat", "Fstar", "Tabs")}
+    acc = {k: {n_: torch.zeros(a.m, a.n, dtype=DT) for n_ in ("T", "T0", "Th", "s_data", "s_yhat", "s_fix", "Fstar", "Tabs")}
            for k in keys}
     for rep in range(a.reps):
         O = (torch.rand(a.m, a.n, generator=g, dtype=DT) < P).to(DT)
@@ -115,10 +117,12 @@ def main():
                     W = edge_estimate(O, Y, Pb, Yh if edge == "DR" else None)
                     if src.startswith("split"):
                         W = torch.where(A > 0, Yh, W)      # pairs used for the nuisances are imputed
-                    for deg in ("Yhat", "Wx"):
+                    for deg in a.degs:
                         if src.startswith("split") and deg == "Wx":
                             continue
-                        if deg == "Yhat":
+                        if deg == "Yfix":
+                            C = degree_weights(W, a.alpha, D=Y)         # fixed a priori: target degrees
+                        elif deg == "Yhat":
                             C = degree_weights(W, a.alpha, D=Yh)
                         elif src == "indep":
                             # degrees from edge estimates of the independent log
@@ -145,6 +149,9 @@ def main():
                         r["Tabs"] += Ts
                         r["s_data"] += (s1 / c1d + a.beta * T / c3d) - (CY / c1s + a.beta * Ts / c3s)
                         r["s_yhat"] += (s1 / c1y + a.beta * T / c3y) - (CY / c1y + a.beta * Ts / c3y)
+                        # constants fixed from the target as well (nothing in the score depends on the log
+                        # except the edge estimates): isolates the effect of the numerator
+                        r["s_fix"] += (s1 / c1s + a.beta * T / c3s) - (CY / c1s + a.beta * Ts / c3s)
                         r["Fstar"] += CY / c1s + a.beta * Ts / c3s
         if (rep + 1) % 500 == 0:
             print("rep", rep + 1, flush=True)
@@ -158,6 +165,7 @@ def main():
             "rel_bias_T_uncorrected": float((r["T0"] / a.reps).abs().mean() / sc_T),
             "rel_bias_s_data_consts": float((r["s_data"] / a.reps).abs().mean() / sc_F),
             "rel_bias_s_yhat_consts": float((r["s_yhat"] / a.reps).abs().mean() / sc_F),
+            "rel_bias_s_fixed_consts": float((r["s_fix"] / a.reps).abs().mean() / sc_F),
         }
         if k[0].startswith("split"):
             out["/".join(k)]["rel_bias_T_vs_hybrid_target"] = float((r["Th"] / a.reps).abs().mean() / sc_T)

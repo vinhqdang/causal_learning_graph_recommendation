@@ -63,6 +63,8 @@ def main():
     ap.add_argument("--others", nargs="+", default=None, help="compare only with these methods")
     ap.add_argument("--exclude", nargs="*", default=[],
                     help="methods left out of the default family (reported with --others)")
+    ap.add_argument("--tost", type=float, default=0.005,
+                    help="equivalence margin (metric units) for the two one-sided tests")
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
     key = a.key or {"kuairec": "ndcg@20", "kuairand": "ndcg@10"}.get(a.dataset, "ndcg@5")
@@ -87,7 +89,7 @@ def main():
                 # IPS-end configuration); floating-point noise is not a difference
                 rows.append({"ref": ref, "other": m, "n_users": int(len(d)), "diff": 0.0,
                              "ci95": [0.0, 0.0], "p_t": 1.0, "p_wilcoxon": 1.0, "p_nb_splits": 1.0,
-                             "identical": True})
+                             "tost_p": 0.0, "identical": True})
                 continue
             se = d.std(ddof=1) / np.sqrt(len(d))
             tcrit = stats.t.ppf(0.975, len(d) - 1)
@@ -96,7 +98,11 @@ def main():
                 p_w = float(stats.wilcoxon(d[d != 0]).pvalue) if (d != 0).sum() > 10 else 1.0
             except ValueError:
                 p_w = 1.0
+            dof = len(d) - 1
+            p_lo = float(1 - stats.t.cdf((d.mean() + a.tost) / se, dof))       # H0: mean <= -margin
+            p_hi = float(stats.t.cdf((d.mean() - a.tost) / se, dof))           # H0: mean >= +margin
             rows.append({"ref": ref, "other": m, "n_users": int(len(d)), "diff": float(d.mean()),
+                         "tost_p": max(p_lo, p_hi),
                          "ci95": [float(d.mean() - tcrit * se), float(d.mean() + tcrit * se)],
                          "p_t": p_t, "p_wilcoxon": p_w,
                          "p_nb_splits": nadeau_bengio(res[ref], r, key, a.frac_val)})

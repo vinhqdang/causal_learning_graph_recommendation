@@ -1,0 +1,14 @@
+{
+ "dense": {
+  "Fstar": 1.0,
+  "three_hop_only": 0.6556102735679644,
+  "one_hop_only": 1.0,
+  "popularity": 0.023680036925973078
+ },
+ "sparse": {
+  "Fstar": 1.0,
+  "three_hop_only": 0.6908909854966463,
+  "one_hop_only": 1.0,
+  "popularity": 0.03192904717360498
+ }
+}
