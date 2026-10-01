@@ -225,3 +225,44 @@ revision roadmap (REV-n).
   claims are weakened to "not a fairness criterion". The DSA mapping is
   tightened (first-party audit; Art. 37 per Delegated Regulation 2024/436;
   Art. 40).
+
+# Round 4 (internal five-seat review of commit 927b367; decision Major Revision)
+
+Seats: Journal-Fit (Reject, resubmit shorter), Methodology (Major), Domain (Major, borderline
+Reject), Perspective (Major), Devil's Advocate (Major).
+
+## Reframing (all seats)
+- Title, abstract, introduction, discussion and conclusion now present the paper as an exact
+  diagnosis and correction of the repeated-walk bias, with an explicit statement of where the
+  empirical evidence is weak. New title: "Repeated-walk bias in debiased graph propagation for
+  recommendation: an exact correction and its limits".
+- New Discussion paragraph "Where the evidence is weak" collects the five results that limit the
+  claims: oracle conditions for the score-level benefit (including the oracle target ranking, nDCG@20
+  1.0, because it contains the label), the cost of the sample split, the audit's lack of power,
+  privacy and certificate limits, and the thinner statistical evidence.
+- The abstract no longer claims that real-data audits confirm exposure invariance.
+
+## Methodology (R1, DA)
+- New simulation control (Table S "Which nuisance breaks the correction"): with degree weights fixed
+  a priori, cross-fitting alone preserves the correction (0.05 against 1.10 uncorrected); degrees from
+  the cross-fitted imputation or from edge estimates destroy it. Remark 1 and the Monte-Carlo section
+  now attribute the failure to log-dependent degrees, not to cross-fitting as such.
+- New table of key comparisons under the user-level Holm test, the Nadeau-Bengio test over splits and
+  two one-sided equivalence tests (margin 0.005 nDCG). DRUP and DR adjacency are equivalent on three
+  datasets (Coat 0.034). The KuaiRec margin over DR-JL does not survive Nadeau-Bengio (p = 0.14) and
+  is smaller than the seed spread; stated in the text.
+- New control: propagation over the imputation alone (no residual) in the accuracy table.
+- Oracle target F*: nDCG@20 1.0 (it contains the label); the three-hop term alone 0.66.
+- Limitations: within-user guarantee needs known conditional propensities; Coat's shipped
+  propensities were estimated with the uniform sample used for testing.
+
+## Perspective (R3)
+- DSA paragraph restricted to very large providers; Article 40 is data access, not a right to re-run a
+  proprietary pipeline. Ethics statement, societal-risk paragraph, KuaiRand data availability added.
+- Concentration, privacy and certificate results are stated in the main text (Discussion).
+
+## Not done
+- A discriminating audit control (a configuration whose scores are not close to the imputation, for which
+  stale propensities move eta) and a real platform display-policy dataset showing eta ~ 0.
+- StableDR, DICE, CausE and AutoDebias baselines (the uniform data are used for evaluation only).
+- Equalising the tuning budgets (reported in Table B.13 instead).

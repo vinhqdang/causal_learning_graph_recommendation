@@ -35,6 +35,9 @@ def results(ds, prop):
     j = load(f"learned_{ds}_{prop}.json")
     if j:
         out.update(j["results"])
+    j = load(f"controls_{ds}_{prop}.json")           # round-4 control: propagation over Yhat only
+    if j:
+        out.update(j["results"])
     draws = [json.load(open(p))["results"] for p in
              sorted(glob.glob(os.path.join(R3, f"filters_{ds}_{prop}_split[1-9].json")))]
     for m in ("DR-split", "DRUP-split"):
@@ -78,7 +81,7 @@ ROWS = [
     ("Training-free, logged graph", [("Obs", "linear LightGCN / r-AdjNorm"), ("EASE", "EASE"),
                                      ("GF-CF", "GF-CF"), ("BSPM", "BSPM")]),
     ("Training-free, debiased graph", [("IPS", "IPS adjacency (NAVIP-style)"), ("IPS+WC", "IPS + walk correction"),
-                                       ("EASE-DR", "EASE on DR graph"), ("GF-CF-DR", "GF-CF on DR graph"),
+                                       ("ImputeProp", "propagation over $\\hat Y$ only (no residual)"), ("EASE-DR", "EASE on DR graph"), ("GF-CF-DR", "GF-CF on DR graph"),
                                        ("BSPM-DR", "BSPM on DR graph"),
                                        ("DR", "DR adjacency"), ("DRUP", "DRUP"),
                                        ("DR-5hop", "DR adjacency, 5 hops"), ("DRUP-5hop", "DRUP, 5 hops")]),
