@@ -141,10 +141,14 @@ split, the resulting estimator, DRUP, is edge-wise doubly robust for
 propagation over the full-exposure graph, robust to within-user exposure
 dependence to second order in the imputation error, and exposure-invariant in
 expectation; in simulation, cross-fitting the nuisances on the same log does
-not preserve these guarantees. On three benchmarks with unbiased test data, training-free DR
-propagation is competitive with tuned trained and closed-form baselines, while
-the correction itself leaves top-$K$ accuracy and rankings unchanged; its
-contribution is at the level of scores. Future work includes
+not preserve these guarantees, so the main experiments, which cross-fit, test a
+heuristic, and the sample-split variant is the one the theory covers. On a
+semi-synthetic log with known exposure the correction removes the overestimate of
+full-exposure utility that uncorrected operators produce. On four benchmarks with
+unbiased test data the correction leaves top-$K$ accuracy and rankings unchanged,
+and the most accurate method differs by dataset: iALS on Coat, BPR-trained graph
+models on Yahoo!\,R3 and KuaiRand, and training-free propagation over the DR
+graph on KuaiRec. Its contribution is at the level of scores. Future work includes
 private nuisance models, certificates that remain informative for large
 catalogues, guarantees under adaptive logging, and combining the correction with
 learned propagation weights.

@@ -78,3 +78,17 @@ propensities below the clip $\tau=0.01$), true and estimated propensities
 \input{tables/semisynth_sparse.tex}
 \end{adjustbox}
 \end{table}
+
+\begin{table}[p]\centering\scriptsize
+\caption{AUC of the candidate list on unbiased test data (mean$\pm$std over splits; ties count one half). Same methods, tuning and splits as Table~\ref{tab:acc}, which tuned on the metric named there.}\label{tab:auc}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/accuracy_auc.tex}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[p]\centering\scriptsize
+\caption{Recall at the cut-off of Table~\ref{tab:acc} (@5 on Coat and Yahoo!\,R3, @10 on KuaiRand, @20 on KuaiRec). On Yahoo!\,R3 the lists have ten candidates, so Recall@10 is 1 for every method and Recall@5 is reported.}\label{tab:recall}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/accuracy_recall.tex}
+\end{adjustbox}
+\end{table}
