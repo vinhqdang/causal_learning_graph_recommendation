@@ -53,8 +53,8 @@ log, which is what most pipelines, including our main experiments, do. The
 contribution concerns score values. On a semi-synthetic KuaiRec log with known
 exposure, the correction removes the 18--29\% overestimate of full-exposure
 utility of uncorrected operators; on Coat, Yahoo!\,R3, KuaiRand and KuaiRec it
-does not change accuracy or rankings against up to 26 tuned baselines, also under
-exposure caps. The most accurate method differs by dataset, and the sample split
+does not change accuracy or rankings against up to 26 tuned baselines, nor
+exposure-capped allocations (three datasets). The most accurate method differs by dataset, and the sample split
 costs accuracy on sparse logs. Real-data thinning interventions confirm exposure
 invariance where the selected configuration uses DR edges, not where it uses
 clipped IPS edges.
@@ -146,7 +146,7 @@ in the Supplementary Material.
 \item \emph{Evaluation.} We check the guarantees and their scope by Monte
 Carlo, including the gap between the theory and cross-fitted nuisances; test
 score values and score-based decisions on a semi-synthetic KuaiRec log with
-known propensities; and compare DRUP with 26 tuned baselines on Coat~\citep{schnabel2016},
+known propensities; and compare DRUP with up to 26 tuned baselines on Coat~\citep{schnabel2016},
 Yahoo!\,R3~\citep{marlin2009collaborative}, KuaiRand~\citep{gao2022kuairand} and
 KuaiRec~\citep{gao2022kuairec}, whose test data are random or fully observed,
 with per-split validation for every method, an analysis of tuning budgets,
@@ -777,7 +777,7 @@ tune every method on the same validation data and report how many
 configurations each one searched.
 
 \paragraph{Methods}
-We compare DRUP with 26 baselines. \emph{Non-personalised}: popularity and the imputation
+We compare DRUP with up to 26 baselines (22 on KuaiRand, where eleven models were trained). \emph{Non-personalised}: popularity and the imputation
 $\hat Y$ alone. \emph{Trained with a pointwise loss}: MF, IPS-MF~\citep{schnabel2016},
 DR-MF, DR-JL~\citep{wang2019drjl}, MRDR~\citep{guo2021mrdr}, iALS~\citep{hu2008ials},
 LightGCN and DR-LightGCN (LightGCN with the DR loss).
@@ -988,8 +988,8 @@ Only the sample-split variants satisfy Assumption~\ref{as:fixed}.}\label{tab:acc
 \begin{table}[t]\centering\small
 \caption{User-level paired comparisons: mean difference of the test metric
 over users with a 95\% interval, and the $t$-test $p$-value, Holm-adjusted over
-all comparisons run for the dataset (four references against every other
-method: 124 on Coat, 87 on Yahoo!\,R3, 75 on KuaiRand, 120 on KuaiRec). Users with a positive
+all comparisons run for the dataset (DRUP, DR adjacency and DRUP-split, and on Coat and KuaiRec also five-hop DRUP, each
+against every other method: 124 on Coat, 87 on Yahoo!\,R3, 75 on KuaiRand, 120 on KuaiRec). Users with a positive
 candidate who are in the test part of at least one split (225, 2{,}310, 8{,}321 and
 1{,}410); sample-split rows use the first draw. Selected rows; all comparisons
 are in the result files.}\label{tab:sig}
@@ -1018,8 +1018,9 @@ accuracy over three (KuaiRec 0.6376 against 0.6378).
 
 \paragraph{The sample split} DRUP-split, the only variant covered by the
 guarantees, costs little on the larger and denser logs and much on the sparse
-one. On KuaiRec it reaches $0.6337\pm0.0013$ over draws of the split-off pairs,
-0.0035 below the cross-fitted DRUP ($p_{\mathrm{Holm}}=0.003$), and remains
+one. On KuaiRec it reaches $0.6321\pm0.0035$ over five draws of the split-off pairs
+(0.627 to 0.636), 0.006 below the cross-fitted DRUP. For the first draw (0.6337) the
+gap is 0.0035 ($p_{\mathrm{Holm}}=0.003$), and that draw remains
 significantly above pointwise LightGCN ($+0.007$, $p_{\mathrm{Holm}}<10^{-3}$; Wilcoxon
 $p_{\mathrm{Holm}}=0.48$) and on par with DR-JL and MRDR ($p_{\mathrm{Holm}}=1$). 
 On Coat its accuracy depends on the draw ($0.544\pm0.011$, from 0.527 to 0.558):
@@ -1094,18 +1095,19 @@ costs about 3\,s (21 minutes for all 384), against 130--210\,s for training one
 LightGCN configuration.
 
 \paragraph{Baselines} Three observations concern the baselines. First, the loss
-matters more than the architecture, and in opposite directions on the two
-explicit-feedback datasets and KuaiRec: pairwise training is decisive on
+matters more than the architecture, and in opposite directions on the
+logs with few exposures per user and on KuaiRec: pairwise training is decisive on
 Yahoo!\,R3 (pointwise MF variants stay near 0.51, below popularity, whereas BPR-MF
-reaches 0.646 and BPR-trained LightGCN 0.671), whereas on KuaiRec the pointwise
+reaches 0.646 and BPR-trained LightGCN 0.671) and on KuaiRand (BPR-MF 0.448
+against 0.371 pointwise, LightGCN 0.457 against 0.406), whereas on KuaiRec the pointwise
 models beat their BPR versions (LightGCN 0.627 against 0.609, MF 0.622 against
 0.596). Second, iALS is the strongest trained model on Coat and competitive on
 Yahoo!\,R3, but weak on KuaiRec (0.613), and the jointly learned DR models are
 the strongest trained models on KuaiRec but weak on the two small logs.
 No single trained baseline is strong on all datasets. Third, re-training the
 split-0 selection with other seeds shows how much of a trained model's score
-is seed luck. On Yahoo!\,R3 and for the LightGCN variants on KuaiRec the
-seeds lie within 0.007 of each other; on Coat they spread by up to 0.05 for the
+is seed luck. On Yahoo!\,R3 the seeds lie within 0.013 of each other (0.007 for DR-JL and
+for the BPR graph models) and for the LightGCN variants on KuaiRec within 0.007; on Coat they spread by up to 0.05 for the
 graph models (r-AdjNorm 0.521--0.566), and on KuaiRec by 0.009 and 0.015 for
 DR-JL and MRDR, which learn their imputation jointly. The margin of DRUP over
 DR-JL and MRDR on KuaiRec (0.004) is therefore smaller than their seed
@@ -1157,7 +1159,7 @@ Table~\ref{tab:interv} tests the prediction of Theorem~\ref{thm:fair} with a kno
 intervention on exposure. The operators use the cross-fitted protocol, which
 the theorem does not cover (Remark~\ref{rem:xfit}), so this is an empirical
 check. The logged graph behaves as the theorem predicts for correlational
-propagation: with frozen nuisances $\eta=+1.00$ to $+1.03$ on all three datasets, and
+propagation: with frozen nuisances $\eta=+1.00$ to $+1.03$ on all four datasets, and
 thinned items drop by 0.07--0.24 in mean within-user rank. On KuaiRec and Coat,
 DRUP is invariant to within a few hundredths ($\eta=-0.012$ and $-0.008$) and stays
 so when its nuisances are re-fitted on the thinned log, with the known or with
@@ -1167,7 +1169,7 @@ invariant as DRUP on these data; its over-correction ($\eta=-0.19$ in
 Table~\ref{tab:mc}) scales with $(1-p)/p\cdot\varepsilon^2$ (Theorem~\ref{thm:lower}), and
 the selected clips and imputations keep it small here.
 
-Yahoo!\,R3 is the exception, and Table~\ref{tab:tau} explains it. There,
+Yahoo!\,R3 and KuaiRand are the exceptions, and Table~\ref{tab:tau} explains the first. On Yahoo!\,R3,
 validation selects IPS edges ($\lambda=0$) with a clip of 0.1--0.2, which binds for
 82\% of the logged pairs at $\tau=0.2$. A clipped IPS edge is $O_eY_e/\tau$, proportional
 to the exposure itself, so DRUP inherits the elasticity of the logged graph
@@ -1175,7 +1177,11 @@ to the exposure itself, so DRUP inherits the elasticity of the logged graph
 ($\lambda=1$) and an accurate imputation the clipping bias is small
 (Theorem~\ref{thm:var}(c)) and invariance survives. Lowering the clip on Yahoo!\,R3
 reduces the elasticity to $+0.18\pm0.11$ at $\tau=5\cdot10^{-4}$, where almost no
-propensity is clipped, at a cost of 0.044 nDCG@5; the remaining elasticity and
+propensity is clipped, at a cost of 0.044 nDCG@5. KuaiRand follows the same pattern
+without a clip sweep: validation selects IPS edges with the smallest clip in the grid
+(0.02), which binds for 57\% of the treated logged pairs after the intervention,
+and DRUP is far from invariant ($\eta=+0.64$ with frozen nuisances, $+0.65$ when
+they are re-fitted; logged graph $+1.00$). The remaining elasticity and
 its large spread over the thinning draws come from heavy-tailed
 inverse-propensity weights on a log that is 2\% dense. Exposure invariance is
 therefore a property of the estimator under its assumptions, and whether a
@@ -1199,21 +1205,23 @@ updates the propensities to the known $p/2$, and an unbiased edge estimate is
 then unaffected by construction; a value near zero shows that the estimator
 is used as intended, not that the scores are right. Table~\ref{tab:intervextra}
 adds three controls. Popularity re-fitted on the thinned log has $\eta\approx1$
-and the imputation alone $\eta\approx0$, which brackets the scale. The negative
+and the imputation alone $\eta\approx0$ on Coat and Yahoo!\,R3 ($-0.16$ on KuaiRec), which brackets the scale. The negative
 control, which keeps the propensities of the original log, should push a
-debiasing estimator towards $\eta=1$. It does for IPS adjacency on both
-datasets and for every operator on Yahoo!\,R3, whose selected configuration
-uses IPS edges, but not for DR adjacency or DRUP on Coat ($\eta=-0.004$ and
-$-0.008$). There, the scores are almost a function of the imputation (rank
+debiasing estimator towards $\eta=1$. It does for IPS adjacency on all
+four datasets and for every operator on Yahoo!\,R3 and KuaiRand, whose selected
+configurations use IPS edges, but not for DR adjacency or DRUP on Coat ($\eta=-0.004$ and
+$-0.008$) or on KuaiRec ($-0.087$ and $-0.088$). There, the scores are almost a function of the imputation (rank
 correlation 0.98--0.99 with $\hat Y$), which is fitted on exposed pairs and
 reacts little to a halved exposure of some items; the audit cannot detect a
 misspecified propensity model in this regime, and a near-zero $\eta$ on Coat
 says little beyond the invariance of $\hat Y$. DRUP-split, whose edge estimates
 are less dominated by the imputation (rank correlation 0.76 on Coat, 0.58 on
-Yahoo!\,R3), is invariant on Coat ($\eta\le0.022$ frozen or re-fitted) and much
-less elastic than the selected cross-fitted configuration on Yahoo!\,R3
-($\eta=+0.32$ against $+0.96$), because the sample-split configurations use DR
-edges there. The audit is thus informative for IPS-dominated configurations
+Yahoo!\,R3, 0.55 on KuaiRand), is invariant on Coat and KuaiRec ($|\eta|\le0.022$ frozen
+or re-fitted) and less elastic than the selected cross-fitted configuration on
+Yahoo!\,R3 and KuaiRand ($\eta=+0.32$ and $+0.33$ against $+0.96$ and $+0.64$).
+Both select IPS edges there, so the edge type does not explain the difference;
+a fifth of the split variant's pairs carry the exposure-free imputation instead
+of a clipped IPS edge, which may account for it, but we did not isolate this. The audit is thus informative for IPS-dominated configurations
 and weak for configurations whose scores are close to the imputation, and it
 should be reported with these controls.
 
@@ -1246,8 +1254,11 @@ because the estimated full-exposure scores are themselves concentrated on few it
 coefficient is 0.60 against 0.34. Exposure invariance and exposure concentration
 are different properties, and DRUP improves the first at the expense of the
 second. The user-group gaps do not differ between operators. They are clearly
-non-zero on Coat (men 0.11 above women) and on Yahoo!\,R3 (inactive users 0.046
-below active ones), under every operator, and not on KuaiRec.
+non-zero on Coat (men 0.11 above women), on Yahoo!\,R3 (inactive users 0.046
+below active ones) and on KuaiRand (inactive users 0.014 above active ones), under every
+operator, and not on KuaiRec. On KuaiRand the lists of DRUP, IPS and the logged graph
+are almost equally concentrated (Gini 0.43, coverage 0.98), as the scores of all
+three are close to each other there.
 
 
 
@@ -1256,7 +1267,7 @@ below active ones), under every operator, and not on KuaiRec.
 %======================================================================
 
 \paragraph{What the correction is for}
-On the three benchmarks the walk correction does not change top-$K$
+On the four benchmarks the walk correction does not change top-$K$
 accuracy, and in simulation the uncorrected DR operator can even agree
 slightly better with the full-exposure ranking, because its bias adds weight
 to the imputation (Section~\ref{sec:mc}). The correction matters wherever the
@@ -1301,7 +1312,7 @@ and training-free but needs propensities, and the guarantees need
 propensities that are correct and nuisances that do not depend on the log: in
 simulation with nuisances from an independent log, estimated and misspecified
 propensities bias the corrected
-operator by 2 to 7 times the mean target and the uncorrected ones by up to 90
+operator by 2 to 7 times the mean target and the uncorrected ones by up to 93
 times, at least as much as the repeated walks do (Table~S6).
 The clip $\tau$ and the control-variate weight $\lambda$ trade exposure invariance
 against accuracy; this is a policy choice, and one option is to select the
@@ -1340,7 +1351,7 @@ different sizes, which we analyse but cannot fully equalise
 (Section~\ref{sec:acc}). The joint-DP guarantee requires public nuisances, and on the
 small Coat data the public-nuisance variant loses much of its accuracy. The
 certificates are informative only against a handful of fake profiles (on
-KuaiRec, 95\% of users at five profiles, none at fifty), and the variance
+KuaiRec, 95\% of users at five profiles, 1\% at fifty), and the variance
 and concentration bounds are loose by several orders of magnitude
 (Section~\ref{sec:mc}). The target $F^*$ is a linear LightGCN score of the
 full-exposure world, a normative choice that other stakeholders may not
@@ -1573,8 +1584,8 @@ cross-fitted $W$-degrees do not, since the weight at a pair then depends on
 the exposures of other pairs, so configurations with $W$-degrees (selected on
 Yahoo!\,R3) lie outside the theorems. Only $\hat Y$-degrees make the
 certificates of Theorem~S3 informative. EASE uses
-$\lambda\in\{10,100,1000\}$; GF-CF uses the ideal low-pass weight
-$\in\{0,0.3,1\}$ with $64$ or $256$ singular vectors. BSPM~\citep{choi2023bspm} uses blurring time
+$\lambda\in\{10,100,1000\}$; GF-CF uses four settings of (ideal low-pass weight, singular vectors):
+$(0,0)$, $(0.3,64)$, $(0.3,256)$ and $(1,256)$. BSPM~\citep{choi2023bspm} uses blurring time
 $\in\{1,2\}$, sharpening time $\in\{0,0.1,0.3\}$ and ideal low-pass weight
 $\in\{0,0.3\}$ with one Euler step each. On the DR graph, EASE, GF-CF and BSPM
 search the same nuisance grid as DR adjacency. The sample-split variants are
@@ -1591,7 +1602,7 @@ imputation (and propensity model, where it is estimated) is fitted on a random
 The grid combines the learning rates $10^{-2}$, $3\cdot10^{-3}$ and $10^{-3}$ with the
 weight decays $10^{-5}$, $10^{-4}$ and (Coat, and the MF models on Yahoo!\,R3)
 $10^{-3}$. Embeddings have 64 dimensions (Coat: 32 or 64). The graph models with
-the widest search (LightGCN, r-AdjNorm and SimGCL on Yahoo!\,R3, the pointwise
+the widest search (LightGCN and r-AdjNorm on Yahoo!\,R3, the pointwise
 and BPR LightGCN on KuaiRec, all graph models on Coat) also search one to three
 layers and 64 or 128 dimensions (Coat: 32 or 64); the others use two layers.
 PDA searches $\gamma\in\{0.1,0.2\}$, r-AdjNorm $r\in\{0.3,0.7\}$, SimGCL the
@@ -1646,13 +1657,17 @@ DRUP and DRUP-split against every other method); the Wilcoxon signed-rank
 $p$-values are adjusted over the same family. Within-reference adjustments are
 in the result files. The Wilcoxon signed-rank test gives the same conclusions except for the
 five-hop DRUP against DR comparison on KuaiRec ($p=0.66$ against 0.011) and for
-DRUP-split against pointwise LightGCN on KuaiRec ($p=0.30$ against $10^{-4}$). The
+DRUP-split against pointwise LightGCN on KuaiRec ($p_{\mathrm{Holm}}=0.48$ against $3\cdot10^{-4}$). The
 corrected resampled $t$-test over split means~\citep{nadeau2003} is far more
 conservative with five or ten splits and is reported in the result files.
 All tests condition on the training log and the fitted nuisances.
 
 \paragraph{Hardware and code}
-All experiments ran on four CPU cores with 16\,GB of memory, without a GPU.
+All experiments ran on four CPU cores with 16\,GB of memory, except the KuaiRand
+debiased and sample-split operators, which ran on a Google Colab T4 GPU (same code and
+seeds; per-user ranking metrics are computed once per score matrix and match the
+per-user routine to $10^{-15}$). GF-CF uses a randomised SVD, so its scores vary by
+about 0.002 between runs.
 Code, configurations and result files are available at the repository given
 on the title page.
 
