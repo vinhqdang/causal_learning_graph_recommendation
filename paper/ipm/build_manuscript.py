@@ -77,6 +77,7 @@ if "%SUPPLEMENT-START" in appendix:
             t = t.replace("\\ref{" + lab + "}", sn)
         return t
     body, appendix, abstract = to_supp(body), to_supp(appendix), to_supp(abstract)
+    supp = supp.replace("Appendix~\\ref{app:more}", "the section on additional results").replace("\\ref{app:more}", "the additional results section")
     supp = supp.replace("%SUPPLEMENT-START", "").replace("\\section{Additional results}\\label{app:more}",
                                                          "\\section{Additional results}")
 

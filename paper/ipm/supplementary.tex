@@ -27,19 +27,300 @@
 
 \usepackage{xr}
 \externaldocument{manuscript}
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thetheorem}{S\arabic{theorem}}
 \renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\theequation}{S\arabic{equation}}
 \begin{document}
 \begin{center}{\large\bfseries Supplementary Material\\[2pt]
 Walk-unbiased doubly robust graph propagation for recommendation from
 exposure-biased logs}\end{center}
 
-Additional results referred to in the main text. Theorem, table and section
-numbers without the prefix S refer to the main text.
+Theorem, table, section and equation numbers without the prefix S refer to the
+main text.
 
 
+\section{Structural properties of linear propagation}\label{sec:structth}
+
+The results of this section use only that, given the nuisances, $s$ is a
+fixed linear function of the edge estimates. They hold for DRUP and equally for
+the uncorrected operators and for linear LightGCN, and they describe the
+recommender with its nuisances held fixed.
+
+\begin{proposition}[Affine in the user's own data]\label{prop:affine}
+Fix $u$ and a candidate $i$ with $O_{ui}=0$, and let $G^{(-u)}$ be $G$ without
+$u$'s own contribution. With frozen nuisances,
+$s_{ui}=\mathrm{const}+\sum_{j\neq i}\omega_jw_{uj}$ with
+$\omega_j=b\big(c_{uj}G^{(-u)}_{ji}+c_{ui}w_{ui}c_{uj}^2\big)$.
+Hence un-logging interaction $j$, i.e., replacing $w_{uj}$ by its unlogged
+value $\hat Y_{uj}$, changes $s_{ui}$ by exactly $\phi_j=\omega_j(w_{uj}-\hat Y_{uj})$,
+removal effects add up over any subset, and completeness holds exactly.
+\end{proposition}
+Because the removal game is additive, the $\phi_j$ are also its Shapley values;
+this is a consequence of linearity, and the attribution is relative to the
+stated baseline~\citep{kumar2020shapley}.
+
+\begin{theorem}[Optimal minimal counterfactual explanation]\label{thm:cf}
+For candidates $i,k$ with $s_{ui}>s_{uk}$, sorting $g_j=\phi^{(i)}_j-\phi^{(k)}_j$ in
+decreasing order and removing interactions until the cumulative sum exceeds the
+margin yields a minimum-cardinality set whose removal makes $k$ outrank $i$.
+If the positive $g_j$ do not sum above the margin, no such set exists. The
+cost is $O(n+d_u\log d_u)$.
+\end{theorem}
+
+\begin{theorem}[Certificates against injected profiles, frozen nuisances]\label{thm:robust}
+With frozen nuisances, one injected user $v$ changes $u$'s three-hop score of item
+$k$ by $\Delta_k=x_k(D+a_kc_{vk})-a_kx_k^2$, where $a=\tilde w_u$, $x=c_v\odot w_v$
+and $D=\langle a,x\rangle$. If $v$ logs at most $L$ interactions with arbitrary
+items, labels and propensities $\ge\tau$, then $D$ and $x_k$ lie in closed-form
+intervals. $\Delta_k$ is linear in $D$ and quadratic in $x_k$, so its extremes
+$[\underline\Delta_k,\overline\Delta_k]$ over the box formed by the two intervals
+are attained at its edges or at the vertex of the quadratic. The box contains
+every feasible $(D,x_k)$ but ignores that both are determined by the same $L$
+interactions, so $[\underline\Delta_k,\overline\Delta_k]$ contains the feasible
+range of $\Delta_k$ and is conservative rather than exact. Item $t$
+provably stays out of $u$'s top-$K$ against any $F$ such users if
+$s_{ut}+F\overline\Delta_t$ is below the $(K{+}1)$-th largest value of
+$s_{uk}+F\underline\Delta_k$ over the other candidates. With unclipped IPS, the
+influence of a single interaction is unbounded.
+\end{theorem}
+The same argument certifies the uncorrected operators (with
+$\Delta_k=x_kD$). Degrees taken from $\hat Y$ make the fake user's weight $c_v$
+known; degrees taken from $W$ would be attacker-controlled.
+
+\begin{theorem}[Joint differential privacy with public nuisances]\label{thm:dp}
+Let the population-level parts of the nuisances (the propensity model, the
+item parameters of $\hat Y$, the item degrees in $C$ and the radius $R$), the
+hyper-parameters and the constants $a,b$ of the score be fixed a priori or
+computed from public data and from the release, and every user-level part
+from the user's own row.
+Scale each private row so that $\|\tilde w_v\|_2\le R$ and
+$\|c_v^{\odot2}\odot w_v\|_2\le R^2$. Releasing $G$, computed over the private
+rows, plus symmetric Gaussian noise of scale
+$\sigma=\sigma_{\mathrm{aG}}(\epsilon,\delta;2R^2)$, the analytic Gaussian
+calibration~\citep{balle2018analytic}, is $(\epsilon,\delta)$-DP under adding or
+removing one user, for every $\epsilon>0$. Scoring by~\eqref{eq:local} uses only
+the release and the user's own row, so the recommender is $(\epsilon,\delta)$-jointly
+DP~\citep{hsu2014matchings}. Post-processing such as low-rank denoising is free.
+\end{theorem}
+Row scaling changes the estimate for users whose rows exceed $R$, so
+Theorems~\ref{thm:unbiased} and~\ref{thm:fair} hold for the private variant only
+up to this shrinkage.
+
+\begin{theorem}[Exposure-capped allocation]\label{thm:alloc}
+Let $N$ users each receive $K$ of their candidates and let item $i$ be
+recommended to at most $\mathrm{cap}_i$ users. Let $\hat x$ maximise $\langle x,s\rangle$
+over such allocations. The constraint matrix is totally unimodular, so the
+linear relaxation has an integral optimum, and min-cost flow on the scores
+rounded to a grid of $L$ levels finds $\hat x$ exactly up to the rounding gap
+$\Gamma\le NK(\max s-\min s)/L$. All caps hold, at least $NK/\max_i\mathrm{cap}_i$
+items are recommended, and for the full-exposure utility $U(x)=\langle x,F^*\rangle$,
+\[
+U(\hat x)\ \ge\ \max_{x}U(x)-\Gamma-2\max_x|\langle x,s-F^*\rangle| .
+\]
+If $\E s=F^*$ (DRUP under Assumption~\ref{as:fixed} with $\xi\equiv0$),
+McDiarmid's inequality and a union bound over all $mn$ pairs give
+$\max_x|\langle x,s-F^*\rangle|\le NK\,t_\vartheta$ with probability $1-\vartheta$, where
+\begin{gather*}
+t_\vartheta=\max_{u,i}\Big(\tfrac12\textstyle\sum_e\bar c_e(u,i)^2\ln(2mn/\vartheta)\Big)^{1/2},\\
+\bar c_e(u,i)=b\,c_e(u,i)+a\,C_{ui}\,\varepsilon_{ui}\,\mathbb 1[e=(u,i)]/\tau ,
+\end{gather*}
+$c_e(u,i)$ is the constant of Theorem~\ref{thm:var}(d) for the three-hop term
+and the second part is the sensitivity of the one-hop term. The union runs over
+all pairs because the candidate set depends on the log. For logged-graph propagation,
+$\E s=F^*(P\odot Y)$, and the last term does not vanish.
+\end{theorem}
+
+\subsection{Proofs}\label{sec:structproofs}
+
+\paragraph{Proposition~\ref{prop:affine} and Theorem~\ref{thm:cf}.}
+With frozen nuisances, substitute
+$G=G^{(-u)}+\tilde w_u^\top\tilde w_u-\diag(\tilde w_u^2)+\diag(c_u^2w_u)$
+into~\eqref{eq:local}. The terms $\tilde w_{ui}\sum_j\tilde w_{uj}^2$ cancel against the
+local correction, leaving $\tilde w_{ui}\sum_jc_{uj}^2w_{uj}$, and every remaining term
+involving $w_{uj}$ ($j\neq i$) is linear, with coefficient
+$c_{uj}G^{(-u)}_{ji}+c_{ui}w_{ui}c_{uj}^2$ in $\hat T_{ui}$. Since $O_{ui}=0$, the one-hop
+term $a\tW_{ui}$ does not involve $w_{uj}$, so the coefficient in $s_{ui}=a\tW_{ui}+b\hat T_{ui}$
+is $\omega_j$. Un-logging $j$ replaces $w_{uj}$ by
+$\hat Y_{uj}$, which changes $s_{ui}$ by $\omega_j(w_{uj}-\hat Y_{uj})$; the game is additive, so
+its Shapley values are the individual effects. For Theorem~\ref{thm:cf}, the
+margin after removing $S$ is $s_{ui}-s_{uk}-\sum_{j\in S}g_j$, so minimising $|S|$
+under $\sum_Sg_j>$ margin selects the largest $g_j$. \qed
+
+\paragraph{Theorem~\ref{thm:robust}.}
+Adding row $v$ adds $\mathrm{contrib}_v$ to $G$ and leaves $u$'s local terms
+unchanged, so $\Delta=\tilde w_u\,\mathrm{contrib}_v=(a\cdot x)x-a\odot x^2+a\odot c_v\odot x$.
+A logged DR entry satisfies $w\in[\hat Y-\hat Y/\tau,\hat Y+(1-\hat Y)/\tau]$ for any label
+and any $p\ge\tau$, and an unlogged one equals $\hat Y$. $D$ is maximised
+(minimised) by assigning the $L$ slots to the largest positive (negative)
+deviations, and $x_k$ ranges over the values of a logged or unlogged entry.
+Every feasible profile gives a point $(D,x_k)$ of the product of the two
+intervals, so the extremes of $\Delta_k$ over this box bound its feasible
+extremes; they are not attained in general, because the box treats $D$ and
+$x_k$ as free although both depend on the same at most $L$ entries. For fixed
+$x_k$ the effect is linear in $D$, so its extremes over the box are at the ends
+of the $D$ interval; for fixed $D$ it is quadratic in $x_k$, with extremes at the
+ends or at the clamped vertex. With frozen nuisances $G$ is a sum of
+per-user contributions, so effects add over fake users. For
+unclipped IPS, $|W_e|=1/p_e$ is unbounded. \qed
+
+\paragraph{Theorem~\ref{thm:dp}.}
+Because the population-level nuisances are public and every user-level part
+depends only on the user's own row, adding or removing user $v$ changes $G$ by
+$\mathrm{contrib}_v$ alone. With the row scaling,
+$\|\mathrm{contrib}_v\|_F\le\|\tilde w_v\tilde w_v^\top-\diag(\tilde w_v^2)\|_F+\|c_v^2w_v\|_2\le R^2+R^2$,
+so the $\ell_2$-sensitivity of the upper triangle is at most $2R^2$. The analytic
+Gaussian mechanism is $(\epsilon,\delta)$-DP for every $\epsilon>0$ exactly when
+$\Phi(\frac{\Delta}{2\sigma}-\frac{\epsilon\sigma}{\Delta})-e^\epsilon\Phi(-\frac{\Delta}{2\sigma}-\frac{\epsilon\sigma}{\Delta})\le\delta$
+(Theorem~8 of~\citet{balle2018analytic}); we use the smallest such $\sigma$. The
+classical calibration $\sigma=\Delta\sqrt{2\ln(1.25/\delta)}/\epsilon$~\citep{dwork2014algorithmic}
+is only valid for $\epsilon<1$. Each user's output is a function of the release and
+the user's own data, which gives joint DP by the billboard
+lemma~\citep{hsu2014matchings}. \qed
+
+\paragraph{Theorem~\ref{thm:alloc}.}
+The allocation polytope is defined by the incidence matrix of the bipartite
+user--candidate graph with degree bounds, which is totally unimodular, so the
+linear relaxation has an integral optimal vertex and min-cost flow finds it.
+Rounding changes each score by at most $h/2$ with $h=(\max s-\min s)/L$. If
+$x^\star$ is optimal for $s$ and $\hat x$ for the rounded scores $\tilde s$, then
+$\langle x^\star,s\rangle\le\langle x^\star,\tilde s\rangle+NKh/2\le\langle\hat x,\tilde s\rangle+NKh/2\le\langle\hat x,s\rangle+NKh$, so
+$\Gamma\le NKh$. Each item is recommended at most $\max_i\mathrm{cap}_i$ times and $NK$
+slots are filled, which gives the coverage bound. With $x_F$ optimal for $U$,
+$U(\hat x)\ge\langle\hat x,s\rangle-|\langle\hat x,s-F^*\rangle|\ge\langle x_F,s\rangle-\Gamma-|\langle\hat x,s-F^*\rangle|
+\ge U(x_F)-\Gamma-2\max_x|\langle x,s-F^*\rangle|$. For the concentration step,
+$s_{ui}=a\tW_{ui}+b\hat T_{ui}$ is a function of the independent exposures.
+Changing $O_e$ moves $b\hat T_{ui}$ by at most $b\,c_e(u,i)$ (proof of
+Theorem~\ref{thm:var}(d)) and, for $e=(u,i)$, moves $a\tW_{ui}$ by at most
+$aC_{ui}\varepsilon_{ui}/\tau$, so $s_{ui}$ has bounded differences $\bar c_e(u,i)$. If
+$\E s=F^*$, McDiarmid's inequality gives
+$\Pr(|s_{ui}-F^*_{ui}|\ge t)\le2\exp(-2t^2/\sum_e\bar c_e(u,i)^2)$. The candidate set
+depends on $O$, so we take a union bound over all $mn$ pairs: with probability
+$1-\delta$, $|s_{ui}-F^*_{ui}|\le t_\delta$ for every pair, in particular for every
+candidate, and an allocation sums $NK$ such terms. \qed
+
+\section{Structural properties on real data}\label{sec:struct}
+
+The properties of Section~\ref{sec:structth} hold for the model with frozen
+(explanations, certificates) or public (privacy) nuisances, and for any linear
+operator; we check them for DRUP and report where they are informative.
+
+\begin{table}[t]\centering\small
+\caption{Exact explanations (Proposition~\ref{prop:affine}, Theorem~\ref{thm:cf}) on 200 random
+test users: largest relative error of completeness and subset additivity
+against re-propagation; rank of the top-1 item after un-logging the five
+interactions with the largest attribution, five random ones, or the five most
+similar ones (0 = still first); share of top-1 recommendations for which no
+subset of the user's own interactions makes the second item overtake it; median
+size of the minimal counterfactual explanation otherwise. Every explanation
+was verified by re-scoring.}\label{tab:explain}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/explain.tex}
+\end{adjustbox}
+\end{table}
+
+\paragraph{Explanations} Attributions recomputed against full re-propagation
+are exact to floating-point precision (relative error $10^{-16}$ in float64 on
+Coat and Yahoo!\,R3, $3\cdot10^{-6}$ in float32 on KuaiRec; Table~\ref{tab:explain}), and removing the
+interactions with the largest attribution moves the top item further down than
+removing random or similar ones, so the attributions are faithful. The
+counterfactual analysis mostly certifies that no explanation from the user's
+own data exists: on Coat 94\% of the top recommendations cannot be overturned by removing any subset of the user's own interactions, on KuaiRec 52\%, and on Yahoo!\,R3 10\%; the minimal explanation otherwise has a median size of 2, 7 and 1 interactions. Such recommendations rest on population-level
+evidence (through $G$), which the attribution to a user's own interactions does
+not explain.
+
+\begin{table}[t]\centering\small
+\caption{Injection attack: $F$ fake users log a low-popularity target and the most
+popular items. Realised hit rate of the target in real users' top-$K$, and the
+fraction of real users for whom Theorem~\ref{thm:robust} certifies that the target
+cannot enter the top-$K$ against \emph{any} $F$ profiles of that size (frozen
+nuisances). No certificate was violated.}\label{tab:attack}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/attack_compact.tex}
+\end{adjustbox}
+\end{table}
+
+\paragraph{Robustness} No certificate was violated in any run
+(Table~\ref{tab:attack}). With imputation-based degrees, DR adjacency and DRUP
+certify every Coat user against one or two fake profiles and 93--95\% of users on
+Coat and KuaiRec against five, and realised attacks with up to 100 fake users
+never placed the target in a KuaiRec top-20. Certificates are informative only
+for small budgets: at $F=20$ they cover 10--26\% of users, and at 200 fake users
+the target reaches 39\% of KuaiRec users under DR and DRUP, more than under IPS
+(10\%) and the logged graph (29\%). On Yahoo!\,R3, where DRUP selects IPS edges with
+cross-fitted $W$-degrees, the fake users' degrees are attacker-controlled and no
+user is certified. When the nuisances are re-fitted on the poisoned log, which
+the certificates do not cover, none of the certified user--target pairs of DRUP (5{,}196 on Coat, 2{,}821 on KuaiRec)
+was violated, and the realised hit rates were lower than with frozen nuisances
+(Table~\ref{tab:refit} in the additional results section), because the fake users' own
+imputation raises their degree and lowers their weight.
+
+\begin{table}[t]\centering\small
+\caption{nDCG of jointly private DRUP ($\delta=10^{-5}$, analytic Gaussian mechanism,
+denoising rank 32 fixed in advance). Population-level nuisances come from a
+public 10\% of the users (non-test users where available; on Coat, whose
+users are all test users, the public users are excluded from evaluation); ``all nuisances'' is the non-private model
+with all nuisances fitted on the whole log. Other ranks in
+Table~\ref{tab:privfull}.}\label{tab:privacy}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/privacy_compact.tex}
+\end{adjustbox}
+\end{table}
+
+\paragraph{Privacy} Table~\ref{tab:privacy} reports the jointly private variant of
+Theorem~\ref{thm:dp}, in which only public users inform the population-level
+nuisances and the score constants $c_1,c_3$. The configuration is fixed a
+priori (clip 0.1, ridge 20, additive imputation, $\alpha=0.5$, control-variate
+weight 1, $\beta=1$), not selected on the test data. Useful privacy needs a large
+user base and a weak guarantee, and the public-nuisance model can itself be the
+limit. On KuaiRec, with 717 public users, private DRUP reaches nDCG@20 of 0.618
+at $\epsilon=16$ and 0.598 at $\epsilon=8$, against 0.634 without noise, 0.637
+with all nuisances and 0.577 for popularity; it falls below popularity for
+$\epsilon\le4$. On Coat (29 public users) the noise-free model reaches 0.548,
+only just above popularity (0.527), and it is below popularity at every finite
+$\epsilon$ (0.438 at $\epsilon=16$). On Yahoo!\,R3 the noise-free model with
+public nuisances reaches 0.492 and so is below popularity (0.525) at every
+$\epsilon$, although the non-private model with all nuisances reaches 0.652:
+1{,}540 public users do not estimate the item parameters of a 2\%-dense log. The
+privacy variant is therefore useful only on the largest log. Privatising the
+nuisance models with a composed budget is left open.
+
+\subsection{Exposure-capped allocation}\label{sec:rerank}
+
+\begin{table}[t]\centering\small
+\caption{Exposure-capped re-ranking (Theorem~\ref{thm:alloc}, exact min-cost flow).
+Each item may be recommended to at most $c$ times its fair share $NK/n$ of users.
+Cells: nDCG@$K$ (Gini@$K$). Every cap held; the full range of caps and the
+accuracy--concentration frontier are in the additional results section.}\label{tab:rerank}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/rerank_compact.tex}
+\end{adjustbox}
+\end{table}
+
+Table~\ref{tab:rerank} applies the exposure-capped allocation of
+Theorem~\ref{thm:alloc} to every operator. The min-cost-flow solver returns the
+optimum up to its rounding gap (a relative gap below $4\cdot10^{-5}$ in every run), all
+caps hold, and coverage never falls below the guaranteed $NK/\max\mathrm{cap}$. On KuaiRec, where exposure is extremely concentrated,
+DR adjacency and DRUP are the most accurate operators under every cap, for
+example 0.199 against 0.173 (logged graph) and 0.178 (IPS) at $c=5$, and 0.140
+against 0.115 and 0.121 at $c=2$; the two agree to the third decimal under
+every cap, so the correction does not change the allocation either. Under the same cap, however, their lists
+remain more concentrated (Gini 0.80 against 0.72 at $c=5$), and at equal Gini
+the frontier over each operator's grid (Table~\ref{tab:frontier}) favours the
+correlation-based operators on Coat. On Coat, whose random test items are already
+diverse, capping costs DRUP more accuracy than it costs the logged graph; on
+Yahoo!\,R3 exposure is not concentrated (Gini 0.27) and caps down to twice the
+fair share cost every operator at most 0.002. The allocation is thus the
+mechanism that controls concentration, and the DR graph is the better input to
+it when exposure in the log is very uneven.
+
+
+
+\section{Additional results}
 
 \begin{table}[h]\centering\small
-\caption{Stress tests outside Assumption~1 and with misspecified
+\caption{Stress tests outside Assumption~\ref{as:unconf} and with misspecified
 propensities (log-normal noise with $\sigma=0.5$). Relative $|$bias$|$ on unexposed
 candidates.}\label{tab:stress}
 \begin{adjustbox}{max width=\textwidth}
@@ -60,7 +341,7 @@ data-dependent constants (3{,}000 replications).}\label{tab:protocolfull}
 \end{table}
 
 \begin{table}[h]\centering\small
-\caption{Tightness of Theorem~6 in a 12-user, 15-item model (20{,}000
+\caption{Tightness of Theorem~\ref{thm:var} in a 12-user, 15-item model (20{,}000
 replications, all propensities $\ge\tau$), over all $(u,i)$.}\label{tab:bounds}
 \begin{adjustbox}{max width=\textwidth}\input{../tables/bounds.tex}\end{adjustbox}
 \end{table}
@@ -100,6 +381,39 @@ frozen-nuisance certificates of the clean system.}\label{tab:refit}
 \end{adjustbox}
 \end{table}
 
+\begin{table}[h]\centering\small
+\caption{Semi-synthetic KuaiRec with propensities estimated by the logistic
+exposure model (columns as in Table~\ref{tab:semisynth}; regret not computed).}\label{tab:semisynthest}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/semisynth_est.tex}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[h]\centering\small
+\caption{Semi-synthetic KuaiRec with a sparser log (density 3\%, 58\% of the
+propensities below the clip $\tau=0.01$), true and estimated propensities
+(columns as in Table~\ref{tab:semisynth}; regret not computed).}\label{tab:semisynthsparse}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/semisynth_sparse.tex}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[p]\centering\scriptsize
+\caption{AUC of the candidate list on unbiased test data (mean$\pm$std over splits; ties count one half). Same methods, tuning and splits as Table~\ref{tab:acc}, which tuned on the metric named there.}\label{tab:auc}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/accuracy_auc.tex}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[p]\centering\scriptsize
+\caption{Recall at the cut-off of Table~\ref{tab:acc} (@5 on Coat and Yahoo!\,R3, @10 on KuaiRand, @20 on KuaiRec). On Yahoo!\,R3 the lists have ten candidates, so Recall@10 is 1 for every method and Recall@5 is reported.}\label{tab:recall}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/accuracy_recall.tex}
+\end{adjustbox}
+\end{table}
 
 
+
+\bibliographystyle{elsarticle-harv}
+\bibliography{../refs}
 \end{document}
