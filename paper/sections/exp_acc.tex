@@ -15,8 +15,8 @@ Only the sample-split variants satisfy Assumption~\ref{as:fixed}.}\label{tab:acc
 \begin{table}[t]\centering\small
 \caption{User-level paired comparisons: mean difference of the test metric
 over users with a 95\% interval, and the $t$-test $p$-value, Holm-adjusted over
-all comparisons run for the dataset (four references against every other
-method: 124 on Coat, 87 on Yahoo!\,R3, 75 on KuaiRand, 120 on KuaiRec). Users with a positive
+all comparisons run for the dataset (DRUP, DR adjacency and DRUP-split, and on Coat and KuaiRec also five-hop DRUP, each
+against every other method: 124 on Coat, 87 on Yahoo!\,R3, 75 on KuaiRand, 120 on KuaiRec). Users with a positive
 candidate who are in the test part of at least one split (225, 2{,}310, 8{,}321 and
 1{,}410); sample-split rows use the first draw. Selected rows; all comparisons
 are in the result files.}\label{tab:sig}
@@ -45,8 +45,9 @@ accuracy over three (KuaiRec 0.6376 against 0.6378).
 
 \paragraph{The sample split.} DRUP-split, the only variant covered by the
 guarantees, costs little on the larger and denser logs and much on the sparse
-one. On KuaiRec it reaches $0.6337\pm0.0013$ over draws of the split-off pairs,
-0.0035 below the cross-fitted DRUP ($p_{\mathrm{Holm}}=0.003$), and remains
+one. On KuaiRec it reaches $0.6321\pm0.0035$ over five draws of the split-off pairs
+(0.627 to 0.636), 0.006 below the cross-fitted DRUP. For the first draw (0.6337) the
+gap is 0.0035 ($p_{\mathrm{Holm}}=0.003$), and that draw remains
 significantly above pointwise LightGCN ($+0.007$, $p_{\mathrm{Holm}}<10^{-3}$; Wilcoxon
 $p_{\mathrm{Holm}}=0.48$) and on par with DR-JL and MRDR ($p_{\mathrm{Holm}}=1$). 
 On Coat its accuracy depends on the draw ($0.544\pm0.011$, from 0.527 to 0.558):
@@ -121,18 +122,19 @@ costs about 3\,s (21 minutes for all 384), against 130--210\,s for training one
 LightGCN configuration.
 
 \paragraph{Baselines.} Three observations concern the baselines. First, the loss
-matters more than the architecture, and in opposite directions on the two
-explicit-feedback datasets and KuaiRec: pairwise training is decisive on
+matters more than the architecture, and in opposite directions on the
+logs with few exposures per user and on KuaiRec: pairwise training is decisive on
 Yahoo!\,R3 (pointwise MF variants stay near 0.51, below popularity, whereas BPR-MF
-reaches 0.646 and BPR-trained LightGCN 0.671), whereas on KuaiRec the pointwise
+reaches 0.646 and BPR-trained LightGCN 0.671) and on KuaiRand (BPR-MF 0.448
+against 0.371 pointwise, LightGCN 0.457 against 0.406), whereas on KuaiRec the pointwise
 models beat their BPR versions (LightGCN 0.627 against 0.609, MF 0.622 against
 0.596). Second, iALS is the strongest trained model on Coat and competitive on
 Yahoo!\,R3, but weak on KuaiRec (0.613), and the jointly learned DR models are
 the strongest trained models on KuaiRec but weak on the two small logs.
 No single trained baseline is strong on all datasets. Third, re-training the
 split-0 selection with other seeds shows how much of a trained model's score
-is seed luck. On Yahoo!\,R3 and for the LightGCN variants on KuaiRec the
-seeds lie within 0.007 of each other; on Coat they spread by up to 0.05 for the
+is seed luck. On Yahoo!\,R3 the seeds lie within 0.013 of each other (0.007 for DR-JL and
+for the BPR graph models) and for the LightGCN variants on KuaiRec within 0.007; on Coat they spread by up to 0.05 for the
 graph models (r-AdjNorm 0.521--0.566), and on KuaiRec by 0.009 and 0.015 for
 DR-JL and MRDR, which learn their imputation jointly. The margin of DRUP over
 DR-JL and MRDR on KuaiRec (0.004) is therefore smaller than their seed

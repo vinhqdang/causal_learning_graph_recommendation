@@ -3,7 +3,7 @@
 %======================================================================
 
 \paragraph{What the correction is for.}
-On the three benchmarks the walk correction does not change top-$K$
+On the four benchmarks the walk correction does not change top-$K$
 accuracy, and in simulation the uncorrected DR operator can even agree
 slightly better with the full-exposure ranking, because its bias adds weight
 to the imputation (Section~\ref{sec:mc}). The correction matters wherever the
@@ -87,7 +87,7 @@ different sizes, which we analyse but cannot fully equalise
 (Section~\ref{sec:acc}). The joint-DP guarantee requires public nuisances, and on the
 small Coat data the public-nuisance variant loses much of its accuracy. The
 certificates are informative only against a handful of fake profiles (on
-KuaiRec, 95\% of users at five profiles, none at fifty), and the variance
+KuaiRec, 95\% of users at five profiles, 1\% at fifty), and the variance
 and concentration bounds are loose by several orders of magnitude
 (Section~\ref{sec:mc}). The target $F^*$ is a linear LightGCN score of the
 full-exposure world, a normative choice that other stakeholders may not

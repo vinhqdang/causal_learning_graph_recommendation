@@ -29,7 +29,7 @@ Sample-split rows are means over five draws of the split-off pairs.
 | GF-CF, logged graph | 0.551 | 0.655 | 0.450 | 0.614 |
 | DR adjacency (no walk correction) | 0.546 | 0.657 | 0.449 | 0.638 |
 | DRUP | 0.547 | 0.657 | 0.449 | 0.638 |
-| DRUP-split (Assumption 2 holds) | 0.544 | 0.595 | 0.440 | 0.634 |
+| DRUP-split (Assumption 2 holds) | 0.544 | 0.595 | 0.440 | 0.632 |
 
 - The walk correction does not change top-K accuracy (DRUP vs DR adjacency:
   n.s. on all datasets; identical on Yahoo!R3 and KuaiRand, where validation

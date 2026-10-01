@@ -17,8 +17,8 @@ cross-fitted $W$-degrees do not, since the weight at a pair then depends on
 the exposures of other pairs, so configurations with $W$-degrees (selected on
 Yahoo!\,R3) lie outside the theorems. Only $\hat Y$-degrees make the
 certificates of Theorem~\ref{thm:robust} informative. EASE uses
-$\lambda\in\{10,100,1000\}$; GF-CF uses the ideal low-pass weight
-$\in\{0,0.3,1\}$ with $64$ or $256$ singular vectors. BSPM~\cite{choi2023bspm} uses blurring time
+$\lambda\in\{10,100,1000\}$; GF-CF uses four settings of (ideal low-pass weight, singular vectors):
+$(0,0)$, $(0.3,64)$, $(0.3,256)$ and $(1,256)$. BSPM~\cite{choi2023bspm} uses blurring time
 $\in\{1,2\}$, sharpening time $\in\{0,0.1,0.3\}$ and ideal low-pass weight
 $\in\{0,0.3\}$ with one Euler step each. On the DR graph, EASE, GF-CF and BSPM
 search the same nuisance grid as DR adjacency. The sample-split variants are
@@ -35,7 +35,7 @@ imputation (and propensity model, where it is estimated) is fitted on a random
 The grid combines the learning rates $10^{-2}$, $3\cdot10^{-3}$ and $10^{-3}$ with the
 weight decays $10^{-5}$, $10^{-4}$ and (Coat, and the MF models on Yahoo!\,R3)
 $10^{-3}$. Embeddings have 64 dimensions (Coat: 32 or 64). The graph models with
-the widest search (LightGCN, r-AdjNorm and SimGCL on Yahoo!\,R3, the pointwise
+the widest search (LightGCN and r-AdjNorm on Yahoo!\,R3, the pointwise
 and BPR LightGCN on KuaiRec, all graph models on Coat) also search one to three
 layers and 64 or 128 dimensions (Coat: 32 or 64); the others use two layers.
 PDA searches $\gamma\in\{0.1,0.2\}$, r-AdjNorm $r\in\{0.3,0.7\}$, SimGCL the
@@ -90,7 +90,7 @@ DRUP and DRUP-split against every other method); the Wilcoxon signed-rank
 $p$-values are adjusted over the same family. Within-reference adjustments are
 in the result files. The Wilcoxon signed-rank test gives the same conclusions except for the
 five-hop DRUP against DR comparison on KuaiRec ($p=0.66$ against 0.011) and for
-DRUP-split against pointwise LightGCN on KuaiRec ($p=0.30$ against $10^{-4}$). The
+DRUP-split against pointwise LightGCN on KuaiRec ($p_{\mathrm{Holm}}=0.48$ against $3\cdot10^{-4}$). The
 corrected resampled $t$-test over split means~\cite{nadeau2003} is far more
 conservative with five or ten splits and is reported in the result files.
 All tests condition on the training log and the fitted nuisances.
