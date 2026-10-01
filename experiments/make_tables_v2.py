@@ -51,6 +51,18 @@ def results(ds, prop):
     return out
 
 
+def loadfat(ds, prop, base=True):
+    """Audit results of a dataset: round-2 file (if base), overlaid by the round-3 sections
+    (_v3, and _v3x for sections that were run separately)."""
+    out = {}
+    names = ([f"fat_{ds}_{prop}.json"] if base else []) + [f"fat_{ds}_{prop}_v3.json", f"fat_{ds}_{prop}_v3x.json"]
+    for nm in names:
+        j = load(nm)
+        if j:
+            out.update(j)
+    return out or None
+
+
 def fmt(x, d=4):
     return "--" if x is None else f"{x:.{d}f}"
 
@@ -229,7 +241,7 @@ def fat():
     lines = ["\\begin{tabular}{llcccccc}", "\\toprule",
              "Data & Operator & nDCG & PRU & ECB & Gini@$K$ & user gap [95\\% CI] & coverage\\\\", "\\midrule"]
     for ds, prop, key, nm in DS:
-        j = load(f"fat_{ds}_{prop}.json")
+        j = loadfat(ds, prop)
         if not j or "fairness" not in j:
             continue
         for mth, lab in (("Obs", "logged graph"), ("IPS", "IPS adjacency"), ("DR", "DR adjacency"), ("DRUP", "DRUP")):
@@ -252,7 +264,7 @@ def fat():
              " & & \\multicolumn{2}{c}{frozen nuisances} & \\multicolumn{2}{c}{re-fitted, known $p/2$} & \\multicolumn{2}{c}{re-fitted, re-estimated $\\hat p$}\\\\",
              "Data & Operator & rank shift & $\\eta$ & rank shift & $\\eta$ & rank shift & $\\eta$\\\\", "\\midrule"]
     for ds, prop, key, nm in DS:
-        j = load(f"fat_{ds}_{prop}.json")
+        j = loadfat(ds, prop)
         if not j or "intervene" not in j:
             continue
         iv = j["intervene"]
@@ -531,7 +543,7 @@ def intervene_extra():
             ("DRUP-split/refit_known", "DRUP-split, re-fitted (known change)"),
             ("DRUP-split/refit_estimated", "DRUP-split, re-fitted (estimated)")]
     dss = [(ds, prop, nm) for ds, prop, _, nm in DS]
-    js = {ds: load(f"fat_{ds}_{prop}_v3.json") for ds, prop, _ in dss}
+    js = {ds: loadfat(ds, prop, base=False) for ds, prop, _ in dss}
     js = {k: v for k, v in js.items() if v and "intervene_extra" in v}
     if not js:
         return

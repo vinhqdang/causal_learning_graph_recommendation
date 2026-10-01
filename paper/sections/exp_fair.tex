@@ -19,7 +19,7 @@ Table~\ref{tab:interv} tests the prediction of Theorem~\ref{thm:fair} with a kno
 intervention on exposure. The operators use the cross-fitted protocol, which
 the theorem does not cover (Remark~\ref{rem:xfit}), so this is an empirical
 check. The logged graph behaves as the theorem predicts for correlational
-propagation: with frozen nuisances $\eta=+1.00$ to $+1.03$ on all three datasets, and
+propagation: with frozen nuisances $\eta=+1.00$ to $+1.03$ on all four datasets, and
 thinned items drop by 0.07--0.24 in mean within-user rank. On KuaiRec and Coat,
 DRUP is invariant to within a few hundredths ($\eta=-0.012$ and $-0.008$) and stays
 so when its nuisances are re-fitted on the thinned log, with the known or with
@@ -29,7 +29,7 @@ invariant as DRUP on these data; its over-correction ($\eta=-0.19$ in
 Table~\ref{tab:mc}) scales with $(1-p)/p\cdot\varepsilon^2$ (Theorem~\ref{thm:lower}), and
 the selected clips and imputations keep it small here.
 
-Yahoo!\,R3 is the exception, and Table~\ref{tab:tau} explains it. There,
+Yahoo!\,R3 and KuaiRand are the exceptions, and Table~\ref{tab:tau} explains the first. On Yahoo!\,R3,
 validation selects IPS edges ($\lambda=0$) with a clip of 0.1--0.2, which binds for
 82\% of the logged pairs at $\tau=0.2$. A clipped IPS edge is $O_eY_e/\tau$, proportional
 to the exposure itself, so DRUP inherits the elasticity of the logged graph
@@ -37,7 +37,11 @@ to the exposure itself, so DRUP inherits the elasticity of the logged graph
 ($\lambda=1$) and an accurate imputation the clipping bias is small
 (Theorem~\ref{thm:var}(c)) and invariance survives. Lowering the clip on Yahoo!\,R3
 reduces the elasticity to $+0.18\pm0.11$ at $\tau=5\cdot10^{-4}$, where almost no
-propensity is clipped, at a cost of 0.044 nDCG@5; the remaining elasticity and
+propensity is clipped, at a cost of 0.044 nDCG@5. KuaiRand follows the same pattern
+without a clip sweep: validation selects IPS edges with the smallest clip in the grid
+(0.02), which binds for 57\% of the treated logged pairs after the intervention,
+and DRUP is far from invariant ($\eta=+0.64$ with frozen nuisances, $+0.65$ when
+they are re-fitted; logged graph $+1.00$). The remaining elasticity and
 its large spread over the thinning draws come from heavy-tailed
 inverse-propensity weights on a log that is 2\% dense. Exposure invariance is
 therefore a property of the estimator under its assumptions, and whether a
@@ -108,5 +112,8 @@ because the estimated full-exposure scores are themselves concentrated on few it
 coefficient is 0.60 against 0.34. Exposure invariance and exposure concentration
 are different properties, and DRUP improves the first at the expense of the
 second. The user-group gaps do not differ between operators. They are clearly
-non-zero on Coat (men 0.11 above women) and on Yahoo!\,R3 (inactive users 0.046
-below active ones), under every operator, and not on KuaiRec.
+non-zero on Coat (men 0.11 above women), on Yahoo!\,R3 (inactive users 0.046
+below active ones) and on KuaiRand (inactive users 0.014 above active ones), under every
+operator, and not on KuaiRec. On KuaiRand the lists of DRUP, IPS and the logged graph
+are almost equally concentrated (Gini 0.43, coverage 0.98), as the scores of all
+three are close to each other there.
