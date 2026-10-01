@@ -71,7 +71,12 @@ followed by pointwise LightGCN (0.627; $+0.010$, $p_{\mathrm{Holm}}<10^{-3}$). I
 better than every operator on the logged graph (GF-CF 0.614, BSPM 0.614, linear
 LightGCN 0.604) and than the imputation used alone (0.619). GF-CF on the same DR
 graph performs as well as DRUP (0.637, $p_{\mathrm{Holm}}=1$), so the gain comes from
-the DR graph and not from a particular filter.
+the DR graph and not from a particular filter. A control that propagates the imputation alone
+(every edge is $\hat Y$, no observed residual) reaches 0.6312: about two thirds of the
+0.018 that DRUP gains over the imputation (0.6194) come from propagating the
+imputation, and one third from the observed residuals. On Coat the control equals
+the imputation (0.553 against 0.553; DRUP 0.547), and on Yahoo!\,R3 it is far below DRUP
+(0.528 against 0.657), where the IPS edges carry the signal.
 
 \paragraph{KuaiRand.} KuaiRand is the only dataset whose log records platform
 exposure. Its log is 0.7\% dense, and as on Yahoo!\,R3 validation selects IPS
