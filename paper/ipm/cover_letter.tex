@@ -27,15 +27,20 @@ the log: they hold for an independent log or a sample split, but not for
 nuisances cross-fitted on the same log, and a sample-split variant is
 evaluated alongside.
 
-The evaluation is deliberately conservative. On Coat, Yahoo!\ R3 and KuaiRec,
-whose test data are random or fully observed, DRUP is compared with 22 methods
-under one protocol (cross-fitted nuisances, per-split tuning of every method,
-user-level tests with Holm correction). The manuscript reports that the walk
+The evaluation is deliberately conservative. A semi-synthetic test on KuaiRec
+with known exposure shows that the correction removes the 18--29\% overestimate
+of the full-exposure utility of fixed allocations that uncorrected operators
+produce. On Coat, Yahoo!\ R3, KuaiRand and KuaiRec, whose test data are random
+or fully observed, DRUP is compared with up to 26 tuned baselines under one
+protocol (per-split tuning and early stopping of every method, user-level tests
+with Holm correction over all comparisons). The manuscript reports that the walk
 correction does not change top-$K$ accuracy or rankings, so that its
-contribution is at the level of scores, that training-free propagation over
-the doubly robust graph is the most accurate method on KuaiRec while trained
-graph models are better on Yahoo!\ R3, and that exposure invariance holds on
-Coat and KuaiRec but not at the selected configuration on Yahoo!\ R3.
+contribution is at the level of scores; that the most accurate method differs
+by dataset (iALS on Coat, BPR-trained graph models on Yahoo!\ R3 and KuaiRand,
+training-free propagation over the doubly robust graph on KuaiRec); that the
+sample split that the guarantees require costs accuracy on sparse logs; and that
+real-data exposure invariance holds where the selected configuration uses
+doubly robust edges, not where it uses clipped inverse-propensity edges.
 
 We believe the work fits the journal's interest in trustworthy information
 access and recommender systems. The manuscript is original, has not been

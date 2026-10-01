@@ -4,10 +4,10 @@
 \begin{document}
 \section*{Highlights}
 \begin{itemize}
-\item Inverse-propensity and doubly robust graph propagation are biased beyond one hop.
-\item DRUP removes the repeated-walk bias exactly for any odd number of hops.
-\item Its guarantees need nuisances independent of the log, e.g. a sample split.
-\item Training-free DR propagation beats tuned trained models on KuaiRec.
-\item Thinning audits confirm exposure invariance on Coat and KuaiRec only.
+\item Debiased graph propagation is biased beyond one hop: walks repeat edges.
+\item DRUP removes this bias exactly for any odd number of hops.
+\item Guarantees need nuisances independent of the log, e.g. a sample split.
+\item The correction fixes score values but not rankings on four benchmarks.
+\item Thinning audits show exposure invariance only for DR-edge configurations.
 \end{itemize}
 \end{document}
