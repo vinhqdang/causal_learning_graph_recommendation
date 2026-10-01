@@ -45,7 +45,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from drup.data import load_coat, load_yahoo, split_test  # noqa: E402
 from drup.estimation import clip_propensity, popularity_propensity  # noqa: E402
 from drup.khop import khop  # noqa: E402
-from drup.metrics import evaluate  # noqa: E402
+from drup.metrics import UserMetrics, evaluate  # noqa: E402
 from drup.pipeline import Nuisance, _impute, edge_weights  # noqa: E402
 from drup.propagation import degree_weights, edge_estimate, three_hop  # noqa: E402
 
@@ -68,7 +68,7 @@ class SplitNuisance:
 
     def __init__(self, d, O, Y, prop, q, seed=0):
         g = torch.Generator().manual_seed(seed + 12345)
-        self.A = torch.rand(O.shape, generator=g) < q
+        self.A = (torch.rand(O.shape, generator=g, device="cpu") < q).to(O.device)
         self.O, self.Y = O, Y
         Am = self.A.to(O.dtype)
         if prop == "given" and d.get("P_given") is not None:
@@ -243,18 +243,32 @@ def score_bank(d, method, cfg, nz, rows):
     return out
 
 
+def load_kuairand_cached():
+    """data/raw/kuairand.pt, or the compact sparse form (12 MB) when only that is present."""
+    if os.path.exists("data/raw/kuairand.pt"):
+        return torch.load("data/raw/kuairand.pt", weights_only=False)
+    c = pickle.load(open("data/raw/kuairand_compact.pkl", "rb"))
+    O = torch.zeros(c["shape"], dtype=torch.float32, device="cpu")
+    Y = torch.zeros(c["shape"], dtype=torch.float32, device="cpu")
+    oi, oj = torch.from_numpy(c["oi"]).long(), torch.from_numpy(c["oj"]).long()
+    O[oi, oj] = 1.0
+    Y[oi, oj] = torch.from_numpy(c["oy"]).float()
+    return {"name": c["name"], "O": O, "Y": Y, "P_given": None, "test": c["test"]}
+
+
 def load_dataset(name, dt):
     if name == "coat":
         d, ks, key, by = load_coat(), (5, 10), "ndcg@5", "entry"
     elif name == "yahoo":
         d, ks, key, by = load_yahoo(), (5, 10), "ndcg@5", "user"
     elif name == "kuairand":
-        d = torch.load("data/raw/kuairand.pt", weights_only=False)
+        d = load_kuairand_cached()
         ks, key, by = (5, 10, 20), "ndcg@10", "user"
     else:
         d = torch.load("data/raw/kuairec.pt", weights_only=False)
         ks, key, by = (10, 20, 50), "ndcg@20", "user"
-    d["O"], d["Y"] = d["O"].to(dt), d["Y"].to(dt)
+    dev = torch.zeros(()).device
+    d["O"], d["Y"] = d["O"].to(device=dev, dtype=dt), d["Y"].to(device=dev, dtype=dt)
     return d, ks, key, by
 
 
@@ -277,6 +291,7 @@ def main():
                     default=["Pop", "Impute", "Obs", "EASE", "GF-CF", "IPS", "IPS+WC", "DR", "DRUP",
                              "EASE-DR", "GF-CF-DR"])
     ap.add_argument("--dtype", default="float64")
+    ap.add_argument("--device", default=None, help="e.g. cuda: run all tensors there")
     ap.add_argument("--out", default=None)
     ap.add_argument("--redo", action="store_true", help="recompute methods already in --out")
     ap.add_argument("--split_seed", type=int, default=0, help="seed of the sample split A")
@@ -286,6 +301,8 @@ def main():
                     help="also write every configuration's validation and test score per split "
                          "(for tuning-budget curves)")
     a = ap.parse_args()
+    if a.device:
+        torch.set_default_device(a.device)
 
     dt = getattr(torch, a.dtype)
     if a.out and os.path.exists(a.out) and not a.redo and not a.dump_bank:
@@ -302,10 +319,20 @@ def main():
     nzs = SplitNuisance(d, d["O"], d["Y"], a.prop, a.split, seed=a.split_seed) if any(mth in SPLIT for mth in todo0) else None
     print(f"nuisance setup (xfit={a.xfit}) {time.time() - t0:.0f}s", flush=True)
     rows_users = sorted({u for u, _, _ in d["test"]})
-    rows = torch.tensor(rows_users)
+    rows = torch.tensor(rows_users, device="cpu").to(torch.zeros(()).device)
     row_of = {u: k for k, u in enumerate(rows_users)}
 
     splits = [split_test(d["test"], a.frac_val, s, by=by) for s in range(a.seeds)]
+    fast = None
+    if by == "user":
+        um_ = UserMetrics(d["test"], ks, row_of, torch.zeros(()).device)
+        pos_ = um_.pos
+        def _idx(lst):
+            us = tuple(u for u, it, rel in lst if len(it) > 0 and rel.sum() > 0)
+            return torch.tensor([pos_[u] for u in us], device=torch.zeros(()).device), us
+        vsp, tsp = [_idx(v) for v, _ in splits], [_idx(t) for _, t in splits]
+        fast = (um_, [x for x, _ in vsp], [x for x, _ in tsp])
+        tusers = [u for _, u in tsp]
     results = {}
     if a.out and os.path.exists(a.out):
         results = json.load(open(a.out)).get("results", {})
@@ -342,6 +369,19 @@ def main():
         for method, cfg in jobs[key_]:
             t0 = time.time()
             for c, s in score_bank(d, method, cfg, nzs if method in SPLIT else nz, rows):
+                if fast is not None:
+                    # per-user metrics once per score matrix, then means over each split's users
+                    um_, vidx, tidx = fast
+                    mt = um_.compute(s.detach() if isinstance(s, torch.Tensor) else torch.as_tensor(s))
+                    vm = [float(mt[key][vi].mean()) for vi in vidx]
+                    tm = []
+                    for ti, tu in zip(tidx, tusers):
+                        agg = {m_: float(v_[ti].mean()) for m_, v_ in mt.items()}
+                        tm.append((agg, mt[key][ti].float().cpu().numpy(), tu))
+                    banks[method].append((c, vm, tm))
+                    continue
+                if isinstance(s, torch.Tensor):
+                    s = s.detach().cpu().numpy()      # one device-to-host copy per score matrix
                 vm = [evaluate(s, v, ks, row_of)[key] for v, _ in splits]
                 tm = []
                 for _, t in splits:

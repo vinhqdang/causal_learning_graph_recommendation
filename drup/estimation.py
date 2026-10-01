@@ -78,7 +78,7 @@ def popularity_propensity(O, iters=50, ridge=1e-6, mask=None, return_params=Fals
 def fold_ids(shape, K, seed=0):
     """Random assignment of every (u, i) pair to one of K cross-fitting folds."""
     g = torch.Generator().manual_seed(seed)
-    return torch.randint(0, K, shape, generator=g, dtype=torch.int8)
+    return torch.randint(0, K, shape, generator=g, dtype=torch.int8, device="cpu").to(torch.zeros(()).device)
 
 
 def crossfit(fit, O, folds, K):
@@ -185,8 +185,8 @@ def lowrank_imputation(O, Y, P, rank=32, lam=10.0, ridge=5.0, iters=8, chunk=512
     Rz = O * (Y - base)                               # residual on logged pairs
     m, n = O.shape
     dt = O.dtype
-    U = 0.01 * torch.randn(m, rank, generator=g, dtype=torch.float64).to(dt)
-    V = 0.01 * torch.randn(n, rank, generator=g, dtype=torch.float64).to(dt)
+    U = 0.01 * torch.randn(m, rank, generator=g, dtype=torch.float64, device="cpu").to(device=torch.zeros(()).device, dtype=dt)
+    V = 0.01 * torch.randn(n, rank, generator=g, dtype=torch.float64, device="cpu").to(device=torch.zeros(()).device, dtype=dt)
     eye = torch.eye(rank, dtype=dt)
 
     def solve(Wm, Rm, F, out):
