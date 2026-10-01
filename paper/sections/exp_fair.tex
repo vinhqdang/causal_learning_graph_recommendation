@@ -23,7 +23,9 @@ propagation: with frozen nuisances $\eta=+1.00$ to $+1.03$ on all four datasets,
 thinned items drop by 0.07--0.24 in mean within-user rank. On KuaiRec and Coat,
 DRUP is invariant to within a few hundredths ($\eta=-0.012$ and $-0.008$) and stays
 so when its nuisances are re-fitted on the thinned log, with the known or with
-re-estimated propensities where they are estimated ($|\eta|\le0.022$). IPS adjacency is far from invariant
+re-estimated propensities where they are estimated ($|\eta|\le0.022$). This is what the theorem predicts, but the controls
+below show that the audit would give the same result for any estimator whose scores stay close to the
+imputation, so we read it as consistent with invariance, not as evidence for it. IPS adjacency is far from invariant
 ($\eta=+0.14$ on KuaiRec, $+0.90$ on Coat). The uncorrected DR adjacency is as
 invariant as DRUP on these data; its over-correction ($\eta=-0.19$ in
 Table~\ref{tab:mc}) scales with $(1-p)/p\cdot\varepsilon^2$ (Theorem~\ref{thm:lower}), and

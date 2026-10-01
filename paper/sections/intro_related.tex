@@ -32,21 +32,26 @@ meant to recover.
 We make this observation precise and remove the resulting bias exactly. Four
 points qualify its practical reach, and we state them up front. First, the
 guarantees need nuisances (propensities, imputation, degree weights and score
-constants) that do not depend on the log. Cross-fitting over pairs, the
-standard remedy, does not provide them for products of several edge
-estimates, and in simulation the correction then no longer reduces bias; a
-sample split does, and we treat this variant, DRUP-split, as the estimator
-that the theory covers. Second, for ranking the \emph{unexposed} candidates of
-a user with inverse-propensity edges, the repeated walks through the candidate
-vanish at three hops, and the bias only appears from five hops on; for DR
-edges it is present at three hops. Third, on four public benchmarks removing
-the bias does not change top-$K$ accuracy or rankings, also under exposure
-caps. Fourth, the correction does matter where score values are used: on a
-semi-synthetic log built from KuaiRec's fully observed matrix, uncorrected
-propagation overestimates the full-exposure utility of an allocation by
-18--29\%, and the corrected operator is within 2\%, provided that the
-propensities are correct and the propagation weights are fixed a priori. The
-contribution is therefore at the level of scores, not accuracy.
+constants) that do not depend on the log. Cross-fitting the propensity and the
+imputation suffices if the degree weights are fixed a priori, but not if they are
+computed from the log, which our experiments do; in that case the correction no
+longer reduces bias in simulation. A sample split does supply independent
+nuisances, and we treat this variant, DRUP-split, as the estimator that the theory
+covers. Second, for ranking the \emph{unexposed} candidates of a user with
+inverse-propensity edges, the repeated walks through the candidate vanish at three
+hops, and the bias only appears from five hops on; for DR edges it is present at
+three hops. Third, on four public benchmarks removing the bias does not change
+top-$K$ accuracy or rankings, also under exposure caps, and the most accurate
+method differs by dataset. Fourth, the correction matters where score values are
+used, but only under oracle conditions: on a semi-synthetic log built from
+KuaiRec's fully observed matrix, uncorrected propagation overestimates the
+full-exposure utility of an allocation by 18--29\%, and the corrected operator is
+within 2\%, provided that the propensities are correct and the propagation weights
+are fixed a priori; with estimated propensities all operators overstate utility by
+100--540\%. The contribution is therefore a diagnosis and an exact correction at the
+level of scores, not an accuracy gain, and we report where the evidence for each
+further property is weak: the thinning audit of exposure invariance, the private
+release and the certificates (Section~\ref{sec:disc}).
 
 \paragraph{Contributions.}
 \begin{enumerate}

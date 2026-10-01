@@ -112,8 +112,7 @@ preamble = r"""\documentclass[preprint,review,12pt,authoryear]{elsarticle}
 \begin{document}
 \begin{frontmatter}
 
-\title{Walk-unbiased doubly robust graph propagation for recommendation from
-exposure-biased logs}
+\title{Repeated-walk bias in debiased graph propagation for recommendation: an exact correction and its limits}
 
 % Anonymised for double-anonymised review: author details are given on the
 % separate title page (title_page.tex).
@@ -155,8 +154,7 @@ if supp:
 \renewcommand{\theequation}{S\arabic{equation}}
 \begin{document}
 \begin{center}{\large\bfseries Supplementary Material\\[2pt]
-Walk-unbiased doubly robust graph propagation for recommendation from
-exposure-biased logs}\end{center}
+Repeated-walk bias in debiased graph propagation for recommendation: an exact correction and its limits}\end{center}
 
 Theorem, table, section and equation numbers without the prefix S refer to the
 main text.

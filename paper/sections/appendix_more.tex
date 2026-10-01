@@ -103,3 +103,13 @@ and without the walk correction.}\label{tab:protocolfixed}
 \input{tables/protocol_fixed.tex}
 \end{adjustbox}
 \end{table}
+
+\begin{table}[t]\centering\scriptsize
+\caption{Key comparisons under three tests. $\Delta$: mean per-user difference of the dataset metric (first method minus second).
+$p_{\mathrm{Holm}}$: user-level paired $t$-test, Holm-adjusted over all comparisons of the dataset.
+$p_{\mathrm{NB}}$: corrected resampled $t$-test over the split means~\cite{nadeau2003}, unadjusted. $p_{\mathrm{TOST}}$: two
+one-sided user-level tests of equivalence within $\pm0.005$; a small value means that the two methods are equivalent. Sample-split rows use the first draw.}\label{tab:nbtost}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/nbtost.tex}
+\end{adjustbox}
+\end{table}
