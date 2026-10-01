@@ -352,22 +352,29 @@ def main():
             tr_np = treated.cpu().numpy()
             P2 = torch.where(treated[None, :], P_raw * 0.5, P_raw)
             P2A = torch.where(treated[None, :], P_A * 0.5, P_A)
-            S2 = {}
-            S2["DRUP-split/frozen"] = split_scores(O2, P2A, A, fsplit, True, Yh=Yh_A)[0]
-            S2["DRUP-split/refit_known"] = split_scores(O2, P2A, A, fsplit, True)[0]
+            # one score matrix at a time (a full set does not fit in memory on the large logs)
+            thunks = {}
+            thunks["DRUP-split/frozen"] = lambda: split_scores(O2, P2A, A, fsplit, True, Yh=Yh_A)[0]
+            thunks["DRUP-split/refit_known"] = lambda: split_scores(O2, P2A, A, fsplit, True)[0]
             if a.prop != "given":
-                S2["DRUP-split/refit_estimated"] = split_scores(
+                thunks["DRUP-split/refit_estimated"] = lambda: split_scores(
                     O2, popularity_propensity(O2, mask=A.to(dt))[0], A, fsplit, True)[0]
-            S2["Impute/refit_known"] = _impute(O2, Y, clip_propensity(P2, cfg_imp["floor"]),
-                                               dict(cfg_imp, imp=cfg_imp.get("imp", "add")))[rows]
-            S2["Pop/refit"] = (O2 * Y).sum(0, keepdim=True).expand(len(rows), -1)
+            thunks["Impute/refit_known"] = lambda: _impute(O2, Y, clip_propensity(P2, cfg_imp["floor"]),
+                                                           dict(cfg_imp, imp=cfg_imp.get("imp", "add")))[rows]
+            thunks["Pop/refit"] = lambda: (O2 * Y).sum(0, keepdim=True).expand(len(rows), -1)
+
+            def mis(mth):
+                def f():
+                    M0 = get_model(mth)
+                    cfg = cfgs[mth]
+                    W2 = edge_estimate(O2, Y, clip_propensity(P_raw, cfg["floor"]),
+                                       M0["Yhat"] if mth != "IPS" else None, cfg.get("cv", 1.0))
+                    return scores_with_consts(dict(M0, W=W2), rows)[0]
+                return f
             for mth in ("IPS", "DR", "DRUP"):
-                M0 = get_model(mth)
-                cfg = cfgs[mth]
-                W2 = edge_estimate(O2, Y, clip_propensity(P_raw, cfg["floor"]),
-                                   M0["Yhat"] if mth != "IPS" else None, cfg.get("cv", 1.0))
-                S2[f"{mth}/misspecified"] = scores_with_consts(dict(M0, W=W2), rows)[0]
-            for key, Sx in S2.items():
+                thunks[f"{mth}/misspecified"] = mis(mth)
+            for key, fn in thunks.items():
+                Sx = fn()
                 S0 = allS[key.split("/")[0]]
                 a0, c0 = within_user_rank(S0, test, row_of, n)
                 a1, c1_ = within_user_rank(Sx, test, row_of, n)
@@ -377,7 +384,9 @@ def main():
                     - (a1[ct].sum() / c1_[ct].sum() - a0[ct].sum() / c0[ct].sum())
                 res[key]["shift"].append(float(shift))
                 res[key]["eta"].append(score_elasticity(S0, Sx, test, row_of, tr_np))
-            del O2, P2, S2
+                del Sx
+                gc.collect()
+            del O2, P2, thunks
             gc.collect()
         out["intervene_extra"] = {"spearman_with_imputation": corr, "config_split": fsplit,
                                   "results": {k: {q: {"mean": float(np.mean(x)), "std": float(np.std(x)), "all": x}

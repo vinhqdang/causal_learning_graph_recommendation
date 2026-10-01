@@ -68,18 +68,20 @@ adds three controls. Popularity re-fitted on the thinned log has $\eta\approx1$
 and the imputation alone $\eta\approx0$ on Coat and Yahoo!\,R3 ($-0.16$ on KuaiRec), which brackets the scale. The negative
 control, which keeps the propensities of the original log, should push a
 debiasing estimator towards $\eta=1$. It does for IPS adjacency on all
-three datasets and for every operator on Yahoo!\,R3, whose selected configuration
-uses IPS edges, but not for DR adjacency or DRUP on Coat ($\eta=-0.004$ and
+four datasets and for every operator on Yahoo!\,R3 and KuaiRand, whose selected
+configurations use IPS edges, but not for DR adjacency or DRUP on Coat ($\eta=-0.004$ and
 $-0.008$) or on KuaiRec ($-0.087$ and $-0.088$). There, the scores are almost a function of the imputation (rank
 correlation 0.98--0.99 with $\hat Y$), which is fitted on exposed pairs and
 reacts little to a halved exposure of some items; the audit cannot detect a
 misspecified propensity model in this regime, and a near-zero $\eta$ on Coat
 says little beyond the invariance of $\hat Y$. DRUP-split, whose edge estimates
 are less dominated by the imputation (rank correlation 0.76 on Coat, 0.58 on
-Yahoo!\,R3), is invariant on Coat ($\eta\le0.022$ frozen or re-fitted) and much
-less elastic than the selected cross-fitted configuration on Yahoo!\,R3
-($\eta=+0.32$ against $+0.96$), because the sample-split configurations use DR
-edges there. The audit is thus informative for IPS-dominated configurations
+Yahoo!\,R3, 0.55 on KuaiRand), is invariant on Coat and KuaiRec ($|\eta|\le0.022$ frozen
+or re-fitted) and less elastic than the selected cross-fitted configuration on
+Yahoo!\,R3 and KuaiRand ($\eta=+0.32$ and $+0.33$ against $+0.96$ and $+0.64$).
+Both select IPS edges there, so the edge type does not explain the difference;
+a fifth of the split variant's pairs carry the exposure-free imputation instead
+of a clipped IPS edge, which may account for it, but we did not isolate this. The audit is thus informative for IPS-dominated configurations
 and weak for configurations whose scores are close to the imputation, and it
 should be reported with these controls.
 
