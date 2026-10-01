@@ -228,16 +228,21 @@ Table~\ref{tab:privfull}.}\label{tab:privacy}
 
 \paragraph{Privacy.} Table~\ref{tab:privacy} reports the jointly private variant of
 Theorem~\ref{thm:dp}, in which only public users inform the population-level
-nuisances. Useful privacy needs a large user base and a weak
-guarantee. On KuaiRec, private DRUP reaches nDCG@20 of 0.596 at $\epsilon=16$ and 0.530 at
-$\epsilon=8$, against 0.637 without privacy and 0.577 for popularity, and it is below
-popularity for $\epsilon\le8$. On Yahoo!\,R3 it reaches 0.574 at $\epsilon=16$ (non-private
-0.652, popularity 0.525). On Coat the public-nuisance model itself is weak, because
-29 public users cannot estimate the item parameters: without any noise it
-reaches only 0.454, below popularity. These numbers are lower than a variant
-that treats all nuisances as public would suggest, and they show the cost of an
-honest privacy accounting; privatising the nuisance models with a composed
-budget is left open.
+nuisances and the score constants $c_1,c_3$. The configuration is fixed a
+priori (clip 0.1, ridge 20, additive imputation, $\alpha=0.5$, control-variate
+weight 1, $\beta=1$), not selected on the test data. Useful privacy needs a large
+user base and a weak guarantee, and the public-nuisance model can itself be the
+limit. On KuaiRec, with 717 public users, private DRUP reaches nDCG@20 of 0.618
+at $\epsilon=16$ and 0.598 at $\epsilon=8$, against 0.634 without noise, 0.637
+with all nuisances and 0.577 for popularity; it falls below popularity for
+$\epsilon\le4$. On Coat (29 public users) the noise-free model reaches 0.548,
+only just above popularity (0.527), and it is below popularity at every finite
+$\epsilon$ (0.438 at $\epsilon=16$). On Yahoo!\,R3 the noise-free model with
+public nuisances reaches 0.492 and so is below popularity (0.525) at every
+$\epsilon$, although the non-private model with all nuisances reaches 0.652:
+1{,}540 public users do not estimate the item parameters of a 2\%-dense log. The
+privacy variant is therefore useful only on the largest log. Privatising the
+nuisance models with a composed budget is left open.
 
 \subsection{Exposure-capped allocation}\label{sec:rerank}
 

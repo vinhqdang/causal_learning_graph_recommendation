@@ -382,7 +382,9 @@ def explain_attack_privacy():
     lines = ["\\begin{tabular}{llccccccc}", "\\toprule",
              "Data & rank & $\\epsilon=0.5$ & 1 & 2 & 4 & 8 & 16 & $\\infty$\\\\", "\\midrule"]
     for ds, prop, key, nm in DS:
-        j = load(f"fat_{ds}_{prop}.json")
+        j = load(f"fat_{ds}_{prop}_v3.json")        # round 3: fixed configuration, public constants
+        if not j or "privacy" not in j:
+            j = load(f"fat_{ds}_{prop}.json")
         if not j or "privacy" not in j:
             continue
         pr = j["privacy"]["results"]
@@ -643,7 +645,9 @@ def compact():
     lines = ["\\begin{tabular}{lccccccccc}", "\\toprule",
              "Data & $\\epsilon=0.5$ & 1 & 2 & 4 & 8 & 16 & $\\infty$ & all nuisances & popularity\\\\", "\\midrule"]
     for ds, prop, key, nm in DS:
-        j = load(f"fat_{ds}_{prop}.json")
+        j = load(f"fat_{ds}_{prop}_v3.json")        # round 3: fixed configuration, public constants
+        if not j or "privacy" not in j:
+            j = load(f"fat_{ds}_{prop}.json")
         if not j or "privacy" not in j:
             continue
         pr = j["privacy"]["results"]
