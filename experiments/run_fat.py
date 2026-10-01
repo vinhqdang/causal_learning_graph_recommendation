@@ -69,7 +69,7 @@ def per_user_ndcg(S, test, row_of, k):
 def within_user_rank(S, test, row_of, n):
     """Mean within-user percentile rank (1 = top) of every item over users."""
     acc, cnt = np.zeros(n), np.zeros(n)
-    Sn = S.numpy()
+    Sn = S.cpu().numpy()
     for u, items, _ in test:
         if len(items) < 2:
             continue
@@ -86,7 +86,7 @@ def score_elasticity(S0, S1, test, row_of, treated):
     over the unbiased candidate entries of treated (t) and control (c) items.
     eta = 1 for exposure-proportional scores, 0 for exposure invariance."""
     acc = {"t0": 0.0, "t1": 0.0, "c0": 0.0, "c1": 0.0}
-    A0, A1 = S0.numpy(), S1.numpy()
+    A0, A1 = S0.cpu().numpy(), S1.cpu().numpy()
     for u, items, _ in test:
         if len(items) == 0:
             continue
@@ -99,12 +99,18 @@ def score_elasticity(S0, S1, test, row_of, treated):
     return float((np.log(acc["t1"] / acc["t0"]) - np.log(acc["c1"] / acc["c0"])) / np.log(0.5))
 
 
+def crand(*shape, generator):
+    """torch.rand from a CPU generator, moved to the default device."""
+    return torch.rand(*shape, generator=generator, device="cpu").to(torch.zeros(()).device)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dataset", default="coat")
     ap.add_argument("--prop", default="given")
     ap.add_argument("--sections", nargs="+", default=["fairness", "intervene", "explain", "attack", "privacy"])
     ap.add_argument("--dtype", default="float64")
+    ap.add_argument("--device", default=None)
     ap.add_argument("--reps", type=int, default=5)
     ap.add_argument("--n_explain", type=int, default=200)
     ap.add_argument("--methods", nargs="+", default=None)
@@ -118,6 +124,8 @@ def main():
                     help="privacy: configuration fixed a priori (fixed) or the non-private selection")
     a = ap.parse_args()
     dt = getattr(torch, a.dtype)
+    if a.device:
+        torch.set_default_device(a.device)
     if a.dataset == "coat":
         d = load_coat()
         K, kn = 5, 5
@@ -127,25 +135,27 @@ def main():
     elif a.dataset == "yahoo":
         d = load_yahoo()
         K, kn = 5, 5
-        act = d["O"].sum(1).numpy()
+        act = d["O"].sum(1).cpu().numpy()
         med = np.median(act[[u for u, _, _ in d["test"]]])
         groups = {u: int(act[u] > med) for u, _, _ in d["test"]}
         gname = "activity (inactive vs active)"
     elif a.dataset == "kuairand":
-        d = torch.load("data/raw/kuairand.pt", weights_only=False)
+        from experiments.run_filters import load_kuairand_cached
+        d = load_kuairand_cached()
         K, kn = 10, 10
-        act = d["O"].sum(1).numpy()
+        act = d["O"].sum(1).cpu().numpy()
         med = np.median(act[[u for u, _, _ in d["test"]]])
         groups = {u: int(act[u] > med) for u, _, _ in d["test"]}
         gname = "activity (inactive vs active)"
     else:
         d = torch.load("data/raw/kuairec.pt", weights_only=False)
         K, kn = 20, 20
-        act = d["O"].sum(1).numpy()
+        act = d["O"].sum(1).cpu().numpy()
         med = np.median(act[[u for u, _, _ in d["test"]]])
         groups = {u: int(act[u] > med) for u, _, _ in d["test"]}
         gname = "activity (inactive vs active)"
-    O, Y = d["O"].to(dt), d["Y"].to(dt)
+    dev = torch.zeros(()).device
+    O, Y = d["O"].to(device=dev, dtype=dt), d["Y"].to(device=dev, dtype=dt)
     m, n = O.shape
     nz = Nuisance(d, O, Y, a.prop, K=a.xfit, seed=0)
     P_raw = nz.P
@@ -158,7 +168,7 @@ def main():
         METHODS = a.methods
     fpath = a.filters_json or f"results/v2/filters_{a.dataset}_{a.prop}.json"
     cfgs = {mth: chosen_config(fpath, mth) for mth in METHODS}
-    item_pop = (O * Y).sum(0).numpy()
+    item_pop = (O * Y).sum(0).cpu().numpy()
     # true item quality on the unbiased data
     qa, qc = np.zeros(n), np.zeros(n)
     for u, items, rel in test:
@@ -232,11 +242,11 @@ def main():
         clip_frac = {mth: [] for mth in METHODS}
         g = torch.Generator().manual_seed(123)
         for r in range(a.reps):
-            treated = torch.rand(n, generator=g) < 0.5
-            keep = (torch.rand(m, n, generator=g) < 0.5).to(dt)
+            treated = crand(n, generator=g) < 0.5
+            keep = (crand(m, n, generator=g) < 0.5).to(dt)
             thin = torch.where(treated[None, :], keep, torch.ones_like(keep))
             O2 = O * thin
-            tr_np = treated.numpy()
+            tr_np = treated.cpu().numpy()
             # (ii) known intervention: the propensity of treated items is halved
             P2 = torch.where(treated[None, :], P_raw * 0.5, P_raw)
             cache.clear()
@@ -308,7 +318,7 @@ def main():
             return (s3 if b >= 1e3 else s1 + b * s3), Yh
 
         gA = torch.Generator().manual_seed(12345)
-        A = torch.rand(O.shape, generator=gA) < a.split       # the split of run_filters (seed 0)
+        A = crand(O.shape, generator=gA) < a.split       # the split of run_filters (seed 0)
         fsplit = chosen_config(fpath, "DRUP-split")
         P_A = P_raw if a.prop == "given" else popularity_propensity(O, mask=A.to(dt))[0]
         S_split, Yh_A = split_scores(O, P_A, A, fsplit, True)
@@ -325,7 +335,7 @@ def main():
             for u, items, rel in test:
                 if len(items) > 2:
                     r_ = row_of[u]
-                    c = spearmanr(Sx[r_, items].numpy(), S_imp[r_, items].numpy()).correlation
+                    c = spearmanr(Sx[r_, items].cpu().numpy(), S_imp[r_, items].cpu().numpy()).correlation
                     if np.isfinite(c):
                         rs.append(c)
             corr[nm] = float(np.mean(rs))
@@ -336,10 +346,10 @@ def main():
                                                         "DRUP/misspecified")}
         g = torch.Generator().manual_seed(123)
         for r in range(a.reps):
-            treated = torch.rand(n, generator=g) < 0.5
-            keep = (torch.rand(m, n, generator=g) < 0.5).to(dt)
+            treated = crand(n, generator=g) < 0.5
+            keep = (crand(m, n, generator=g) < 0.5).to(dt)
             O2 = O * torch.where(treated[None, :], keep, torch.ones_like(keep))
-            tr_np = treated.numpy()
+            tr_np = treated.cpu().numpy()
             P2 = torch.where(treated[None, :], P_raw * 0.5, P_raw)
             P2A = torch.where(treated[None, :], P_A * 0.5, P_A)
             S2 = {}
@@ -406,7 +416,7 @@ def main():
             s = user_scores(u, W[u], Gloo)
             full = S["DRUP"][row_of[u]]
             comp_err.append(float((s[items] - full[items]).abs().max() / full[items].abs().max().clamp_min(1e-12)))
-            order = items[np.argsort(-s[items].numpy())]
+            order = items[np.argsort(-s[items].cpu().numpy())]
             i, k2 = int(order[0]), int(order[1])
             logged = (O[u] > 0).to(dt)
             w0 = cv_drup * Yhat[u]      # unlogged value under the control-variate weight

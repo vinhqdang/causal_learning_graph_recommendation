@@ -16,9 +16,8 @@ Only the sample-split variants satisfy Assumption~\ref{as:fixed}.}\label{tab:acc
 \caption{User-level paired comparisons: mean difference of the test metric
 over users with a 95\% interval, and the $t$-test $p$-value, Holm-adjusted over
 all comparisons run for the dataset (four references against every other
-method: %KR-NCMP
-124 on Coat, 87 on Yahoo!\,R3, 120 on KuaiRec). Users with a positive
-candidate who are in the test part of at least one split (225, 2{,}310, %KR-NUSERS
+method: 124 on Coat, 87 on Yahoo!\,R3, 75 on KuaiRand, 120 on KuaiRec). Users with a positive
+candidate who are in the test part of at least one split (225, 2{,}310, 8{,}321 and
 1{,}410); sample-split rows use the first draw. Selected rows; all comparisons
 are in the result files.}\label{tab:sig}
 \begin{adjustbox}{max width=\textwidth}
@@ -32,11 +31,10 @@ conclusions.
 
 \paragraph{The walk correction does not change accuracy.} On every dataset DRUP
 and the uncorrected DR adjacency with the same grid are statistically
-indistinguishable (Coat $+0.0014$, KuaiRec $-0.0001$, %KR-CORR
-$p_{\mathrm{Holm}}=1$), and on Yahoo!\,R3 they coincide exactly, because
+indistinguishable (Coat $+0.0014$, KuaiRec $-0.0001$, $p_{\mathrm{Holm}}=1$), and on Yahoo!\,R3 and KuaiRand they coincide exactly, because
 validation selects the IPS end of the control-variate family ($\lambda=0$) on
 every split and IPS edges have no three-hop repeated-walk bias on unexposed
-candidates (Corollary~\ref{cor:cand}). The IPS adjacency and IPS with the
+candidates (Corollary~\ref{cor:cand}); on KuaiRand the selected clip is the smallest in the grid, 0.02, on all splits. The IPS adjacency and IPS with the
 correction give identical rankings on all datasets for the same reason. At five
 hops, where the correction is active for both edge types, the corrected
 operator is lower by 0.0003 nDCG@20 on KuaiRec ($p=0.011$ before and
@@ -50,7 +48,7 @@ guarantees, costs little on the larger and denser logs and much on the sparse
 one. On KuaiRec it reaches $0.6337\pm0.0013$ over draws of the split-off pairs,
 0.0035 below the cross-fitted DRUP ($p_{\mathrm{Holm}}=0.003$), and remains
 significantly above pointwise LightGCN ($+0.007$, $p_{\mathrm{Holm}}<10^{-3}$; Wilcoxon
-$p_{\mathrm{Holm}}=0.48$) and on par with DR-JL and MRDR ($p_{\mathrm{Holm}}=1$). %KR-SPLIT
+$p_{\mathrm{Holm}}=0.48$) and on par with DR-JL and MRDR ($p_{\mathrm{Holm}}=1$). 
 On Coat its accuracy depends on the draw ($0.544\pm0.011$, from 0.527 to 0.558):
 with 24 logged ratings per user, which fifth of them is spent on the nuisances
 matters, and the first draw is not significantly different from the
@@ -71,7 +69,19 @@ LightGCN 0.604) and than the imputation used alone (0.619). GF-CF on the same DR
 graph performs as well as DRUP (0.637, $p_{\mathrm{Holm}}=1$), so the gain comes from
 the DR graph and not from a particular filter.
 
-%KR-PARA KuaiRand paragraph to be written when its results are complete.
+\paragraph{KuaiRand.} KuaiRand is the only dataset whose log records platform
+exposure. Its log is 0.7\% dense, and as on Yahoo!\,R3 validation selects IPS
+edges ($\lambda=0$) on every split, so DRUP, DR adjacency and IPS adjacency
+coincide (nDCG@10 0.4492). They are not significantly different from GF-CF
+(0.4502) or BSPM (0.4498) on the logged graph, from iALS (0.4528) or from
+BPR-trained MF (0.4475; all $p_{\mathrm{Holm}}=1$), and they are significantly
+behind the BPR graph models: r-AdjNorm (0.4590; $-0.010$, $p_{\mathrm{Holm}}<10^{-3}$), LightGCN
+(0.4569; $-0.008$) and NAVIP (0.4565; $-0.008$; both $p_{\mathrm{Holm}}<10^{-3}$). They
+are significantly ahead of popularity (0.4204), of the pointwise models (LightGCN
+0.406, MF 0.371, DR-JL 0.376), of MACR (0.431) and of SimGCL (0.420). The sample split
+costs 0.009 ($0.4400\pm0.0007$ over five draws; $p_{\mathrm{Holm}}<10^{-3}$), with
+DRUP-split and DR adjacency under the split again indistinguishable
+($p_{\mathrm{Holm}}=1$). Only eleven baselines were trained on KuaiRand.
 
 \paragraph{Coat and Yahoo!\,R3.} On Coat (290 users, 15 candidates per user) the
 most accurate method is iALS (0.581), followed by BSPM on the logged graph,
@@ -119,7 +129,6 @@ models beat their BPR versions (LightGCN 0.627 against 0.609, MF 0.622 against
 0.596). Second, iALS is the strongest trained model on Coat and competitive on
 Yahoo!\,R3, but weak on KuaiRec (0.613), and the jointly learned DR models are
 the strongest trained models on KuaiRec but weak on the two small logs.
-%KR-BASE
 No single trained baseline is strong on all datasets. Third, re-training the
 split-0 selection with other seeds shows how much of a trained model's score
 is seed luck. On Yahoo!\,R3 and for the LightGCN variants on KuaiRec the
