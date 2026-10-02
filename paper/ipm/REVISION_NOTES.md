@@ -276,3 +276,14 @@ Reject), Perspective (Major), Devil's Advocate (Major).
   KuaiRec margins over DR-JL and MRDR are not significant (p = 1.0 and 0.34); "significantly better than every
   trained model" removed.
 - Table 1: DRUP split into DRUP-split (assumptions hold) and DRUP cross-fitted (as run, no guarantee).
+
+# Submission record
+- Submitted to Information Processing & Management (Elsevier) by the author, 2026-10-02.
+- Submitted version: repository commit 0080196 (manuscript 79 pages in review format, supplementary 22 pages,
+  title page, cover letter, highlights; title "Causal graph recommendation under exposure bias: removing the
+  repeated-walk bias of doubly robust propagation").
+- Internal review rounds before submission: five (decisions: Major Revision throughout; round 5: Journal-Fit
+  Reject, Methodology Major (light), Domain Major, Perspective Minor, Devil's Advocate Major).
+- Open at submission (not addressed): length (~45 pages main text); StableDR, DICE, CausE and AutoDebias not run;
+  tuning budgets of the training-free operators larger than those of the trained models (Table B.13 reports the
+  equal-budget case); the thinning audit has limited power; no real display-policy dataset showing eta near 0.
