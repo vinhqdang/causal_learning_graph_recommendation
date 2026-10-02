@@ -42,19 +42,20 @@ multi-hop propagation this is biased: a walk that traverses an edge several
 times multiplies its estimate with itself. We give the exact bias and remove it
 with DRUP (Doubly Robust, walk-Unbiased Propagation), which replaces each
 repeated edge by its idempotent counterpart; Möbius inversion extends the
-correction to any odd number of hops. The guarantees require nuisances that do not depend on the log.
-In simulation, cross-fitting suffices only if the degree weights are fixed a priori;
-with degrees taken from the log, as in our experiments, the correction no longer reduces bias. The correction
-changes no ranking: on Coat, Yahoo!\,R3, KuaiRand and KuaiRec its accuracy equals
-that of uncorrected DR propagation, and the most accurate method differs by
-dataset. It matters for score values, but only under oracle conditions: on a
-semi-synthetic KuaiRec log it removes an 18--29\% overestimate of an
-allocation's utility when propensities are true and weights fixed; with
-estimated propensities all operators overstate it by 100--540\%. The
-sample split that satisfies the assumptions costs up to 0.06 nDCG on sparse logs.
-A real-data thinning audit of exposure invariance has limited power: its negative
-control fails where invariance holds, and the selected configurations are not
-invariant on Yahoo!\,R3 and KuaiRand. Private release is useful only on the largest log.
+correction to any odd number of hops. The guarantees require nuisances that do
+not depend on the log. In simulation, cross-fitting suffices only if the degree
+weights are fixed a priori; with degrees taken from the log, as in our
+experiments, the correction no longer reduces bias. We find no detectable change
+in accuracy: on Coat, Yahoo!\,R3, KuaiRand and KuaiRec the corrected and
+uncorrected DR operators are equivalent within 0.005 nDCG, and the most accurate
+method differs by dataset. The correction matters for score values, but only under
+oracle conditions: on a semi-synthetic KuaiRec log it removes an 18--29\%
+overestimate of an allocation's utility when propensities are true and weights
+fixed, while with estimated propensities all operators overstate it by
+100--540\%. The sample split that satisfies the assumptions costs up to 0.06 nDCG
+on sparse logs. A real-data thinning audit of exposure invariance has limited
+power, and the selected configurations are not invariant on Yahoo!\,R3 and
+KuaiRand. Private release is useful only on the largest log.
 \end{abstract}
 
 \begin{keyword}
@@ -108,7 +109,7 @@ covers. Second, for ranking the \emph{unexposed} candidates of a user with
 inverse-propensity edges, the repeated walks through the candidate vanish at three
 hops, and the bias only appears from five hops on; for DR edges it is present at
 three hops. Third, on four public benchmarks removing the bias does not change
-top-$K$ accuracy or rankings, also under exposure caps, and the most accurate
+top-$K$ accuracy beyond 0.005 nDCG, also under exposure caps, and the most accurate
 method differs by dataset. Fourth, the correction matters where score values are
 used, but only under oracle conditions: on a semi-synthetic log built from
 KuaiRec's fully observed matrix, uncorrected propagation overestimates the
@@ -1292,12 +1293,14 @@ three are close to each other there.
 On the four benchmarks the walk correction does not change top-$K$
 accuracy, and in simulation the uncorrected DR operator can even agree
 slightly better with the full-exposure ranking, because its bias adds weight
-to the imputation (Section~\ref{sec:mc}). The correction matters wherever the
+to the imputation (Section~\ref{sec:mc}). The correction can matter where the
 \emph{value} of a propagated score is used rather than only its order within
-one user's list: when scores are compared across users, as in the
-exposure-capped allocation; when they are aggregated into an estimate of
-full-exposure utility; and when an auditor wants to verify that expected
-scores do not depend on exposure. In these uses the uncorrected estimate is
+one user's list, for instance when scores are aggregated into an estimate of
+full-exposure utility. It did not matter for the uses we tested that compare
+scores across users: the exposure-capped allocation loses 79--84\% of the achievable
+utility under every estimator (Section~\ref{sec:semisynth}), and the thinning audit
+does not separate the corrected from the uncorrected operator
+(Section~\ref{sec:fair}). Where score values are used, the uncorrected estimate is
 biased by 1.8 to 15 times the target over all pairs in the model of
 Table~\ref{tab:mc} (0.09 to 2.2 times in the models of Table~\ref{tab:protocol}), and the
 bias grows with the number of hops and with small propensities. Two limits
@@ -1312,10 +1315,11 @@ log or the sample split of DRUP-split. We have no evidence that the correction c
 rankings, within users or under exposure caps: DRUP and DR adjacency are equivalent
 within $\pm0.005$ nDCG by two one-sided tests ($p<10^{-3}$) on Yahoo!\,R3, KuaiRand and
 KuaiRec and marginally on Coat ($p=0.034$; Table~S17 in the Supplementary Material). A practitioner who only needs
-rankings loses nothing by using the uncorrected DR adjacency; one who uses
-score values across users or pairs, audits exposure invariance, or propagates
-over five hops or more, should use the corrected operator. In both cases, most of
-the accuracy comes from training-free propagation over a doubly robust graph.
+rankings loses nothing by using the uncorrected DR adjacency; one who aggregates
+score values or propagates over five hops or more needs the corrected operator for the estimate to be
+unbiased, with the caveats above. In both cases, most of the accuracy comes from training-free
+propagation over a doubly robust graph, whose gain over the imputation alone is two thirds from
+propagating the imputation.
 
 \paragraph{Where the evidence is weak} Five results limit what the paper can claim, and
 we collect them here because each sits in a table far from the abstract.
@@ -1415,12 +1419,14 @@ Propagation-level debiasing needs to consider the propagation operator itself,
 not only the edges it propagates: multiplying unbiased edge estimates does not
 give an unbiased multi-hop score. The repeated-walk bias is exactly
 removable, and the tools that remove it (idempotent reduction and Möbius
-inversion over walk-index coincidences) apply to any polynomial graph filter
-built from inverse-propensity or DR estimates. Our evaluation also shows that
+inversion over walk-index coincidences) extend to polynomial filters of
+odd degree on binary outcomes built from inverse-propensity or DR edge estimates, as far as
+Theorem~\ref{thm:khop} goes. Our evaluation also shows that
 training-free propagation over a DR graph is a strong baseline against which
-trained debiased graph recommenders should be compared, and that claims of
-exposure invariance can be tested on real data by thinning exposures with a
-known factor.
+trained debiased graph recommenders should be compared. Claims of exposure
+invariance can be probed on real data by thinning exposures with a known factor, but our
+controls show that such an audit has little power unless it includes a negative control and a
+configuration whose scores are not dominated by the imputation.
 
 \paragraph{For practice}
 At three hops DRUP runs at the asymptotic cost of one item Gram matrix and needs no gradient training,

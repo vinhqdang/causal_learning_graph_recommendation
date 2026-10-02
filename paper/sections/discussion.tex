@@ -6,12 +6,14 @@
 On the four benchmarks the walk correction does not change top-$K$
 accuracy, and in simulation the uncorrected DR operator can even agree
 slightly better with the full-exposure ranking, because its bias adds weight
-to the imputation (Section~\ref{sec:mc}). The correction matters wherever the
+to the imputation (Section~\ref{sec:mc}). The correction can matter where the
 \emph{value} of a propagated score is used rather than only its order within
-one user's list: when scores are compared across users, as in the
-exposure-capped allocation; when they are aggregated into an estimate of
-full-exposure utility; and when an auditor wants to verify that expected
-scores do not depend on exposure. In these uses the uncorrected estimate is
+one user's list, for instance when scores are aggregated into an estimate of
+full-exposure utility. It did not matter for the uses we tested that compare
+scores across users: the exposure-capped allocation loses 79--84\% of the achievable
+utility under every estimator (Section~\ref{sec:semisynth}), and the thinning audit
+does not separate the corrected from the uncorrected operator
+(Section~\ref{sec:fair}). Where score values are used, the uncorrected estimate is
 biased by 1.8 to 15 times the target over all pairs in the model of
 Table~\ref{tab:mc} (0.09 to 2.2 times in the models of Table~\ref{tab:protocol}), and the
 bias grows with the number of hops and with small propensities. Two limits
@@ -26,10 +28,11 @@ log or the sample split of DRUP-split. We have no evidence that the correction c
 rankings, within users or under exposure caps: DRUP and DR adjacency are equivalent
 within $\pm0.005$ nDCG by two one-sided tests ($p<10^{-3}$) on Yahoo!\,R3, KuaiRand and
 KuaiRec and marginally on Coat ($p=0.034$; Table~\ref{tab:nbtost} in the Supplementary Material). A practitioner who only needs
-rankings loses nothing by using the uncorrected DR adjacency; one who uses
-score values across users or pairs, audits exposure invariance, or propagates
-over five hops or more, should use the corrected operator. In both cases, most of
-the accuracy comes from training-free propagation over a doubly robust graph.
+rankings loses nothing by using the uncorrected DR adjacency; one who aggregates
+score values or propagates over five hops or more needs the corrected operator for the estimate to be
+unbiased, with the caveats above. In both cases, most of the accuracy comes from training-free
+propagation over a doubly robust graph, whose gain over the imputation alone is two thirds from
+propagating the imputation.
 
 \paragraph{Where the evidence is weak.} Five results limit what the paper can claim, and
 we collect them here because each sits in a table far from the abstract.
@@ -129,12 +132,14 @@ Propagation-level debiasing needs to consider the propagation operator itself,
 not only the edges it propagates: multiplying unbiased edge estimates does not
 give an unbiased multi-hop score. The repeated-walk bias is exactly
 removable, and the tools that remove it (idempotent reduction and Möbius
-inversion over walk-index coincidences) apply to any polynomial graph filter
-built from inverse-propensity or DR estimates. Our evaluation also shows that
+inversion over walk-index coincidences) extend to polynomial filters of
+odd degree on binary outcomes built from inverse-propensity or DR edge estimates, as far as
+Theorem~\ref{thm:khop} goes. Our evaluation also shows that
 training-free propagation over a DR graph is a strong baseline against which
-trained debiased graph recommenders should be compared, and that claims of
-exposure invariance can be tested on real data by thinning exposures with a
-known factor.
+trained debiased graph recommenders should be compared. Claims of exposure
+invariance can be probed on real data by thinning exposures with a known factor, but our
+controls show that such an audit has little power unless it includes a negative control and a
+configuration whose scores are not dominated by the imputation.
 
 \paragraph{For practice.}
 At three hops DRUP runs at the asymptotic cost of one item Gram matrix and needs no gradient training,

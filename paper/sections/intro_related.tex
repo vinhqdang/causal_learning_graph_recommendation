@@ -41,7 +41,7 @@ covers. Second, for ranking the \emph{unexposed} candidates of a user with
 inverse-propensity edges, the repeated walks through the candidate vanish at three
 hops, and the bias only appears from five hops on; for DR edges it is present at
 three hops. Third, on four public benchmarks removing the bias does not change
-top-$K$ accuracy or rankings, also under exposure caps, and the most accurate
+top-$K$ accuracy beyond 0.005 nDCG, also under exposure caps, and the most accurate
 method differs by dataset. Fourth, the correction matters where score values are
 used, but only under oracle conditions: on a semi-synthetic log built from
 KuaiRec's fully observed matrix, uncorrected propagation overestimates the
