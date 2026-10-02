@@ -89,7 +89,7 @@ def main():
                 # IPS-end configuration); floating-point noise is not a difference
                 rows.append({"ref": ref, "other": m, "n_users": int(len(d)), "diff": 0.0,
                              "ci95": [0.0, 0.0], "p_t": 1.0, "p_wilcoxon": 1.0, "p_nb_splits": 1.0,
-                             "tost_p": 0.0, "identical": True})
+                             "tost_p": 0.0, "tost_by_margin": {"0.002": 0.0, "0.005": 0.0, "0.01": 0.0}, "identical": True})
                 continue
             se = d.std(ddof=1) / np.sqrt(len(d))
             tcrit = stats.t.ppf(0.975, len(d) - 1)
@@ -99,10 +99,14 @@ def main():
             except ValueError:
                 p_w = 1.0
             dof = len(d) - 1
-            p_lo = float(1 - stats.t.cdf((d.mean() + a.tost) / se, dof))       # H0: mean <= -margin
-            p_hi = float(stats.t.cdf((d.mean() - a.tost) / se, dof))           # H0: mean >= +margin
+            def tost(margin):
+                lo = float(1 - stats.t.cdf((d.mean() + margin) / se, dof))      # H0: mean <= -margin
+                hi = float(stats.t.cdf((d.mean() - margin) / se, dof))          # H0: mean >= +margin
+                return max(lo, hi)
+            p_lo, p_hi = None, None
             rows.append({"ref": ref, "other": m, "n_users": int(len(d)), "diff": float(d.mean()),
-                         "tost_p": max(p_lo, p_hi),
+                         "tost_p": tost(a.tost),
+                         "tost_by_margin": {str(mg): tost(mg) for mg in (0.002, 0.005, 0.01)},
                          "ci95": [float(d.mean() - tcrit * se), float(d.mean() + tcrit * se)],
                          "p_t": p_t, "p_wilcoxon": p_w,
                          "p_nb_splits": nadeau_bengio(res[ref], r, key, a.frac_val)})
@@ -113,6 +117,11 @@ def main():
         r["p_holm"] = float(q)
     for r, q in zip(rows, holm([r["p_wilcoxon"] for r in rows])):
         r["p_wilcoxon_holm"] = float(q)
+    # Nadeau-Bengio p-values adjusted over the same family as the t-test (identical rankings excluded:
+    # their splits give zero variance)
+    nb = [r["p_nb_splits"] for r in rows]
+    for r, q in zip(rows, holm(nb)):
+        r["p_nb_holm"] = float(q)
     for ref in a.ref:
         fam = [r for r in rows if r["ref"] == ref]
         for r, q in zip(fam, holm([r["p_t"] for r in fam])):

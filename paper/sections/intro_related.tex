@@ -262,11 +262,15 @@ NAVIP & edge weights & no & no & no\\
 \shortstack[l]{r-AdjNorm, APDA,\\CAGED, DPAA} & learned & no & no & no\\[2pt]
 DR adjacency (uncorrected) & DR edges & no & edge-wise & no$^\ast$\\
 \midrule
-DRUP (ours) & DR edges & any odd $K$ & yes$^\dagger$ & in expectation$^\dagger$\\
+DRUP-split (ours; assumptions hold) & DR edges & any odd $K$ & yes$^\dagger$ & in expectation$^\dagger$\\
+DRUP, cross-fitted (ours; as run) & DR edges & no$^\ddagger$ & no$^\ddagger$ & no$^\ddagger$\\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
 \par\smallskip
-\raggedright\scriptsize $^\ast$Over-corrects (Theorem~\ref{thm:fair}); invariant in our real-data audits.
-$^\dagger$Under Assumptions~\ref{as:unconf}--\ref{as:fixed} (e.g., the sample split) and unclipped propensities.
+\raggedright\scriptsize $^\ast$Over-corrects (Theorem~\ref{thm:fair}) with nuisances independent of the log; as invariant as DRUP in our real-data audits, which cannot tell them apart.
+$^\dagger$Guaranteed under Assumptions~\ref{as:unconf}--\ref{as:fixed} (the sample split) and unclipped propensities.
+$^\ddagger$No guarantee: nuisances are cross-fitted on the same log and degree weights and score constants are computed from it
+(Remark~\ref{rem:xfit}); in simulation the correction then no longer reduces bias, and the audited configurations are not invariant on Yahoo!\,R3 and KuaiRand.
+The cross-fitted operator is what the accuracy tables report; its accuracy equals that of uncorrected DR adjacency.
 \end{table}

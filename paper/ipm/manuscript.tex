@@ -46,9 +46,9 @@ correction to any odd number of hops. The guarantees require nuisances that do
 not depend on the log. In simulation, cross-fitting suffices only if the degree
 weights are fixed a priori; with degrees taken from the log, as in our
 experiments, the correction no longer reduces bias. We find no detectable change
-in accuracy: on Coat, Yahoo!\,R3, KuaiRand and KuaiRec the corrected and
-uncorrected DR operators are equivalent within 0.005 nDCG, and the most accurate
-method differs by dataset. The correction matters for score values, but only under
+in accuracy: the corrected and uncorrected DR operators are equivalent within
+0.005 nDCG on KuaiRec, marginally on Coat, and identical on Yahoo!\,R3 and KuaiRand,
+and the most accurate method differs by dataset. The correction matters for score values, but only under
 oracle conditions: on a semi-synthetic KuaiRec log it removes an 18--29\%
 overestimate of an allocation's utility when propensities are true and weights
 fixed, while with estimated propensities all operators overstate it by
@@ -330,13 +330,17 @@ NAVIP & edge weights & no & no & no\\
 \shortstack[l]{r-AdjNorm, APDA,\\CAGED, DPAA} & learned & no & no & no\\[2pt]
 DR adjacency (uncorrected) & DR edges & no & edge-wise & no$^\ast$\\
 \midrule
-DRUP (ours) & DR edges & any odd $K$ & yes$^\dagger$ & in expectation$^\dagger$\\
+DRUP-split (ours; assumptions hold) & DR edges & any odd $K$ & yes$^\dagger$ & in expectation$^\dagger$\\
+DRUP, cross-fitted (ours; as run) & DR edges & no$^\ddagger$ & no$^\ddagger$ & no$^\ddagger$\\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
 \par\smallskip
-\raggedright\scriptsize $^\ast$Over-corrects (Theorem~\ref{thm:fair}); invariant in our real-data audits.
-$^\dagger$Under Assumptions~\ref{as:unconf}--\ref{as:fixed} (e.g., the sample split) and unclipped propensities.
+\raggedright\scriptsize $^\ast$Over-corrects (Theorem~\ref{thm:fair}) with nuisances independent of the log; as invariant as DRUP in our real-data audits, which cannot tell them apart.
+$^\dagger$Guaranteed under Assumptions~\ref{as:unconf}--\ref{as:fixed} (the sample split) and unclipped propensities.
+$^\ddagger$No guarantee: nuisances are cross-fitted on the same log and degree weights and score constants are computed from it
+(Remark~\ref{rem:xfit}); in simulation the correction then no longer reduces bias, and the audited configurations are not invariant on Yahoo!\,R3 and KuaiRand.
+The cross-fitted operator is what the accuracy tables report; its accuracy equals that of uncorrected DR adjacency.
 \end{table}
 
 %======================================================================
@@ -1017,9 +1021,12 @@ conclusions.
 
 \paragraph{The walk correction does not change accuracy} On every dataset DRUP
 and the uncorrected DR adjacency with the same grid are not significantly
-different (Coat $+0.0014$, KuaiRec $-0.0001$, $p_{\mathrm{Holm}}=1$) and are equivalent within
-$\pm0.005$ nDCG by two one-sided tests ($p_{\mathrm{TOST}}<10^{-3}$ on Yahoo!\,R3, KuaiRand and KuaiRec,
-0.034 on Coat; Table~S17), and on Yahoo!\,R3 and KuaiRand they coincide exactly, because
+different (Coat $+0.0014$, KuaiRec $-0.0001$, $p_{\mathrm{Holm}}=1$). Only KuaiRec and, marginally,
+Coat can test equivalence: within $\pm0.005$ nDCG the two operators are equivalent on KuaiRec
+($p_{\mathrm{TOST}}<10^{-3}$, also at $\pm0.002$) and marginally so on Coat ($p_{\mathrm{TOST}}=0.034$, but 0.38 at
+$\pm0.002$; Table~S17). The margin is a convention, about twice the split-to-split standard deviation of the
+methods on KuaiRec (0.002--0.004). On Yahoo!\,R3 and KuaiRand the two operators coincide exactly, so
+there is no test to run, because
 validation selects the IPS end of the control-variate family ($\lambda=0$) on
 every split and IPS edges have no three-hop repeated-walk bias on unexposed
 candidates (Corollary~\ref{cor:cand}); on KuaiRand the selected clip is the smallest in the grid, 0.02, on all splits. The IPS adjacency and IPS with the
@@ -1050,10 +1057,13 @@ score values: the imputed pairs bias the utility estimates upwards.
 \paragraph{Propagation over the DR graph is what helps on KuaiRec} On KuaiRec,
 whose test matrix is fully observed and whose candidate sets have 3{,}314 items,
 training-free propagation over the DR graph reaches nDCG@20 of 0.638 and is
-significantly better than every trained model at the user level: the best are the jointly
-learned doubly robust models DR-JL and MRDR (0.633; $+0.004$, $p_{\mathrm{Holm}}=0.003$; with the
-Nadeau--Bengio test over splits the margin over DR-JL is not significant, $p=0.14$, and over MRDR $p=0.006$, and it is smaller than their seed spread of 0.009 and 0.015),
-followed by pointwise LightGCN (0.627; $+0.010$, $p_{\mathrm{Holm}}<10^{-3}$). It is also
+ahead of every trained model at the user level, but by little over the best ones: the jointly
+learned doubly robust models DR-JL and MRDR (0.633; $+0.004$, $p_{\mathrm{Holm}}=0.003$). With the
+Nadeau--Bengio test over splits, adjusted over the same family, neither margin is significant
+($p_{\mathrm{NB,Holm}}=1.0$ and $0.34$), and both are smaller than the seed spread of 0.009 and 0.015 of
+these models. The margin over pointwise LightGCN (0.627; $+0.010$) is significant under both tests
+($p_{\mathrm{NB,Holm}}=0.03$). The next ranks are
+It is also
 better than every operator on the logged graph (GF-CF 0.614, BSPM 0.614, linear
 LightGCN 0.604) and than the imputation used alone (0.619). GF-CF on the same DR
 graph performs as well as DRUP (0.637, $p_{\mathrm{Holm}}=1$), so the gain comes from
@@ -1312,9 +1322,9 @@ on the log: with nuisances cross-fitted on the same log, the corrected
 operator is not less biased than the uncorrected one in simulation
 (Section~\ref{sec:mc}), so a user of the score values needs an independent
 log or the sample split of DRUP-split. We have no evidence that the correction changes
-rankings, within users or under exposure caps: DRUP and DR adjacency are equivalent
-within $\pm0.005$ nDCG by two one-sided tests ($p<10^{-3}$) on Yahoo!\,R3, KuaiRand and
-KuaiRec and marginally on Coat ($p=0.034$; Table~S17 in the Supplementary Material). A practitioner who only needs
+accuracy: DRUP and DR adjacency are equivalent within $\pm0.005$ nDCG on KuaiRec
+($p_{\mathrm{TOST}}<10^{-3}$) and marginally on Coat ($0.034$), and identical on Yahoo!\,R3 and
+KuaiRand, where they cannot differ (Table~S17 in the Supplementary Material). A practitioner who only needs
 rankings loses nothing by using the uncorrected DR adjacency; one who aggregates
 score values or propagates over five hops or more needs the corrected operator for the estimate to be
 unbiased, with the caveats above. In both cases, most of the accuracy comes from training-free
@@ -1340,9 +1350,9 @@ release is useful only on the largest log: it falls below popularity at every $\
 Coat and Yahoo!\,R3 and for $\epsilon\le4$ on KuaiRec. The certificates cover 10--26\% of
 users at 20 fake profiles, and at 200 fake profiles a DR or DRUP target reaches
 39\% of KuaiRec users, against 10\% under IPS. (v) The statistical evidence is thinner
-than the user-level tests suggest. With the Nadeau--Bengio test over splits, DRUP is no
-longer significantly ahead of DR-JL on KuaiRec ($p=0.14$ against $p_{\mathrm{Holm}}=0.003$; MRDR
-$p=0.006$), and its 0.004 margin is smaller than the seed spread of DR-JL (0.009) and MRDR (0.015). We also note
+than the user-level tests suggest. With the Nadeau--Bengio test over splits, adjusted over the same family, DRUP is no
+longer significantly ahead of DR-JL or MRDR on KuaiRec ($p=1.0$ and $0.34$, against
+$p_{\mathrm{Holm}}=0.003$ at the user level), and its 0.004 margin is smaller than the seed spread of DR-JL (0.009) and MRDR (0.015). We also note
 that DRUP searched 384 to 6{,}300 configurations against 6 to 108 for the trained models;
 at the six configurations of DR-JL its expected KuaiRec score is 0.618 against 0.633.
 

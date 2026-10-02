@@ -185,18 +185,20 @@ def significance():
 
 NBT = [("DRUP", "DR", "DRUP vs DR adjacency"), ("DRUP-5hop", "DR-5hop", "DRUP vs DR adjacency, 5 hops"),
        ("DRUP-split", "DR-split", "DRUP-split vs DR-split"), ("DRUP", "GF-CF-DR", "DRUP vs GF-CF on DR graph"),
-       ("DRUP-split", "DRUP", "DRUP-split vs DRUP"), ("DRUP", "DR-JL", "DRUP vs DR-JL"),
+       ("DRUP-split", "DRUP", "DRUP-split vs DRUP"), ("DRUP", "DR-JL", "DRUP vs DR-JL"), ("DRUP", "MRDR", "DRUP vs MRDR"),
        ("DRUP", "LightGCN-pt", "DRUP vs LightGCN (pointwise)"), ("DRUP", "iALS", "DRUP vs iALS"),
        ("DRUP", "r-AdjNorm", "DRUP vs r-AdjNorm")]
 
 
 def nbtost():
-    """Key comparisons under three tests: user-level t-test (Holm over the dataset), Nadeau-Bengio
-    corrected resampled t-test over split means, and equivalence (TOST, margin 0.005 nDCG)."""
+    """Key comparisons under three tests, all adjusted over the same family of the dataset:
+    user-level t-test (Holm), Nadeau-Bengio corrected resampled t-test over split means (Holm over the
+    same family), and equivalence (TOST) at margin 0.005 nDCG with the 0.002 and 0.01 margins as
+    sensitivity. Identical rankings are marked: their test is a tautology."""
     def f(p):
         return "$<10^{-3}$" if p < 1e-3 else f"{p:.3f}"
     lines = ["\\begin{tabular}{l" + "c" * len(DS) + "}", "\\toprule",
-             "Comparison ($\\Delta$; $p_{\\mathrm{Holm}}$ / $p_{\\mathrm{NB}}$ / $p_{\\mathrm{TOST}}$) & " + " & ".join(nm for _, _, _, nm in DS) + "\\\\", "\\midrule"]
+             "Comparison (first minus second) & " + " & ".join(nm for _, _, _, nm in DS) + "\\\\", "\\midrule"]
     tabs = {}
     for ds, prop, _, _ in DS:
         j = load(f"significance_{ds}_{prop}.json")
@@ -205,8 +207,14 @@ def nbtost():
         cells = []
         for ds, _, _, _ in DS:
             r = tabs[ds].get((ref, other))
-            cells.append("--" if r is None or "tost_p" not in r else
-                         f"{r['diff']:+.4f}; {f(r['p_holm'])} / {f(r['p_nb_splits'])} / {f(r['tost_p'])}")
+            if r is None or "tost_p" not in r:
+                cells.append("--")
+            elif r.get("identical"):
+                cells.append("identical rankings")
+            else:
+                tb = r["tost_by_margin"]
+                cells.append(f"{r['diff']:+.4f}; {f(r['p_holm'])} / {f(r['p_nb_holm'])} / "
+                             f"{f(tb['0.005'])} [{f(tb['0.002'])}, {f(tb['0.01'])}]")
         lines.append(f"{label} & " + " & ".join(cells) + "\\\\")
     lines += ["\\bottomrule", "\\end{tabular}"]
     open(f"{T}/nbtost.tex", "w").write("\n".join(lines) + "\n")

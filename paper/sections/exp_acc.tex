@@ -31,9 +31,12 @@ conclusions.
 
 \paragraph{The walk correction does not change accuracy.} On every dataset DRUP
 and the uncorrected DR adjacency with the same grid are not significantly
-different (Coat $+0.0014$, KuaiRec $-0.0001$, $p_{\mathrm{Holm}}=1$) and are equivalent within
-$\pm0.005$ nDCG by two one-sided tests ($p_{\mathrm{TOST}}<10^{-3}$ on Yahoo!\,R3, KuaiRand and KuaiRec,
-0.034 on Coat; Table~\ref{tab:nbtost}), and on Yahoo!\,R3 and KuaiRand they coincide exactly, because
+different (Coat $+0.0014$, KuaiRec $-0.0001$, $p_{\mathrm{Holm}}=1$). Only KuaiRec and, marginally,
+Coat can test equivalence: within $\pm0.005$ nDCG the two operators are equivalent on KuaiRec
+($p_{\mathrm{TOST}}<10^{-3}$, also at $\pm0.002$) and marginally so on Coat ($p_{\mathrm{TOST}}=0.034$, but 0.38 at
+$\pm0.002$; Table~\ref{tab:nbtost}). The margin is a convention, about twice the split-to-split standard deviation of the
+methods on KuaiRec (0.002--0.004). On Yahoo!\,R3 and KuaiRand the two operators coincide exactly, so
+there is no test to run, because
 validation selects the IPS end of the control-variate family ($\lambda=0$) on
 every split and IPS edges have no three-hop repeated-walk bias on unexposed
 candidates (Corollary~\ref{cor:cand}); on KuaiRand the selected clip is the smallest in the grid, 0.02, on all splits. The IPS adjacency and IPS with the
@@ -64,10 +67,13 @@ score values: the imputed pairs bias the utility estimates upwards.
 \paragraph{Propagation over the DR graph is what helps on KuaiRec.} On KuaiRec,
 whose test matrix is fully observed and whose candidate sets have 3{,}314 items,
 training-free propagation over the DR graph reaches nDCG@20 of 0.638 and is
-significantly better than every trained model at the user level: the best are the jointly
-learned doubly robust models DR-JL and MRDR (0.633; $+0.004$, $p_{\mathrm{Holm}}=0.003$; with the
-Nadeau--Bengio test over splits the margin over DR-JL is not significant, $p=0.14$, and over MRDR $p=0.006$, and it is smaller than their seed spread of 0.009 and 0.015),
-followed by pointwise LightGCN (0.627; $+0.010$, $p_{\mathrm{Holm}}<10^{-3}$). It is also
+ahead of every trained model at the user level, but by little over the best ones: the jointly
+learned doubly robust models DR-JL and MRDR (0.633; $+0.004$, $p_{\mathrm{Holm}}=0.003$). With the
+Nadeau--Bengio test over splits, adjusted over the same family, neither margin is significant
+($p_{\mathrm{NB,Holm}}=1.0$ and $0.34$), and both are smaller than the seed spread of 0.009 and 0.015 of
+these models. The margin over pointwise LightGCN (0.627; $+0.010$) is significant under both tests
+($p_{\mathrm{NB,Holm}}=0.03$). The next ranks are
+It is also
 better than every operator on the logged graph (GF-CF 0.614, BSPM 0.614, linear
 LightGCN 0.604) and than the imputation used alone (0.619). GF-CF on the same DR
 graph performs as well as DRUP (0.637, $p_{\mathrm{Holm}}=1$), so the gain comes from

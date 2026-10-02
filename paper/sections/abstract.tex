@@ -9,9 +9,9 @@ correction to any odd number of hops. The guarantees require nuisances that do
 not depend on the log. In simulation, cross-fitting suffices only if the degree
 weights are fixed a priori; with degrees taken from the log, as in our
 experiments, the correction no longer reduces bias. We find no detectable change
-in accuracy: on Coat, Yahoo!\,R3, KuaiRand and KuaiRec the corrected and
-uncorrected DR operators are equivalent within 0.005 nDCG, and the most accurate
-method differs by dataset. The correction matters for score values, but only under
+in accuracy: the corrected and uncorrected DR operators are equivalent within
+0.005 nDCG on KuaiRec, marginally on Coat, and identical on Yahoo!\,R3 and KuaiRand,
+and the most accurate method differs by dataset. The correction matters for score values, but only under
 oracle conditions: on a semi-synthetic KuaiRec log it removes an 18--29\%
 overestimate of an allocation's utility when propensities are true and weights
 fixed, while with estimated propensities all operators overstate it by

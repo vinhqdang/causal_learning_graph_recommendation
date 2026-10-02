@@ -266,3 +266,13 @@ Reject), Perspective (Major), Devil's Advocate (Major).
   stale propensities move eta) and a real platform display-policy dataset showing eta ~ 0.
 - StableDR, DICE, CausE and AutoDebias baselines (the uniform data are used for evaluation only).
 - Equalising the tuning budgets (reported in Table B.13 instead).
+
+## Round 5 follow-ups (commit after b3e4079)
+- Abstract and intro: "changes no ranking" replaced by "no detectable change in accuracy"; two Discussion
+  inconsistencies fixed (capped allocation; audit); "any polynomial filter" narrowed to odd degree and binary outcomes.
+- Equivalence tests: identical rankings (Yahoo!R3, KuaiRand) are marked as such instead of reporting a tautological
+  TOST; margin sensitivity (0.002, 0.01) shown; the margin is stated to be a convention.
+- Nadeau-Bengio p-values are now Holm-adjusted over the same family as the user-level tests. After adjustment the
+  KuaiRec margins over DR-JL and MRDR are not significant (p = 1.0 and 0.34); "significantly better than every
+  trained model" removed.
+- Table 1: DRUP split into DRUP-split (assumptions hold) and DRUP cross-fitted (as run, no guarantee).

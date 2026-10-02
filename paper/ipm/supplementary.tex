@@ -426,8 +426,9 @@ and without the walk correction.}\label{tab:protocolfixed}
 \begin{table}[t]\centering\scriptsize
 \caption{Key comparisons under three tests. $\Delta$: mean per-user difference of the dataset metric (first method minus second).
 $p_{\mathrm{Holm}}$: user-level paired $t$-test, Holm-adjusted over all comparisons of the dataset.
-$p_{\mathrm{NB}}$: corrected resampled $t$-test over the split means~\citep{nadeau2003}, unadjusted. $p_{\mathrm{TOST}}$: two
-one-sided user-level tests of equivalence within $\pm0.005$; a small value means that the two methods are equivalent. Sample-split rows use the first draw.}\label{tab:nbtost}
+$p_{\mathrm{NB}}$: corrected resampled $t$-test over the split means~\citep{nadeau2003}, Holm-adjusted over the same family. $p_{\mathrm{TOST}}$: two
+one-sided user-level tests of equivalence within $\pm0.005$ nDCG, with the margins $\pm0.002$ and $\pm0.01$ in brackets as sensitivity; a small value means that
+the two methods are equivalent. ``Identical rankings'': the two operators select the same configuration on every split, so no test applies. The margin is a convention, not derived from the data. Sample-split rows use the first draw.}\label{tab:nbtost}
 \begin{adjustbox}{max width=\textwidth}
 \input{../tables/nbtost.tex}
 \end{adjustbox}

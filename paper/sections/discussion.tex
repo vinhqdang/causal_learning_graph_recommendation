@@ -25,9 +25,9 @@ on the log: with nuisances cross-fitted on the same log, the corrected
 operator is not less biased than the uncorrected one in simulation
 (Section~\ref{sec:mc}), so a user of the score values needs an independent
 log or the sample split of DRUP-split. We have no evidence that the correction changes
-rankings, within users or under exposure caps: DRUP and DR adjacency are equivalent
-within $\pm0.005$ nDCG by two one-sided tests ($p<10^{-3}$) on Yahoo!\,R3, KuaiRand and
-KuaiRec and marginally on Coat ($p=0.034$; Table~\ref{tab:nbtost} in the Supplementary Material). A practitioner who only needs
+accuracy: DRUP and DR adjacency are equivalent within $\pm0.005$ nDCG on KuaiRec
+($p_{\mathrm{TOST}}<10^{-3}$) and marginally on Coat ($0.034$), and identical on Yahoo!\,R3 and
+KuaiRand, where they cannot differ (Table~\ref{tab:nbtost} in the Supplementary Material). A practitioner who only needs
 rankings loses nothing by using the uncorrected DR adjacency; one who aggregates
 score values or propagates over five hops or more needs the corrected operator for the estimate to be
 unbiased, with the caveats above. In both cases, most of the accuracy comes from training-free
@@ -53,9 +53,9 @@ release is useful only on the largest log: it falls below popularity at every $\
 Coat and Yahoo!\,R3 and for $\epsilon\le4$ on KuaiRec. The certificates cover 10--26\% of
 users at 20 fake profiles, and at 200 fake profiles a DR or DRUP target reaches
 39\% of KuaiRec users, against 10\% under IPS. (v) The statistical evidence is thinner
-than the user-level tests suggest. With the Nadeau--Bengio test over splits, DRUP is no
-longer significantly ahead of DR-JL on KuaiRec ($p=0.14$ against $p_{\mathrm{Holm}}=0.003$; MRDR
-$p=0.006$), and its 0.004 margin is smaller than the seed spread of DR-JL (0.009) and MRDR (0.015). We also note
+than the user-level tests suggest. With the Nadeau--Bengio test over splits, adjusted over the same family, DRUP is no
+longer significantly ahead of DR-JL or MRDR on KuaiRec ($p=1.0$ and $0.34$, against
+$p_{\mathrm{Holm}}=0.003$ at the user level), and its 0.004 margin is smaller than the seed spread of DR-JL (0.009) and MRDR (0.015). We also note
 that DRUP searched 384 to 6{,}300 configurations against 6 to 108 for the trained models;
 at the six configurations of DR-JL its expected KuaiRec score is 0.618 against 0.633.
 
