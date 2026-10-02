@@ -112,7 +112,7 @@ preamble = r"""\documentclass[preprint,review,12pt,authoryear]{elsarticle}
 \begin{document}
 \begin{frontmatter}
 
-\title{Repeated-walk bias in debiased graph propagation for recommendation: an exact correction and its limits}
+\title{Causal graph recommendation under exposure bias: removing the repeated-walk bias of doubly robust propagation}
 
 % Anonymised for double-anonymised review: author details are given on the
 % separate title page (title_page.tex).
@@ -154,7 +154,7 @@ if supp:
 \renewcommand{\theequation}{S\arabic{equation}}
 \begin{document}
 \begin{center}{\large\bfseries Supplementary Material\\[2pt]
-Repeated-walk bias in debiased graph propagation for recommendation: an exact correction and its limits}\end{center}
+Causal graph recommendation under exposure bias: removing the repeated-walk bias of doubly robust propagation}\end{center}
 
 Theorem, table, section and equation numbers without the prefix S refer to the
 main text.
