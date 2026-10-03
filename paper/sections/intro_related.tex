@@ -2,243 +2,178 @@
 \section{Introduction}
 %======================================================================
 
-Graph-based recommender systems represent users and items as nodes and
-logged interactions as edges, and they score a user--item pair by aggregating
-signals along multi-hop walks~\cite{he2020lightgcn,shen2021gfcf}. The logged
-graph, however, is not the preference graph. An edge exists only if the
-platform \emph{exposed} the item and the user then responded, so the graph
-records the exposure policy as much as the user's taste. A recent survey of
-causal learning in graph-based recommendation~\cite{yu2026survey} traces
-several open problems of the field, among them fairness, interpretability and
-out-of-distribution behaviour, to message passing over this observational
-graph, and it lists theoretical guarantees and privacy as open directions.
-
-Two families of corrections exist. \emph{Loss-level} debiasing re-weights the
-training objective by inverse propensities or doubly robust (DR)
-terms~\cite{schnabel2016,wang2019drjl,saito2020unbiased}, but it leaves the
+Graph-based recommenders represent users and items as nodes and logged
+interactions as edges, and they score a user--item pair by aggregating signals
+along multi-hop walks~\citep{he2020lightgcn,shen2021gfcf}. The logged graph is
+not the preference graph. An edge exists only if the platform \emph{exposed}
+the item and the user then responded, so the graph records the exposure policy
+as much as the user's taste. Causal learning offers two families of
+corrections. \emph{Loss-level} debiasing re-weights the training objective by
+inverse propensities or doubly robust (DR)
+terms~\citep{schnabel2016,wang2019drjl,saito2020unbiased}, but it leaves the
 propagation operator of a graph model untouched. \emph{Propagation-level}
-debiasing changes the propagated graph itself, for example by weighting each
-edge by its inverse propensity~\cite{kim2022navip} or by learning
-popularity-aware aggregation weights~\cite{zhou2023apda,dpaa2026}. This paper
-starts from a simple observation about the second family. An inverse-propensity
-edge estimate $W_e=O_eY_e/p_e$ is unbiased for the potential outcome $Y_e$,
-but a walk that traverses $e$ twice contributes $W_e^2$, and
-$\E[W_e^2]=Y_e/p_e\neq Y_e$. The same happens for DR edge estimates. Walks that
-repeat an edge are part of every multi-hop operator: the back-and-forth step
-$u\to j\to u$ of a three-hop walk is one. Their excess is largest where the
-propensity is smallest, that is, on the rarely exposed edges that debiasing is
-meant to recover.
+debiasing changes the propagated graph, for example by weighting each edge by
+its inverse propensity~\citep{kim2022navip} or by learning popularity-aware
+aggregation weights~\citep{zhou2023apda,dpaa2026}.
 
-We make this observation precise and remove the resulting bias exactly. Four
-points qualify its practical reach, and we state them up front. First, the
-guarantees need nuisances (propensities, imputation, degree weights and score
-constants) that do not depend on the log. Cross-fitting the propensity and the
-imputation suffices if the degree weights are fixed a priori, but not if they are
-computed from the log, which our experiments do; in that case the correction no
-longer reduces bias in simulation. A sample split does supply independent
-nuisances, and we treat this variant, DRUP-split, as the estimator that the theory
-covers. Second, for ranking the \emph{unexposed} candidates of a user with
-inverse-propensity edges, the repeated walks through the candidate vanish at three
-hops, and the bias only appears from five hops on; for DR edges it is present at
-three hops. Third, on four public benchmarks removing the bias does not change
-top-$K$ accuracy beyond 0.005 nDCG, also under exposure caps, and the most accurate
-method differs by dataset. Fourth, the correction matters where score values are
-used, but only under oracle conditions: on a semi-synthetic log built from
-KuaiRec's fully observed matrix, uncorrected propagation overestimates the
-full-exposure utility of an allocation by 18--29\%, and the corrected operator is
-within 2\%, provided that the propensities are correct and the propagation weights
-are fixed a priori; with estimated propensities all operators overstate utility by
-100--540\%. The contribution is therefore a diagnosis and an exact correction at the
-level of scores, not an accuracy gain, and we report where the evidence for each
-further property is weak: the thinning audit of exposure invariance, the private
-release and the certificates (Section~\ref{sec:disc}).
+This paper starts from a simple observation about the second family. An
+inverse-propensity edge estimate $W_e=O_eY_e/p_e$ is unbiased for the potential
+outcome $Y_e$, where $O_e$ indicates that edge $e$ was exposed, $Y_e$ is the
+outcome and $p_e$ the exposure propensity. A walk that traverses $e$ twice
+contributes $W_e^2$, and $\E[W_e^2]=Y_e/p_e\neq Y_e$. The same holds for DR edge
+estimates. Walks that repeat an edge are part of every multi-hop operator: the
+back-and-forth step $u\to j\to u$ of a three-hop walk is one. Their excess is
+largest where the propensity is smallest, that is, on the rarely exposed edges
+that debiasing is meant to recover.
+
+%======================================================================
+\section{Research objectives and contributions}\label{sec:objectives}
+%======================================================================
+
+The aim of this study is to determine whether and when removing the
+repeated-walk bias helps graph recommendation from exposure-biased logs. We
+pursue four objectives, each tied to a research question (RQ).
+
+\begin{description}
+\item[O1 (estimator).] Derive the exact bias of inverse-propensity and DR graph
+propagation and an estimator that removes it. \emph{RQ1: how large is the bias,
+and can it be removed exactly at a cost comparable to the uncorrected operator?}
+\item[O2 (conditions).] State the conditions under which the correction is
+unbiased and test them in the way practitioners fit nuisances. \emph{RQ2: do the
+guarantees survive cross-fitting and data-dependent degree weights?}
+\item[O3 (value).] Measure what the correction changes. \emph{RQ3: does it
+improve the accuracy of recommendations against tuned baselines on four
+benchmarks, and does it improve the values of the scores on a log with known
+exposure?}
+\item[O4 (invariance).] Test on real logs the prediction that expected scores do
+not depend on an item's exposure. \emph{RQ4: how informative is a thinning audit
+of this property?}
+\end{description}
+
+\paragraph{Answers in brief.} The bias is exact and removable at three hops for
+the cost of one item Gram matrix (RQ1). The guarantees need nuisances that do
+not depend on the log: cross-fitting suffices if the degree weights are fixed a
+priori, but not if they are computed from the log, which our experiments do
+(RQ2). The correction leaves accuracy unchanged on four datasets, and it
+improves score values only under oracle conditions: true propensities and
+weights fixed in advance (RQ3). The thinning audit has little power and the
+selected configurations are not invariant on two of four datasets (RQ4).
 
 \paragraph{Contributions.}
 \begin{enumerate}
-\item \emph{Diagnosis.} We give the exact conditional bias of inverse-propensity
-and DR graph propagation on unexposed candidates. It is unbounded as
-propensities vanish, and under a propensity clip $\tau$ its worst case is
-$\Theta(1/\tau)$ (Theorem~\ref{thm:lower}).
+\item \emph{Diagnosis.} The exact conditional bias of inverse-propensity and DR
+propagation on unexposed candidates; under a propensity clip $\tau$ its worst
+case is $\Theta(1/\tau)$ (Theorem~\ref{thm:lower}).
 \item \emph{Estimator.} DRUP (Doubly Robust, walk-Unbiased Propagation) uses
-$Y_e^2=Y_e$ for binary outcomes and replaces every repeated edge by its
-idempotent unbiased counterpart. The three-hop operator has the asymptotic
-cost of the uncorrected one (one item Gram matrix plus $O(mn)$ reductions) and
-factorises into a public item operator and per-user corrections. Möbius
-inversion over the coincidence patterns of walk indices makes the correction
-exact for any odd number of hops (Theorem~\ref{thm:khop}). A sample split
-supplies nuisances that do not depend on the edge estimates.
-\item \emph{Guarantees.} With nuisances that do not depend on the log, DRUP is
-edge-wise doubly robust for propagation over the full-exposure graph
-(Theorem~\ref{thm:unbiased}); on unexposed candidates it is unbiased up to the
-imputation error at the candidate itself (Corollary~\ref{cor:cand}); its bias
-under exposure dependence within a user's history is of second order in the
-imputation error (Proposition~\ref{prop:dep}); we bound its variance and
-clipping bias (Theorem~\ref{thm:var}); and its expected scores do not respond
-to interventions on an item's exposure (Theorem~\ref{thm:fair}). Properties
-that follow from linearity alone (attributions, certificates, joint
-differential privacy, capped allocation) hold for any linear operator and are
-in the Supplementary Material.
-\item \emph{Evaluation.} We check the guarantees and their scope by Monte
-Carlo, including the gap between the theory and cross-fitted nuisances; test
-score values and score-based decisions on a semi-synthetic KuaiRec log with
-known propensities; and compare DRUP with up to 26 tuned baselines on Coat~\cite{schnabel2016},
-Yahoo!\,R3~\cite{marlin2009collaborative}, KuaiRand~\cite{gao2022kuairand} and
-KuaiRec~\cite{gao2022kuairec}, whose test data are random or fully observed,
-with per-split validation for every method, an analysis of tuning budgets,
-and user-level tests with Holm correction. Real-data thinning interventions,
-with a negative control, test exposure invariance.
+$Y_e^2=Y_e$ for binary outcomes and replaces each repeated edge by its
+idempotent unbiased counterpart. The three-hop operator has the asymptotic cost
+of the uncorrected one, and Möbius inversion over the coincidence patterns of
+walk indices makes the correction exact for any odd number of hops
+(Theorem~\ref{thm:khop}). A sample split supplies nuisances independent of the
+edge estimates (DRUP-split).
+\item \emph{Guarantees and their scope.} With nuisances independent of the log,
+DRUP is edge-wise doubly robust for propagation over the full-exposure graph
+(Theorem~\ref{thm:unbiased}), unbiased on unexposed candidates up to the
+imputation error at the candidate (Corollary~\ref{cor:cand}), and its expected
+scores do not respond to interventions on an item's exposure
+(Theorem~\ref{thm:fair}). We show by simulation where these guarantees fail.
+\item \emph{Evidence.} A semi-synthetic test on KuaiRec with known exposure;
+a comparison with up to 26 tuned baselines on Coat, Yahoo!\,R3, KuaiRand and
+KuaiRec with user-level tests; and real-data thinning audits with a negative
+control. The properties that follow from linearity alone (attributions,
+certificates, private release, capped allocation) are in the Supplementary
+Material.
 \end{enumerate}
 
-%======================================================================
-\section{Related work}
-%======================================================================
+\paragraph{Outline.} Section~\ref{sec:related} reviews related work,
+Section~\ref{sec:drup} presents the method, Section~\ref{sec:setup} the datasets,
+baselines and protocol, Section~\ref{sec:results} the results, and
+Section~\ref{sec:disc} the theoretical and practical implications and limits.
 
-We review the lines of work that DRUP touches. Table~\ref{tab:related}
-summarises how DRUP relates to representative methods.
+%======================================================================
+\section{Related work}\label{sec:related}
+%======================================================================
 
 \paragraph{Graph-based recommendation.}
-Graph neural recommenders learn user and item representations by propagating
-embeddings over the user--item graph. NGCF~\cite{wang2019ngcf} stacks
-non-linear propagation layers, and LightGCN~\cite{he2020lightgcn} shows that
-removing feature transformations and non-linearities improves accuracy, which
-reduces propagation to a weighted sum of powers of a normalised adjacency.
-UltraGCN~\cite{mao2021ultragcn} approximates infinite-layer propagation with a
-constraint loss, and SGL~\cite{wu2021sgl} and SimGCL~\cite{yu2022simgcl} add
-contrastive views. Closed-form models are strong competitors of trained
-propagation: EASE~\cite{steck2019ease} learns an item--item matrix with a
-zero diagonal in closed form, and EDLAE~\cite{steck2020edlae} generalises the
-constraint by penalising the diagonal, which, like our diagonal correction of
-$G$, removes an item's own contribution to its score; GF-CF~\cite{shen2021gfcf} and
-BSPM~\cite{choi2023bspm} interpret collaborative filtering as graph signal
-filtering, and graph convolutions can trade accuracy for
-diversity~\cite{isufi2021accuracy}. Reproducibility studies show that carefully
-tuned simple baselines often match graph models~\cite{anelli2023myth}. All these
-models propagate over the \emph{logged} graph. DRUP keeps the linear
-propagation form of LightGCN and of closed-form filters but propagates over an
-unbiased estimate of the full-exposure graph, and we compare it with EASE and
-GF-CF on both graphs.
+Graph neural recommenders propagate embeddings over the user--item graph.
+LightGCN~\citep{he2020lightgcn} removes feature transformations and
+non-linearities, which reduces propagation to a weighted sum of powers of a
+normalised adjacency; UltraGCN~\citep{mao2021ultragcn} approximates
+infinite-layer propagation, and SGL~\citep{wu2021sgl} and
+SimGCL~\citep{yu2022simgcl} add contrastive views. Closed-form models are strong
+competitors: EASE~\citep{steck2019ease} and EDLAE~\citep{steck2020edlae} learn an
+item--item matrix with a constrained diagonal, which, like our diagonal
+correction, removes an item's own contribution to its score;
+GF-CF~\citep{shen2021gfcf} and BSPM~\citep{choi2023bspm} cast collaborative
+filtering as graph signal filtering. Carefully tuned simple baselines often
+match graph models~\citep{anelli2023myth}. All of these propagate over the
+\emph{logged} graph. DRUP keeps the linear propagation form but propagates over
+an unbiased estimate of the full-exposure graph.
 
-\paragraph{Bias and debiasing in recommendation.}
-Recommendation logs are missing not at random: users see what the system
-exposed and rate what they chose to rate~\cite{marlin2009collaborative}.
-Surveys organise the resulting biases and their remedies~\cite{chen2023bias}
-and cast debiasing as causal inference~\cite{gao2024causalsurvey}.
-Propensity-based methods re-weight the loss by inverse exposure
-probabilities~\cite{schnabel2016}, possibly self-normalised to reduce
-variance~\cite{swaminathan2015snips}; \citet{saito2020unbiased} extend them
-to implicit feedback, and \citet{liang2016exposure} model exposure as a
-latent variable. Doubly robust learning combines inverse propensities with
-an imputation model~\cite{wang2019drjl}, and later variants reduce its bias
-and variance~\cite{guo2021mrdr,dai2022gdr,li2023stabledr} or learn
-information-theoretic representations~\cite{wang2020cvib}. A small uniformly
-logged sample can supervise the debiasing itself~\cite{chen2021autodebias}.
-Causal approaches to popularity bias remove its direct effect by
-counterfactual inference~\cite{wei2021macr}, adjust for it as a
-confounder~\cite{zhang2021pda}, or disentangle interest from
-conformity~\cite{zheng2021dice}. In this journal, popularity debiasing has
-been studied from the user and item side jointly~\cite{boratto2021connecting},
-with a controllable accuracy trade-off~\cite{okamura2024flexibly}, through
-invariant learning with biased imputation~\cite{bai2025invariant}, and by
-causal deconfounding of multi-criteria ratings~\cite{guo2026confounding}.
-These methods correct the loss or the output of a model. DRUP applies IPS and
-DR estimation to the \emph{edges} of the propagated graph, and its
-control-variate family interpolates between the two.
+\paragraph{Debiasing in recommendation.}
+Logs are missing not at random~\citep{marlin2009collaborative}; surveys organise
+the resulting biases and cast debiasing as causal
+inference~\citep{chen2023bias,gao2024causalsurvey}. Propensity-based methods
+re-weight the loss~\citep{schnabel2016,swaminathan2015snips,saito2020unbiased}.
+Doubly robust learning adds an imputation model~\citep{wang2019drjl}, and later
+variants reduce its bias and variance~\citep{guo2021mrdr,dai2022gdr,li2023stabledr}.
+A small uniform sample can supervise the debiasing~\citep{chen2021autodebias}.
+Causal approaches to popularity bias use counterfactual
+inference~\citep{wei2021macr}, confounder adjustment~\citep{zhang2021pda} or
+disentangled representations~\citep{zheng2021dice}; recent work in this journal
+studies popularity debiasing from both sides~\citep{boratto2021connecting}, with a
+controllable trade-off~\citep{okamura2024flexibly}, through invariant
+learning~\citep{bai2025invariant} and through causal deconfounding of
+multi-criteria ratings~\citep{guo2026confounding}. These methods correct the loss
+or the output of a model; DRUP applies inverse-propensity and DR estimation to the
+\emph{edges} of the propagated graph.
 
 \paragraph{Debiasing inside graph propagation.}
-Closest to our work are methods that change neighbour aggregation.
-NAVIP~\cite{kim2022navip} weights each edge by its inverse propensity inside
-LightGCN. r-AdjNorm~\cite{zhao2022radjnorm} shows that the normalisation
-exponent of the adjacency controls how strongly popularity is amplified, and
-tunes it; graph convolutions provably amplify popularity
-bias~\cite{chen2024gcnpop}, and deconfounding can reduce the amplification of
-user-level biases~\cite{wang2021decrs}. APDA~\cite{zhou2023apda} learns an adaptive inverse-popularity
-weight per edge, CAGED~\cite{que2025caged} derives aggregation weights from a
-backdoor adjustment, and DPAA~\cite{dpaa2026} learns interaction- and
-layer-wise weights to counter the amplification of popularity by repeated
-message passing. These methods change \emph{which} adjacency is propagated and
-target popularity-related metrics. None of them analyses what happens to an
-unbiased edge estimate when the re-weighted adjacency is multiplied with
-itself over several hops. Theorem~\ref{thm:lower} shows that the product is
-then biased, by a term of order $1/p$ that concentrates on rarely exposed
-items, and DRUP removes this term exactly for any odd number of hops. Our linear
-propagation baseline over the logged graph searches the normalisation exponent
-and is therefore a training-free r-AdjNorm; we also train r-AdjNorm and NAVIP.
+NAVIP~\citep{kim2022navip} weights each edge by its inverse propensity inside
+LightGCN. r-AdjNorm~\citep{zhao2022radjnorm} tunes the adjacency normalisation
+that controls the amplification of popularity, and graph convolutions provably
+amplify popularity bias~\citep{chen2024gcnpop}. APDA~\citep{zhou2023apda},
+CAGED~\citep{que2025caged} and DPAA~\citep{dpaa2026} learn aggregation weights.
+These methods change \emph{which} adjacency is propagated. None analyses what
+happens to an unbiased edge estimate when the re-weighted adjacency is multiplied
+with itself over several hops. Theorem~\ref{thm:lower} shows that the product is
+then biased by a term of order $1/p$ that concentrates on rarely exposed items.
+Our linear baseline over the logged graph searches the normalisation exponent and
+is therefore a training-free r-AdjNorm; we also train r-AdjNorm and NAVIP.
 
 \paragraph{Unbiased estimation of polynomials under missingness.}
-The walk correction belongs to a classical idea: an unbiased estimator of a
-polynomial in unknown quantities must avoid products of the same noisy
-measurement, as in U-statistics~\cite{hoeffding1948}. For covariance matrices
-estimated from Bernoulli-masked data, the off-diagonal entries of the masked
-Gram matrix need a $1/p^2$ correction and the diagonal a $1/p$
-correction~\cite{lounici2014}; our diagonal-corrected item operator $G$ is the
-analogue for inverse-propensity and DR edges with heterogeneous propensities.
-Unbiased subgraph counts from sampled edges~\cite{tsourakakis2009doulion},
-and the passage from homomorphism counts to injective counts by Möbius
-inversion on the partition lattice~\cite{rota1964}, are the combinatorial
-counterparts of our $K$-hop construction. Removing walks that revisit vertices
-or edges is also standard in network analysis: non-backtracking
-operators~\cite{krzakala2013} and self-avoiding-walk
-statistics~\cite{hopkins2017bayesian} discard backtracking walks to control
-the spectrum or the variance. Our correction differs in that it keeps the
-repeated walks and replaces each repeated factor by its unbiased
-counterpart, so that the estimator targets the full walk sum, repeats
-included. In recommendation, \citet{schnabel2020item} debias item-to-item
-co-occurrence statistics with propensities and a small annotated sample. The
-reduction itself is therefore not new. What is new is its combination with
-inverse-propensity and DR edge estimates and degree weights in graph
-recommendation, the exact bias of the uncorrected operators, the
-public-operator form, and the consequences for exposure invariance. Our
-treatment of nuisances follows double machine learning, whose cross-fitting we
-adopt~\cite{chernozhukov2018dml}, and our clipping and control-variate choices
-mirror doubly robust off-policy evaluation~\cite{dudik2011doubly}.
+An unbiased estimator of a polynomial in unknown quantities must avoid products of
+the same noisy measurement, as in U-statistics~\citep{hoeffding1948}. For
+Bernoulli-masked data the masked Gram matrix needs a $1/p^2$ correction off the
+diagonal and $1/p$ on it~\citep{lounici2014}; our item operator is the analogue
+with heterogeneous propensities. Möbius inversion on the partition
+lattice~\citep{rota1964} turns homomorphism counts into injective counts and is
+the combinatorial counterpart of our $K$-hop construction. Non-backtracking
+operators~\citep{krzakala2013} and self-avoiding walks~\citep{hopkins2017bayesian}
+discard repeated walks; our correction keeps them and replaces each repeated
+factor by its unbiased counterpart. In recommendation,
+\citet{schnabel2020item} debias item co-occurrence with propensities. The
+reduction itself is therefore not new; what is new is its combination with
+inverse-propensity and DR edge estimates and degree weights, the exact bias of the
+uncorrected operators, and the consequences for exposure invariance. Our
+treatment of nuisances follows double machine learning~\citep{chernozhukov2018dml}.
 
-\paragraph{Fairness in recommendation.}
-Fairness notions in recommendation cover users and items, groups and
-individuals, and outcomes and exposure~\cite{wang2023fairness}; a unifying
-account of their measurement is given by~\cite{amigo2023fairness}, and
-provider fairness and its relation to data characteristics have been analysed
-in~\cite{gomez2022provider,deldjoo2021explaining}. On the item side, exposure can be allocated
-in proportion to merit~\cite{singh2018exposure}, amortised over
-time~\cite{biega2018equity} or under uncertainty about
-merit~\cite{singh2021uncertainty}, and two-sided allocations can be guaranteed
-by constrained matching~\cite{patro2020fairrec}; expected exposure evaluates
-stochastic rankings against merit~\cite{diaz2020expected}, and
+\paragraph{Fairness, explanation, robustness and privacy.}
+Fairness notions cover users and items, groups and individuals, and outcomes and
+exposure~\citep{wang2023fairness,amigo2023fairness}; item-side exposure can be
+allocated in proportion to merit~\citep{singh2018exposure,diaz2020expected}, and
 multi-stakeholder views weigh users, providers and the
-platform~\cite{abdollahpouri2020multistakeholder,ekstrand2022fairness}.
-Fairness can also be audited by counterfactual
-reasoning~\cite{cornacchia2023auditing}. DRUP contributes a
-causal item-side property of the merit \emph{estimate}, exposure invariance:
-its expected scores do not respond to interventions on an item's exposure
-(Theorem~\ref{thm:fair}). It is not a fairness criterion. Merit-based
-allocation can be applied to any merit estimate, and what it requires is an
-estimate whose errors do not depend on past exposure; exposure invariance is
-one such property, relative to the full-exposure target $F^*$ as the notion of
-merit. It can increase the concentration of recommendations, and the
-distributive mechanism is an explicit allocation such as the exposure-capped
-$b$-matching of Theorem~\ref{thm:alloc}, related to~\cite{patro2020fairrec}.
-
-\paragraph{Explanations, robustness and privacy.}
-Explainable recommendation is surveyed by~\cite{zhang2020explainable}. For graph models,
-GNNExplainer~\cite{ying2019gnnexplainer} and CF-GNNExplainer~\cite{lucic2022cfgnn}
-search for important or minimal sets of edges, PRINCE~\cite{ghazimatin2020prince}
-finds minimal sets of a user's actions whose removal changes a random-walk
-recommendation, and CountER~\cite{tan2021counter} optimises counterfactual
-explanations of aspect-based models. Counterfactual explanations have a legal
-motivation~\cite{wachter2018counterfactual} and hidden
-assumptions~\cite{barocas2020hidden}, and Shapley attributions depend on their
-baseline~\cite{kumar2020shapley}. Recommenders can be manipulated by injected
-profiles~\cite{lam2004shilling,li2016poisoning,fang2018poisoning}, and shilling
-groups can be detected with graph convolutions~\cite{wang2022shilling};
-PORE~\cite{jia2023pore} certifies robustness by ensembling models trained on
-sub-sampled data. Private recommenders perturb item--item
-statistics~\cite{mcsherry2009netflix}, factorisation models~\cite{liu2024dpmf} or
-matrix completion under joint differential privacy~\cite{jain2018dpmc}, and
-federated approaches keep ratings on the device~\cite{chai2021fedmf}. Any
-linear propagation operator with fixed nuisances, DRUP included, admits exact
-removal attributions, closed-form certificates and a jointly private release
-of its item operator with an analytically calibrated Gaussian
-mechanism~\cite{balle2018analytic,hsu2014matchings}; we state and test these
-properties in the Supplementary Material.
+platform~\citep{abdollahpouri2020multistakeholder,ekstrand2022fairness}. DRUP
+contributes a causal property of the merit \emph{estimate}, exposure invariance,
+which is not a fairness criterion. Graph explainers search for important or
+minimal edge sets~\citep{ying2019gnnexplainer,lucic2022cfgnn,ghazimatin2020prince},
+recommenders can be attacked by injected
+profiles~\citep{lam2004shilling,li2016poisoning,fang2018poisoning}, and private
+recommenders perturb statistics or matrix
+completion~\citep{mcsherry2009netflix,jain2018dpmc}. Any linear operator with fixed
+nuisances admits exact removal attributions, closed-form certificates and a jointly
+private release of its item operator~\citep{balle2018analytic,hsu2014matchings};
+these are in the Supplementary Material.
 
 \begin{table}[t]\centering\footnotesize
 \caption{DRUP and representative related methods. ``loss'': the correction

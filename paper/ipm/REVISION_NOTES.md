@@ -287,3 +287,13 @@ Reject), Perspective (Major), Devil's Advocate (Major).
 - Open at submission (not addressed): length (~45 pages main text); StableDR, DICE, CausE and AutoDebias not run;
   tuning budgets of the training-free operators larger than those of the trained models (Table B.13 reports the
   equal-budget case); the thinning audit has limited power; no real display-policy dataset showing eta near 0.
+
+# Editor's send-back (2026-10-03) and revision
+The editor (IP&M) asked, before review, for: shorter highlights (15-30 words), a more specific and shorter
+abstract, explicit research objectives, an explicit dataset description, a SOTA/LLM baseline statement, explicit
+implications, copy editing, a much shorter manuscript, tidier references, and a response document. Done:
+new Section 2 (objectives, RQ1-RQ4), Section 7.1 (datasets table), Section 7.2 (baselines, how recent, LLMs),
+Section 9 (discussion and implications), abstract 216 words, highlights 19-24 words, new title, manuscript from
+14,600 to 9,300 words (79 to 53 pages in review layout; proofs, experimental details and secondary results moved to the
+supplement), bibliography audited. See paper/ipm/response_to_editor.pdf.
+Not done: LLM-based recommenders and newer baselines; strict APA (Elsevier author-year style kept).

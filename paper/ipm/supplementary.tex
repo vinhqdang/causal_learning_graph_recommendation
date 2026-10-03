@@ -40,6 +40,261 @@ Theorem, table, section and equation numbers without the prefix S refer to the
 main text.
 
 
+\section{Proofs}\label{app:proofs}
+
+Throughout, expectations are conditional on $Y$, and ``walk'' means a
+three-hop walk $u\!-\!j\!-\!v\!-\!i$ unless stated otherwise. Its edges are
+$(u,j)$, $(v,j)$ and $(v,i)$.
+
+\paragraph{Equations~\eqref{eq:drup} and~\eqref{eq:local}.}
+Split the plug-in sum $(\tW\tW^\top\tW)_{ui}=\sum_{j,v}\tW_{uj}\tW_{vj}\tW_{vi}$ by walk
+type (Figure~\ref{fig:walks}): (a) $v\ne u$, $j\ne i$; (b) $v=u$, $j\ne i$, giving
+$\sum_{j\ne i}\tW_{uj}^2\tW_{ui}$; (c) $v\ne u$, $j=i$, giving
+$\sum_{v\ne u}\tW_{ui}\tW_{vi}^2$; (d) $v=u$, $j=i$, giving $\tW_{ui}^3$. The
+corrected estimator keeps (a) and replaces (b)--(d) by
+$\sum_{j\ne i}C_{uj}^2W_{uj}\tW_{ui}$, $\sum_{v\ne u}\tW_{ui}C_{vi}^2W_{vi}$ and
+$C_{ui}^3W_{ui}$. The difference between plug-in and corrected sums is
+$\tW_{ui}\sum_{j\ne i}\Delta_{uj}+\tW_{ui}\sum_{v\ne u}\Delta_{vi}+(\tW_{ui}^3-C_{ui}^3W_{ui})
+=\tW_{ui}(r_u-\Delta_{ui})+\tW_{ui}(\kappa_i-\Delta_{ui})+(\tW_{ui}^3-C_{ui}^3W_{ui})$,
+which is Eq.~\eqref{eq:drup}. For Eq.~\eqref{eq:local},
+$(\tilde w_uG)_i=\sum_{j\ne i}\tW_{uj}(\tW^\top\tW)_{ji}+\tW_{ui}\sum_vC_{vi}^2W_{vi}
+=(\tW\tW^\top\tW)_{ui}-\tW_{ui}\kappa_i+\tW_{ui}\sum_vC_{vi}^2W_{vi}$, and substituting
+into Eq.~\eqref{eq:drup} cancels the $\kappa_i$ terms. \qed
+
+\paragraph{Theorem~\ref{thm:unbiased}.}
+By the decomposition above, the corrected estimator is a sum over walks of
+$\prod_{e}C_e^{k_e}W_e$, the product running over the \emph{distinct} edges of the
+walk with multiplicities $k_e$. Under Assumptions~\ref{as:unconf}--\ref{as:fixed}
+the $W_e$ of distinct edges are independent, so the expectation factorises,
+with $\E W_e=\hat Y_e+p_e(Y_e-\hat Y_e)/\bar p_e=Y_e+\xi_e$. The target walk
+monomial is $\prod_eC_e^{k_e}Y_e^{k_e}=\prod_eC_e^{k_e}Y_e$ because
+$Y_e\in\{0,1\}$. The one-hop term is unbiased edge by edge. \qed
+
+\paragraph{Corollary~\ref{cor:cand}.}
+Given $O_{ui}=0$, $W_{ui}=\hat Y_{ui}$ is deterministic and the other edge
+estimates keep their distribution (Assumption~\ref{as:unconf}). The edge $(u,i)$
+belongs to the one-hop term and to exactly the walks of types (b), (c) and (d).
+In each of them it contributes $C_{ui}^{k}\hat Y_{ui}$ instead of $C_{ui}^kY_{ui}$,
+and every other distinct edge contributes its mean $Y_e$. After the idempotent
+reduction, $F^*_{ui}$ is affine in $Y_{ui}$, so
+$\E[s_{ui}\mid O_{ui}=0]=F^*_{ui}|_{Y_{ui}\leftarrow\hat Y_{ui}}=F^*_{ui}-(Y_{ui}-\hat Y_{ui})\,\partial F^*_{ui}/\partial Y_{ui}$.
+The derivative collects $aC_{ui}$ from the one-hop term,
+$bC_{ui}\sum_{j\ne i}C_{uj}^2Y_{uj}$ from type (b),
+$bC_{ui}\sum_{v\ne u}C_{vi}^2Y_{vi}$ from type (c) and $bC_{ui}^3$ from type (d).
+For IPS edges, $W_{ui}=0$ given $O_{ui}=0$. \qed
+
+\paragraph{Theorem~\ref{thm:khop}.}
+Fix $u$ and $i$. For an assignment $\varphi$ of values to the free variables, let
+$\pi(\varphi)$ be its equality pattern. Two walk edges $(U_s,J_t)$ and
+$(U_{s'},J_{t'})$ coincide if and only if $U_s,U_{s'}$ share a user block and
+$J_t,J_{t'}$ share an item block, so the distinct edges and their
+multiplicities $k_e$ depend on $\pi(\varphi)$ only. For a pattern $\pi$, let
+$F_\pi(\varphi)=\prod_\epsilon X^{(k_\epsilon)}_{\varphi(\epsilon)}$, the product over the
+distinct edges $\epsilon$ of $\pi$, with $X^{(k)}=C^{\odot k}\odot W$ (corrected) or
+$X^{(k)}=\tW^{\odot k}$ (plug-in). The plug-in $K$-hop product equals
+$\sum_\pi S^{\mathrm{plug}}_\pi$ and the corrected estimator is
+$\sum_\pi S^{\mathrm{corr}}_\pi$, where $S_\pi=\sum_{\varphi:\pi(\varphi)=\pi}F_\pi(\varphi)$. The two
+coincide for patterns without a repeated edge, which gives the form of
+$\hat T^{(K)}$ once each $S_\pi$ is written through unconstrained sums. For
+$\sigma\ge\pi$ let $g_\pi(\sigma)=\sum_{\varphi:\pi(\varphi)\ge\sigma}F_\pi(\varphi)$: variables in the
+same block of $\sigma$ are equal and values of different blocks are unrestricted,
+so $g_\pi(\sigma)$ is a single tensor contraction over the blocks of $\sigma$ (with
+the blocks of $U_0$ and $J_{r+1}$ fixed to $u$ and $i$). Grouping the terms of
+$g_\pi(\sigma)$ by their exact pattern gives $g_\pi(\sigma)=\sum_{\tau\ge\sigma}f_\pi(\tau)$ with
+$f_\pi(\tau)=\sum_{\varphi:\pi(\varphi)=\tau}F_\pi(\varphi)$. Möbius inversion on the interval
+$[\pi,\hat1]$ of the product of the two partition lattices~\citep{rota1964} yields
+$S_\pi=f_\pi(\pi)=\sum_{\sigma\ge\pi}\mu(\pi,\sigma)\,g_\pi(\sigma)$, where
+$\mu(\pi,\sigma)=\prod_{B}(-1)^{b_B-1}(b_B-1)!$ over the blocks $B$ of $\sigma$ in both
+lattices and $b_B$ is the number of blocks of $\pi$ merged into $B$. Finally, for
+every $\varphi$ with $\pi(\varphi)=\pi$ the distinct edges are independent, so
+$\E F^{\mathrm{corr}}_\pi(\varphi)=\prod_\epsilon C_{\varphi(\epsilon)}^{k_\epsilon}Y_{\varphi(\epsilon)}$, which is the
+corresponding monomial of $(\tY\tY^\top)^r\tY$ since $Y$ is binary. The number of
+contraction terms is the number of pairs $(\pi,\sigma)$ with $\sigma\ge\pi$ and $\pi$
+containing a repeated edge, which is 5, 99 and 2{,}790 for $K=3,5,7$. \qed
+
+\paragraph{Proposition~\ref{prop:dep}.}
+With correct propensities $\E W_e=Y_e$, and for distinct $e,f$ in the same row
+$\mathrm{Cov}(W_e,W_f)=(Y_e-\hat Y_e)(Y_f-\hat Y_f)\,\mathrm{Cov}(O_e,O_f)/(p_ep_f)$, so
+$|\mathrm{Cov}(W_e,W_f)|\le\rho\,\varepsilon_e\varepsilon_f$. In a type (a) walk the edge $(u,j)$
+lies in row $u$ and the edges $(v,j),(v,i)$ in row $v\ne u$; rows are independent,
+so $\E[W_{uj}W_{vj}W_{vi}]=Y_{uj}(Y_{vj}Y_{vi}+\mathrm{Cov}(W_{vj},W_{vi}))$ and the bias of
+the walk is at most $C_{uj}C_{vj}C_{vi}\rho\,\varepsilon_{vj}\varepsilon_{vi}$. A corrected type (b)
+walk contributes $C_{uj}^2C_{ui}W_{uj}W_{ui}$ with two edges in row $u$, with bias
+at most $C_{uj}^2C_{ui}\rho\,\varepsilon_{uj}\varepsilon_{ui}$. Type (c) walks have their two
+distinct edges in different rows and type (d) walks a single edge, so they are
+unbiased. Summing gives the bound. For $k$ of $n$ items drawn uniformly,
+$\Pr(O_e=O_f=1)=k(k-1)/(n(n-1))$, so
+$|\mathrm{Cov}(O_e,O_f)|/(p_ep_f)=(n-k)/(k(n-1))\le1/k$. \qed
+
+\paragraph{Theorem~\ref{thm:lower}.}
+By the decomposition of Eq.~\eqref{eq:drup}, the plug-in minus the corrected
+operator is $\tW_{ui}\sum_{j\ne i}\Delta_{uj}+\tW_{ui}\sum_{v\ne u}\Delta_{vi}+(\tW_{ui}^3-C_{ui}^3W_{ui})$.
+Given $O_{ui}=0$, $\tW_{ui}=C_{ui}\hat Y_{ui}$ is deterministic and the other
+$\Delta_e$ keep their distribution. With correct propensities and binary $Y$,
+$\E\Delta_e=C_e^2(\E W_e^2-\E W_e)=C_e^2(\Var W_e+Y_e^2-Y_e)=C_e^2V_e$ with
+$V_e=\frac{1-p_e}{p_e}\varepsilon_e^2$, which gives the stated bias, the last term being
+$C_{ui}^3(\hat Y_{ui}^3-\hat Y_{ui})$. Part (a) uses $(1-p)/p\ge1/\max_vp_{vi}-1$. For
+(b), with $\mu_e=\E W_e\in[0,1]$, $\E W_e^2-\E W_e=\Var W_e-\mu_e(1-\mu_e)\le\Var W_e
+=p_e(1-p_e)\varepsilon_e^2/\bar p_e^2$. If $p_e\ge\tau$ this is
+$\frac{1-p_e}{p_e}\varepsilon_e^2\le(1/\tau-1)\varepsilon_e^2$; if $p_e<\tau\le1/2$ it is
+$p_e(1-p_e)\varepsilon_e^2/\tau^2<\tau(1-\tau)\varepsilon_e^2/\tau^2$ because $p(1-p)$ increases on
+$[0,1/2]$. At $p_e=\tau$, $\mu_e=Y_e$ and the bound is attained; setting all
+$p_{vi}=\tau$ gives a bias $C_{ui}\hat Y_{ui}(1/\tau-1)\sum_{v\ne u}C_{vi}^2\varepsilon_{vi}^2$, so the
+worst case is $\Theta(1/\tau)$. For (c), IPS gives $\tW_{ui}=0$ and $C_{ui}^3W_{ui}=0$
+given $O_{ui}=0$. \qed
+
+\subsection*{Statement of Theorem~\ref{thm:var}}
+\begin{theorem}[Variance, clipping and concentration]\label{thm:var}
+Let $\Lambda_e(u,i)$ be the $C$-weighted mass of the walks from $u$ to $i$ through
+edge $e$, and $B=\max(1,1/\tau)$. Then
+(a) $\Var(W_e)\le\varepsilon_e^2/(4\tau^2)$, and $\Var(W_e)\le\varepsilon_e^2/\tau$ if $\hat p=p$;
+(b) if $\hat p=p$, $\Var(\hat T_{ui})\le\frac{(1+1/\tau)^2}{\tau}\sum_e\varepsilon_e^2\Lambda_e(u,i)^2$;
+(c) if $\hat p=p$, so that clipping is the only source of bias,
+$|\E\hat T_{ui}-T^*_{ui}|\le3\bar\xi(1+\bar\xi)^2\sum_{j,v}C_{uj}C_{vj}C_{vi}$ with
+$\bar\xi=\max_e(1-p_e/\tau)_+\varepsilon_e$;
+(d) for any $\hat p$, $\Pr(|\hat T_{ui}-\E\hat T_{ui}|\ge t)\le2\exp(-2t^2/\sum_ec_e^2)$ with
+$c_e=\varepsilon_eB^2\Lambda_e(u,i)/\tau$.
+\end{theorem}
+
+\paragraph{Theorem~\ref{thm:var}.}
+(a) $\Var(W_e)=p_e(1-p_e)\varepsilon_e^2/\bar p_e^2\le\varepsilon_e^2/(4\tau^2)$ for any $\hat p$,
+since $p(1-p)\le1/4$ and $\bar p_e\ge\tau$. If $\hat p=p$, then $\bar p=\max(p,\tau)$: if
+$p_e\ge\tau$ the variance is at most $(1/\tau-1)\varepsilon_e^2$, otherwise at most
+$p_e\varepsilon_e^2/\tau^2<\varepsilon_e^2/\tau$. Without $\hat p=p$ the bound $\varepsilon_e^2/\tau$ can
+fail (e.g., $p=0.5$, $\hat p=0.01$, $\tau=0.05$ gives $100\,\varepsilon_e^2>20\,\varepsilon_e^2$).
+(b) $\hat T_{ui}$ is multilinear in the independent $W_e$ and hence affine in each
+of them. The Efron--Stein inequality~\citep{efron1981jackknife} gives
+$\Var(\hat T)\le\sum_e\E[(\partial_e\hat T)^2]\Var(W_e)$. The derivative $\partial_e\hat T$
+is a sum over the walks through $e$ of $C$-weights times at most two other
+independent $W_f$, and with $\hat p=p$, $\mu_f=Y_f\in[0,1]$ and
+$\E W_f^2=\mu_f^2+\Var W_f\le1+1/\tau$ by (a). Minkowski's
+inequality bounds $\|\partial_e\hat T\|_2\le(1+1/\tau)\Lambda_e$.
+(c) By Theorem~\ref{thm:unbiased}, the bias is at most
+$\sum_{\text{walks}}|\kappa_{\text{walk}}|\,[\prod_f(Y_f+|\xi_f|)-\prod_fY_f]\le((1+\bar\xi)^3-1)\sum_{j,v}C_{uj}C_{vj}C_{vi}$,
+and $(1+x)^3-1\le3x(1+x)^2$. With $\hat p=p$, $|\xi_e|=(1-p_e/\tau)_+\varepsilon_e$.
+(d) Changing $O_e$ moves $W_e$ by at most $\varepsilon_e/\tau$. Every edge estimate
+satisfies $|W_f|\le B$, so $|\partial_e\hat T|\le B^2\Lambda_e$, and McDiarmid's
+inequality~\citep{mcdiarmid1989} applies. \qed
+
+\paragraph{Theorem~\ref{thm:fair}.}
+By Definition~\ref{def:elast} the estimator uses the post-intervention
+propensities, and if $\pi p\ge\tau$ the clip does not bind, so they remain
+correct. DRUP: by Theorem~\ref{thm:unbiased}, $\E[s]=F^*$,
+and by Corollary~\ref{cor:cand}, $\E[s\mid O_{ui}=0]$ is $F^*$ with $Y_{ui}$ replaced by
+the fixed $\hat Y_{ui}$; neither depends on $\pi$. Logged graph with fixed $C$: $\E[O_eY_e]=p_eY_e$,
+and every walk that ends at $i$ contains $k\ge1$ edges incident to $i$, so its
+expectation scales as $\pi^k$ and $\eta_i$ is an average of such $k$. Uncorrected
+DR: by Theorem~\ref{thm:lower}, $\E[s_{ui}\mid O_{ui}=0]$ equals the DRUP target plus
+$C_{ui}\hat Y_{ui}(R_u^{(i)}+K_i(\pi))$ minus a term free of $\pi$; $R_u^{(i)}$ involves
+no edge of item $i$, and $K_i(\pi)=\sum_{v\ne u}C_{vi}^2\frac{1-\pi p_{vi}}{\pi p_{vi}}\varepsilon_{vi}^2$ is
+strictly decreasing in $\pi$. \qed
+
+\section{Experimental details}\label{app:details}
+
+\paragraph{Training-free operators}
+All operators share the score $s=s_1/c_1+\beta s_3/c_3$ (Section~\ref{sec:drup}) with
+$\beta\in\{0,0.03,0.1,0.3,1,3,10\}$ or the three-hop term alone; the five-hop
+variants add $\gamma s_5/c_5$ with $\gamma\in\{0.03,0.1,0.3,1,3\}$. The grids are:
+normalisation exponent $\alpha\in\{0.3,0.5,0.7\}$ (Coat), $\{0.5,0.7\}$
+(Yahoo!\,R3, KuaiRand) and $\{0.3,0.5\}$ (KuaiRec); clip
+$\tau\in\{0.01,0.02,0.05,0.1,0.2\}$ (Coat), $\{0.1,0.2\}$ (Yahoo!\,R3),
+$\{0.02,0.05,0.1\}$ (KuaiRand) and $\{0.05,0.1,0.2\}$ (KuaiRec); imputation ridge
+$\lambda\in\{1,5,20\}$ (Coat), $\{20\}$ (Yahoo!\,R3, KuaiRand) and $\{5,20\}$
+(KuaiRec); additive or low-rank (rank 32) imputation; control-variate weight
+$\in\{0,0.25,0.5,1\}$ on Yahoo!\,R3, $\{0,0.5,1\}$ on KuaiRand and $1$ elsewhere; and degree source $\in\{\hat Y,\ \text{cross-fitted }W\}$ for
+the debiased operators. The degree source is a searched hyper-parameter.
+$\hat Y$-degrees satisfy Assumption~\ref{as:fixed} whenever $\hat Y$ does;
+cross-fitted $W$-degrees do not, since the weight at a pair then depends on
+the exposures of other pairs, so configurations with $W$-degrees (selected on
+Yahoo!\,R3) lie outside the theorems. Only $\hat Y$-degrees make the
+certificates of Theorem~\ref{thm:robust} informative. EASE uses
+$\lambda\in\{10,100,1000\}$; GF-CF uses four settings of (ideal low-pass weight, singular vectors):
+$(0,0)$, $(0.3,64)$, $(0.3,256)$ and $(1,256)$. BSPM~\citep{choi2023bspm} uses blurring time
+$\in\{1,2\}$, sharpening time $\in\{0,0.1,0.3\}$ and ideal low-pass weight
+$\in\{0,0.3\}$ with one Euler step each. On the DR graph, EASE, GF-CF and BSPM
+search the same nuisance grid as DR adjacency. The sample-split variants are
+run for five draws of the split-off pairs; each draw is tuned separately, and
+the tables report the mean over draws. The propensity model is
+the one shipped with Coat and a logistic exposure model on user and item
+exposure rates elsewhere; on Yahoo!\,R3 it was selected on validation data
+against an outcome-dependent Naive-Bayes model. All nuisances are cross-fitted
+over ten random folds of pairs, except for the sample-split variants, whose
+imputation (and propensity model, where it is estimated) is fitted on a random
+20\% of the pairs.
+
+\paragraph{Trained models}
+The grid combines the learning rates $10^{-2}$, $3\cdot10^{-3}$ and $10^{-3}$ with the
+weight decays $10^{-5}$, $10^{-4}$ and (Coat, and the MF models on Yahoo!\,R3)
+$10^{-3}$. Embeddings have 64 dimensions (Coat: 32 or 64). The graph models with
+the widest search (LightGCN and r-AdjNorm on Yahoo!\,R3, the pointwise
+and BPR LightGCN on KuaiRec, all graph models on Coat) also search one to three
+layers and 64 or 128 dimensions (Coat: 32 or 64); the others use two layers.
+PDA searches $\gamma\in\{0.1,0.2\}$, r-AdjNorm $r\in\{0.3,0.7\}$, SimGCL the
+contrastive weight $\in\{0.1,0.5\}$ (noise $0.1$, temperature $0.2$, InfoNCE over at
+most 2{,}048 users and items of a batch) and MACR $c\in\{0.1,0.3\}$; iALS searches
+the confidence $\alpha\in\{3,10,30\}$ and the ridge $\in\{1,10,100,1000\}$. DR-JL and MRDR
+learn an MF imputation model jointly with the prediction
+model~\citep{wang2019drjl,guo2021mrdr}. BPR models draw one uniformly sampled
+negative per positive. Batch sizes are 256 (Coat), 1{,}024 (Yahoo!\,R3), 8{,}192
+(KuaiRand) and 32{,}768 (KuaiRec, with 2M sampled pairs per epoch for the
+pointwise losses); training runs for at most 100, 60, 40 and 30 epochs. Because
+the training log is the same for every split, each configuration is trained
+once and evaluated after every epoch on the validation part of every split.
+Each split stops on its own validation score (patience 5 on Coat and
+Yahoo!\,R3, 3 otherwise) and selects its own configuration and epoch; training
+continues until every split has stopped, and a split never uses epochs after
+its own stopping point, so no split's selection depends on another split's
+validation users, who may be its test users. The split-0 selection is
+re-trained with three (KuaiRec, KuaiRand: two) further seeds to measure seed
+variance. We did not run DICE, StableDR and methods that train on the uniform
+data (CausE, AutoDebias): in our protocol the uniform data serve only for
+selection and testing, for every method. Table~\ref{tab:configs} lists the
+number of configurations each method was selected from.
+
+\begin{table}[h]\centering\footnotesize
+\caption{Number of configurations searched per method (per split).}\label{tab:configs}
+\input{../tables/configs.tex}
+\end{table}
+
+\begin{table}[h]\centering\footnotesize
+\caption{Tuning budget. Expected test score of DRUP when its configuration is
+selected on validation data among $k$ configurations drawn at random from its
+grid (exact, averaged over splits; Dodge et al.~\citep{dodge2019showyourwork}), with
+$k$ the budget of the most accurate trained model. Configurations: a trained
+configuration keeps its best epoch per split, and every value of $\beta$ is a
+separate DRUP configuration. Evaluations: every (configuration, epoch) of a
+trained model counts as one validation evaluation.}\label{tab:budget}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/budget.tex}
+\end{adjustbox}
+\end{table}
+
+\paragraph{Evaluation and tests}
+Coat splits each user's candidates (30\% validation), Yahoo!\,R3, KuaiRand and
+KuaiRec split the test users (30\% validation), over 10, 5, 5 and 5 random splits.
+Users without a positive candidate are skipped. For a pair of methods, each
+test user's metric difference is averaged over the splits in which the user
+is in the test part, and we report the mean difference over users with a
+95\% $t$-interval and the paired $t$-test. The Holm family is every comparison
+run for a dataset, with all references together (DRUP, DR adjacency, five-hop
+DRUP and DRUP-split against every other method); the Wilcoxon signed-rank
+$p$-values are adjusted over the same family. Within-reference adjustments are
+in the result files. The Wilcoxon signed-rank test gives the same conclusions except for the
+five-hop DRUP against DR comparison on KuaiRec ($p=0.66$ against 0.011) and for
+DRUP-split against pointwise LightGCN on KuaiRec ($p_{\mathrm{Holm}}=0.48$ against $3\cdot10^{-4}$). The
+corrected resampled $t$-test over split means~\citep{nadeau2003} is far more
+conservative with five or ten splits and is reported in the result files.
+All tests condition on the training log and the fitted nuisances.
+
+\paragraph{Hardware and code}
+All experiments ran on four CPU cores with 16\,GB of memory, except the KuaiRand
+debiased and sample-split operators, which ran on a Google Colab T4 GPU (same code and
+seeds; per-user ranking metrics are computed once per score matrix and match the
+per-user routine to $10^{-15}$). GF-CF uses a randomised SVD, so its scores vary by
+about 0.002 between runs.
+Code, configurations and result files are available at the repository given
+on the title page.
+
 \section{Structural properties of linear propagation}\label{sec:structth}
 
 The results of this section use only that, given the nuisances, $s$ is a
@@ -253,7 +508,7 @@ cross-fitted $W$-degrees, the fake users' degrees are attacker-controlled and no
 user is certified. When the nuisances are re-fitted on the poisoned log, which
 the certificates do not cover, none of the certified user--target pairs of DRUP (5{,}196 on Coat, 2{,}821 on KuaiRec)
 was violated, and the realised hit rates were lower than with frozen nuisances
-(Table~\ref{tab:refit} in the additional results section), because the fake users' own
+(Table~\ref{tab:refit} in the section on additional results), because the fake users' own
 imputation raises their degree and lowers their weight.
 
 \begin{table}[t]\centering\small
@@ -292,7 +547,7 @@ nuisance models with a composed budget is left open.
 \caption{Exposure-capped re-ranking (Theorem~\ref{thm:alloc}, exact min-cost flow).
 Each item may be recommended to at most $c$ times its fair share $NK/n$ of users.
 Cells: nDCG@$K$ (Gini@$K$). Every cap held; the full range of caps and the
-accuracy--concentration frontier are in the additional results section.}\label{tab:rerank}
+accuracy--concentration frontier are in the section on additional results.}\label{tab:rerank}
 \begin{adjustbox}{max width=\textwidth}
 \input{../tables/rerank_compact.tex}
 \end{adjustbox}
@@ -433,6 +688,87 @@ the two methods are equivalent. ``Identical rankings'': the two operators select
 \input{../tables/nbtost.tex}
 \end{adjustbox}
 \end{table}
+
+\subsection{Does the correction matter on sparser logs?}\label{sec:sparse}
+
+\begin{table}[t]\centering\small
+\caption{KuaiRec with the log thinned to a fraction $q$ of its exposures
+(nuisances re-fitted, additive imputation, $\tau\in\{0.05,0.01\}$, $\lambda\in\{0,1\}$,
+selected on validation). nDCG@20 of the uncorrected and corrected operators, and
+the lowest top-20 overlap and Spearman correlation between the two rankings at
+matched configurations.}\label{tab:sparse}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/sparse.tex}
+\end{adjustbox}
+\end{table}
+
+Theorem~\ref{thm:lower} predicts a larger bias when propensities are small. We
+therefore thinned the KuaiRec log to 10\% and 3\% of its exposures, which lowers the
+median logged propensity from 0.48 to 0.045 and 0.013, re-fitted the nuisances
+and re-selected every operator (Table~\ref{tab:sparse}). The corrected and the
+uncorrected operators still rank almost identically: their top-20 lists overlap
+by at least 93\%, the rank correlation is at least 0.999, and the accuracy
+differences stay below 0.0005 nDCG@20 in either direction, at three and at five
+hops. On these data the repeated-walk term is small compared with the score
+differences that decide the ranking, and the value of the correction lies in
+the properties of the scores, not in the rankings they induce.
+
+
+\subsection{Clip and exposure invariance; exposure concentration}\label{sec:fairsupp}
+\begin{table}[t]\centering\small
+\caption{Clip $\tau$ against exposure invariance for DRUP under the same
+intervention, with frozen nuisances ($\eta$: mean$\pm$std over draws).}\label{tab:tau}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/tau.tex}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[t]\centering\small
+\caption{Exposure concentration and user groups. PRU: popularity--rank
+correlation. ECB (KuaiRec, where item quality is known from the fully observed
+matrix): partial correlation between an item's mean rank and its log exposure,
+controlling for its true like rate. User gap: nDCG of group 0 minus group 1
+(men minus women on Coat, inactive minus active users elsewhere) with a
+bootstrap 95\% interval.}\label{tab:fair}
+\begin{adjustbox}{max width=\textwidth}
+\input{../tables/fat.tex}
+\end{adjustbox}
+\end{table}
+
+Table~\ref{tab:fair} shows the distributional side. On KuaiRec, the
+exposure-conditional bias drops from 0.83 (logged graph) and 0.80 (IPS) to 0.33
+for DRUP and DR adjacency: given their true quality, items are ranked much less
+by how often they were shown. At the same time DRUP's top-20 lists are
+concentrated on 1.2\% of the candidate items, against 15\% for the logged graph,
+because the estimated full-exposure scores are themselves concentrated on few items; on Coat its Gini
+coefficient is 0.60 against 0.34. Exposure invariance and exposure concentration
+are different properties, and DRUP improves the first at the expense of the
+second. The user-group gaps do not differ between operators. They are clearly
+non-zero on Coat (men 0.11 above women), on Yahoo!\,R3 (inactive users 0.046
+below active ones) and on KuaiRand (inactive users 0.014 above active ones), under every
+operator, and not on KuaiRec. On KuaiRand the lists of DRUP, IPS and the logged graph
+are almost equally concentrated (Gini 0.43, coverage 0.98), as the scores of all
+three are close to each other there.
+
+
+\subsection{Stakeholders and regulation}\label{sec:stake}
+\emph{Item providers.} Exposure invariance means that an item's expected score does not
+depend on how often it was observed; it is not equal exposure, and it comes with more
+concentrated lists (Table~\ref{tab:fair}) that a retrained system could entrench.
+Deployments should report concentration next to invariance and use an explicit allocation
+mechanism. \emph{Users.} The removal attributions describe the model with its nuisances
+frozen and are not an account of data deletion. \emph{Platforms and auditors.} The clip
+$\tau$ and the control-variate weight $\lambda$ trade invariance against accuracy; one
+option is to select the most accurate configuration subject to a bound on the elasticity
+measured in a thinning audit, whose power is limited. The audit is a first-party
+instrument: it needs the log, the propensities, the deployed hyper-parameters and the
+ability to re-run the pipeline. Article~40 of the Digital Services
+Act~\citep{dsa2022} gives vetted researchers access to data of very large online platforms
+and search engines; whether it extends to re-running a proprietary pipeline is not settled
+by the text, and we do not claim that it does. The Act's risk-assessment and audit
+obligations (Articles~34--37, Delegated Regulation (EU) 2024/436~\citep{eu2024audit})
+concern compliance of very large providers, not properties of estimators, and our results
+can at most inform a risk assessment.
 
 
 

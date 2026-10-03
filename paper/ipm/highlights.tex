@@ -4,10 +4,10 @@
 \begin{document}
 \section*{Highlights}
 \begin{itemize}
-\item Debiased graph propagation is biased beyond one hop: walks repeat edges.
-\item DRUP removes this bias exactly for any odd number of hops.
-\item Guarantees need nuisances independent of the log, e.g. a sample split.
-\item The correction fixes score values but not rankings on four benchmarks.
-\item The thinning audit of exposure invariance has limited power; two datasets fail it.
+\item Debiased graph propagation is biased beyond one hop because walks repeat edges, and we derive this bias exactly for inverse-propensity and doubly robust estimates.
+\item DRUP removes the repeated-walk bias for any odd number of hops, at the cost of the uncorrected three-hop operator.
+\item On a log with known exposure, the correction removes an 18--29\% overestimate of an allocation's utility and cuts three-hop error 4 to 12 times.
+\item The guarantee fails when degree weights come from the log, a condition that standard cross-fitted debiasing pipelines violate; we locate the cause by simulation.
+\item Across Coat, Yahoo! R3, KuaiRand and KuaiRec and up to 26 tuned baselines, the correction leaves three-hop accuracy unchanged within 0.0014 nDCG.
 \end{itemize}
 \end{document}

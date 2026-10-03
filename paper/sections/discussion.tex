@@ -1,183 +1,94 @@
 %======================================================================
-\section{Discussion}\label{sec:disc}
+\section{Discussion and implications}\label{sec:disc}
 %======================================================================
 
-\paragraph{What the correction is for.}
-On the four benchmarks the walk correction does not change top-$K$
-accuracy, and in simulation the uncorrected DR operator can even agree
-slightly better with the full-exposure ranking, because its bias adds weight
-to the imputation (Section~\ref{sec:mc}). The correction can matter where the
-\emph{value} of a propagated score is used rather than only its order within
-one user's list, for instance when scores are aggregated into an estimate of
-full-exposure utility. It did not matter for the uses we tested that compare
-scores across users: the exposure-capped allocation loses 79--84\% of the achievable
-utility under every estimator (Section~\ref{sec:semisynth}), and the thinning audit
-does not separate the corrected from the uncorrected operator
-(Section~\ref{sec:fair}). Where score values are used, the uncorrected estimate is
-biased by 1.8 to 15 times the target over all pairs in the model of
-Table~\ref{tab:mc} (0.09 to 2.2 times in the models of Table~\ref{tab:protocol}), and the
-bias grows with the number of hops and with small propensities. Two limits
-apply. On the unexposed candidates that are actually recommended, DRUP
-estimates the full-exposure score only up to the imputation error at the
-candidate (Corollary~\ref{cor:cand}), which is 12\% of the mean target at three
-hops in our simulation. And the guarantees assume nuisances that do not depend
-on the log: with nuisances cross-fitted on the same log, the corrected
-operator is not less biased than the uncorrected one in simulation
-(Section~\ref{sec:mc}), so a user of the score values needs an independent
-log or the sample split of DRUP-split. We have no evidence that the correction changes
-accuracy: DRUP and DR adjacency are equivalent within $\pm0.005$ nDCG on KuaiRec
-($p_{\mathrm{TOST}}<10^{-3}$) and marginally on Coat ($0.034$), and identical on Yahoo!\,R3 and
-KuaiRand, where they cannot differ (Table~\ref{tab:nbtost} in the Supplementary Material). A practitioner who only needs
-rankings loses nothing by using the uncorrected DR adjacency; one who aggregates
-score values or propagates over five hops or more needs the corrected operator for the estimate to be
-unbiased, with the caveats above. In both cases, most of the accuracy comes from training-free
-propagation over a doubly robust graph, whose gain over the imputation alone is two thirds from
-propagating the imputation.
+\paragraph{Summary of findings.} The repeated-walk bias is real and exactly removable
+(RQ1). The guarantees hold with nuisances independent of the log and fail when the
+degree weights come from the log, which is how our experiments fit them (RQ2). The
+correction leaves accuracy unchanged on four datasets, and it improves score values
+only under oracle conditions (RQ3). The thinning audit has low power, and the selected
+configurations are not invariant on two of four datasets (RQ4).
 
-\paragraph{Where the evidence is weak.} Five results limit what the paper can claim, and
-we collect them here because each sits in a table far from the abstract.
-(i) The score-level benefit needs oracle conditions. In the semi-synthetic test the
-oracle target itself ranks the unexposed candidates perfectly (nDCG@20 of 1.0,
-because it contains the label), whereas the estimators reach 0.37--0.38; with degree
-weights taken from the imputation the corrected operator's utility error is
-$-49\%$ against $-44\%$ uncorrected, and with estimated propensities it is
-$+100$ to $+540\%$ for all operators. (ii) The estimator the theory covers, DRUP-split,
-costs 0.062 nDCG on Yahoo!\,R3 and biases utility estimates upwards by 38--47\% because a
-fifth of the pairs carry the imputation. (iii) The thinning audit has little power:
-the negative control, which keeps stale propensities, does not move the scores of DR
-adjacency and DRUP on Coat ($\eta=-0.008$) or KuaiRec ($\eta=-0.088$), their scores
-are correlated 0.98 (Coat) with the imputation, the uncorrected DR adjacency passes
-equally well, and the configurations selected on Yahoo!\,R3 and KuaiRand, the latter the
-only log of platform impressions, are not invariant ($\eta=+0.96$, $+0.64$). (iv) Private
-release is useful only on the largest log: it falls below popularity at every $\epsilon$ on
-Coat and Yahoo!\,R3 and for $\epsilon\le4$ on KuaiRec. The certificates cover 10--26\% of
-users at 20 fake profiles, and at 200 fake profiles a DR or DRUP target reaches
-39\% of KuaiRec users, against 10\% under IPS. (v) The statistical evidence is thinner
-than the user-level tests suggest. With the Nadeau--Bengio test over splits, adjusted over the same family, DRUP is no
-longer significantly ahead of DR-JL or MRDR on KuaiRec ($p=1.0$ and $0.34$, against
-$p_{\mathrm{Holm}}=0.003$ at the user level), and its 0.004 margin is smaller than the seed spread of DR-JL (0.009) and MRDR (0.015). We also note
-that DRUP searched 384 to 6{,}300 configurations against 6 to 108 for the trained models;
-at the six configurations of DR-JL its expected KuaiRec score is 0.618 against 0.633.
+\subsection{Theoretical implications}
+First, propagation-level debiasing must consider the propagation operator, not only the
+edges it propagates: multiplying unbiased edge estimates does not give an unbiased
+multi-hop score. The tools that remove the bias (idempotent reduction and Möbius
+inversion over walk-index coincidences) extend to polynomial filters of odd degree on
+binary outcomes built from inverse-propensity or DR edge estimates, as far as
+Theorem~\ref{thm:khop} goes; the reduction itself is classical, and the contribution is
+its exact form for graph recommendation. Second, a guarantee stated for fixed nuisances
+is a statement about the whole pipeline, not about the estimator: cross-fitting the
+propensity and the imputation preserves it only if the degree weights and the score
+constants are also independent of the log (Table~\ref{tab:protocol}), a condition that
+standard debiased graph pipelines do not meet. Third, unbiasedness for the
+full-exposure target does not imply better rankings: on unexposed candidates the
+uncorrected DR operator carries a positive multiple of the informative imputation, and the
+target itself contains the label of the pair it scores (it ranks the semi-synthetic
+candidates perfectly, nDCG@20 of 1.0, whereas the estimators reach 0.37--0.38), so
+matching it on observed pairs is not the same as ranking well.
 
-\paragraph{Stakeholders.}
-\emph{Item providers.} Exposure invariance means that an item's expected score does not depend on
-how often it was observed; it is not equal exposure, and it comes with more concentrated lists
-(Table~\ref{tab:fair}) that a retrained system could entrench. Deployments should report
-concentration next to invariance and use an explicit allocation mechanism. \emph{Users.} The removal
-attributions of the Supplementary Material describe the model with its nuisances frozen and are
-not an account of data deletion. \emph{Platforms and auditors.} DRUP is cheap and training-free
-but needs correct propensities and nuisances independent of the log; the clip $\tau$ and the
-control-variate weight $\lambda$ trade invariance against accuracy, and one option is to select the
-most accurate configuration subject to a bound on the elasticity measured in a thinning audit,
-whose limited power we described above. The audit is a first-party instrument: it needs the
-log, the propensities, the deployed hyper-parameters and the ability to re-run the pipeline.
-Article~40 of the Digital Services Act~\cite{dsa2022} gives vetted researchers access to data of very
-large online platforms and search engines; whether it extends to re-running a proprietary
-pipeline is not settled by the text, and we do not claim that it does. The Act's risk-assessment and
-audit obligations (Articles~34--37, Delegated Regulation (EU) 2024/436~\cite{eu2024audit}) concern
-compliance of very large providers, not properties of estimators, and our results can at most
-inform a risk assessment.
+\subsection{Practical implications}
+The corrected and the uncorrected DR operators are equivalent in accuracy within
+0.005 nDCG on KuaiRec and identical on two datasets, so a practitioner who needs only
+rankings loses nothing by using the cheaper uncorrected operator. Where score values are
+aggregated, for instance into an estimate of the full-exposure utility of an allocation,
+the uncorrected estimate is biased by 1.8 to 15 times the target over all pairs
+(Table~\ref{tab:mc}) and the corrected one is unbiased under the conditions of RQ2; this
+needs nuisances independent of the log, such as DRUP-split, and true propensities, since
+with estimated propensities all operators overstate utility by 100--540\%. The
+exposure-capped allocation, which compares scores across users, loses 79--84\% of the
+achievable utility under every estimator, so the correction does not help there. On
+KuaiRec, training-free propagation over the DR graph is a strong, cheap baseline
+(nDCG@20 0.638, no gradient training, about 50 minutes of nuisance fitting and 3\,s per
+configuration) against which trained debiased graph recommenders should be compared;
+two thirds of its gain over the imputation alone comes from propagating the imputation.
+A thinning audit can probe exposure invariance, but it needs a negative control and a
+configuration whose scores are not dominated by the imputation. Finally, the sample
+split that satisfies the assumptions costs up to 0.06 nDCG on sparse logs, which is the
+price of the guarantee. The properties that follow from linearity (exact attributions,
+certificates, a private item operator, capped allocation) are in the Supplementary
+Material, together with their weak results: private release is below popularity on
+Coat and Yahoo!\,R3 and for $\epsilon\le4$ on KuaiRec, and at 200 fake profiles a DR or
+DRUP target reaches 39\% of KuaiRec users against 10\% under IPS.
 
-\paragraph{Limitations.}
-The analysis is static. It assumes a single logging policy and fixed potential
-outcomes, whereas recommenders are retrained on the feedback they
-generate~\cite{chaney2018confounding,hazrati2022evolution} and can change the
-preferences they predict~\cite{perdomo2020performative}; extending the
-guarantees to adaptive and slate logging~\cite{swaminathan2017slate} is open.
-Proposition~\ref{prop:dep} covers dependence within a user's history, not
-dependence across users. The idempotent correction relies on binary outcomes;
-graded relevance would need separate unbiased estimates of the powers of $Y$.
-Items that were never exposed fall outside $\pi p\ge\tau$ and are scored by the
-imputation only. In our main protocol the nuisances are cross-fitted on the
-same log, the Yahoo!\,R3 configuration takes degrees from edge estimates, and
-the score constants are computed from the log, so the theorems do not cover
-these experiments (Remark~\ref{rem:xfit}); the sample split restores them at
-the price of an imputation bias on the split-off pairs and, on sparse logs,
-of accuracy. The significance tests are conditional
-on the single log and its fitted nuisances, and the methods searched grids of
-different sizes, which we analyse but cannot fully equalise
-(Section~\ref{sec:acc}). The joint-DP guarantee requires public nuisances, and on the
-small Coat data the public-nuisance variant loses much of its accuracy. The
-certificates are informative only against a handful of fake profiles (on
-KuaiRec, 95\% of users at five profiles, 1\% at fifty), and the variance
-and concentration bounds are loose by several orders of magnitude
-(Section~\ref{sec:mc}). The target $F^*$ is a linear LightGCN score of the
-full-exposure world, a normative choice that other stakeholders may not
-share. Like every method in our comparison, DRUP selects its hyper-parameters
-on a small unbiased sample; without such a sample, selection would need an
-off-policy estimate of the validation metric. The propensities shipped with Coat were estimated with the help of the uniform sample that
-we use for validation and testing~\cite{schnabel2016}, a possible leak that we cannot rule out.
-The within-user guarantee of Proposition~\ref{prop:dep} assumes known conditional
-propensities; for a fixed-size slate it is not a bound on the bias when the propensities are
-estimated. The target $F^*$ contains the label of the pair it scores
-(the oracle ranks the unexposed candidates perfectly), so matching it on observed
-pairs is not the same as ranking well. Finally, our largest catalogue has about $10^4$
-items, and the dense implementation does not scale to catalogues of $10^5$ or more.
-
-\paragraph{Societal risks.} Removing the dependence of expected scores on exposure
-does not make a recommender fair to item providers: DRUP's lists are more concentrated than those
-of the logged graph (Gini 0.60 against 0.34 on Coat, 1.2\% against 15\% of
-the candidate items in the top-20 lists on KuaiRec), so a system retrained on its own
-output could entrench a small set of items. The user-group gaps we measure are the same
-under every operator. The privacy variant protects only the public item operator and
-is less accurate than popularity on two of three datasets. We use only public,
-anonymised data sets and no human subjects.
-
-%======================================================================
-\section{Implications}
-%======================================================================
-
-\paragraph{For research.}
-Propagation-level debiasing needs to consider the propagation operator itself,
-not only the edges it propagates: multiplying unbiased edge estimates does not
-give an unbiased multi-hop score. The repeated-walk bias is exactly
-removable, and the tools that remove it (idempotent reduction and Möbius
-inversion over walk-index coincidences) extend to polynomial filters of
-odd degree on binary outcomes built from inverse-propensity or DR edge estimates, as far as
-Theorem~\ref{thm:khop} goes. Our evaluation also shows that
-training-free propagation over a DR graph is a strong baseline against which
-trained debiased graph recommenders should be compared. Claims of exposure
-invariance can be probed on real data by thinning exposures with a known factor, but our
-controls show that such an audit has little power unless it includes a negative control and a
-configuration whose scores are not dominated by the imputation.
-
-\paragraph{For practice.}
-At three hops DRUP runs at the asymptotic cost of one item Gram matrix and needs no gradient training,
-so it can serve as an auditable baseline or as a candidate scorer. The
-choice between the corrected and the uncorrected operator depends on whether
-score values or only within-user orders matter; score values need nuisances
-that do not depend on the log, such as those of DRUP-split, since with
-nuisances cross-fitted on the same log they carry no unbiasedness guarantee.
-On sparse logs, exact exposure
-invariance requires small clips and costs accuracy (Table~\ref{tab:tau}). The
-structural properties (exact attributions, certificates, a private item
-operator and capped allocation) come with any linear propagation operator and
-hold for the model with its nuisances held fixed; platforms should report them
-together with that scope.
+\subsection{Limitations}
+The analysis is static: it assumes a single logging policy and fixed potential
+outcomes, whereas recommenders are retrained on their own
+feedback~\citep{chaney2018confounding,hazrati2022evolution,perdomo2020performative}.
+Proposition~\ref{prop:dep} covers dependence within a user's history with known
+conditional propensities, not dependence across users, and the idempotent correction
+needs binary outcomes. The main experiments cross-fit the nuisances and compute degree
+weights and score constants from the log, so the theorems do not cover them
+(Remark~\ref{rem:xfit}). The oracle conditions of the score-level result (true
+propensities, fixed weights) are not met by any real pipeline. The training-free
+operators searched 384 to 6{,}300 configurations against 6 to 108 for the trained models
+(equal-budget results are in Supplementary Table~\ref{tab:budget}); the KuaiRec margin of
+0.004 over DR-JL and MRDR is smaller than their seed spread and not significant under
+the Nadeau--Bengio test. Yahoo!\,R3 and KuaiRand select IPS edges, so they do not test the
+DR half of the method. The propensities shipped with Coat were estimated with the
+uniform sample that we use for validation and testing~\citep{schnabel2016}, a
+possible leak. We did not run LLM-based recommenders (Section~\ref{sec:baselines}),
+StableDR, DICE, CausE or AutoDebias, and the largest catalogue has about $10^4$ items;
+the dense implementation does not scale to $10^5$ or more. The target $F^*$ is a
+normative choice that other stakeholders may not share. Removing the dependence of
+expected scores on exposure does not make a recommender fair to item providers: DRUP's
+lists are more concentrated than those of the logged graph (Gini 0.60 against 0.34 on
+Coat; 1.2\% against 15\% of the candidate items in the KuaiRec top-20), so a system
+retrained on its own output could entrench a small set of items. The data are public
+and anonymised, and no human subjects are involved.
 
 %======================================================================
 \section{Conclusion}
 %======================================================================
 
-Inverse-propensity and doubly robust graph propagation are biased beyond one
-hop because walks that repeat an edge multiply its estimate with itself. We
-gave the exact bias, whose worst case grows as the inverse of the propensity
-clip, and removed it with an idempotent correction that is exact for any odd
-number of hops and, at three hops, has the asymptotic cost of the uncorrected
-operator.
-With nuisances that do not depend on the log, for instance from a sample
-split, the resulting estimator, DRUP, is edge-wise doubly robust for
-propagation over the full-exposure graph, robust to within-user exposure
-dependence to second order in the imputation error, and exposure-invariant in
-expectation; in simulation, cross-fitting the nuisances on the same log does
-not preserve these guarantees, so the main experiments, which cross-fit, test a
-heuristic, and the sample-split variant is the one the theory covers. On a
-semi-synthetic log with known exposure the correction removes the overestimate of
-full-exposure utility that uncorrected operators produce. On four benchmarks with
-unbiased test data the correction leaves top-$K$ accuracy and rankings unchanged,
-and the most accurate method differs by dataset: iALS on Coat, BPR-trained graph
-models on Yahoo!\,R3 and KuaiRand, and training-free propagation over the DR
-graph on KuaiRec. Its contribution is at the level of scores. Future work includes
-private nuisance models, certificates that remain informative for large
-catalogues, guarantees under adaptive logging, and combining the correction with
-learned propagation weights.
+Inverse-propensity and doubly robust graph propagation are biased beyond one hop
+because walks that repeat an edge multiply its estimate with itself. We gave the
+exact bias and removed it with an idempotent correction, DRUP, that is exact for any odd
+number of hops and, at three hops, costs about as much as the uncorrected operator.
+The guarantees hold when the nuisances do not depend on the log, for instance with a
+sample split, and fail when degree weights are computed from the log. On four
+benchmarks the correction does not change accuracy against up to 26 tuned baselines,
+and it improves score values only with true propensities and fixed weights. Future work
+includes a protocol with log-independent weights that shows a benefit on real logs,
+guarantees under adaptive logging, audits with controls that discriminate, and a
+comparison with text-based recommenders on a dataset that supports it.

@@ -114,3 +114,84 @@ the two methods are equivalent. ``Identical rankings'': the two operators select
 \input{tables/nbtost.tex}
 \end{adjustbox}
 \end{table}
+
+\subsection{Does the correction matter on sparser logs?}\label{sec:sparse}
+
+\begin{table}[t]\centering\small
+\caption{KuaiRec with the log thinned to a fraction $q$ of its exposures
+(nuisances re-fitted, additive imputation, $\tau\in\{0.05,0.01\}$, $\lambda\in\{0,1\}$,
+selected on validation). nDCG@20 of the uncorrected and corrected operators, and
+the lowest top-20 overlap and Spearman correlation between the two rankings at
+matched configurations.}\label{tab:sparse}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/sparse.tex}
+\end{adjustbox}
+\end{table}
+
+Theorem~\ref{thm:lower} predicts a larger bias when propensities are small. We
+therefore thinned the KuaiRec log to 10\% and 3\% of its exposures, which lowers the
+median logged propensity from 0.48 to 0.045 and 0.013, re-fitted the nuisances
+and re-selected every operator (Table~\ref{tab:sparse}). The corrected and the
+uncorrected operators still rank almost identically: their top-20 lists overlap
+by at least 93\%, the rank correlation is at least 0.999, and the accuracy
+differences stay below 0.0005 nDCG@20 in either direction, at three and at five
+hops. On these data the repeated-walk term is small compared with the score
+differences that decide the ranking, and the value of the correction lies in
+the properties of the scores, not in the rankings they induce.
+
+
+\subsection{Clip and exposure invariance; exposure concentration}\label{sec:fairsupp}
+\begin{table}[t]\centering\small
+\caption{Clip $\tau$ against exposure invariance for DRUP under the same
+intervention, with frozen nuisances ($\eta$: mean$\pm$std over draws).}\label{tab:tau}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/tau.tex}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[t]\centering\small
+\caption{Exposure concentration and user groups. PRU: popularity--rank
+correlation. ECB (KuaiRec, where item quality is known from the fully observed
+matrix): partial correlation between an item's mean rank and its log exposure,
+controlling for its true like rate. User gap: nDCG of group 0 minus group 1
+(men minus women on Coat, inactive minus active users elsewhere) with a
+bootstrap 95\% interval.}\label{tab:fair}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/fat.tex}
+\end{adjustbox}
+\end{table}
+
+Table~\ref{tab:fair} shows the distributional side. On KuaiRec, the
+exposure-conditional bias drops from 0.83 (logged graph) and 0.80 (IPS) to 0.33
+for DRUP and DR adjacency: given their true quality, items are ranked much less
+by how often they were shown. At the same time DRUP's top-20 lists are
+concentrated on 1.2\% of the candidate items, against 15\% for the logged graph,
+because the estimated full-exposure scores are themselves concentrated on few items; on Coat its Gini
+coefficient is 0.60 against 0.34. Exposure invariance and exposure concentration
+are different properties, and DRUP improves the first at the expense of the
+second. The user-group gaps do not differ between operators. They are clearly
+non-zero on Coat (men 0.11 above women), on Yahoo!\,R3 (inactive users 0.046
+below active ones) and on KuaiRand (inactive users 0.014 above active ones), under every
+operator, and not on KuaiRec. On KuaiRand the lists of DRUP, IPS and the logged graph
+are almost equally concentrated (Gini 0.43, coverage 0.98), as the scores of all
+three are close to each other there.
+
+
+\subsection{Stakeholders and regulation}\label{sec:stake}
+\emph{Item providers.} Exposure invariance means that an item's expected score does not
+depend on how often it was observed; it is not equal exposure, and it comes with more
+concentrated lists (Table~\ref{tab:fair}) that a retrained system could entrench.
+Deployments should report concentration next to invariance and use an explicit allocation
+mechanism. \emph{Users.} The removal attributions describe the model with its nuisances
+frozen and are not an account of data deletion. \emph{Platforms and auditors.} The clip
+$\tau$ and the control-variate weight $\lambda$ trade invariance against accuracy; one
+option is to select the most accurate configuration subject to a bound on the elasticity
+measured in a thinning audit, whose power is limited. The audit is a first-party
+instrument: it needs the log, the propensities, the deployed hyper-parameters and the
+ability to re-run the pipeline. Article~40 of the Digital Services
+Act~\citep{dsa2022} gives vetted researchers access to data of very large online platforms
+and search engines; whether it extends to re-running a proprietary pipeline is not settled
+by the text, and we do not claim that it does. The Act's risk-assessment and audit
+obligations (Articles~34--37, Delegated Regulation (EU) 2024/436~\citep{eu2024audit})
+concern compliance of very large providers, not properties of estimators, and our results
+can at most inform a risk assessment.

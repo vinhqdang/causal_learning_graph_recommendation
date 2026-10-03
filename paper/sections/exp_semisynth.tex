@@ -1,4 +1,4 @@
-\subsection{Score values on a semi-synthetic KuaiRec log}\label{sec:semisynth}
+\subsection{Score values on a semi-synthetic KuaiRec log (RQ3, part 1)}\label{sec:semisynth}
 
 \begin{table}[t]\centering\small
 \caption{Semi-synthetic KuaiRec (30 draws of the log). RMSE $T$: root mean
@@ -16,8 +16,8 @@ in the Supplementary Material.}\label{tab:semisynth}
 \end{adjustbox}
 \end{table}
 
-The real benchmarks cannot show whether score values are right, because
-$F^*$ is unknown. We therefore use KuaiRec's fully observed small matrix
+On real benchmarks the full-exposure target $F^*$ is unknown, so they cannot show
+whether score values are right. We therefore use KuaiRec's fully observed small matrix
 (1{,}411 users, 3{,}327 items, 4.6\% positives) as the potential outcomes $Y$ and
 draw exposure logs from a known MNAR mechanism fitted to the big matrix,
 $\operatorname{logit}p_{ui}=c+z_u+1.5z_i+Y_{ui}$, with $z$ the standardised logit
@@ -37,10 +37,9 @@ correction lowers the relative RMSE of the three-hop term by a factor of 4 to
 cross-fitted): the repeated factors of rarely exposed edges dominate the error
 as well as the bias. With 30 draws the remaining three-hop bias of the
 corrected operators is within Monte-Carlo error; at five hops the relative
-bias drops from 3.46 (DR) to 0.32 (DRUP). The difference is visible in the
-quantity a score-level user cares about. Summing the scores of a fixed
-allocation estimates its full-exposure utility, and the uncorrected operators
-overestimate it by 18--29\% (random allocation) and 10--19\% (popular items),
+bias drops from 3.46 (DR) to 0.32 (DRUP). The difference shows in a quantity
+that uses score values: the sum of the scores of a fixed allocation estimates its
+full-exposure utility, and the uncorrected operators overestimate it by 18--29\% (random allocation) and 10--19\% (popular items),
 whereas IPS with the correction and DRUP are within 2\% of the truth. This
 holds with an independent log and, because $C$ is fixed, also with
 cross-fitted nuisances (DRUP $-0.1\pm1.6\%$ against DR $+28.6\pm4.7\%$). The

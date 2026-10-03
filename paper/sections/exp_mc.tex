@@ -1,10 +1,10 @@
-\subsection{Monte-Carlo checks}\label{sec:mc}
+\subsection{Simulation: does the correction work, and under which conditions?}\label{sec:mc}
 
-Table~\ref{tab:mc} uses a synthetic MNAR model with known propensities: 30 users,
-40 items, low-rank preferences, and exposures driven by user activity, item
-popularity and the outcome itself (median propensity 0.06, a third of the
-pairs below 0.05). We draw 20{,}000 exposure matrices for three hops and 4{,}000
-for five hops.
+This section addresses RQ1 and RQ2. Table~\ref{tab:mc} uses a synthetic MNAR model
+with known propensities: 30 users, 40 items, low-rank preferences, and exposures
+driven by user activity, item popularity and the outcome itself (median
+propensity 0.06). We draw 20{,}000 exposure matrices for three hops and 4{,}000 for
+five hops.
 
 \begin{table}[t]\centering\small
 \caption{Monte-Carlo check of Theorems~\ref{thm:unbiased}, \ref{thm:khop}, \ref{thm:lower}
@@ -19,31 +19,28 @@ full-exposure target on unexposed candidates. $\eta$ is the exposure elasticity
 \end{adjustbox}
 \end{table}
 
-Over all entries, the uncorrected IPS and DR operators are biased by 2.3 and 1.8
-times the mean target at three hops, and by 15 and 8 times at five hops. With
-the correction the residual bias (0.02--0.06) is at the level of the
-Monte-Carlo error. On unexposed candidates the picture is the one predicted by
-Corollary~\ref{cor:cand}: the uncorrected IPS operator is unbiased at three
-hops (0.029, identical to IPS with the correction) but not at five hops (4.7),
-and the uncorrected DR operator is biased at both depths (1.1 and 5.1). The
-exposure elasticity is $+1.78$ for the logged graph, $-0.19$ for DR adjacency and
-$+0.005$ for DRUP. The $K$-hop engine reproduces the closed-form three-hop
-operator to $7\times10^{-15}$ and brute-force enumeration of all five-hop walks to
-$10^{-13}$. On a dense matrix of KuaiRec's size (7{,}176 users, 10{,}728 items,
-1{,}411 scored users, four CPU cores) the corrected three-hop operator takes 1.9\,s
-against 1.4\,s for the plug-in one, and the corrected five-hop operator 85\,s
-against 2.9\,s: the $K$-hop correction is exact but not free.
+\paragraph{The bias is large and the correction removes it (RQ1).} Over all entries, the
+uncorrected IPS and DR operators are biased by 2.3 and 1.8 times the mean target
+at three hops and by 15 and 8 times at five hops. With the correction the residual
+bias (0.02--0.06) is at the Monte-Carlo error. On the unexposed candidates that are
+actually ranked, Corollary~\ref{cor:cand} predicts that IPS is unbiased at three
+hops but not at five, and the uncorrected DR operator is biased at both depths;
+the simulation agrees (IPS 0.029 at three hops and 4.7 at five; DR 1.1 and 5.1).
+The exposure elasticity is $+1.78$ for the logged graph, $-0.19$ for DR adjacency
+and $+0.005$ for DRUP. The $K$-hop engine matches the closed-form three-hop
+operator to $7\times10^{-15}$ and brute-force enumeration of five-hop walks to
+$10^{-13}$. On a dense matrix of KuaiRec's size (7{,}176 users, 10{,}728 items, 1{,}411
+scored users, four CPU cores) the corrected three-hop operator takes 1.9\,s against
+1.4\,s for the plug-in one, and the corrected five-hop operator 85\,s against
+2.9\,s: the correction is exact but not free beyond three hops.
 
-Unbiasedness does not buy ranking accuracy in this model. The rank agreement
-of a single realisation with the target is higher for the uncorrected DR
-operator (Kendall $\tau=0.20$) than for DRUP (0.12), and at five hops 0.11 against
-0.09. The reason is visible in Theorem~\ref{thm:lower}: on unexposed candidates
-the bias is $C_{ui}\hat Y_{ui}(R_u^{(i)}+K_i)$, which adds a positive multiple of the
-imputation to the score, and here the imputation is informative. The corrected
-operator removes this term and, with it, some useful signal. For IPS edges,
-whose bias does not involve the imputation, the correction leaves the rank
-agreement unchanged (0.061 against 0.059 at five hops).
-
+\paragraph{Unbiasedness does not buy ranking accuracy.} The rank agreement of one
+realisation with the target is higher for the uncorrected DR operator (Kendall
+$\tau=0.20$) than for DRUP (0.12). On unexposed candidates the bias is
+$C_{ui}\hat Y_{ui}(R_u^{(i)}+K_i)$ (Theorem~\ref{thm:lower}), which adds a
+positive multiple of the imputation to the score, and here the imputation is
+informative. For IPS edges, whose bias does not involve the imputation, the
+correction leaves the rank agreement unchanged.
 
 \begin{table}[t]\centering\small
 \caption{Monte-Carlo check of the nuisance protocol (Remark~\ref{rem:xfit}): relative
@@ -61,47 +58,24 @@ graph (2{,}000--3{,}000 replications).}\label{tab:protocol}
 \end{adjustbox}
 \end{table}
 
-\paragraph{Theory against protocol.} Table~\ref{tab:protocol} measures how far the
-guarantees carry over to the way nuisances are fitted in practice. With
-nuisances from an independent log, the corrected operator's bias is at the
-Monte-Carlo error (0.01--0.10) while the uncorrected operators are biased by
-0.09--2.2 times the mean target. With the cross-fitted protocol of our main
-experiments this advantage disappears: the corrected operator is biased by
-0.17--0.80 and the uncorrected one by 0.11--0.61, because the nuisances, and in
-particular the degree weights, depend on the exposures of the walk edges, and
-this dependence partly offsets the repeated-walk excess of the uncorrected
-operator. The dependence bias shrinks as users have more exposures (from 0.80
-at 11 to 0.18 at 60 per user) but does not vanish. A control that fixes the degree
-weights a priori (Table~\ref{tab:protocolfixed} in the Supplementary Material)
-isolates the cause: with fixed weights, cross-fitting the propensity and the imputation
-alone preserves the correction (IPS with the correction 0.05 against 1.10 uncorrected;
-DRUP 0.05 against 0.89), whereas degrees taken from the cross-fitted $\hat Y$ or from
-the edge estimates destroy it (0.64--0.80 and 0.74--0.82). The failure of the main protocol is thus
-due to log-dependent degree weights, not to cross-fitting as such; fitting the
-nuisances in sample, without cross-fitting, breaks the correction even with fixed
-weights for DR edges (0.23). Degrees from edge estimates
-make the uncorrected operators much worse at low exposure (up to 4.1). The sample split
-restores the guarantee: relative to the target of
-Theorem~\ref{thm:unbiased} with $\hat Y$ on the imputed pairs, the bias of
-DRUP-split is 0.007--0.065, and relative to the full-exposure target it is
-0.07--0.18 with $q=0.2$, against 0.07--1.09 for the uncorrected operator under the same
-split; $q=0.5$ imputes too many pairs (0.13--0.42). The data-dependent
-constants matter as well: with independent nuisances and DR edges, the full
-score is biased by 0.18--0.35 when $c_1,c_3$ are computed from the scores and by
-0.02--0.11 when they come from the imputed graph. On
-unexposed candidates, the conditional target of Corollary~\ref{cor:cand}
-differs from the full-exposure target by 12\% (three hops) and 6\% (five hops)
-of the mean target in this model, and it agrees with it in within-user order
-only up to Kendall $\tau=0.63$ and 0.77: this is the part of $F^*$ that no
-estimator can recover on the candidates actually ranked. Results with
-estimated propensities, which are misspecified in this model and bias every
-operator, are in Table~\ref{tab:protocolfull} of Appendix~\ref{app:more}.
-
-Stress tests outside the assumptions of Theorem~\ref{thm:unbiased} are in
-Appendix~\ref{app:more} (Table~\ref{tab:stress}). With fixed-size slates, which
-make exposures within a user negatively dependent, IPS picks up a first-order
-bias (0.22) whereas DRUP stays at 0.024, as Proposition~\ref{prop:dep} predicts;
-with misspecified propensities DRUP is exactly unbiased when the imputation is
-exact and biased by 0.16 when it is noisy, against 0.57 for IPS and 1.9 for the
-uncorrected DR operator. The bounds of Theorem~\ref{thm:var} were never violated
-but are loose by a factor of 70 to 8{,}000 (Table~\ref{tab:bounds}).
+\paragraph{The guarantees do not survive data-dependent weights (RQ2).}
+Table~\ref{tab:protocol} measures the guarantees under the ways nuisances are
+fitted in practice. With nuisances from an independent log the corrected operator is
+at the Monte-Carlo error (0.01--0.10), while the uncorrected operators are biased by
+0.09--2.2 times the mean target. Under the cross-fitted protocol of our main
+experiments the advantage disappears: the corrected operator is biased by
+0.17--0.80 and the uncorrected one by 0.11--0.61, because the degree weights
+depend on the exposures of the walk edges. A control that fixes the degree weights
+a priori (Table~\ref{tab:protocolfixed} in the Supplementary Material) isolates the
+cause: with fixed weights, cross-fitting alone preserves the correction (IPS with the
+correction 0.05 against 1.10 uncorrected; DRUP 0.05 against 0.89), whereas degrees
+from the cross-fitted $\hat Y$ or from the edge estimates destroy it (0.64--0.80 and
+0.74--0.82). Fitting the nuisances in sample breaks the correction even with fixed
+weights for DR edges (0.23). The sample split restores the guarantee: relative to
+the target of Theorem~\ref{thm:unbiased}, the bias of DRUP-split is 0.007--0.065, and
+relative to the full-exposure target 0.07--0.18 at $q=0.2$, against 0.07--1.09 for
+the uncorrected operator under the same split. The data-dependent constants matter
+too: with independent nuisances and DR edges, the full score is biased by 0.18--0.35
+when $c_1,c_3$ are computed from the scores and by 0.02--0.11 when they come from the
+imputed graph. Stress tests (fixed-size slates, misspecified propensities, bounds on
+the variance) are in the Supplementary Material.

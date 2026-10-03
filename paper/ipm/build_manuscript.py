@@ -34,8 +34,6 @@ def natbib(t):
     t = re.sub(r"~?\\cite\{", "~\\\\citep{", t)
     # elsarticle appends its own full stop to run-in paragraph titles
     t = re.sub(r"\\paragraph\{([^}]*?)\.\}", r"\\paragraph{\1}", t)
-    # elsarticle's \ref to an appendix section already prints "Appendix A"
-    t = t.replace("Appendix~\\ref{", "\\ref{")
     # tables live one directory up
     return t.replace("\\input{tables/", "\\input{../tables/")
 
@@ -73,6 +71,7 @@ if "%SUPPLEMENT-START" in appendix:
     def to_supp(t):
         t = t.replace("Appendix~\\ref{app:more}", "the Supplementary Material")
         t = t.replace("\\ref{app:more}", "the Supplementary Material")
+        t = re.sub(r"Appendix~\\ref\{([^}]*)\}", r"Supplementary Section~\\ref{\1}", t)
         for lab, sn in snum.items():
             t = t.replace("\\ref{" + lab + "}", sn)
         return t

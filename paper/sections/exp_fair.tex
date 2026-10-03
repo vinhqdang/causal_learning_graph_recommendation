@@ -1,4 +1,4 @@
-\subsection{Exposure invariance on real data}\label{sec:fair}
+\subsection{Exposure invariance on real data (RQ4)}\label{sec:fair}
 
 \begin{table}[t]\centering\small
 \caption{Real-data intervention $do(p\leftarrow p/2)$: the logged exposures of a
@@ -15,40 +15,22 @@ per operator (the one selected most often), all test data.}\label{tab:interv}
 \end{adjustbox}
 \end{table}
 
-Table~\ref{tab:interv} tests the prediction of Theorem~\ref{thm:fair} with a known
-intervention on exposure. The operators use the cross-fitted protocol, which
-the theorem does not cover (Remark~\ref{rem:xfit}), so this is an empirical
-check. The logged graph behaves as the theorem predicts for correlational
-propagation: with frozen nuisances $\eta=+1.00$ to $+1.03$ on all four datasets, and
-thinned items drop by 0.07--0.24 in mean within-user rank. On KuaiRec and Coat,
-DRUP is invariant to within a few hundredths ($\eta=-0.012$ and $-0.008$) and stays
-so when its nuisances are re-fitted on the thinned log, with the known or with
-re-estimated propensities where they are estimated ($|\eta|\le0.022$). This is what the theorem predicts, but the controls
-below show that the audit would give the same result for any estimator whose scores stay close to the
-imputation, so we read it as consistent with invariance, not as evidence for it. IPS adjacency is far from invariant
-($\eta=+0.14$ on KuaiRec, $+0.90$ on Coat). The uncorrected DR adjacency is as
-invariant as DRUP on these data; its over-correction ($\eta=-0.19$ in
-Table~\ref{tab:mc}) scales with $(1-p)/p\cdot\varepsilon^2$ (Theorem~\ref{thm:lower}), and
-the selected clips and imputations keep it small here.
-
-Yahoo!\,R3 and KuaiRand are the exceptions, and Table~\ref{tab:tau} explains the first. On Yahoo!\,R3,
-validation selects IPS edges ($\lambda=0$) with a clip of 0.1--0.2, which binds for
-82\% of the logged pairs at $\tau=0.2$. A clipped IPS edge is $O_eY_e/\tau$, proportional
-to the exposure itself, so DRUP inherits the elasticity of the logged graph
-($\eta=+0.96$). On Coat the clip binds just as often (77\%), but with DR edges
-($\lambda=1$) and an accurate imputation the clipping bias is small
-(Theorem~\ref{thm:var}(c)) and invariance survives. Lowering the clip on Yahoo!\,R3
-reduces the elasticity to $+0.18\pm0.11$ at $\tau=5\cdot10^{-4}$, where almost no
-propensity is clipped, at a cost of 0.044 nDCG@5. KuaiRand follows the same pattern
-without a clip sweep: validation selects IPS edges with the smallest clip in the grid
-(0.02), which binds for 57\% of the treated logged pairs after the intervention,
-and DRUP is far from invariant ($\eta=+0.64$ with frozen nuisances, $+0.65$ when
-they are re-fitted; logged graph $+1.00$). The remaining elasticity and
-its large spread over the thinning draws come from heavy-tailed
-inverse-propensity weights on a log that is 2\% dense. Exposure invariance is
-therefore a property of the estimator under its assumptions, and whether a
-tuned configuration has it must be checked; the thinning audit is a simple way
-to do so.
+Table~\ref{tab:interv} tests Theorem~\ref{thm:fair} with a known intervention on
+exposure. The operators use the cross-fitted protocol, which the theorem does not
+cover (Remark~\ref{rem:xfit}), so this is an empirical check. The logged graph
+behaves as predicted for correlational propagation: with frozen nuisances
+$\eta=+1.00$ to $+1.03$ on all four datasets, and thinned items drop by 0.07--0.24 in
+mean within-user rank. On KuaiRec and Coat, DRUP is invariant to within a few
+hundredths ($\eta=-0.012$ and $-0.008$), also when its nuisances are re-fitted on the
+thinned log ($|\eta|\le0.022$). IPS adjacency is far from invariant ($\eta=+0.14$ on
+KuaiRec, $+0.90$ on Coat). The uncorrected DR adjacency is as invariant as DRUP on
+these data. On Yahoo!\,R3 and KuaiRand the selected configurations are not invariant
+($\eta=+0.96$ and $+0.64$): validation selects IPS edges ($\lambda=0$) with a clip that
+binds for 82\% of the logged pairs on Yahoo!\,R3 and for 57\% of the treated pairs on
+KuaiRand. A clipped IPS edge is $O_eY_e/\tau$, proportional to the exposure itself, so
+DRUP inherits the elasticity of the logged graph. On Yahoo!\,R3, lowering the clip to
+$5\cdot10^{-4}$ reduces $\eta$ to $+0.18\pm0.11$ at a cost of 0.044 nDCG@5
+(Supplementary Material).
 
 \begin{table}[t]\centering\small
 \caption{Controls for the thinning audit (same intervention as
@@ -62,62 +44,22 @@ pairs.}\label{tab:intervextra}
 \end{adjustbox}
 \end{table}
 
-\paragraph{How informative is the audit?} With frozen nuisances the audit
-updates the propensities to the known $p/2$, and an unbiased edge estimate is
-then unaffected by construction; a value near zero shows that the estimator
-is used as intended, not that the scores are right. Table~\ref{tab:intervextra}
-adds three controls. Popularity re-fitted on the thinned log has $\eta\approx1$
-and the imputation alone $\eta\approx0$ on Coat and Yahoo!\,R3 ($-0.16$ on KuaiRec), which brackets the scale. The negative
-control, which keeps the propensities of the original log, should push a
-debiasing estimator towards $\eta=1$. It does for IPS adjacency on all
-four datasets and for every operator on Yahoo!\,R3 and KuaiRand, whose selected
-configurations use IPS edges, but not for DR adjacency or DRUP on Coat ($\eta=-0.004$ and
-$-0.008$) or on KuaiRec ($-0.087$ and $-0.088$). There, the scores are almost a function of the imputation (rank
-correlation 0.98--0.99 with $\hat Y$), which is fitted on exposed pairs and
-reacts little to a halved exposure of some items; the audit cannot detect a
-misspecified propensity model in this regime, and a near-zero $\eta$ on Coat
-says little beyond the invariance of $\hat Y$. DRUP-split, whose edge estimates
-are less dominated by the imputation (rank correlation 0.76 on Coat, 0.58 on
-Yahoo!\,R3, 0.55 on KuaiRand), is invariant on Coat and KuaiRec ($|\eta|\le0.022$ frozen
-or re-fitted) and less elastic than the selected cross-fitted configuration on
-Yahoo!\,R3 and KuaiRand ($\eta=+0.32$ and $+0.33$ against $+0.96$ and $+0.64$).
-Both select IPS edges there, so the edge type does not explain the difference;
-a fifth of the split variant's pairs carry the exposure-free imputation instead
-of a clipped IPS edge, which may account for it, but we did not isolate this. The audit is thus informative for IPS-dominated configurations
-and weak for configurations whose scores are close to the imputation, and it
+\paragraph{How informative is the audit?} With frozen nuisances the audit updates the
+propensities to the known $p/2$, and an unbiased edge estimate is then unaffected by
+construction; a value near zero shows that the estimator is used as intended, not that the
+scores are right. Table~\ref{tab:intervextra} adds controls. Popularity re-fitted on the
+thinned log has $\eta\approx1$ and the imputation alone $\eta\approx0$ on Coat and
+Yahoo!\,R3 ($-0.16$ on KuaiRec), which brackets the scale. The negative control, which
+keeps the propensities of the original log, should push a debiasing estimator towards
+$\eta=1$. It does for IPS adjacency on all four datasets and for every operator on
+Yahoo!\,R3 and KuaiRand, whose selected configurations use IPS edges, but not for DR
+adjacency or DRUP on Coat ($\eta=-0.008$) or KuaiRec ($-0.088$). On Coat the scores are
+almost a function of the imputation (rank correlation 0.98--0.99 with $\hat Y$), which is
+fitted on exposed pairs and reacts little to a halved exposure of some items, so a
+near-zero $\eta$ there says little beyond the invariance of $\hat Y$. DRUP-split, whose
+edge estimates are less dominated by the imputation (rank correlation 0.76 on Coat, 0.58
+on Yahoo!\,R3, 0.55 on KuaiRand), is invariant on Coat and KuaiRec ($|\eta|\le0.022$) and
+less elastic than the selected cross-fitted configuration on Yahoo!\,R3 and KuaiRand
+($\eta=+0.32$ and $+0.33$). We read the audit as consistent with invariance where DR edges
+are used and informative where IPS edges are used, but of low power in between, and it
 should be reported with these controls.
-
-\begin{table}[t]\centering\small
-\caption{Clip $\tau$ against exposure invariance for DRUP under the same
-intervention, with frozen nuisances ($\eta$: mean$\pm$std over draws).}\label{tab:tau}
-\begin{adjustbox}{max width=\textwidth}
-\input{tables/tau.tex}
-\end{adjustbox}
-\end{table}
-
-\begin{table}[t]\centering\small
-\caption{Exposure concentration and user groups. PRU: popularity--rank
-correlation. ECB (KuaiRec, where item quality is known from the fully observed
-matrix): partial correlation between an item's mean rank and its log exposure,
-controlling for its true like rate. User gap: nDCG of group 0 minus group 1
-(men minus women on Coat, inactive minus active users elsewhere) with a
-bootstrap 95\% interval.}\label{tab:fair}
-\begin{adjustbox}{max width=\textwidth}
-\input{tables/fat.tex}
-\end{adjustbox}
-\end{table}
-
-Table~\ref{tab:fair} shows the distributional side. On KuaiRec, the
-exposure-conditional bias drops from 0.83 (logged graph) and 0.80 (IPS) to 0.33
-for DRUP and DR adjacency: given their true quality, items are ranked much less
-by how often they were shown. At the same time DRUP's top-20 lists are
-concentrated on 1.2\% of the candidate items, against 15\% for the logged graph,
-because the estimated full-exposure scores are themselves concentrated on few items; on Coat its Gini
-coefficient is 0.60 against 0.34. Exposure invariance and exposure concentration
-are different properties, and DRUP improves the first at the expense of the
-second. The user-group gaps do not differ between operators. They are clearly
-non-zero on Coat (men 0.11 above women), on Yahoo!\,R3 (inactive users 0.046
-below active ones) and on KuaiRand (inactive users 0.014 above active ones), under every
-operator, and not on KuaiRec. On KuaiRand the lists of DRUP, IPS and the logged graph
-are almost equally concentrated (Gini 0.43, coverage 0.98), as the scores of all
-three are close to each other there.

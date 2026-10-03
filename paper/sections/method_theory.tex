@@ -5,11 +5,11 @@
 Users $u\in[m]$, items $i\in[n]$ and pairs $e=(u,i)$ carry a binary potential
 outcome $Y_e\in\{0,1\}$ (whether $u$ would like $i$ if it were shown) and an
 observation indicator $O_e\in\{0,1\}$. The log reveals $O$ and $O\odot Y$. What
-$O$ records depends on the platform: on KuaiRec it is an impression chosen by
-the system, on Coat and Yahoo!\,R3 it is a rating that the user chose to give,
+$O$ records depends on the platform. On KuaiRec it is an impression chosen by
+the system. On Coat and Yahoo!\,R3 it is a rating that the user chose to give,
 so the ``exposure'' mechanism modelled by $p$ is then user self-selection
 rather than the platform's display policy. All statements below are relative
-to the mechanism that generates $O$; we keep the word exposure for brevity.
+to the mechanism that generates $O$. We keep the word exposure for brevity.
 
 \begin{assumption}[Conditionally independent exposure]\label{as:unconf}
 Conditionally on $Y$, the exposures $O_e$ are independent Bernoulli variables
@@ -25,10 +25,10 @@ given $Y$, i.e., they do not depend on $O$ (for instance, they are fitted on
 an independent log). We use $C_{ui}=d_u^{-\alpha}d_i^{-(1-\alpha)}$ with degrees
 $d$ taken from $\hat Y$.
 \end{assumption}
-The weights $C$ also enter the target below, so with degrees from $\hat Y$ the
-target is indexed by the imputation. A normalisation fixed a priori (a design
-choice, or degrees from an independent source) makes the target independent
-of $\hat Y$; Section~\ref{sec:semisynth} compares both.
+The weights $C$ also enter the target below. With degrees from $\hat Y$, the
+target therefore depends on the imputation. A normalisation fixed a priori (a
+design choice, or degrees from an independent source) makes the target
+independent of $\hat Y$; Section~\ref{sec:semisynth} compares both.
 
 \begin{remark}[Scope of the guarantees and the experimental protocol]\label{rem:xfit}
 All guarantees below are stated under Assumption~\ref{as:fixed}. Our main
@@ -36,23 +36,25 @@ experimental protocol does not satisfy it, in four ways. (i) $\hat p$ and
 $\hat Y$ are cross-fitted over ten random folds of pairs: the nuisances used at
 a pair of fold $k$ are fitted on the other nine
 folds~\cite{chernozhukov2018dml}. This makes the nuisance at a pair
-independent of that pair's exposure, which is what a one-hop estimate needs,
-but not of the exposures of the other edges of a walk, so a product of
-several edge estimates can be biased although every single edge estimate is
-unbiased. (ii) The degree weights sum the imputation over all pairs of a user
-or an item, so they depend on the exposures of all these pairs, including the
-pair at which they are used. (iii) One of the searched degree sources takes
-degrees from edge estimates. (iv) The constants $a,b$ are computed from the
+independent of that pair's exposure, which is what a one-hop estimate needs.
+It does not make the nuisance independent of the exposures of the other edges
+of a walk. A product of several edge estimates can therefore be biased, even
+though every single edge estimate is unbiased. (ii) The degree weights sum the
+imputation over all pairs of a user or an item. They therefore depend on the
+exposures of all these pairs, including the pair at which they are used.
+(iii) One of the searched degree sources takes degrees from edge estimates.
+(iv) The constants $a,b$ are computed from the
 scores (Section~\ref{sec:drup}). In simulation, the resulting dependence bias
-is of the same order as the repeated-walk bias, and under this protocol with
-imputation-based degrees the corrected operator is not less biased than the
+is of the same order as the repeated-walk bias. Under this protocol with
+imputation-based degrees, the corrected operator is not less biased than the
 uncorrected one
-(Section~\ref{sec:mc}); a control in which only the degree weights are fixed a
-priori restores the correction under cross-fitting, so (ii) and (iii), more than (i),
-account for the failure. The theorems therefore describe DRUP with nuisances
-from an independent log, or from the sample split introduced below; for the
-cross-fitted protocol they give no guarantee, and our experiments with it
-evaluate accuracy and the empirical behaviour of the scores, not unbiasedness.
+(Section~\ref{sec:mc}). In a control where only the degree weights are fixed a
+priori, the correction works again under cross-fitting. So (ii) and (iii), more
+than (i), account for the failure. The theorems therefore describe DRUP with
+nuisances from an independent log, or from the sample split introduced below.
+For the cross-fitted protocol they give no guarantee. Our experiments with it
+evaluate accuracy and the empirical behaviour of the scores, not
+unbiasedness.
 \end{remark}
 
 With $\tY=C\odot Y$, the target is propagation over the full-exposure graph,
@@ -60,8 +62,8 @@ With $\tY=C\odot Y$, the target is propagation over the full-exposure graph,
 F^*=a\,\tY+b\,T^*,\qquad T^*=\tY\tY^\top\tY ,
 \end{equation}
 with fixed constants $a,b\ge0$. $F^*$ is the linear LightGCN score one would
-compute if every item had been shown to every user. It is a normative choice:
-it treats potential outcomes as fixed and ignores preferences that exposure
+compute if every item had been shown to every user. It is a normative choice.
+It treats potential outcomes as fixed and ignores preferences that exposure
 itself shapes~\cite{chaney2018confounding,perdomo2020performative}
 (Section~\ref{sec:disc}).
 
@@ -80,10 +82,11 @@ Both have mean $Y_e$ when $\bar p=p$.
 \paragraph{Where the plug-in operator fails.}
 The plug-in three-hop operator $(\tW\tW^\top\tW)_{ui}$, with $\tW=C\odot W$, sums
 the products $\tW_{uj}\tW_{vj}\tW_{vi}$ over all walks $u\!-\!j\!-\!v\!-\!i$.
-If $v\neq u$ and $j\neq i$ the three edges are distinct and, by independence,
+If $v\neq u$ and $j\neq i$, the three edges are distinct and, by independence,
 the product is unbiased. The other walks repeat an edge
-(Figure~\ref{fig:walks}): for $v=u$ the edge $(u,j)$ is traversed twice, for
-$j=i$ the edge $(v,i)$, and for $v=u,j=i$ the edge $(u,i)$ three times. A
+(Figure~\ref{fig:walks}). For $v=u$ the edge $(u,j)$ is traversed twice. For
+$j=i$ the edge $(v,i)$ is traversed twice. For $v=u,j=i$ the edge $(u,i)$ is
+traversed three times. A
 repeated factor $\tW_e^k$ has mean $C_e^k\E[W_e^k]\ne C_e^kY_e$; for IPS,
 $\E[W_e^2]=Y_e/p_e$. Because $Y_e^k=Y_e$ for binary outcomes, the unbiased
 replacement of $\tW_e^k$ is simply $C_e^kW_e$.
@@ -133,36 +136,37 @@ type:
 \hat T=\tW\tW^\top\tW-\tW\odot(r\mathbf 1^\top-\Delta)-\tW\odot(\mathbf 1\kappa^\top-\Delta)
 -(\tW^{\odot3}-C^{\odot3}\odot W).
 \end{equation}
-The second term removes the excess of type (b) walks, the third that of type
-(c), and the last that of type (d); the subtracted $\Delta$ inside the first
-two avoids counting type (d) twice. The DRUP score is $s=a\,\tW+b\,\hat T$.
-In the experiments $a=1/c_1$ and $b=\beta/c_3$, where $c_1$ and $c_3$ are the
-mean absolute values of the one- and three-hop terms over all scored users and
+The second term removes the excess of type (b) walks, the third removes that of
+type (c), and the last removes that of type (d). The subtracted $\Delta$ inside
+the first two terms avoids counting type (d) twice. The DRUP score is
+$s=a\,\tW+b\,\hat T$.
+In the experiments $a=1/c_1$ and $b=\beta/c_3$. Here $c_1$ and $c_3$ are the
+mean absolute values of the one- and three-hop terms over all scored users, and
 $\beta$ is selected on validation data. The constants are global, so every
-user's scores are the same linear combination of the two terms, and
-within-user rankings depend on them only through $b/a$; a data-dependent
-$c_3/c_1$ thus acts as a data-dependent rescaling of the grid of $\beta$.
-Because $c_1$ and $c_3$ are computed from the log, however,
+user's scores are the same linear combination of the two terms. Within-user
+rankings depend on the constants only through $b/a$, so a data-dependent
+$c_3/c_1$ acts as a data-dependent rescaling of the grid of $\beta$.
+However, $c_1$ and $c_3$ are computed from the log, so
 $\E[\hat T/c_3]\neq T^*/c_3$ in general, and the score-level statements below
 hold for fixed $a,b$. Constants computed from the imputed graph $C\odot\hat Y$
-satisfy Assumption~\ref{as:fixed} whenever $\hat Y$ does; Section~\ref{sec:mc}
+satisfy Assumption~\ref{as:fixed} whenever $\hat Y$ does. Section~\ref{sec:mc}
 compares both choices.
 
 \paragraph{Sample-split variant.}
 A log rarely comes with an independent log for its nuisances. A sample split
-provides one at a cost. Draw a random set $A$ of pairs, each pair with
-probability $q$, fit $\hat Y$ (and $\hat p$, where it is estimated) on the
-pairs in $A$ only, replace
+provides one, at a cost. Draw a random set $A$ of pairs, each pair with
+probability $q$. Fit $\hat Y$ (and $\hat p$, where it is estimated) on the
+pairs in $A$ only. Replace
 the edge estimates of the pairs in $A$ by $\hat Y$, take the degrees from
 $\hat Y$, and compute $c_1$ and $c_3$ on the imputed graph $C\odot\hat Y$.
 Conditionally on $A$ and on the exposures in $A$, the remaining edge estimates
-are independent of every nuisance, so Assumption~\ref{as:fixed} holds and the
+are independent of every nuisance. Assumption~\ref{as:fixed} then holds and the
 results below apply, with $\xi_e=\hat Y_e-Y_e$ on the pairs in $A$. The price
-is a first-order imputation bias on a fraction $q$ of the pairs and fewer
+is a first-order imputation bias on a fraction $q$ of the pairs, and fewer
 exposures for the edge estimates. We call this variant DRUP-split and use
-$q=0.2$. The guarantee holds for every fixed configuration; selecting the
-hyper-parameters on validation data, as every method in our comparison does,
-is outside it, as it is for any estimator.
+$q=0.2$. The guarantee holds for every fixed configuration. It does not cover
+the selection of hyper-parameters on validation data, which every method in our
+comparison does and which is outside the guarantee of any estimator.
 
 \paragraph{Public-operator form.}
 Define the diagonal-corrected item Gram matrix
@@ -196,31 +200,19 @@ matrix estimated from masked data~\cite{lounici2014}.
 More generally, $W^\lambda_e=O_eY_e/\bar p_e+\lambda(\hat Y_e-O_e\hat Y_e/\bar p_e)$
 is unbiased for every $\lambda\in[0,1]$ under correct propensities. It
 interpolates between IPS ($\lambda=0$) and DR ($\lambda=1$, the only member that
-is also robust to propensity errors), and it equals the DR estimate with the
+is also robust to propensity errors). It equals the DR estimate with the
 shrunk imputation $\lambda\hat Y$. With $\bar p=p$ its variance is
 $\frac{1-p}{p}(Y-\lambda\hat Y)^2$. All results below hold for every member, and
 $\lambda$ is selected on validation data.
 
-\paragraph{Imputation.}
-Theorem~\ref{thm:unbiased} holds for any fixed $\hat Y$, so the imputation is a
-design choice; its accuracy enters the variance and the clipping bias
-(Theorem~\ref{thm:var}). We use an additive model $\mu+b_u+b_i$ fitted by
-IPS-weighted ridge regression, or that model plus a rank-32 residual $UV^\top$
-fitted by IPS-weighted alternating least squares. The additive imputation gives
-every user the same item order on unexposed candidates, which makes the one-hop
-DR term non-personalised; the low-rank imputation removes this limitation.
-
-\paragraph{Complexity and scale.}
-At three hops, one $n\times n$ Gram product and $O(mn)$ reductions, i.e., the
-cost of the uncorrected operator. The $K$-hop correction of
-Theorem~\ref{thm:khop} evaluates one tensor contraction per pair of equality
-patterns; we report its measured cost for $K=5$ in Section~\ref{sec:mc}. On KuaiRec (7{,}176 users, 10{,}728 items) one
-configuration takes a few seconds on four CPU cores once the nuisances are
-fitted. The dense $W$ and $G$
-need $O(mn+n^2)$ memory, which limits the present implementation to catalogues
-of about $10^4$--$10^5$ items. Because the correction only modifies diagonals
-and row and column sums, it carries over to sparse or low-rank
-representations of $W$, but we have not evaluated catalogues of $10^6$ items.
+\paragraph{Imputation and cost.}
+Theorem~\ref{thm:unbiased} holds for any fixed $\hat Y$. We use an additive model
+$\mu+b_u+b_i$ fitted by IPS-weighted ridge regression, or that model plus a rank-32
+residual fitted by IPS-weighted alternating least squares. At three hops the
+correction costs one $n\times n$ Gram product and $O(mn)$ reductions, which is the cost of the
+uncorrected operator. The five-hop correction is 29 times slower (Section~\ref{sec:mc}).
+The dense $W$ and $G$ need $O(mn+n^2)$ memory. This limits the present implementation to
+catalogues of about $10^4$--$10^5$ items.
 
 %======================================================================
 \section{Theory}
@@ -258,9 +250,9 @@ residual is not identified and no estimator can remove it.
 
 At three hops the walks through $(u,i)$ are exactly those counted in
 $g_{ui}$. With IPS edges they vanish on unexposed candidates, so the uncorrected
-IPS operator has no repeated-walk bias there; from five hops on, walks repeat
+IPS operator has no repeated-walk bias there. From five hops on, walks repeat
 edges that are not incident to the candidate (for example
-$u\!-\!j\!-\!v\!-\!j\!-\!v\!-\!i$) and the bias reappears
+$u\!-\!j\!-\!v\!-\!j\!-\!v\!-\!i$), and the bias reappears
 (Table~\ref{tab:mc}).
 
 \begin{theorem}[Any odd number of hops]\label{thm:khop}
@@ -319,25 +311,14 @@ repeated-walk bias is therefore $\Theta(1/\tau)$;
 DRUP has zero bias relative to the same target.
 \end{theorem}
 The within-user ranking is affected through $C_{ui}\hat Y_{ui}K_i$, which
-up-weights items whose other raters were rarely exposed; $R_u^{(i)}$ depends on
+up-weights items whose other raters were rarely exposed. The term $R_u^{(i)}$ depends on
 $i$ only through one term.
 
-\begin{theorem}[Variance, clipping and concentration]\label{thm:var}
-Let $\Lambda_e(u,i)$ be the $C$-weighted mass of the walks from $u$ to $i$ through
-edge $e$, and $B=\max(1,1/\tau)$. Then
-(a) $\Var(W_e)\le\varepsilon_e^2/(4\tau^2)$, and $\Var(W_e)\le\varepsilon_e^2/\tau$ if $\hat p=p$;
-(b) if $\hat p=p$, $\Var(\hat T_{ui})\le\frac{(1+1/\tau)^2}{\tau}\sum_e\varepsilon_e^2\Lambda_e(u,i)^2$;
-(c) if $\hat p=p$, so that clipping is the only source of bias,
-$|\E\hat T_{ui}-T^*_{ui}|\le3\bar\xi(1+\bar\xi)^2\sum_{j,v}C_{uj}C_{vj}C_{vi}$ with
-$\bar\xi=\max_e(1-p_e/\tau)_+\varepsilon_e$;
-(d) for any $\hat p$, $\Pr(|\hat T_{ui}-\E\hat T_{ui}|\ge t)\le2\exp(-2t^2/\sum_ec_e^2)$ with
-$c_e=\varepsilon_eB^2\Lambda_e(u,i)/\tau$.
-\end{theorem}
-
-The variance scales with the imputation error $\varepsilon^2$, not with $Y^2$ as
-for IPS, and $\tau$ trades variance against a clipping bias that vanishes when
-$\hat Y$ is accurate. The constants are worst-case and loose; Section~\ref{sec:mc}
-compares bound (b) with the Monte-Carlo variance.
+\paragraph{Variance and clipping.} The variance of an edge estimate scales with the
+imputation error $\varepsilon^2$, not with $Y^2$ as for IPS. The clip $\tau$ trades
+variance against a clipping bias, which vanishes when $\hat Y$ is accurate. The bounds
+(Theorem~\ref{thm:var} in Appendix~\ref{app:proofs}) are worst-case and loose by a factor of 70 to
+8{,}000 in simulation.
 
 \begin{definition}[Exposure elasticity]\label{def:elast}
 For an intervention $do(p_{\cdot i}\leftarrow\pi p_{\cdot i})$ on item $i$'s
@@ -357,7 +338,7 @@ Uncorrected DR propagation has $\eta_i<0$ whenever $\hat Y_{ui}K_i>0$
 \end{theorem}
 
 Exposure invariance is a statement about expected scores. It is not a
-distributive fairness criterion, and it is conditional: when many propensities
+distributive fairness criterion. It is also conditional: when many propensities
 lie below the clip, $\pi p\ge\tau$ fails and invariance is lost
 (Section~\ref{sec:fair}).
 
@@ -365,7 +346,7 @@ lie below the clip, $\pi p\ge\tau$ fails and invariance is lost
 
 Given its nuisances, $s$ is a fixed linear function of the edge estimates.
 Section~\ref{sec:structth} of the Supplementary Material states and proves the
-consequences, which hold for every linear propagation operator, corrected or
+consequences. They hold for every linear propagation operator, corrected or
 not: exact attributions and minimal counterfactual explanations with frozen
 nuisances (Proposition~\ref{prop:affine}, Theorem~\ref{thm:cf}), conservative
 certificates against injected profiles (Theorem~\ref{thm:robust}), joint

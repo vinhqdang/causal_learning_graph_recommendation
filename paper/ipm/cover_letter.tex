@@ -11,20 +11,16 @@ Please consider the enclosed manuscript, ``Causal graph recommendation under exp
 \emph{Information Processing \& Management}.
 
 Graph-based recommenders propagate preferences over interaction graphs that the
-platform's own exposure policy has filtered. The manuscript shows that the
-inverse-propensity and doubly robust corrections used inside graph propagation
-are themselves biased once propagation spans more than one hop, gives the exact
-bias, and removes it with a training-free operator (DRUP) that is exact for any
-odd number of hops and, at three hops, costs no more than the uncorrected
-operator. It states the guarantees that follow, with their assumptions: edge-wise double robustness, robustness to
-within-user exposure dependence, and exposure invariance in expectation, plus
-the properties that any linear operator with fixed nuisances shares (exact
-attributions, certificates against injected profiles, joint differential
-privacy with public nuisances, capped allocation). It also shows, by
-simulation, that these guarantees require nuisances fitted independently of
-the log: they hold for an independent log or a sample split, but not for
-nuisances cross-fitted on the same log, and a sample-split variant is
-evaluated alongside.
+platform's own exposure policy has filtered. The manuscript asks whether and when removing
+the repeated-walk bias of debiased graph propagation helps. It shows that the
+inverse-propensity and doubly robust corrections used inside graph propagation are
+biased once propagation spans more than one hop, gives the exact bias, and removes it
+with a training-free operator (DRUP) that is exact for any odd number of hops and, at
+three hops, costs no more than the uncorrected operator. It states the guarantees that
+follow, with their assumptions, and shows by simulation that these guarantees require
+nuisances (propensities, imputation and degree weights) independent of the log: they hold
+for an independent log or a sample split, but not when degree weights are computed from the
+log, which is what standard cross-fitted pipelines do.
 
 The evaluation is deliberately conservative. A semi-synthetic test on KuaiRec
 with known exposure shows that the correction removes the 18--29\% overestimate

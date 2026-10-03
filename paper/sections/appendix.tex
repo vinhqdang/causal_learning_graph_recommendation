@@ -1,3 +1,4 @@
+%SUPPLEMENT-START
 \section{Proofs}\label{app:proofs}
 
 Throughout, expectations are conditional on $Y$, and ``walk'' means a
@@ -100,6 +101,19 @@ $[0,1/2]$. At $p_e=\tau$, $\mu_e=Y_e$ and the bound is attained; setting all
 $p_{vi}=\tau$ gives a bias $C_{ui}\hat Y_{ui}(1/\tau-1)\sum_{v\ne u}C_{vi}^2\varepsilon_{vi}^2$, so the
 worst case is $\Theta(1/\tau)$. For (c), IPS gives $\tW_{ui}=0$ and $C_{ui}^3W_{ui}=0$
 given $O_{ui}=0$. \qed
+
+\subsection*{Statement of Theorem~\ref{thm:var}}
+\begin{theorem}[Variance, clipping and concentration]\label{thm:var}
+Let $\Lambda_e(u,i)$ be the $C$-weighted mass of the walks from $u$ to $i$ through
+edge $e$, and $B=\max(1,1/\tau)$. Then
+(a) $\Var(W_e)\le\varepsilon_e^2/(4\tau^2)$, and $\Var(W_e)\le\varepsilon_e^2/\tau$ if $\hat p=p$;
+(b) if $\hat p=p$, $\Var(\hat T_{ui})\le\frac{(1+1/\tau)^2}{\tau}\sum_e\varepsilon_e^2\Lambda_e(u,i)^2$;
+(c) if $\hat p=p$, so that clipping is the only source of bias,
+$|\E\hat T_{ui}-T^*_{ui}|\le3\bar\xi(1+\bar\xi)^2\sum_{j,v}C_{uj}C_{vj}C_{vi}$ with
+$\bar\xi=\max_e(1-p_e/\tau)_+\varepsilon_e$;
+(d) for any $\hat p$, $\Pr(|\hat T_{ui}-\E\hat T_{ui}|\ge t)\le2\exp(-2t^2/\sum_ec_e^2)$ with
+$c_e=\varepsilon_eB^2\Lambda_e(u,i)/\tau$.
+\end{theorem}
 
 \paragraph{Theorem~\ref{thm:var}.}
 (a) $\Var(W_e)=p_e(1-p_e)\varepsilon_e^2/\bar p_e^2\le\varepsilon_e^2/(4\tau^2)$ for any $\hat p$,

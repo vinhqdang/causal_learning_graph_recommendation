@@ -1,0 +1,157 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parskip}{4pt}
+\begin{document}
+\begin{center}
+{\Large\bfseries Response to the Editor}\\[6pt]
+Manuscript: \emph{Causal graph recommendation under exposure bias: removing the repeated-walk bias of doubly robust propagation}\\
+Journal: Information Processing \& Management
+\end{center}
+
+Dear Dr.\ Jansen,
+
+Thank you for reading the manuscript and for the detailed instructions. We have revised the
+manuscript and the supplementary material accordingly. Below, each point of your message is
+quoted in short form, followed by what we did and where. Section numbers refer to the revised
+manuscript; ``Supplement S$n$'' refers to the revised Supplementary Material.
+
+\section*{Summary of the main changes}
+\begin{itemize}[leftmargin=*]
+\item \textbf{Length.} The manuscript is shortened from about 14{,}600 to 9{,}300 words, and from 79
+to 53 pages in the review layout (32 pages of text, followed by references, declarations and the
+float pages). The proofs, the experimental details and the secondary results (sparse logs, exposure
+concentration, stakeholders and regulation) moved to the Supplementary Material.
+\item \textbf{New Section 2} ``Research objectives and contributions'' with four objectives and four research questions.
+\item \textbf{New Section 7.1} ``Datasets'' with a table describing all four datasets, and Section 7.2 ``Baselines''.
+\item \textbf{New Section 9} ``Discussion and implications'' with separate theoretical implications, practical implications and limitations.
+\item \textbf{Abstract} rewritten: 216 words, with dataset sizes and numerical results.
+\item \textbf{Highlights} rewritten: five items of 19 to 24 words.
+\item \textbf{Title} changed, to name the field (causal recommendation) and the contribution.
+\end{itemize}
+
+\section*{Point-by-point response}
+
+\paragraph{1. Master's and Ph.D.\ paper awards.}
+Not applicable: the lead author is not a student.
+
+\paragraph{2. Reviewing for IP\&M.}
+Noted. The author will accept review invitations from the journal.
+
+\paragraph{3. ``Highlights are not highlights \dots\ or are too long; about 15 to 30 words each.''}
+We rewrote the five highlights so that each states one finding or contribution in 19 to 24 words,
+for example the exact bias of debiased graph propagation beyond one hop, the 18--29\% overestimate of
+utility that the correction removes on a log with known exposure, and the unchanged accuracy over
+four datasets and up to 26 baselines (file \texttt{highlights}). They include the negative result
+that the guarantee fails when degree weights come from the log. (Elsevier's general guidance
+suggests at most 85 characters per highlight; we followed your length instruction.)
+
+\paragraph{4. ``The abstract does not highlight the specifics \dots\ too much background; add details; shorter is better.''}
+The abstract is rewritten from 245 to 216 words. Background is reduced to two sentences. It now
+gives the data (four datasets, 290 to 15{,}400 users, up to 10.3 million logged interactions; a
+semi-synthetic KuaiRec log), the comparison (up to 26 tuned baselines) and the main numbers: the
+three-hop error reduced by a factor of 4 to 12, the 18--29\% utility overestimate removed under oracle
+conditions and 100--540\% overestimate with estimated propensities, accuracy differences of at most
+0.0014 nDCG, a loss of up to 0.06 nDCG for the sample-split variant, and the 0.004 nDCG margin on KuaiRec
+that lies within the seed spread of the best trained model.
+
+\paragraph{5. ``An explicit research objective(s), preferably as a separate section.''}
+New \textbf{Section 2, Research objectives and contributions}. It states four objectives (O1
+estimator, O2 conditions, O3 value, O4 invariance) with four research questions (RQ1--RQ4), gives
+short answers, and lists the contributions. The Results (Section 8) and the Discussion (Section 9)
+are organised by the same research questions.
+
+\paragraph{6. ``Questions about your dataset/sample; explicitly describe the dataset(s) in the manuscript.''}
+New \textbf{Section 7.1, Datasets}, with Table 2 (users, items, size and density of the biased log,
+what the observation indicator means, the unbiased test set, candidates per user and number of
+evaluated users) and a paragraph per dataset: Coat (290 users, 300 items, 6{,}960 ratings; 16 random
+ratings per user for test), Yahoo!\ R3 (15{,}400 users, 1{,}000 songs, 311{,}704 ratings; 54{,}000
+random ratings of 5{,}400 users), KuaiRand-Pure (10{,}000 sampled users, 7{,}583 videos, 511{,}863
+impressions; random impressions as test) and KuaiRec (7{,}176 users, 10{,}728 items, 10.3 million views;
+a fully observed 1{,}411 $\times$ 3{,}327 matrix as test). We state how positives are defined, how
+candidates are chosen, and the metric values of a random ranking. We also state that on Coat and
+Yahoo!\ R3 the ``exposure'' is user self-selection, not a platform's display policy.
+
+\paragraph{7. ``No comparison to a state-of-the-art baseline; baselines stale (use or address not using LLMs); unclear whether baselines were run or taken from the literature; same datasets.''}
+New \textbf{Section 7.2, Baselines}. (a) \emph{We ran every baseline ourselves}, on the same four
+datasets, the same splits and the same validation data; no number is taken from the literature. (b)
+The comparison includes recent graph, contrastive and debiased models: BSPM (2023), SimGCL, r-AdjNorm
+and NAVIP (2022), MRDR (2021) and GF-CF (2021), together with LightGCN, EASE, iALS, DR-JL, MACR and PDA;
+each is tuned per split, and the number of configurations is reported (Supplement S2). (c) A new
+paragraph explains the baselines we did not run (StableDR, DICE, CausE, AutoDebias) and why. (d)
+\emph{Large language models}: we did not compare with LLM-based recommenders. Our pipeline uses only
+interaction data, none of the four benchmarks provides item text together with a random-exposure test
+set, and the question studied is the estimation of a propagation operator under exposure bias, for which
+the relevant comparators are graph operators. We state this explicitly in Section 7.2 and as a limitation
+in Section 9.3. We recognise that this is a genuine limitation and do not claim the method outperforms
+LLM-based recommenders. (e) We additionally report new controls for the claim that gains come from the DR
+graph: propagation over the imputation alone, equal-budget comparisons and seed variation (Sections 8.3, 9.3).
+
+\paragraph{8. ``Highlight the theoretical and practical implications; how does this research differ from existing work; explicit discussion section.''}
+New \textbf{Section 9, Discussion and implications}, with Section 9.1 theoretical implications
+(propagation-level debiasing must consider the operator; a guarantee for fixed nuisances is a statement
+about the whole pipeline, including degree weights; unbiasedness for the full-exposure target does not imply
+better rankings), Section 9.2 practical implications (when the correction is and is not worth using, what
+needs true propensities and nuisances independent of the log, what the audit can and cannot show), and Section
+9.3 limitations. The difference from existing work is stated in Section 3 (``Debiasing inside graph
+propagation'' and ``Unbiased estimation of polynomials under missingness'') and in Section 2: the reduction itself is classical;
+what is new is its exact form for inverse-propensity and DR graph propagation, the exact bias of the
+uncorrected operators, and the finding that the guarantees fail under data-dependent degree weights.
+
+\paragraph{9. ``Thorough copy editing; many readers are not native English speakers.''}
+We rewrote the introduction, related work, experimental design, results, discussion and conclusion in plain
+language with shorter sentences, defined the central symbols in the introduction, and edited the prose of the method section
+for clarity without changing any mathematics, citation, number or result (verified by an automated check of
+formulas, citations, labels and numbers before and after). We would welcome a further language check at
+the proof stage.
+
+\paragraph{10. ``The manuscript is WAY too long; shorten it.''}
+See the summary: 14{,}600 $\to$ 9{,}300 words and 79 $\to$ 53 pages in the review layout, with 32 pages of
+text. Concretely: the related-work section is about half as long (1{,}140 to 580 words); the simulation, accuracy and audit
+sections are condensed to the findings needed for the four research questions; the variance and clipping theorem
+with its proof, the experimental details and the proofs of all theorems moved to the Supplementary Material (S1--S3);
+and the sparse-log experiment, the exposure-concentration and clip analyses, and the stakeholder and regulation discussion
+moved to Supplement S5.
+
+\paragraph{11. ``The reference list needs tidying; missing items or formatting issues; use a standard style (APA).''}
+We audited every cited entry for author, title, venue, year, volume, pages and DOI, completed the missing
+pages, fixed capitalisation of titles (e.g.\ M\"obius, ``A worrying analysis''), and the printed list contains only the 65 works cited in the
+manuscript; we use the Elsevier author--year (Harvard) style with
+consistent formatting throughout. This style is close to, but not identical to, APA 7; if the journal requires strict
+APA formatting we will convert at the revision stage.
+
+\paragraph{12. ``Review recent IP\&M articles on similar topics.''}
+The related work already cites recent IP\&M articles on debiasing, fairness and privacy (for example on
+popularity debiasing from user and item perspectives, controllable popularity bias, invariant debiasing with
+biased imputation, causal deconfounding of multi-criteria ratings, fairness measurement, provider fairness and
+differential privacy for matrix factorisation), and we kept them. We restructured the paper along the usual
+research-article layout (introduction, objectives, related work, method, experimental design, results, discussion
+and implications, conclusion) and moved supporting material to the supplement.
+
+\paragraph{13. Author guidelines.}
+The abstract is under 250 words, the highlights follow your length instruction, and the title page contains the
+declarations of funding, competing interests, generative AI use, CRediT roles, ethics and data availability, with the
+public repository for code and result files.
+
+\section*{Other changes made during the revision}
+\begin{itemize}[leftmargin=*]
+\item New tests: equivalence (TOST) for the key comparisons, a Nadeau--Bengio test over splits adjusted over the same family as the user-level tests, and a note that identical rankings (Yahoo!\ R3, KuaiRand) cannot be tested (Supplement S5, Table S19).
+\item A simulation control that fixes the degree weights a priori shows that cross-fitting alone preserves the correction and that data-dependent degree weights break it (Section 8.1, Table S18).
+\item Table 1 now separates DRUP-split (assumptions hold) from cross-fitted DRUP (as run, no guarantee).
+\item The claim that the correction ``changes no ranking'' is replaced by ``no detectable change in accuracy'', and the exposure-invariance audit is described as having limited power.
+\end{itemize}
+
+\section*{Points we did not address, and why}
+\begin{itemize}[leftmargin=*]
+\item \textbf{LLM-based and newer baselines.} Not run (Section 7.2). A comparison needs a dataset with item text and a random-exposure test set.
+\item \textbf{Strict APA formatting.} The reference list uses the Elsevier author--year style (see point 11).
+\item \textbf{Main-text length.} At 32 pages in the review layout the text is still long for some readers. Further shortening would require removing results that answer the research questions.
+\end{itemize}
+
+We hope the revised manuscript addresses your concerns, and we are grateful for the opportunity to resubmit.
+
+Sincerely,\\
+Quang-Vinh Dang\\
+British University Vietnam, Hung Yen, Vietnam
+\end{document}
