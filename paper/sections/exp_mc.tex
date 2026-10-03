@@ -28,8 +28,8 @@ hops but not at five, and the uncorrected DR operator is biased at both depths;
 the simulation agrees (IPS 0.029 at three hops and 4.7 at five; DR 1.1 and 5.1).
 The exposure elasticity is $+1.78$ for the logged graph, $-0.19$ for DR adjacency
 and $+0.005$ for DRUP. The $K$-hop engine matches the closed-form three-hop
-operator to $7\times10^{-15}$ and brute-force enumeration of five-hop walks to
-$10^{-13}$. On a dense matrix of KuaiRec's size (7{,}176 users, 10{,}728 items, 1{,}411
+operator to $9\times10^{-16}$ and brute-force enumeration of all five-hop walks to
+$10^{-14}$ (absolute error on random $5\times6$ matrices; Supplementary code \texttt{check\_khop.py}). On a dense matrix of KuaiRec's size (7{,}176 users, 10{,}728 items, 1{,}411
 scored users, four CPU cores) the corrected three-hop operator takes 1.9\,s against
 1.4\,s for the plug-in one, and the corrected five-hop operator 85\,s against
 2.9\,s: the correction is exact but not free beyond three hops.
@@ -72,7 +72,7 @@ correction 0.05 against 1.10 uncorrected; DRUP 0.05 against 0.89), whereas degre
 from the cross-fitted $\hat Y$ or from the edge estimates destroy it (0.64--0.80 and
 0.74--0.82). Fitting the nuisances in sample breaks the correction even with fixed
 weights for DR edges (0.23). The sample split restores the guarantee: relative to
-the target of Theorem~\ref{thm:unbiased}, the bias of DRUP-split is 0.007--0.065, and
+the target of Theorem~\ref{thm:unbiased}, the bias of DRUP-split is 0.004--0.066, and
 relative to the full-exposure target 0.07--0.18 at $q=0.2$, against 0.07--1.09 for
 the uncorrected operator under the same split. The data-dependent constants matter
 too: with independent nuisances and DR edges, the full score is biased by 0.18--0.35

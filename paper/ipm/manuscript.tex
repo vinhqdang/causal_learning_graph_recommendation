@@ -648,9 +648,9 @@ ships propensities, which we use.
 ratings of 15{,}400 users on 1{,}000 songs (2.0\% dense) and 54{,}000 ratings of
 ten random songs for 5{,}400 of the users, in the version distributed
 with~\citep{chen2021autodebias}. A random 5\% of the test users is held out and
-used only to fit an outcome-dependent propensity model~\citep{schnabel2016}; it
-did not improve the propagation operators on validation data, so all reported
-results use a logistic exposure model. The remaining 5{,}130 users have ten
+used only to fit an outcome-dependent propensity model~\citep{schnabel2016}; in a
+preliminary comparison on validation data it did not improve the propagation
+operators, so all reported results use a logistic exposure model. The remaining 5{,}130 users have ten
 candidates each, and 2{,}315 of them a positive.
 \emph{KuaiRand-Pure}~\citep{gao2022kuairand} is the only dataset that records
 platform exposure rather than self-selection: $O$ is an impression of the
@@ -667,7 +667,7 @@ on average).
 
 Positives are ratings $\ge4$ (Coat, Yahoo!\,R3), a watch ratio $\ge2$ (KuaiRec)
 and a click (KuaiRand). A random ranking reaches nDCG@5 of 0.306 on Coat and
-0.352 on Yahoo!\,R3, nDCG@10 of 0.328 on KuaiRand and nDCG@20 of 0.046 on
+0.352 on Yahoo!\,R3, nDCG@10 of 0.33 on KuaiRand and nDCG@20 of 0.046 on
 KuaiRec, so the candidate sets of Coat and Yahoo!\,R3 compress metric differences.
 On Coat and Yahoo!\,R3 ``exposure'' means that the user chose to rate the item,
 and exposure invariance is invariance to that choice, not to a platform's
@@ -675,7 +675,9 @@ allocation.
 
 \subsection{Baselines}\label{sec:baselines}
 
-We compare DRUP with up to 26 baselines, all run by us on the same datasets,
+We compare DRUP with up to 26 baselines (counting the non-personalised methods and, among the debiased-graph operators,
+IPS adjacency with and without the walk correction and EASE, GF-CF and BSPM on the DR graph, but not DR adjacency,
+DRUP or their variants), all run by us on the same datasets,
 splits and validation data; no number is taken from the literature.
 \emph{Non-personalised}: popularity and the imputation $\hat Y$ alone.
 \emph{Trained, pointwise loss}: MF, IPS-MF~\citep{schnabel2016}, DR-MF,
@@ -769,8 +771,8 @@ hops but not at five, and the uncorrected DR operator is biased at both depths;
 the simulation agrees (IPS 0.029 at three hops and 4.7 at five; DR 1.1 and 5.1).
 The exposure elasticity is $+1.78$ for the logged graph, $-0.19$ for DR adjacency
 and $+0.005$ for DRUP. The $K$-hop engine matches the closed-form three-hop
-operator to $7\times10^{-15}$ and brute-force enumeration of five-hop walks to
-$10^{-13}$. On a dense matrix of KuaiRec's size (7{,}176 users, 10{,}728 items, 1{,}411
+operator to $9\times10^{-16}$ and brute-force enumeration of all five-hop walks to
+$10^{-14}$ (absolute error on random $5\times6$ matrices; Supplementary code \texttt{check\_khop.py}). On a dense matrix of KuaiRec's size (7{,}176 users, 10{,}728 items, 1{,}411
 scored users, four CPU cores) the corrected three-hop operator takes 1.9\,s against
 1.4\,s for the plug-in one, and the corrected five-hop operator 85\,s against
 2.9\,s: the correction is exact but not free beyond three hops.
@@ -813,7 +815,7 @@ correction 0.05 against 1.10 uncorrected; DRUP 0.05 against 0.89), whereas degre
 from the cross-fitted $\hat Y$ or from the edge estimates destroy it (0.64--0.80 and
 0.74--0.82). Fitting the nuisances in sample breaks the correction even with fixed
 weights for DR edges (0.23). The sample split restores the guarantee: relative to
-the target of Theorem~\ref{thm:unbiased}, the bias of DRUP-split is 0.007--0.065, and
+the target of Theorem~\ref{thm:unbiased}, the bias of DRUP-split is 0.004--0.066, and
 relative to the full-exposure target 0.07--0.18 at $q=0.2$, against 0.07--1.09 for
 the uncorrected operator under the same split. The data-dependent constants matter
 too: with independent nuisances and DR edges, the full score is biased by 0.18--0.35
@@ -910,7 +912,7 @@ Only the sample-split variants satisfy Assumption~\ref{as:fixed}.}\label{tab:acc
 \caption{User-level paired comparisons: mean difference of the test metric
 over users with a 95\% interval, and the $t$-test $p$-value, Holm-adjusted over
 all comparisons run for the dataset (DRUP, DR adjacency and DRUP-split, and on Coat and KuaiRec also five-hop DRUP, each
-against every other method: 124 on Coat, 87 on Yahoo!\,R3, 75 on KuaiRand, 120 on KuaiRec). Users with a positive
+against every other method: 124 on Coat, 87 on Yahoo!\,R3, 75 on KuaiRand, 124 on KuaiRec). Users with a positive
 candidate who are in the test part of at least one split (225, 2{,}310, 8{,}321 and
 1{,}410); sample-split rows use the first draw. Selected rows; all comparisons
 are in the result files.}\label{tab:sig}
@@ -973,7 +975,7 @@ DR-JL and MRDR only.
 DRUP is 0.618 against 0.633 (Supplementary Table~S2); counted in validation
 evaluations, which include every epoch of a trained model, DRUP with the 103 evaluations
 of DR-JL reaches 0.636. Re-training the split-0 selection of the trained models with other
-seeds changes their score by up to 0.013 on Yahoo!\,R3 and 0.05 on Coat (r-AdjNorm
+seeds changes their score by up to 0.013 on Yahoo!\,R3 and 0.075 on Coat (PDA; r-AdjNorm
 0.521--0.566), and by 0.009 and 0.015 on KuaiRec for DR-JL and MRDR, so differences on
 Coat and the KuaiRec margin over DR-JL and MRDR should be read with this in mind. The loss
 matters more than the architecture, in opposite directions: pairwise training is decisive
@@ -1089,8 +1091,8 @@ with estimated propensities all operators overstate utility by 100--540\%. The
 exposure-capped allocation, which compares scores across users, loses 79--84\% of the
 achievable utility under every estimator, so the correction does not help there. On
 KuaiRec, training-free propagation over the DR graph is a strong, cheap baseline
-(nDCG@20 0.638, no gradient training, about 50 minutes of nuisance fitting and 3\,s per
-configuration) against which trained debiased graph recommenders should be compared;
+(nDCG@20 0.638, no gradient training; fitting the nuisances takes tens of minutes on four CPU
+cores, and each configuration then takes seconds) against which trained debiased graph recommenders should be compared;
 two thirds of its gain over the imputation alone comes from propagating the imputation.
 A thinning audit can probe exposure invariance, but it needs a negative control and a
 configuration whose scores are not dominated by the imputation. Finally, the sample

@@ -1,0 +1,7 @@
+{
+ "K3_vs_closed_form": 8.881784197001252e-16,
+ "K3_vs_bruteforce_max_abs": 8.881784197001252e-16,
+ "K3_vs_bruteforce_rel": 3.0444280457191537e-16,
+ "K5_vs_bruteforce_max_abs": 9.769962616701378e-15,
+ "K5_vs_bruteforce_rel": 7.48964003034949e-16
+}

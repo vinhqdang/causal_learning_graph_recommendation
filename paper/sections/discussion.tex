@@ -39,8 +39,8 @@ with estimated propensities all operators overstate utility by 100--540\%. The
 exposure-capped allocation, which compares scores across users, loses 79--84\% of the
 achievable utility under every estimator, so the correction does not help there. On
 KuaiRec, training-free propagation over the DR graph is a strong, cheap baseline
-(nDCG@20 0.638, no gradient training, about 50 minutes of nuisance fitting and 3\,s per
-configuration) against which trained debiased graph recommenders should be compared;
+(nDCG@20 0.638, no gradient training; fitting the nuisances takes tens of minutes on four CPU
+cores, and each configuration then takes seconds) against which trained debiased graph recommenders should be compared;
 two thirds of its gain over the imputation alone comes from propagating the imputation.
 A thinning audit can probe exposure invariance, but it needs a negative control and a
 configuration whose scores are not dominated by the imputation. Finally, the sample

@@ -16,7 +16,7 @@ Only the sample-split variants satisfy Assumption~\ref{as:fixed}.}\label{tab:acc
 \caption{User-level paired comparisons: mean difference of the test metric
 over users with a 95\% interval, and the $t$-test $p$-value, Holm-adjusted over
 all comparisons run for the dataset (DRUP, DR adjacency and DRUP-split, and on Coat and KuaiRec also five-hop DRUP, each
-against every other method: 124 on Coat, 87 on Yahoo!\,R3, 75 on KuaiRand, 120 on KuaiRec). Users with a positive
+against every other method: 124 on Coat, 87 on Yahoo!\,R3, 75 on KuaiRand, 124 on KuaiRec). Users with a positive
 candidate who are in the test part of at least one split (225, 2{,}310, 8{,}321 and
 1{,}410); sample-split rows use the first draw. Selected rows; all comparisons
 are in the result files.}\label{tab:sig}
@@ -79,7 +79,7 @@ DR-JL and MRDR only.
 DRUP is 0.618 against 0.633 (Supplementary Table~\ref{tab:budget}); counted in validation
 evaluations, which include every epoch of a trained model, DRUP with the 103 evaluations
 of DR-JL reaches 0.636. Re-training the split-0 selection of the trained models with other
-seeds changes their score by up to 0.013 on Yahoo!\,R3 and 0.05 on Coat (r-AdjNorm
+seeds changes their score by up to 0.013 on Yahoo!\,R3 and 0.075 on Coat (PDA; r-AdjNorm
 0.521--0.566), and by 0.009 and 0.015 on KuaiRec for DR-JL and MRDR, so differences on
 Coat and the KuaiRec margin over DR-JL and MRDR should be read with this in mind. The loss
 matters more than the architecture, in opposite directions: pairwise training is decisive

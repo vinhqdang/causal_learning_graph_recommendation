@@ -28,9 +28,9 @@ ships propensities, which we use.
 ratings of 15{,}400 users on 1{,}000 songs (2.0\% dense) and 54{,}000 ratings of
 ten random songs for 5{,}400 of the users, in the version distributed
 with~\citep{chen2021autodebias}. A random 5\% of the test users is held out and
-used only to fit an outcome-dependent propensity model~\citep{schnabel2016}; it
-did not improve the propagation operators on validation data, so all reported
-results use a logistic exposure model. The remaining 5{,}130 users have ten
+used only to fit an outcome-dependent propensity model~\citep{schnabel2016}; in a
+preliminary comparison on validation data it did not improve the propagation
+operators, so all reported results use a logistic exposure model. The remaining 5{,}130 users have ten
 candidates each, and 2{,}315 of them a positive.
 \emph{KuaiRand-Pure}~\citep{gao2022kuairand} is the only dataset that records
 platform exposure rather than self-selection: $O$ is an impression of the
@@ -47,7 +47,7 @@ on average).
 
 Positives are ratings $\ge4$ (Coat, Yahoo!\,R3), a watch ratio $\ge2$ (KuaiRec)
 and a click (KuaiRand). A random ranking reaches nDCG@5 of 0.306 on Coat and
-0.352 on Yahoo!\,R3, nDCG@10 of 0.328 on KuaiRand and nDCG@20 of 0.046 on
+0.352 on Yahoo!\,R3, nDCG@10 of 0.33 on KuaiRand and nDCG@20 of 0.046 on
 KuaiRec, so the candidate sets of Coat and Yahoo!\,R3 compress metric differences.
 On Coat and Yahoo!\,R3 ``exposure'' means that the user chose to rate the item,
 and exposure invariance is invariance to that choice, not to a platform's
@@ -55,7 +55,9 @@ allocation.
 
 \subsection{Baselines}\label{sec:baselines}
 
-We compare DRUP with up to 26 baselines, all run by us on the same datasets,
+We compare DRUP with up to 26 baselines (counting the non-personalised methods and, among the debiased-graph operators,
+IPS adjacency with and without the walk correction and EASE, GF-CF and BSPM on the DR graph, but not DR adjacency,
+DRUP or their variants), all run by us on the same datasets,
 splits and validation data; no number is taken from the literature.
 \emph{Non-personalised}: popularity and the imputation $\hat Y$ alone.
 \emph{Trained, pointwise loss}: MF, IPS-MF~\citep{schnabel2016}, DR-MF,
