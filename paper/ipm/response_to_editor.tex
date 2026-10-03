@@ -33,13 +33,10 @@ concentration, stakeholders and regulation) moved to the Supplementary Material.
 
 \section*{Point-by-point response}
 
-\paragraph{1. Master's and Ph.D.\ paper awards.}
-Not applicable: the lead author is not a student.
-
-\paragraph{2. Reviewing for IP\&M.}
+\paragraph{1. Reviewing for IP\&M.}
 Noted. The author will accept review invitations from the journal.
 
-\paragraph{3. ``Highlights are not highlights \dots\ or are too long; about 15 to 30 words each.''}
+\paragraph{2. ``Highlights are not highlights \dots\ or are too long; about 15 to 30 words each.''}
 We rewrote the five highlights so that each states one finding or contribution in 19 to 24 words,
 for example the exact bias of debiased graph propagation beyond one hop, the 18--29\% overestimate of
 utility that the correction removes on a log with known exposure, and the unchanged accuracy over
@@ -47,7 +44,7 @@ four datasets and up to 26 baselines (file \texttt{highlights}). They include th
 that the guarantee fails when degree weights come from the log. (Elsevier's general guidance
 suggests at most 85 characters per highlight; we followed your length instruction.)
 
-\paragraph{4. ``The abstract does not highlight the specifics \dots\ too much background; add details; shorter is better.''}
+\paragraph{3. ``The abstract does not highlight the specifics \dots\ too much background; add details; shorter is better.''}
 The abstract is rewritten from 250 to 216 words. Background is reduced to two sentences. It now
 gives the data (four datasets, 290 to 15{,}400 users, up to 10.3 million logged interactions; a
 semi-synthetic KuaiRec log), the comparison (up to 26 tuned baselines) and the main numbers: the
@@ -56,13 +53,13 @@ conditions and 100--540\% overestimate with estimated propensities, accuracy dif
 0.0014 nDCG, a loss of up to 0.06 nDCG for the sample-split variant, and the 0.004 nDCG margin on KuaiRec
 that lies within the seed spread of the best trained model.
 
-\paragraph{5. ``An explicit research objective(s), preferably as a separate section.''}
+\paragraph{4. ``An explicit research objective(s), preferably as a separate section.''}
 New \textbf{Section 2, Research objectives and contributions}. It states four objectives (O1
 estimator, O2 conditions, O3 value, O4 invariance) with four research questions (RQ1--RQ4), gives
 short answers, and lists the contributions. The Results (Section 8) and the Discussion (Section 9)
 are organised by the same research questions.
 
-\paragraph{6. ``Questions about your dataset/sample; explicitly describe the dataset(s) in the manuscript.''}
+\paragraph{5. ``Questions about your dataset/sample; explicitly describe the dataset(s) in the manuscript.''}
 New \textbf{Section 7.1, Datasets}, with Table 2 (users, items, size and density of the biased log,
 what the observation indicator means, the unbiased test set, candidates per user and number of
 evaluated users) and a paragraph per dataset: Coat (290 users, 300 items, 6{,}960 ratings; 16 random
@@ -73,7 +70,7 @@ a fully observed 1{,}411 $\times$ 3{,}327 matrix as test). We state how positive
 candidates are chosen, and the metric values of a random ranking. We also state that on Coat and
 Yahoo!\ R3 the ``exposure'' is user self-selection, not a platform's display policy.
 
-\paragraph{7. ``No comparison to a state-of-the-art baseline; baselines stale (use or address not using LLMs); unclear whether baselines were run or taken from the literature; same datasets.''}
+\paragraph{6. ``No comparison to a state-of-the-art baseline; baselines stale (use or address not using LLMs); unclear whether baselines were run or taken from the literature; same datasets.''}
 New \textbf{Section 7.2, Baselines}. (a) \emph{We ran every baseline ourselves}, on the same four
 datasets, the same splits and the same validation data; no number is taken from the literature. (b)
 The comparison includes recent graph, contrastive and debiased models: BSPM (2023), SimGCL, r-AdjNorm
@@ -88,7 +85,7 @@ in Section 9.3. We recognise that this is a genuine limitation and do not claim 
 LLM-based recommenders. (e) We additionally report new controls for the claim that gains come from the DR
 graph: propagation over the imputation alone, equal-budget comparisons and seed variation (Sections 8.3, 9.3).
 
-\paragraph{8. ``Highlight the theoretical and practical implications; how does this research differ from existing work; explicit discussion section.''}
+\paragraph{7. ``Highlight the theoretical and practical implications; how does this research differ from existing work; explicit discussion section.''}
 New \textbf{Section 9, Discussion and implications}, with Section 9.1 theoretical implications
 (propagation-level debiasing must consider the operator; a guarantee for fixed nuisances is a statement
 about the whole pipeline, including degree weights; unbiasedness for the full-exposure target does not imply
@@ -99,14 +96,14 @@ propagation'' and ``Unbiased estimation of polynomials under missingness'') and 
 what is new is its exact form for inverse-propensity and DR graph propagation, the exact bias of the
 uncorrected operators, and the finding that the guarantees fail under data-dependent degree weights.
 
-\paragraph{9. ``Thorough copy editing; many readers are not native English speakers.''}
+\paragraph{8. ``Thorough copy editing; many readers are not native English speakers.''}
 We rewrote the introduction, related work, experimental design, results, discussion and conclusion in plain
 language with shorter sentences, defined the central symbols in the introduction, and edited the prose of the method section
 for clarity without changing any mathematics, citation, number or result (verified by an automated check of
 formulas, citations, labels and numbers before and after). We would welcome a further language check at
 the proof stage.
 
-\paragraph{10. ``The manuscript is WAY too long; shorten it.''}
+\paragraph{9. ``The manuscript is WAY too long; shorten it.''}
 See the summary: 13{,}000 $\to$ 9{,}300 words of text and 79 $\to$ 53 pages in the review layout, with 34 pages of
 text. Concretely: the related-work section is about 40\% shorter (1{,}320 to 770 words); the simulation, accuracy and audit
 sections are condensed to the findings needed for the four research questions; the variance and clipping theorem
@@ -114,14 +111,14 @@ with its proof, the experimental details and the proofs of all theorems moved to
 and the sparse-log experiment, the exposure-concentration and clip analyses, and the stakeholder and regulation discussion
 moved to Supplement S5.
 
-\paragraph{11. ``The reference list needs tidying; missing items or formatting issues; use a standard style (APA).''}
+\paragraph{10. ``The reference list needs tidying; missing items or formatting issues; use a standard style (APA).''}
 We audited every cited entry for author, title, venue, year, volume, pages and DOI, completed the missing
 pages, fixed capitalisation of titles (e.g.\ M\"obius, ``A worrying analysis''), and the printed list contains only the 65 works cited in the
 manuscript; we use the Elsevier author--year (Harvard) style with
 consistent formatting throughout. This style is close to, but not identical to, APA 7; if the journal requires strict
 APA formatting we will convert at the revision stage.
 
-\paragraph{12. ``Review recent IP\&M articles on similar topics.''}
+\paragraph{11. ``Review recent IP\&M articles on similar topics.''}
 The related work already cites recent IP\&M articles on debiasing, fairness and privacy (for example on
 popularity debiasing from user and item perspectives, controllable popularity bias, invariant debiasing with
 biased imputation, causal deconfounding of multi-criteria ratings, fairness measurement, provider fairness and
@@ -129,7 +126,7 @@ differential privacy for matrix factorisation), and we kept them. We restructure
 research-article layout (introduction, objectives, related work, method, experimental design, results, discussion
 and implications, conclusion) and moved supporting material to the supplement.
 
-\paragraph{13. Author guidelines.}
+\paragraph{12. Author guidelines.}
 The abstract is under 250 words, the highlights follow your length instruction, and the title page contains the
 declarations of funding, competing interests, generative AI use, CRediT roles, ethics and data availability, with the
 public repository for code and result files.
@@ -145,7 +142,7 @@ public repository for code and result files.
 \section*{Points we did not address, and why}
 \begin{itemize}[leftmargin=*]
 \item \textbf{LLM-based and newer baselines.} Not run (Section 7.2). A comparison needs a dataset with item text and a random-exposure test set.
-\item \textbf{Strict APA formatting.} The reference list uses the Elsevier author--year style (see point 11).
+\item \textbf{Strict APA formatting.} The reference list uses the Elsevier author--year style (see point 10).
 \item \textbf{Main-text length.} At 34 pages in the review layout the text is still long for some readers. Further shortening would require removing results that answer the research questions.
 \end{itemize}
 
