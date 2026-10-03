@@ -128,7 +128,7 @@ preamble = r"""\documentclass[preprint,review,12pt,authoryear]{elsarticle}
 
 """
 
-bib = r"""\section*{Declaration of generative AI and AI-assisted technologies in the writing process}
+bib = r"""\section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
 During the preparation of this work the author used generative AI tools to
 support code development and to polish the writing. All ideas and results are
 the author's own. After using these tools, the author reviewed and edited the
