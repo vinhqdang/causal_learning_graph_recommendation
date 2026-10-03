@@ -297,3 +297,12 @@ Section 9 (discussion and implications), abstract 216 words, highlights 19-24 wo
 14,600 to 9,300 words (79 to 53 pages in review layout; proofs, experimental details and secondary results moved to the
 supplement), bibliography audited. See paper/ipm/response_to_editor.pdf.
 Not done: LLM-based recommenders and newer baselines; strict APA (Elsevier author-year style kept).
+
+## Resubmission after the editor's send-back (2026-10-03)
+
+- Restructured per the editor's list (research objectives, datasets, baselines, discussion, abstract, highlights, shortening).
+- References re-rendered in APA 7 (parent of the journal's own CSL style); dataset papers marked "[Data set]", preprints marked.
+- AI declaration section renamed to the journal's wording.
+- Student-award item removed from the response letter; the author will accept review invitations.
+- Resubmitted through Editorial Manager with the files in `submission/` (commit e35a0f5).
+- Not done: Zenodo deposit (code and results are in the GitHub repository); page numbers for two conference references that have none.
