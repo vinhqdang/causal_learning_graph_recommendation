@@ -58,6 +58,15 @@ class LightGCN(MF):
         return acc[: self.m], acc[self.m:]
 
 
+class LGNCos(LightGCN):
+    """LightGCN whose ranking score is the cosine of the propagated embeddings, the score an
+    InfoNCE loss with normalised embeddings optimises."""
+
+    def full_scores(self, rows):
+        Ue, Ve = self.embeddings()
+        return F.normalize(Ue[rows], dim=-1) @ F.normalize(Ve, dim=-1).T
+
+
 class SimGCL(LightGCN):
     """SimGCL (Yu et al., SIGIR 2022): LightGCN propagation (without the
     layer-0 term) with optional uniform noise of norm eps added at every
@@ -155,7 +164,7 @@ def _elu1(x):
 
 def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
           patience=5, pairs_per_epoch=None, seed=0, item_pop=None, gamma=0.1, log=None,
-          cl_weight=0.1, aux_weight=1e-3):
+          cl_weight=0.1, aux_weight=1e-3, tau=0.2, fn=0.0, ipsw=0, n_neg=32, clip_w=5.0):
     """Pointwise losses: naive / IPS iterate over exposed pairs; DR samples
     pairs uniformly from all (u, i) (pseudo-label DR with a fixed imputation).
     Pairwise losses: 'bpr' (logged positives vs uniformly sampled items that
@@ -180,7 +189,11 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
         imp = MF(m, n, model.U.weight.shape[1])
         opt_imp = torch.optim.Adam(imp.parameters(), lr=lr)
         ou, oi = torch.nonzero(O > 0, as_tuple=True)
-    if loss_type in ("bpr", "pda", "simgcl", "macr"):
+    if loss_type in ("infonce", "drinfonce"):
+        # probability that a pair that is not a logged positive is a positive after all,
+        # under Y independent of O given the imputation: Yhat (1 - p) / (1 - p Yhat)
+        Q = (Yhat * (1.0 - P) / (1.0 - P * Yhat).clamp_min(1e-6)).clamp(0.0, 1.0)
+    if loss_type in ("bpr", "pda", "simgcl", "macr", "infonce", "drinfonce"):
         eu, ei = torch.nonzero(pos, as_tuple=True)
     else:
         eu, ei = torch.nonzero(O > 0, as_tuple=True)
@@ -209,6 +222,24 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
                 loss = (F.binary_cross_entropy(prob, y) + aux_weight * F.binary_cross_entropy_with_logits(bu_, y)
                         + aux_weight * F.binary_cross_entropy_with_logits(bi_, y))
                 reg = wd * sum((e ** 2).sum() for e in (emb[0][uu], emb[1][ii])) / len(uu)
+            elif loss_type in ("infonce", "drinfonce"):
+                J = torch.randint(0, n, (len(u), n_neg), generator=g)
+                Jb = pos[u[:, None], J]
+                J = torch.where(Jb, torch.randint(0, n, (len(u), n_neg), generator=g), J)
+                ue = F.normalize(emb[0][u], dim=-1)
+                pe = F.normalize(emb[1][i], dim=-1)
+                ne = F.normalize(emb[1][J], dim=-1)
+                lp = (ue * pe).sum(-1) / tau
+                ln = (ue[:, None, :] * ne).sum(-1) / tau
+                if loss_type == "drinfonce" and fn > 0:
+                    ln = ln + torch.log((1.0 - fn * Q[u[:, None], J]).clamp_min(1e-3))
+                nll = torch.logsumexp(torch.cat([lp[:, None], ln], 1), 1) - lp
+                if loss_type == "drinfonce" and ipsw:
+                    w = 1.0 / P[u, i]
+                    w = (w / w.mean()).clamp_max(clip_w)
+                    nll = nll * w / w.mean()
+                loss = nll.mean()
+                reg = wd * sum((e ** 2).sum() for e in (emb[0][u], emb[1][i], emb[1][J])) / len(u)
             elif loss_type in ("bpr", "pda", "simgcl"):
                 j = torch.randint(0, n, (len(u),), generator=g)
                 bad_neg = pos[u, j]

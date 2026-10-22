@@ -21,7 +21,7 @@ import torch
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from drup.data import load_coat, load_yahoo, split_test  # noqa: E402
 from drup.estimation import baseline_imputation, clip_propensity, get_propensity  # noqa: E402
-from drup.learned import IALS, MACR, MF, LightGCN, SimGCL, train, train_ials  # noqa: E402
+from drup.learned import IALS, LGNCos, MACR, MF, LightGCN, SimGCL, train, train_ials  # noqa: E402
 from drup.metrics import evaluate  # noqa: E402
 
 # name: (model kind, loss, extra grid)
@@ -40,9 +40,11 @@ METHODS = {
     "MRDR": ("mf", "mrdr", {}),
     "MACR": ("macr", "macr", {"c": [0.1, 0.3]}),
     "SimGCL": ("simgcl", "simgcl", {"cl": [0.1, 0.5]}),
+    "InfoNCE-LGN": ("lgncos", "infonce", {"tau": [0.1, 0.2]}),
+    "DR-InfoNCE-LGN": ("lgncos", "drinfonce", {"tau": [0.1, 0.2], "fn": [0.5, 1.0], "ipsw": [0, 1]}),
     "iALS": ("ials", None, {"alpha": [3.0, 10.0, 30.0], "reg": [1.0, 10.0, 100.0, 1000.0]}),
 }
-GRAPH = ("lgn", "navip", "simgcl")
+GRAPH = ("lgn", "navip", "simgcl", "lgncos")
 
 
 def build(kind, m, n, d, O, Y, P, cfg):
@@ -54,6 +56,8 @@ def build(kind, m, n, d, O, Y, P, cfg):
     if kind == "ials":
         return IALS(m, n, d, eu, ei, alpha=cfg["alpha"], reg=cfg["reg"])
     w = (1.0 / P[eu, ei]).float() if kind == "navip" else torch.ones(len(eu))
+    if kind == "lgncos":
+        return LGNCos(m, n, d, eu, ei, torch.ones(len(eu)), layers=cfg["layers"], r=0.5)
     if kind == "simgcl":
         return SimGCL(m, n, d, eu, ei, w, layers=cfg["layers"], r=0.5)
     return LightGCN(m, n, d, eu, ei, w, layers=cfg["layers"], r=cfg.get("r", 0.5))
@@ -136,7 +140,8 @@ def main():
             return train_ials(model, a.epochs, on_epoch)
         return train(model, O, Y, P, Yhat, loss, cfg["lr"], cfg["wd"], a.epochs, a.batch, on_epoch,
                      patience=a.patience, pairs_per_epoch=a.pairs_per_epoch, seed=seed,
-                     item_pop=item_pop, gamma=cfg.get("gamma", 0.1), cl_weight=cfg.get("cl", 0.1))
+                     item_pop=item_pop, gamma=cfg.get("gamma", 0.1), cl_weight=cfg.get("cl", 0.1), tau=cfg.get("tau", 0.2),
+                     fn=cfg.get("fn", 0.0), ipsw=cfg.get("ipsw", 0))
 
     bank_path = a.dump_bank or os.path.join(os.path.dirname(out), "bank_" + os.path.basename(out))
     dumps = json.load(open(bank_path))["banks"] if os.path.exists(bank_path) else {}
