@@ -1,0 +1,10 @@
+nuisance setup (xfit=10) 0s
+[1/31] nuisance None done [90s]
+[2/31] nuisance (0.01, 1.0, 'add') done [212s]
+[3/31] nuisance (0.01, 1.0, 'lr') done [213s]
+[4/31] nuisance (0.01, 20.0, 'add') done [212s]
+[5/31] nuisance (0.01, 20.0, 'lr') done [212s]
+[6/31] nuisance (0.01, 5.0, 'add') done [215s]
+[7/31] nuisance (0.01, 5.0, 'lr') done [215s]
+[8/31] nuisance (0.02, 1.0, 'add') done [213s]
+[9/31] nuisance (0.02, 1.0, 'lr') done [217s]
