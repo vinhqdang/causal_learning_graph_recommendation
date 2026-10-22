@@ -43,7 +43,7 @@ import torch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from drup.data import load_coat, load_yahoo, split_test  # noqa: E402
-from drup.estimation import clip_propensity, popularity_propensity  # noqa: E402
+from drup.estimation import clip_propensity, entropy_balance_weights, popularity_propensity  # noqa: E402
 from drup.khop import khop  # noqa: E402
 from drup.metrics import UserMetrics, evaluate  # noqa: E402
 from drup.pipeline import Nuisance, _impute, edge_weights  # noqa: E402
@@ -54,6 +54,17 @@ GAMMAS = [0.03, 0.1, 0.3, 1.0, 3.0]          # weight of the 5-hop term
 EASE_LAMS = [10.0, 100.0, 1000.0]
 GFCF = [(0.0, 0), (0.3, 64), (0.3, 256), (1.0, 256)]   # (weight of ideal low-pass, rank)
 DR_FAMILY = ("DR", "DRUP", "DR-5hop", "DRUP-5hop", "EASE-DR", "GF-CF-DR", "BSPM-DR")
+EB_FAMILY = ("EB", "EB+WC", "EB-DR", "EB-DRUP")
+DEFL = [0.0, 0.5, 1.0]                      # weight of the removed top singular component
+_EBW = {}
+
+
+def deflate(s, w):
+    """Remove the dominant (popularity) singular component of the score matrix."""
+    if w == 0.0:
+        return s
+    U, S, V = torch.svd_lowrank(s.float(), q=4, niter=3)
+    return s - w * ((U[:, :1] * S[:1]) @ V[:, :1].T).to(s.dtype)
 BSPM_GRID = [(tb, ts, w) for tb in (1.0, 2.0) for ts in (0.0, 0.1, 0.3) for w in (0.0, 0.3)]
 SPLIT = ("DR-split", "DRUP-split")
 
@@ -164,7 +175,14 @@ def bspm(X, rows, D, grid, steps=4, rank=256):
 
 
 def configs(method, a):
-    if method == "Pop":
+    if method.endswith("+D"):
+        yield from configs(method[:-2], a)
+        return
+    if method in ("EB", "EB+WC"):
+        grid = {"alpha": a.alphas}
+    elif method in ("EB-DR", "EB-DRUP"):
+        grid = {"lam": a.lams, "imp": a.imps, "alpha": a.alphas, "floor": a.floors}
+    elif method == "Pop":
         grid = {}
     elif method == "Impute":
         grid = {"lam": a.lams, "imp": a.imps}
@@ -187,6 +205,25 @@ def configs(method, a):
 def score_bank(d, method, cfg, nz, rows):
     """Returns a list of (cfg_with_hyper, scores[rows]) for one base config."""
     O, Y = d["O"], d["Y"]
+    if method.endswith("+D"):
+        out = []
+        for c, sc in score_bank(d, method[:-2], cfg, nz, rows):
+            out += [(dict(c, defl=w), deflate(sc, w)) for w in DEFL]
+        return out
+    if method in EB_FAMILY:
+        key_ = id(O)
+        if key_ not in _EBW:
+            _EBW[key_] = entropy_balance_weights(O)
+        w = _EBW[key_]
+        if method in ("EB-DR", "EB-DRUP"):
+            Yd = nz.imputation(cfg["floor"], dict(cfg, imp=cfg.get("imp", "add")))
+            W = Yd + O * (Y - Yd) * w
+            C = degree_weights(W, cfg["alpha"], D=Yd)
+        else:
+            W = O * Y * w
+            C = degree_weights(W, cfg["alpha"])
+        parts = propagate(W, C, method in ("EB+WC", "EB-DRUP"), rows)
+        return [(dict(cfg, beta=b), parts[0] + b * parts[1] if b < 1e3 else parts[1]) for b in BETAS]
     if method == "Pop":
         return [(dict(cfg), (O * Y).sum(0, keepdim=True).expand(len(rows), -1))]
     if method == "Impute":
@@ -344,6 +381,10 @@ def main():
     # Group the work by imputation key so that every cross-fitted imputation
     # is computed once and shared by all methods that use it.
     def nkey(method, cfg):
+        if method.endswith("+D"):
+            method = method[:-2]
+        if method in ("EB", "EB+WC"):
+            return None
         if method in ("Pop", "Obs", "EASE", "GF-CF", "BSPM"):
             return None
         if method == "Impute":

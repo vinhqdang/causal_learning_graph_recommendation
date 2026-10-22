@@ -229,3 +229,44 @@ def get_propensity(d, O, Y, prop, folds=None, K=0):
     if prop == "nb":
         return naive_bayes_propensity(base, O, Y, d["mar_rate"])
     return base
+
+
+def entropy_balance_weights(O, ridge=1e-8, iters=30):
+    """Entropy-balancing weights for the exposed pairs (no propensity model, no clipping).
+
+    Finds w_ui = exp(lam . phi_ui) on the exposed pairs such that the weighted moments of
+    phi match their means over *all* pairs and the weights sum to the number of pairs:
+        sum_obs w phi = sum_all phi,   phi = (1, a, b, a^2, b^2, ab),
+    with a, b the standardised log degrees of user and item in the log. The targets are
+    closed-form because a depends on the user only and b on the item only. Returns a dense
+    (m, n) tensor that is zero off the exposed pairs; w is on the 1/p scale, so
+    O * w * Y is a drop-in replacement for the IPS edge estimate.
+    """
+    m, n = O.shape
+    du = torch.log1p(O.sum(1)).double()
+    di = torch.log1p(O.sum(0)).double()
+    a = (du - du.mean()) / du.std().clamp_min(1e-9)
+    b = (di - di.mean()) / di.std().clamp_min(1e-9)
+    ui, ii = torch.nonzero(O > 0, as_tuple=True)
+    pa, pb = a[ui], b[ii]
+    phi = torch.stack([torch.ones_like(pa), pa, pb, pa * pa, pb * pb, pa * pb], 1)
+    tgt = torch.stack([torch.tensor(1.0, dtype=torch.float64), a.mean(), b.mean(), (a * a).mean(),
+                       (b * b).mean(), a.mean() * b.mean()]) * (m * n)
+    lam = torch.zeros(phi.shape[1], dtype=torch.float64)
+    lam[0] = float(torch.log(torch.tensor(m * n / max(len(pa), 1), dtype=torch.float64)))
+    def dual(l):
+        return torch.exp(phi @ l).sum() - l @ tgt
+    for _ in range(iters):
+        w = torch.exp(phi @ lam)
+        g = phi.T @ w - tgt
+        if float(g.abs().max() / (m * n)) < 1e-9:
+            break
+        H = (phi * w[:, None]).T @ phi + ridge * torch.eye(len(lam), dtype=torch.float64)
+        step = torch.linalg.solve(H, g)
+        t, f0 = 1.0, dual(lam)
+        while float(dual(lam - t * step)) > float(f0) and t > 1e-6:   # backtracking
+            t *= 0.5
+        lam = lam - t * step
+    out = torch.zeros(m, n, dtype=O.dtype, device=O.device)
+    out[ui, ii] = torch.exp(phi @ lam).to(O.dtype)
+    return out
