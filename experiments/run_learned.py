@@ -41,7 +41,7 @@ METHODS = {
     "MACR": ("macr", "macr", {"c": [0.1, 0.3]}),
     "SimGCL": ("simgcl", "simgcl", {"cl": [0.1, 0.5]}),
     "InfoNCE-LGN": ("lgncos", "infonce", {"tau": [0.1, 0.2]}),
-    "DR-InfoNCE-LGN": ("lgncos", "drinfonce", {"tau": [0.1, 0.2], "fn": [0.5, 1.0], "ipsw": [0, 1]}),
+    "DR-InfoNCE-LGN": ("lgncos", "drinfonce", {"tau": [0.1, 0.2], "fn": [1.0], "ipsw": [0, 1]}),
     "iALS": ("ials", None, {"alpha": [3.0, 10.0, 30.0], "reg": [1.0, 10.0, 100.0, 1000.0]}),
 }
 GRAPH = ("lgn", "navip", "simgcl", "lgncos")
