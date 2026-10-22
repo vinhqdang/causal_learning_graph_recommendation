@@ -13,3 +13,32 @@ nuisance setup (xfit=10) 0s
 [12/31] nuisance (0.02, 5.0, 'add') done [218s]
 [13/31] nuisance (0.02, 5.0, 'lr') done [216s]
 [14/31] nuisance (0.05, 1.0, 'add') done [213s]
+[15/31] nuisance (0.05, 1.0, 'lr') done [219s]
+[16/31] nuisance (0.05, 20.0, 'add') done [217s]
+[17/31] nuisance (0.05, 20.0, 'lr') done [221s]
+[18/31] nuisance (0.05, 5.0, 'add') done [217s]
+[19/31] nuisance (0.05, 5.0, 'lr') done [213s]
+[20/31] nuisance (0.1, 1.0, 'add') done [212s]
+[21/31] nuisance (0.1, 1.0, 'lr') done [215s]
+[22/31] nuisance (0.1, 20.0, 'add') done [220s]
+[23/31] nuisance (0.1, 20.0, 'lr') done [223s]
+[24/31] nuisance (0.1, 5.0, 'add') done [218s]
+[25/31] nuisance (0.1, 5.0, 'lr') done [217s]
+[26/31] nuisance (0.2, 1.0, 'add') done [216s]
+[27/31] nuisance (0.2, 1.0, 'lr') done [222s]
+[28/31] nuisance (0.2, 20.0, 'add') done [217s]
+[29/31] nuisance (0.2, 20.0, 'lr') done [217s]
+[30/31] nuisance (0.2, 5.0, 'add') done [224s]
+[31/31] nuisance (0.2, 5.0, 'lr') done [225s]
+Obs       ndcg@5=0.5571±0.0100  ndcg@10=0.6745±0.0076  recall@5=0.6461±0.0094  recall@10=0.9443±0.0106  auc=0.6482±0.0100   [10s, 24 cfgs] e.g. {'alpha': 0.7, 'beta': 0.03}
+Obs+D     ndcg@5=0.5571±0.0100  ndcg@10=0.6745±0.0076  recall@5=0.6461±0.0094  recall@10=0.9443±0.0106  auc=0.6482±0.0100   [30s, 72 cfgs] e.g. {'alpha': 0.7, 'beta': 0.03, 'defl': 0.0}
+DR        ndcg@5=0.5459±0.0244  ndcg@10=0.6655±0.0142  recall@5=0.6545±0.0286  recall@10=0.9591±0.0089  auc=0.6516±0.0246   [634s, 1440 cfgs] e.g. {'floor': 0.2, 'lam': 5.0, 'imp': 'lr', 'alpha': 0.7, 'cv': 1.0, 'deg': 'Yhat', 'beta': 0.3}
+DRUP      ndcg@5=0.5467±0.0235  ndcg@10=0.6677±0.0134  recall@5=0.6550±0.0254  recall@10=0.9631±0.0056  auc=0.6533±0.0214   [619s, 1440 cfgs] e.g. {'floor': 0.2, 'lam': 5.0, 'imp': 'lr', 'alpha': 0.7, 'cv': 1.0, 'deg': 'Yhat', 'beta': 0.3}
+EB        ndcg@5=0.5387±0.0125  ndcg@10=0.6561±0.0102  recall@5=0.6458±0.0092  recall@10=0.9439±0.0107  auc=0.6373±0.0112   [10s, 24 cfgs] e.g. {'alpha': 0.7, 'beta': 0.03}
+EB+WC     ndcg@5=0.5387±0.0125  ndcg@10=0.6561±0.0102  recall@5=0.6458±0.0092  recall@10=0.9439±0.0107  auc=0.6373±0.0112   [10s, 24 cfgs] e.g. {'alpha': 0.7, 'beta': 0.03}
+EB-DR     ndcg@5=0.5367±0.0151  ndcg@10=0.6608±0.0086  recall@5=0.6421±0.0177  recall@10=0.9574±0.0077  auc=0.6383±0.0148   [310s, 720 cfgs] e.g. {'lam': 20.0, 'imp': 'add', 'alpha': 0.7, 'floor': 0.2, 'beta': 0.03}
+EB-DRUP   ndcg@5=0.5323±0.0189  ndcg@10=0.6564±0.0111  recall@5=0.6375±0.0220  recall@10=0.9537±0.0096  auc=0.6338±0.0170   [309s, 720 cfgs] e.g. {'lam': 1.0, 'imp': 'lr', 'alpha': 0.7, 'floor': 0.02, 'beta': 0.1}
+EB+D      ndcg@5=0.5300±0.0206  ndcg@10=0.6506±0.0139  recall@5=0.6329±0.0289  recall@10=0.9399±0.0130  auc=0.6230±0.0281   [30s, 72 cfgs] e.g. {'alpha': 0.7, 'beta': 0.03, 'defl': 0.0}
+EB-DR+D   ndcg@5=0.5355±0.0152  ndcg@10=0.6588±0.0095  recall@5=0.6426±0.0168  recall@10=0.9551±0.0075  auc=0.6369±0.0145   [926s, 2160 cfgs] e.g. {'lam': 20.0, 'imp': 'add', 'alpha': 0.7, 'floor': 0.2, 'beta': 0.03, 'defl': 0.0}
+DR+D      ndcg@5=0.5366±0.0285  ndcg@10=0.6587±0.0166  recall@5=0.6465±0.0341  recall@10=0.9581±0.0091  auc=0.6423±0.0302   [1855s, 4320 cfgs] e.g. {'floor': 0.2, 'lam': 5.0, 'imp': 'lr', 'alpha': 0.7, 'cv': 1.0, 'deg': 'Yhat', 'beta': 0.3, 'defl': 0.0}
+DRUP+D    ndcg@5=0.5461±0.0202  ndcg@10=0.6670±0.0133  recall@5=0.6544±0.0202  recall@10=0.9613±0.0064  auc=0.6510±0.0240   [1849s, 4320 cfgs] e.g. {'floor': 0.2, 'lam': 5.0, 'imp': 'lr', 'alpha': 0.7, 'cv': 1.0, 'deg': 'Yhat', 'beta': 0.3, 'defl': 0.0}
