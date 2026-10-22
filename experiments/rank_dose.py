@@ -16,7 +16,8 @@ import numpy as np, torch
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.dirname(__file__))
 from semisynth_kuairec import load, ndcg_unexposed, DT  # noqa: E402
-from drup.estimation import clip_propensity, lowrank_imputation  # noqa: E402
+from drup.estimation import (clip_propensity, crossfit, fold_ids, lowrank_imputation,  # noqa: E402
+                             popularity_propensity)
 from drup.propagation import degree_weights, edge_estimate, three_hop  # noqa: E402
 
 
@@ -52,6 +53,9 @@ def main():
     ap.add_argument("--kappas", default="0.5,1.5,3.0")
     ap.add_argument("--gammas", default="0,1")
     ap.add_argument("--betas", default="0.3,1,3,10,1000")
+    ap.add_argument("--src", default="indep", choices=["indep", "xfit"])
+    ap.add_argument("--prop", default="true", choices=["true", "est"])
+    ap.add_argument("--cdeg", default="fixed", choices=["fixed", "yhat"])
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default="results/v3/rank_dose.json")
     a = ap.parse_args()
@@ -64,25 +68,33 @@ def main():
     res = json.load(open(a.out)) if os.path.exists(a.out) else {}
     for kappa in [float(x) for x in a.kappas.split(",")]:
         for gamma in [float(x) for x in a.gammas.split(",")]:
-            cell = f"k{kappa}_g{gamma}_d{a.density}"
+            cell = f"k{kappa}_g{gamma}_d{a.density}" + ("" if (a.src, a.prop, a.cdeg) == ("indep", "true", "fixed") else f"_{a.src}_{a.prop}_{a.cdeg}")
             if cell in res and len(res[cell]["rows"]) >= a.reps:
                 continue
             P = props(ru, ri, Y, a.density, kappa, gamma, 0.02)
-            Pb = clip_propensity(P, a.tau)
             g = torch.Generator().manual_seed(a.seed)
             rows = []
             t0 = time.time()
             for rep in range(a.reps):
                 O = (torch.rand(m, n, generator=g, dtype=DT) < P).to(DT)
                 O2 = (torch.rand(m, n, generator=g, dtype=DT) < P).to(DT)
-                Yh = lowrank_imputation(O2, Y, Pb, rank=16, ridge=5.0)
+                if a.src == "indep":
+                    Pr = P if a.prop == "true" else popularity_propensity(O2)[0]
+                    Pb_ = clip_propensity(Pr, a.tau)
+                    Yh = lowrank_imputation(O2, Y, Pb_, rank=16, ridge=5.0)
+                else:
+                    folds = fold_ids(O.shape, 10, seed=rep)
+                    Pr = P if a.prop == "true" else crossfit(lambda M: popularity_propensity(O, mask=M)[0], O, folds, 10)
+                    Pb_ = clip_propensity(Pr, a.tau)
+                    Yh = crossfit(lambda M: lowrank_imputation(O * M, Y, Pb_, rank=16, ridge=5.0), O, folds, 10)
+                C = Cfix if a.cdeg == "fixed" else degree_weights(Yh, 0.5, D=Yh)
                 out = {}
-                Ws = {e: edge_estimate(O, Y, Pb, Yh if e == "DR" else None) for e in ("IPS", "DR")}
-                Ts = {(e, c): three_hop(Ws[e], Cfix, correct=c) for e in Ws for c in (False, True)}
+                Ws = {e: edge_estimate(O, Y, Pb_, Yh if e == "DR" else None) for e in ("IPS", "DR")}
+                Ts = {(e, c): three_hop(Ws[e], C, correct=c) for e in Ws for c in (False, True)}
                 for beta in betas:
                     F = Cfix * Y / c1 + beta * T3 / c3
                     for (e, c), T in Ts.items():
-                        s = Cfix * Ws[e] / c1 + beta * T / c3
+                        s = C * Ws[e] / c1 + beta * T / c3
                         nm = {("IPS", False): "IPS", ("IPS", True): "IPS+WC", ("DR", False): "DR", ("DR", True): "DRUP"}[(e, c)]
                         out[f"{nm}|{beta}|ndcg"] = ndcg_unexposed(s, Y, O)
                         out[f"{nm}|{beta}|ovl"] = overlap(s, F, O)
