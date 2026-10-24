@@ -24,3 +24,19 @@
   DR-InfoNCE-LGN: resuming after 21 configurations
 /home/user/causal_learning_graph_recommendation/experiments/../drup/learned.py:49: UserWarning: Sparse invariant checks are implicitly disabled. Memory errors (e.g. SEGFAULT) will occur when operating on a sparse tensor which violates the invariants, but checks incur performance overhead. To silence this warning, explicitly opt in or out. See `torch.sparse.check_sparse_tensor_invariants.__doc__` for guidance.  (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/Context.cpp:848.)
   self.A = torch.sparse_coo_tensor(idx, torch.cat([v_ui, v_iu]), (m + n, m + n)).coalesce()
+  DR-InfoNCE-LGN {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 3, 'tau': 0.1, 'fn': 1.0, 'ipsw': 1} done [26s] best split0 val 0.7731
+  DR-InfoNCE-LGN {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 3, 'tau': 0.2, 'fn': 1.0, 'ipsw': 0} done [19s] best split0 val 0.7731
+  DR-InfoNCE-LGN {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 3, 'tau': 0.2, 'fn': 1.0, 'ipsw': 1} done [15s] best split0 val 0.7731
+  DR-InfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 1, 'tau': 0.1, 'fn': 1.0, 'ipsw': 0} done [14s] best split0 val 0.7731
+  DR-InfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 1, 'tau': 0.1, 'fn': 1.0, 'ipsw': 1} done [20s] best split0 val 0.7731
+  DR-InfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 1, 'tau': 0.2, 'fn': 1.0, 'ipsw': 0} done [20s] best split0 val 0.7731
+  DR-InfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 1, 'tau': 0.2, 'fn': 1.0, 'ipsw': 1} done [20s] best split0 val 0.7731
+  DR-InfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 2, 'tau': 0.1, 'fn': 1.0, 'ipsw': 0} done [23s] best split0 val 0.7731
+  DR-InfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 2, 'tau': 0.1, 'fn': 1.0, 'ipsw': 1} done [40s] best split0 val 0.7731
+  DR-InfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 2, 'tau': 0.2, 'fn': 1.0, 'ipsw': 0} done [24s] best split0 val 0.7731
+  DR-InfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 2, 'tau': 0.2, 'fn': 1.0, 'ipsw': 1} done [20s] best split0 val 0.7731
+  DR-InfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 3, 'tau': 0.1, 'fn': 1.0, 'ipsw': 0} done [9s] best split0 val 0.7731
+  DR-InfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 3, 'tau': 0.1, 'fn': 1.0, 'ipsw': 1} done [18s] best split0 val 0.7731
+  DR-InfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 3, 'tau': 0.2, 'fn': 1.0, 'ipsw': 0} done [23s] best split0 val 0.7731
+  DR-InfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 3, 'tau': 0.2, 'fn': 1.0, 'ipsw': 1} done [22s] best split0 val 0.7731
+  DR-InfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 1, 'tau': 0.1, 'fn': 1.0, 'ipsw': 0} done [14s] best split0 val 0.7731
