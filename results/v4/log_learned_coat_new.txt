@@ -106,3 +106,15 @@
   InfoNCE-LGN {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 3, 'tau': 0.1} done [22s] best split0 val 0.7625
   InfoNCE-LGN {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 3, 'tau': 0.2} done [28s] best split0 val 0.7625
   InfoNCE-LGN {'lr': 0.001, 'wd': 0.001, 'dim': 32, 'layers': 1, 'tau': 0.1} done [31s] best split0 val 0.7625
+  InfoNCE-LGN {'lr': 0.001, 'wd': 0.001, 'dim': 32, 'layers': 1, 'tau': 0.2} done [34s] best split0 val 0.7625
+  InfoNCE-LGN {'lr': 0.001, 'wd': 0.001, 'dim': 32, 'layers': 2, 'tau': 0.1} done [21s] best split0 val 0.7625
+  InfoNCE-LGN {'lr': 0.001, 'wd': 0.001, 'dim': 32, 'layers': 2, 'tau': 0.2} done [30s] best split0 val 0.7625
+  InfoNCE-LGN {'lr': 0.001, 'wd': 0.001, 'dim': 32, 'layers': 3, 'tau': 0.1} done [15s] best split0 val 0.7625
+  InfoNCE-LGN {'lr': 0.001, 'wd': 0.001, 'dim': 32, 'layers': 3, 'tau': 0.2} done [19s] best split0 val 0.7625
+  InfoNCE-LGN {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 1, 'tau': 0.1} done [35s] best split0 val 0.7625
+  InfoNCE-LGN {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 1, 'tau': 0.2} done [29s] best split0 val 0.7625
+  InfoNCE-LGN {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 2, 'tau': 0.1} done [33s] best split0 val 0.7625
+  InfoNCE-LGN {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 2, 'tau': 0.2} done [36s] best split0 val 0.7625
+  InfoNCE-LGN {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 3, 'tau': 0.1} done [23s] best split0 val 0.7625
+  InfoNCE-LGN {'lr': 0.001, 'wd': 0.001, 'dim': 64, 'layers': 3, 'tau': 0.2} done [28s] best split0 val 0.7625
+InfoNCE-LGN  ndcg@5=0.5290±0.0199  ndcg@10=0.6551±0.0182  recall@5=0.6290±0.0182  recall@10=0.9439±0.0121  auc=0.6138±0.0209   [878s, 108 cfgs] seeds 0.5372±0.0098
