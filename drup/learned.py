@@ -176,6 +176,48 @@ class IALSW:
         return self.U[rows] @ self.V.T
 
 
+class IALSLR:
+    """DR-iALS with the confidence of the unlogged pairs, w = 1 - fn * Q, replaced by its rank-K
+    truncated SVD sum_k s_k a_k b_k^T. The weighted normal equations then need only K small Gram
+    matrices per half-step, G_k = F^T diag(b_k) F, plus a sparse correction on the logged positives
+    (confidence 1 + alpha instead of w): O(n d^2 K + nnz d^2) per step, no dense m x n solve."""
+
+    def __init__(self, m, n, d, eu, ei, Q, alpha=10.0, reg=1.0, fn=1.0, K=16, seed=0):
+        g = torch.Generator().manual_seed(seed)
+        self.U = 0.1 * torch.randn(m, d, generator=g)
+        self.V = 0.1 * torch.randn(n, d, generator=g)
+        self.eu, self.ei, self.alpha, self.reg = eu, ei, alpha, reg
+        Wm = (1.0 - fn * Q).clamp_min(1e-3).float()
+        a, sv, b = torch.svd_lowrank(Wm, q=K, niter=4)
+        self.L = a * sv                      # (m, K): left factors times singular values
+        self.R = b                           # (n, K)
+
+    def _solve(self, X, Fx, L, Rf, ru, ri, nrows, chunk=2048):
+        d = Fx.shape[1]
+        G = torch.einsum("nd,ne,nk->kde", Fx, Fx, Rf)                 # (K, d, d)
+        order = torch.argsort(ru)
+        ru, ri = ru[order], ri[order]
+        bounds = torch.searchsorted(ru, torch.arange(0, nrows + chunk, chunk).clamp(max=nrows))
+        eye = self.reg * torch.eye(d)
+        for c, s in enumerate(range(0, nrows, chunk)):
+            e = min(s + chunk, nrows)
+            lo, hi = int(bounds[c]), int(bounds[c + 1])
+            r, f = ru[lo:hi] - s, Fx[ri[lo:hi]]
+            A = torch.einsum("uk,kde->ude", L[s:e], G) + eye
+            wl = (L[ru[lo:hi]] * Rf[ri[lo:hi]]).sum(-1)               # low-rank weight at positives
+            coef = (1.0 + self.alpha - wl)
+            A.index_add_(0, r, coef[:, None, None] * f[:, :, None] * f[:, None, :])
+            b = torch.zeros(e - s, d).index_add_(0, r, (1.0 + self.alpha) * f)
+            X[s:e] = torch.linalg.solve(A, b.unsqueeze(-1)).squeeze(-1)
+
+    def step(self):
+        self._solve(self.U, self.V, self.L, self.R, self.eu, self.ei, self.U.shape[0])
+        self._solve(self.V, self.U, self.R, self.L, self.ei, self.eu, self.V.shape[0])
+
+    def full_scores(self, rows):
+        return self.U[rows] @ self.V.T
+
+
 def train_ials(model, iters, on_epoch):
     for ep in range(iters):
         model.step()

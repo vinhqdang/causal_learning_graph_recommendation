@@ -21,7 +21,7 @@ import torch
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from drup.data import load_coat, load_yahoo, split_test  # noqa: E402
 from drup.estimation import baseline_imputation, clip_propensity, get_propensity  # noqa: E402
-from drup.learned import IALS, IALSW, LGNCos, MACR, MF, LightGCN, SimGCL, train, train_ials  # noqa: E402
+from drup.learned import IALS, IALSLR, IALSW, LGNCos, MACR, MF, LightGCN, SimGCL, train, train_ials  # noqa: E402
 from drup.metrics import evaluate  # noqa: E402
 
 # name: (model kind, loss, extra grid)
@@ -44,6 +44,7 @@ METHODS = {
     "DR-InfoNCE-LGN": ("lgncos", "drinfonce", {"tau": [0.1, 0.2], "fn": [1.0], "ipsw": [0, 1]}),
     "DR-BPR-LGN": ("lgn", "drbpr", {"fn": [0.5, 1.0]}),
     "DR-iALS": ("drials", None, {"alpha": [3.0, 10.0, 30.0], "reg": [1.0, 10.0, 100.0, 1000.0], "fn": [0.5, 1.0]}),
+    "DR-iALS-LR": ("drials_lr", None, {"alpha": [3.0, 10.0, 30.0], "reg": [1.0, 10.0, 100.0, 1000.0], "fn": [0.5, 1.0]}),
     "iALS": ("ials", None, {"alpha": [3.0, 10.0, 30.0], "reg": [1.0, 10.0, 100.0, 1000.0]}),
 }
 GRAPH = ("lgn", "navip", "simgcl", "lgncos")
@@ -56,6 +57,8 @@ def build(kind, m, n, d, O, Y, P, cfg):
     if kind == "macr":
         return MACR(m, n, d, c=cfg["c"])
     eu, ei = torch.nonzero(O * Y > 0, as_tuple=True)
+    if kind == "drials_lr":
+        return IALSLR(m, n, d, eu, ei, QMAT[0], alpha=cfg["alpha"], reg=cfg["reg"], fn=cfg["fn"], K=16)
     if kind == "drials":
         return IALSW(m, n, d, eu, ei, QMAT[0], alpha=cfg["alpha"], reg=cfg["reg"], fn=cfg["fn"])
     if kind == "ials":
@@ -142,7 +145,7 @@ def main():
                 S = mod.full_scores(rows)
             vals = [evaluate(S, v, ks, row_of)[key] for v, _ in splits]
             return bool(record(vals, S, ep))
-        if kind in ("ials", "drials"):
+        if kind in ("ials", "drials", "drials_lr"):
             return train_ials(model, a.epochs, on_epoch)
         return train(model, O, Y, P, Yhat, loss, cfg["lr"], cfg["wd"], a.epochs, a.batch, on_epoch,
                      patience=a.patience, pairs_per_epoch=a.pairs_per_epoch, seed=seed,
@@ -160,7 +163,7 @@ def main():
         wide = name in a.wide
         dims = a.wide_dims if wide else a.dims
         layers = (a.wide_layers if wide else a.layers) if kind in GRAPH else [0]
-        if kind in ("ials", "drials"):
+        if kind in ("ials", "drials", "drials_lr"):
             grid_keys, grid_vals = ["dim"] + list(extra), [dims] + [extra[k] for k in extra]
         else:
             grid_keys = ["lr", "wd", "dim", "layers"] + list(extra)
