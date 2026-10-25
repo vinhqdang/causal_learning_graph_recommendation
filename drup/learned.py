@@ -145,6 +145,37 @@ class IALS:
         return self.U[rows] @ self.V.T
 
 
+class IALSW:
+    """iALS with a dense confidence matrix: logged positives 1 + alpha (target 1), every other
+    pair 1 - fn * Q_ui (target 0), where Q_ui is the probability that a pair that is not a logged
+    positive is a positive after all. Exact per-user and per-item ridge solves (small matrices)."""
+
+    def __init__(self, m, n, d, eu, ei, Q, alpha=10.0, reg=1.0, fn=1.0, seed=0):
+        g = torch.Generator().manual_seed(seed)
+        self.U = 0.1 * torch.randn(m, d, generator=g)
+        self.V = 0.1 * torch.randn(n, d, generator=g)
+        self.reg = reg
+        pos = torch.zeros(m, n, dtype=torch.bool)
+        pos[eu, ei] = True
+        self.C = torch.where(pos, torch.full((m, n), 1.0 + alpha), (1.0 - fn * Q).clamp_min(1e-3)).float()
+        self.T = pos.float()
+
+    def _solve(self, X, Fx, C, T):
+        d = Fx.shape[1]
+        for s in range(0, X.shape[0], 256):
+            c, t = C[s:s + 256], T[s:s + 256]
+            A = torch.einsum("un,nd,ne->ude", c, Fx, Fx) + self.reg * torch.eye(d)
+            b = torch.einsum("un,nd->ud", c * t, Fx)
+            X[s:s + 256] = torch.linalg.solve(A, b.unsqueeze(-1)).squeeze(-1)
+
+    def step(self):
+        self._solve(self.U, self.V, self.C, self.T)
+        self._solve(self.V, self.U, self.C.T, self.T.T)
+
+    def full_scores(self, rows):
+        return self.U[rows] @ self.V.T
+
+
 def train_ials(model, iters, on_epoch):
     for ep in range(iters):
         model.step()
@@ -164,7 +195,7 @@ def _elu1(x):
 
 def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
           patience=5, pairs_per_epoch=None, seed=0, item_pop=None, gamma=0.1, log=None,
-          cl_weight=0.1, aux_weight=1e-3, tau=0.2, fn=0.0, ipsw=0, n_neg=32, clip_w=5.0):
+          cl_weight=0.1, aux_weight=1e-3, tau=0.2, fn=0.0, ipsw=0, n_neg=32, clip_w=5.0, fn_w=None):
     """Pointwise losses: naive / IPS iterate over exposed pairs; DR samples
     pairs uniformly from all (u, i) (pseudo-label DR with a fixed imputation).
     Pairwise losses: 'bpr' (logged positives vs uniformly sampled items that
@@ -179,6 +210,7 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
     on_epoch(model, ep) evaluates the model and returns either the early-
     stopping criterion (higher is better; ``patience`` applies) or a bool
     (True: stop now), which lets the caller run its own per-split stopping."""
+    fn_w = fn if fn_w is None else fn_w
     g = torch.Generator().manual_seed(seed)
     torch.manual_seed(seed)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
@@ -189,11 +221,11 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
         imp = MF(m, n, model.U.weight.shape[1])
         opt_imp = torch.optim.Adam(imp.parameters(), lr=lr)
         ou, oi = torch.nonzero(O > 0, as_tuple=True)
-    if loss_type in ("infonce", "drinfonce"):
+    if loss_type in ("infonce", "drinfonce", "drbpr"):
         # probability that a pair that is not a logged positive is a positive after all,
         # under Y independent of O given the imputation: Yhat (1 - p) / (1 - p Yhat)
         Q = (Yhat * (1.0 - P) / (1.0 - P * Yhat).clamp_min(1e-6)).clamp(0.0, 1.0)
-    if loss_type in ("bpr", "pda", "simgcl", "macr", "infonce", "drinfonce"):
+    if loss_type in ("bpr", "pda", "simgcl", "macr", "infonce", "drinfonce", "drbpr"):
         eu, ei = torch.nonzero(pos, as_tuple=True)
     else:
         eu, ei = torch.nonzero(O > 0, as_tuple=True)
@@ -240,15 +272,19 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
                     nll = nll * w / w.mean()
                 loss = nll.mean()
                 reg = wd * sum((e ** 2).sum() for e in (emb[0][u], emb[1][i], emb[1][J])) / len(u)
-            elif loss_type in ("bpr", "pda", "simgcl"):
+            elif loss_type in ("bpr", "pda", "simgcl", "drbpr"):
                 j = torch.randint(0, n, (len(u),), generator=g)
                 bad_neg = pos[u, j]
                 j = torch.where(bad_neg, torch.randint(0, n, (len(u),), generator=g), j)
-                fp, fn = model(u, i, emb), model(u, j, emb)
+                fp, fneg = model(u, i, emb), model(u, j, emb)
                 if loss_type == "pda":
                     fp = _elu1(fp) * item_pop[i].pow(gamma)
-                    fn = _elu1(fn) * item_pop[j].pow(gamma)
-                loss = -F.logsigmoid(fp - fn).mean()
+                    fneg = _elu1(fneg) * item_pop[j].pow(gamma)
+                if loss_type == "drbpr":
+                    wn = (1.0 - fn_w * Q[u, j]).clamp_min(1e-3)
+                    loss = (-(wn * F.logsigmoid(fp - fneg)).mean()) / wn.mean()
+                else:
+                    loss = -F.logsigmoid(fp - fneg).mean()
                 reg = wd * sum((e ** 2).sum() for e in (emb[0][u], emb[1][i], emb[1][j])) / len(u)
                 if loss_type == "simgcl":
                     v1, v2 = model.embeddings(perturb=True), model.embeddings(perturb=True)
