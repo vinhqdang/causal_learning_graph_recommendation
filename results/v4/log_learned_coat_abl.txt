@@ -136,3 +136,5 @@ DR-BPR-pop   ndcg@5=0.5751±0.0118  ndcg@10=0.6907±0.0122  recall@5=0.6665±0.0
   DR-BPR-shuf {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 2, 'fn': 1.0, 'qmode': 'shuffle'} done [7s] best split0 val 0.7774
   DR-BPR-shuf {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 3, 'fn': 1.0, 'qmode': 'shuffle'} done [11s] best split0 val 0.7774
   DR-BPR-shuf {'lr': 0.003, 'wd': 1e-05, 'dim': 32, 'layers': 1, 'fn': 1.0, 'qmode': 'shuffle'} done [13s] best split0 val 0.7842
+  DR-BPR-shuf {'lr': 0.003, 'wd': 1e-05, 'dim': 32, 'layers': 2, 'fn': 1.0, 'qmode': 'shuffle'} done [9s] best split0 val 0.7842
+  DR-BPR-shuf {'lr': 0.003, 'wd': 1e-05, 'dim': 32, 'layers': 3, 'fn': 1.0, 'qmode': 'shuffle'} done [7s] best split0 val 0.7842
