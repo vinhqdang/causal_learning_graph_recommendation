@@ -12,3 +12,6 @@
   DR-BPR-LGN-1 {'lr': 0.001, 'wd': 1e-05, 'dim': 128, 'layers': 1, 'fn': 1.0} done [431s] best split0 val 0.6989
   DR-BPR-LGN-1 {'lr': 0.001, 'wd': 1e-05, 'dim': 128, 'layers': 2, 'fn': 1.0} done [896s] best split0 val 0.7044
   DR-BPR-LGN-1 {'lr': 0.001, 'wd': 1e-05, 'dim': 128, 'layers': 3, 'fn': 1.0} done [1153s] best split0 val 0.7044
+  DR-BPR-LGN-1 {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 1, 'fn': 1.0} done [475s] best split0 val 0.7044
+  DR-BPR-LGN-1 {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'fn': 1.0} done [747s] best split0 val 0.7044
+  DR-BPR-LGN-1 {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 3, 'fn': 1.0} done [961s] best split0 val 0.7044
