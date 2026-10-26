@@ -44,6 +44,11 @@ METHODS = {
     "DR-InfoNCE-LGN": ("lgncos", "drinfonce", {"tau": [0.1, 0.2], "fn": [1.0], "ipsw": [0, 1]}),
     "DR-BPR-LGN": ("lgn", "drbpr", {"fn": [0.5, 1.0]}),
     "DR-BPR-LGN-1": ("lgn", "drbpr", {"fn": [1.0]}),
+    "DR-BPR-yhat": ("lgn", "drbpr", {"fn": [1.0], "qmode": ["yhat"]}),
+    "DR-BPR-pop": ("lgn", "drbpr", {"fn": [1.0], "qmode": ["pop"]}),
+    "DR-BPR-shuf": ("lgn", "drbpr", {"fn": [1.0], "qmode": ["shuffle"]}),
+    "LightGCN-pn": ("lgn", "pn", {}),
+    "DR-LightGCN-pn": ("lgn", "drpn", {"fn": [1.0]}),
     "DR-iALS": ("drials", None, {"alpha": [3.0, 10.0, 30.0], "reg": [1.0, 10.0, 100.0, 1000.0], "fn": [0.5, 1.0]}),
     "DR-iALS-LR": ("drials_lr", None, {"alpha": [3.0, 10.0, 30.0], "reg": [1.0, 10.0, 100.0, 1000.0], "fn": [0.5, 1.0]}),
     "iALS": ("ials", None, {"alpha": [3.0, 10.0, 30.0], "reg": [1.0, 10.0, 100.0, 1000.0]}),
@@ -151,7 +156,8 @@ def main():
         return train(model, O, Y, P, Yhat, loss, cfg["lr"], cfg["wd"], a.epochs, a.batch, on_epoch,
                      patience=a.patience, pairs_per_epoch=a.pairs_per_epoch, seed=seed,
                      item_pop=item_pop, gamma=cfg.get("gamma", 0.1), cl_weight=cfg.get("cl", 0.1), tau=cfg.get("tau", 0.2),
-                     fn=cfg.get("fn", 0.0), ipsw=cfg.get("ipsw", 0))
+                     fn=cfg.get("fn", 0.0), ipsw=cfg.get("ipsw", 0),
+                     qmode=cfg.get("qmode", "dr"))
 
     bank_path = a.dump_bank or os.path.join(os.path.dirname(out), "bank_" + os.path.basename(out))
     dumps = json.load(open(bank_path))["banks"] if os.path.exists(bank_path) else {}
