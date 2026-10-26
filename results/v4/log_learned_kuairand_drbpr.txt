@@ -4,3 +4,8 @@
   self.A = torch.sparse_coo_tensor(idx, torch.cat([v_ui, v_iu]), (m + n, m + n)).coalesce()
   DR-BPR-LGN-1 {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'fn': 1.0} done [480s] best split0 val 0.4661
   DR-BPR-LGN-1 {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'fn': 1.0} done [312s] best split0 val 0.4663
+  DR-BPR-LGN-1 {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'fn': 1.0} done [575s] best split0 val 0.4663
+  DR-BPR-LGN-1 {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'fn': 1.0} done [618s] best split0 val 0.4663
+  DR-BPR-LGN-1 {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'fn': 1.0} done [637s] best split0 val 0.4663
+  DR-BPR-LGN-1 {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'fn': 1.0} done [661s] best split0 val 0.4663
+DR-BPR-LGN-1 ndcg@5=0.4033±0.0018  ndcg@10=0.4623±0.0017  ndcg@20=0.5270±0.0015  recall@5=0.3329±0.0030  recall@10=0.5438±0.0026  recall@20=0.7492±0.0017  auc=0.6164±0.0018   [3283s, 6 cfgs] seeds 0.0000±0.0000
