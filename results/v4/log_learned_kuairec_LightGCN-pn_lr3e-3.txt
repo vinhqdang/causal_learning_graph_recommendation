@@ -6,3 +6,4 @@
   LightGCN-pn {'lr': 0.003, 'wd': 1e-05, 'dim': 128, 'layers': 1} done [186s] best split0 val 0.5980
   LightGCN-pn {'lr': 0.003, 'wd': 1e-05, 'dim': 128, 'layers': 2} done [128s] best split0 val 0.5980
   LightGCN-pn {'lr': 0.003, 'wd': 1e-05, 'dim': 128, 'layers': 3} done [142s] best split0 val 0.5980
+  LightGCN-pn {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 1} done [87s] best split0 val 0.5980
