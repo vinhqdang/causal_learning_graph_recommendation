@@ -1,3 +1,40 @@
 /home/user/causal_learning_graph_recommendation/experiments/../drup/learned.py:49: UserWarning: Sparse invariant checks are implicitly disabled. Memory errors (e.g. SEGFAULT) will occur when operating on a sparse tensor which violates the invariants, but checks incur performance overhead. To silence this warning, explicitly opt in or out. See `torch.sparse.check_sparse_tensor_invariants.__doc__` for guidance.  (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/Context.cpp:848.)
   self.A = torch.sparse_coo_tensor(idx, torch.cat([v_ui, v_iu]), (m + n, m + n)).coalesce()
   DR-BPR-yhat {'lr': 0.01, 'wd': 1e-05, 'dim': 32, 'layers': 1, 'fn': 1.0, 'qmode': 'yhat'} done [12s] best split0 val 0.7884
+  DR-BPR-yhat {'lr': 0.01, 'wd': 1e-05, 'dim': 32, 'layers': 2, 'fn': 1.0, 'qmode': 'yhat'} done [5s] best split0 val 0.7896
+  DR-BPR-yhat {'lr': 0.01, 'wd': 1e-05, 'dim': 32, 'layers': 3, 'fn': 1.0, 'qmode': 'yhat'} done [11s] best split0 val 0.7896
+  DR-BPR-yhat {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 1, 'fn': 1.0, 'qmode': 'yhat'} done [5s] best split0 val 0.7896
+  DR-BPR-yhat {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'fn': 1.0, 'qmode': 'yhat'} done [4s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 3, 'fn': 1.0, 'qmode': 'yhat'} done [4s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 1, 'fn': 1.0, 'qmode': 'yhat'} done [9s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 2, 'fn': 1.0, 'qmode': 'yhat'} done [4s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.01, 'wd': 0.0001, 'dim': 32, 'layers': 3, 'fn': 1.0, 'qmode': 'yhat'} done [12s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 1, 'fn': 1.0, 'qmode': 'yhat'} done [5s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'fn': 1.0, 'qmode': 'yhat'} done [5s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 3, 'fn': 1.0, 'qmode': 'yhat'} done [4s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 1, 'fn': 1.0, 'qmode': 'yhat'} done [9s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 2, 'fn': 1.0, 'qmode': 'yhat'} done [5s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 3, 'fn': 1.0, 'qmode': 'yhat'} done [15s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 1, 'fn': 1.0, 'qmode': 'yhat'} done [5s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 2, 'fn': 1.0, 'qmode': 'yhat'} done [4s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.01, 'wd': 0.001, 'dim': 64, 'layers': 3, 'fn': 1.0, 'qmode': 'yhat'} done [4s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.003, 'wd': 1e-05, 'dim': 32, 'layers': 1, 'fn': 1.0, 'qmode': 'yhat'} done [12s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.003, 'wd': 1e-05, 'dim': 32, 'layers': 2, 'fn': 1.0, 'qmode': 'yhat'} done [8s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.003, 'wd': 1e-05, 'dim': 32, 'layers': 3, 'fn': 1.0, 'qmode': 'yhat'} done [9s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 1, 'fn': 1.0, 'qmode': 'yhat'} done [9s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'fn': 1.0, 'qmode': 'yhat'} done [7s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 3, 'fn': 1.0, 'qmode': 'yhat'} done [5s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.003, 'wd': 0.0001, 'dim': 32, 'layers': 1, 'fn': 1.0, 'qmode': 'yhat'} done [13s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.003, 'wd': 0.0001, 'dim': 32, 'layers': 2, 'fn': 1.0, 'qmode': 'yhat'} done [7s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.003, 'wd': 0.0001, 'dim': 32, 'layers': 3, 'fn': 1.0, 'qmode': 'yhat'} done [8s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 1, 'fn': 1.0, 'qmode': 'yhat'} done [9s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'fn': 1.0, 'qmode': 'yhat'} done [6s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 3, 'fn': 1.0, 'qmode': 'yhat'} done [5s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.003, 'wd': 0.001, 'dim': 32, 'layers': 1, 'fn': 1.0, 'qmode': 'yhat'} done [13s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.003, 'wd': 0.001, 'dim': 32, 'layers': 2, 'fn': 1.0, 'qmode': 'yhat'} done [8s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.003, 'wd': 0.001, 'dim': 32, 'layers': 3, 'fn': 1.0, 'qmode': 'yhat'} done [10s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 1, 'fn': 1.0, 'qmode': 'yhat'} done [9s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 2, 'fn': 1.0, 'qmode': 'yhat'} done [6s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.003, 'wd': 0.001, 'dim': 64, 'layers': 3, 'fn': 1.0, 'qmode': 'yhat'} done [7s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.001, 'wd': 1e-05, 'dim': 32, 'layers': 1, 'fn': 1.0, 'qmode': 'yhat'} done [23s] best split0 val 0.7925
+  DR-BPR-yhat {'lr': 0.001, 'wd': 1e-05, 'dim': 32, 'layers': 2, 'fn': 1.0, 'qmode': 'yhat'} done [15s] best split0 val 0.7925
