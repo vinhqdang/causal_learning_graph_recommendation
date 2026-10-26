@@ -9,3 +9,7 @@
   LightGCN-pn {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 1} done [57s] best split0 val 0.5978
   LightGCN-pn {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 2} done [117s] best split0 val 0.5978
   LightGCN-pn {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 3} done [182s] best split0 val 0.5978
+  LightGCN-pn {'lr': 0.01, 'wd': 0.0001, 'dim': 128, 'layers': 1} done [82s] best split0 val 0.5978
+  LightGCN-pn {'lr': 0.01, 'wd': 0.0001, 'dim': 128, 'layers': 2} done [94s] best split0 val 0.5978
+  LightGCN-pn {'lr': 0.01, 'wd': 0.0001, 'dim': 128, 'layers': 3} done [350s] best split0 val 0.5978
+LightGCN-pn  ndcg@10=0.6470±0.0056  ndcg@20=0.5995±0.0029  ndcg@50=0.4901±0.0039  recall@10=0.1048±0.0008  recall@20=0.1781±0.0014  recall@50=0.2539±0.0020  auc=0.7708±0.0007   [1741s, 12 cfgs] seeds 0.0000±0.0000
