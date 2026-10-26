@@ -1,0 +1,2 @@
+  DR-iALS-LR {'dim': 64, 'alpha': 3.0, 'reg': 1.0, 'fn': 0.5} done [145s] best split0 val 0.4125
+  DR-iALS-LR {'dim': 64, 'alpha': 3.0, 'reg': 1.0, 'fn': 1.0} done [129s] best split0 val 0.4500
