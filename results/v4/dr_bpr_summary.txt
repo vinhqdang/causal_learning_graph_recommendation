@@ -6,3 +6,13 @@ yahoo: DR-BPR-LGN over 3 learning-rate jobs, mean ndcg@5 0.6837
   vs iALS         baseline 0.6625 (12 cfgs)  diff  +21.83e-3 [8.59] users 2310  p 0.0000  p_Holm 0.0000
   vs DR-LightGCN  baseline 0.5528 (6 cfgs)  diff +131.60e-3 [13.14] users 2310  p 0.0000  p_Holm 0.0000
   vs SimGCL       baseline 0.6348 (12 cfgs)  diff  +50.21e-3 [10.00] users 2310  p 0.0000  p_Holm 0.0000
+
+kuairec: DR-BPR-LGN over 2 learning-rate jobs, mean ndcg@20 0.6095
+  vs LightGCN     baseline 0.6085 (36 cfgs)  diff   +1.39e-3 [1.38] users 1410  p 0.0483  p_Holm 0.0967
+  vs r-AdjNorm    baseline 0.6083 (12 cfgs)  diff   +1.17e-3 [1.22] users 1410  p 0.0599  p_Holm 0.0967
+  vs NAVIP        baseline 0.6186 (6 cfgs)  diff   -9.02e-3 [1.73] users 1410  p 0.0000  p_Holm 0.0000
+  vs DR-LightGCN  baseline 0.6212 (6 cfgs)  diff  -11.77e-3 [2.86] users 1410  p 0.0000  p_Holm 0.0000
+  vs iALS         baseline 0.6133 (12 cfgs)  diff   -3.58e-3 [2.18] users 1410  p 0.0013  p_Holm 0.0039
+  vs DR-JL        baseline 0.6332 (6 cfgs)  diff  -24.06e-3 [3.24] users 1410  p 0.0000  p_Holm 0.0000
+  vs MRDR         baseline 0.6328 (6 cfgs)  diff  -23.84e-3 [3.10] users 1410  p 0.0000  p_Holm 0.0000
+  vs LightGCN-pt  baseline 0.6271 (36 cfgs)  diff  -18.19e-3 [4.24] users 1410  p 0.0000  p_Holm 0.0000
