@@ -51,7 +51,8 @@ SETS = {
                              (V4 + "learned_kuairand_p.json", "DR-BPR-LGN-p")],
                  [V3 + "learned_kuairand_pop.json"], ["LightGCN", "r-AdjNorm", "NAVIP", "iALS", "BPR-MF", "SimGCL"]),
     "KuaiRec": ("ndcg@20", [(V4 + f"learned_kuairec_drbpr_lr{lr}.json", "DR-BPR-LGN-1") for lr in ("1e-2", "3e-3")] +
-                [(V4 + "learned_kuairec_p2_lr3e-3.json", "DR-BPR-LGN-p2"), (V4 + "learned_kuairec_p_lr3e-3.json", "DR-BPR-LGN-p")],
+                [(V4 + f"learned_kuairec_p2_lr{lr}.json", "DR-BPR-LGN-p2") for lr in ("1e-2", "3e-3", "1e-3")] +
+                [(V4 + "learned_kuairec_p_lr3e-3.json", "DR-BPR-LGN-p")],
                 glob.glob(V3 + "learned_kuairec_pop*.json"), ["DR-JL", "MRDR", "LightGCN-pt", "DR-LightGCN", "NAVIP", "iALS", "LightGCN", "r-AdjNorm"]),
 }
 for ds, (key, jobs, bfiles, names) in SETS.items():
