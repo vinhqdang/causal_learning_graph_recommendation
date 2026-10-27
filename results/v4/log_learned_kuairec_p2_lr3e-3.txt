@@ -1,0 +1,27 @@
+/home/user/causal_learning_graph_recommendation/experiments/../drup/learned.py:52: UserWarning: Sparse invariant checks are implicitly disabled. Memory errors (e.g. SEGFAULT) will occur when operating on a sparse tensor which violates the invariants, but checks incur performance overhead. To silence this warning, explicitly opt in or out. See `torch.sparse.check_sparse_tensor_invariants.__doc__` for guidance.  (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/Context.cpp:848.)
+  self.A = torch.sparse_coo_tensor(idx, torch.cat([v_ui, v_iu]), (m + n, m + n)).coalesce()
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 1, 'fn': 1.0, 'pbeta': 1.0} done [69s] best split0 val 0.6309
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 1, 'fn': 1.0, 'pbeta': 2.0} done [63s] best split0 val 0.6309
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'fn': 1.0, 'pbeta': 1.0} done [68s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'fn': 1.0, 'pbeta': 2.0} done [82s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 3, 'fn': 1.0, 'pbeta': 1.0} done [82s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 3, 'fn': 1.0, 'pbeta': 2.0} done [82s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 1e-05, 'dim': 128, 'layers': 1, 'fn': 1.0, 'pbeta': 1.0} done [66s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 1e-05, 'dim': 128, 'layers': 1, 'fn': 1.0, 'pbeta': 2.0} done [82s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 1e-05, 'dim': 128, 'layers': 2, 'fn': 1.0, 'pbeta': 1.0} done [87s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 1e-05, 'dim': 128, 'layers': 2, 'fn': 1.0, 'pbeta': 2.0} done [105s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 1e-05, 'dim': 128, 'layers': 3, 'fn': 1.0, 'pbeta': 1.0} done [104s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 1e-05, 'dim': 128, 'layers': 3, 'fn': 1.0, 'pbeta': 2.0} done [107s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 1, 'fn': 1.0, 'pbeta': 1.0} done [66s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 1, 'fn': 1.0, 'pbeta': 2.0} done [67s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'fn': 1.0, 'pbeta': 1.0} done [70s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'fn': 1.0, 'pbeta': 2.0} done [84s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 3, 'fn': 1.0, 'pbeta': 1.0} done [83s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 3, 'fn': 1.0, 'pbeta': 2.0} done [80s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 0.0001, 'dim': 128, 'layers': 1, 'fn': 1.0, 'pbeta': 1.0} done [66s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 0.0001, 'dim': 128, 'layers': 1, 'fn': 1.0, 'pbeta': 2.0} done [83s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 0.0001, 'dim': 128, 'layers': 2, 'fn': 1.0, 'pbeta': 1.0} done [88s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 0.0001, 'dim': 128, 'layers': 2, 'fn': 1.0, 'pbeta': 2.0} done [108s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 0.0001, 'dim': 128, 'layers': 3, 'fn': 1.0, 'pbeta': 1.0} done [104s] best split0 val 0.6318
+  DR-BPR-LGN-p2 {'lr': 0.003, 'wd': 0.0001, 'dim': 128, 'layers': 3, 'fn': 1.0, 'pbeta': 2.0} done [103s] best split0 val 0.6318
+DR-BPR-LGN-p2 ndcg@10=0.6726±0.0026  ndcg@20=0.6287±0.0019  ndcg@50=0.5126±0.0016  recall@10=0.1111±0.0009  recall@20=0.1915±0.0020  recall@50=0.2688±0.0022  auc=0.8039±0.0007   [1997s, 24 cfgs] seeds 0.0000±0.0000
