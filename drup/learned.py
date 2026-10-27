@@ -255,7 +255,7 @@ def _elu1(x):
 def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
           patience=5, pairs_per_epoch=None, seed=0, item_pop=None, gamma=0.1, log=None,
           cl_weight=0.1, aux_weight=1e-3, tau=0.2, fn=0.0, ipsw=0, n_neg=32, clip_w=5.0, fn_w=None, qmode="dr",
-          adv_lr=1e-4, adv_interval=5, adv_eta=0, k_neg=64.0):
+          adv_lr=1e-4, adv_interval=5, adv_eta=0, k_neg=64.0, adv_min_steps=100):
     """Pointwise losses: naive / IPS iterate over exposed pairs; DR samples
     pairs uniformly from all (u, i) (pseudo-label DR with a fixed imputation).
     Pairwise losses: 'bpr' (logged positives vs uniformly sampled items that
@@ -322,24 +322,33 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
         return torch.logaddexp(lp, torch.logsumexp(ln + logp, 1) + math.log(k_neg * n_neg)) - lp
 
     def _logp(u, J):
-        return torch.log_softmax((model.Pu.weight[u][:, None, :] * model.Pi.weight[J]).sum(-1), 1)
+        return torch.log_softmax(torch.einsum('bd,bnd->bn', model.Pu.weight[u], model.Pi.weight[J]), 1)
 
     best, bad = -1e9, 0
     for ep in range(epochs):
         model.train()
-        if ADV and ep > 0 and (ep + 3) % adv_interval == 0 and n_adv < adv_eta:
+        if ADV and ep > 0 and (adv_interval <= 1 or (ep + 3) % adv_interval == 0) and n_adv < adv_eta:
             with torch.no_grad():
                 Ue_, Ve_ = model.embeddings()
-            pa = torch.randperm(len(eu), generator=g)
-            if pairs_per_epoch: pa = pa[:pairs_per_epoch]
-            kl = []
-            for s in range(0, len(pa), batch):
-                u, i = eu[pa[s:s+batch]], ei[pa[s:s+batch]]; J = _negs(u)
-                with torch.no_grad(): lp, ln = _logits(u, i, J, Ue_, Ve_)
-                logp = _logp(u, J); la = -_nll(lp, ln, logp).mean()
-                opt_adv.zero_grad(); la.backward(); opt_adv.step()
-                kl.append(float((logp.exp() * (logp + math.log(n_neg))).sum(1).mean()))
-            n_adv += 1; print(f"    adv round {n_adv} ep {ep} KL {sum(kl)/len(kl):.4f}", flush=True)
+            n_pos = min(len(eu), pairs_per_epoch) if pairs_per_epoch else len(eu)
+            n_pass = max(1, math.ceil(n_pos / batch))
+            S_round = max(n_pass, adv_min_steps)   # a round: one full pass, at least adv_min_steps steps
+            kl = []; steps = 0
+            while steps < S_round and n_pos > 0:   # cycle through reshuffled passes over the positives
+                pa = torch.randperm(len(eu), generator=g)
+                if pairs_per_epoch: pa = pa[:pairs_per_epoch]
+                for s in range(0, len(pa), batch):
+                    if steps >= S_round: break
+                    u, i = eu[pa[s:s+batch]], ei[pa[s:s+batch]]; J = _negs(u)
+                    with torch.no_grad(): lp, ln = _logits(u, i, J, Ue_, Ve_)
+                    logp = _logp(u, J); la = -_nll(lp, ln, logp).mean()
+                    opt_adv.zero_grad(); la.backward(); opt_adv.step()
+                    with torch.no_grad():
+                        kl.append(float((logp.detach().exp() * (logp.detach() + math.log(n_neg))).sum(1).mean()))
+                    steps += 1
+            kl_tail = kl[-10:]
+            n_adv += 1
+            print(f"    adv round {n_adv} ep {ep} steps {steps} KL {sum(kl_tail)/max(1, len(kl_tail)):.4f}", flush=True)
         if loss_type in ("dr", "drjl", "mrdr"):
             N = pairs_per_epoch or len(eu)
             su = torch.randint(0, m, (N,), generator=g)
@@ -471,4 +480,6 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
             bad += 1
             if bad >= patience:
                 break
+    if ADV:
+        print(f"    adv rounds done {n_adv}/{adv_eta}", flush=True)
     return best

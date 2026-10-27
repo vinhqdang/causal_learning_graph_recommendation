@@ -120,6 +120,8 @@ def main():
     ap.add_argument("--adv_etas", type=int, nargs="+", default=[4, 12])
     ap.add_argument("--adv_lr", type=float, default=1e-4)
     ap.add_argument("--adv_interval", type=int, default=5)
+    ap.add_argument("--adv_min_steps", type=int, default=100,
+                    help="minimum Adam steps per adversarial round (a round is max(one pass, this))")
     ap.add_argument("--n_neg", type=int, default=64)
     ap.add_argument("--seed_check", type=int, default=3,
                     help="re-train the split-0 selection with this many seeds (0: skip)")
@@ -188,6 +190,7 @@ def main():
                      fn=cfg.get("fn", 0.0), ipsw=cfg.get("ipsw", 0),
                      qmode=cfg.get("qmode", "dr"),
                      adv_lr=a.adv_lr, adv_interval=a.adv_interval, adv_eta=cfg.get("eta", 0),
+                     adv_min_steps=a.adv_min_steps,
                      n_neg=(a.n_neg if loss in ("advinfonce", "dradvinfonce") else 32))
 
     bank_path = a.dump_bank or os.path.join(os.path.dirname(out), "bank_" + os.path.basename(out))
