@@ -294,3 +294,132 @@
     adv round 2 ep 2 steps 100 KL 3.3764
     adv round 3 ep 3 steps 100 KL 3.5068
     adv round 4 ep 4 steps 100 KL 3.5593
+    adv rounds done 4/4
+  AdvInfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 1, 'tau': 0.75, 'eta': 4} done [15s] best split0 val 0.7539
+    adv round 1 ep 1 steps 100 KL 3.0076
+    adv round 2 ep 2 steps 100 KL 3.3764
+    adv round 3 ep 3 steps 100 KL 3.5068
+    adv round 4 ep 4 steps 100 KL 3.5593
+    adv round 5 ep 5 steps 100 KL 3.6384
+    adv round 6 ep 6 steps 100 KL 3.6715
+    adv rounds done 6/12
+  AdvInfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 1, 'tau': 0.75, 'eta': 12} done [18s] best split0 val 0.7539
+    adv round 1 ep 1 steps 100 KL 3.1554
+    adv round 2 ep 2 steps 100 KL 3.2763
+    adv round 3 ep 3 steps 100 KL 3.4119
+    adv round 4 ep 4 steps 100 KL 3.5093
+    adv rounds done 4/4
+  AdvInfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'tau': 0.2, 'eta': 4} done [13s] best split0 val 0.7539
+    adv round 1 ep 1 steps 100 KL 3.1554
+    adv round 2 ep 2 steps 100 KL 3.2763
+    adv round 3 ep 3 steps 100 KL 3.4119
+    adv round 4 ep 4 steps 100 KL 3.5093
+    adv round 5 ep 5 steps 100 KL 3.5381
+    adv round 6 ep 6 steps 100 KL 3.5766
+    adv rounds done 6/12
+  AdvInfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'tau': 0.2, 'eta': 12} done [19s] best split0 val 0.7539
+    adv round 1 ep 1 steps 100 KL 3.3401
+    adv round 2 ep 2 steps 100 KL 3.3809
+    adv round 3 ep 3 steps 100 KL 3.4931
+    adv round 4 ep 4 steps 100 KL 3.5402
+    adv rounds done 4/4
+  AdvInfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'tau': 0.75, 'eta': 4} done [12s] best split0 val 0.7539
+    adv round 1 ep 1 steps 100 KL 3.3401
+    adv round 2 ep 2 steps 100 KL 3.3809
+    adv round 3 ep 3 steps 100 KL 3.4931
+    adv round 4 ep 4 steps 100 KL 3.5402
+    adv round 5 ep 5 steps 100 KL 3.6239
+    adv round 6 ep 6 steps 100 KL 3.6548
+    adv rounds done 6/12
+  AdvInfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'tau': 0.75, 'eta': 12} done [17s] best split0 val 0.7539
+    adv round 1 ep 1 steps 100 KL 3.2697
+    adv round 2 ep 2 steps 100 KL 3.2527
+    adv round 3 ep 3 steps 100 KL 3.3769
+    adv round 4 ep 4 steps 100 KL 3.4724
+    adv rounds done 4/4
+  AdvInfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 3, 'tau': 0.2, 'eta': 4} done [13s] best split0 val 0.7539
+    adv round 1 ep 1 steps 100 KL 3.2697
+    adv round 2 ep 2 steps 100 KL 3.2527
+    adv round 3 ep 3 steps 100 KL 3.3769
+    adv round 4 ep 4 steps 100 KL 3.4724
+    adv round 5 ep 5 steps 100 KL 3.5397
+    adv round 6 ep 6 steps 100 KL 3.5768
+    adv rounds done 6/12
+  AdvInfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 3, 'tau': 0.2, 'eta': 12} done [13s] best split0 val 0.7539
+    adv round 1 ep 1 steps 100 KL 3.4639
+    adv round 2 ep 2 steps 100 KL 3.3751
+    adv round 3 ep 3 steps 100 KL 3.4851
+    adv round 4 ep 4 steps 100 KL 3.5420
+    adv rounds done 4/4
+  AdvInfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 3, 'tau': 0.75, 'eta': 4} done [14s] best split0 val 0.7539
+    adv round 1 ep 1 steps 100 KL 3.4639
+    adv round 2 ep 2 steps 100 KL 3.3751
+    adv round 3 ep 3 steps 100 KL 3.4851
+    adv round 4 ep 4 steps 100 KL 3.5420
+    adv round 5 ep 5 steps 100 KL 3.5847
+    adv round 6 ep 6 steps 100 KL 3.6685
+    adv rounds done 6/12
+  AdvInfoNCE-LGN {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 3, 'tau': 0.75, 'eta': 12} done [17s] best split0 val 0.7539
+    adv round 1 ep 1 steps 100 KL 2.8659
+    adv round 2 ep 2 steps 100 KL 3.3336
+    adv round 3 ep 3 steps 100 KL 3.4543
+    adv round 4 ep 4 steps 100 KL 3.5248
+    adv rounds done 4/4
+  AdvInfoNCE-LGN {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 1, 'tau': 0.2, 'eta': 4} done [17s] best split0 val 0.7539
+    adv round 1 ep 1 steps 100 KL 2.8659
+    adv round 2 ep 2 steps 100 KL 3.3336
+    adv round 3 ep 3 steps 100 KL 3.4543
+    adv round 4 ep 4 steps 100 KL 3.5248
+    adv round 5 ep 5 steps 100 KL 3.5492
+    adv round 6 ep 6 steps 100 KL 3.5912
+    adv round 7 ep 7 steps 100 KL 3.6261
+    adv round 8 ep 8 steps 100 KL 3.6347
+    adv round 9 ep 9 steps 100 KL 3.6607
+    adv round 10 ep 10 steps 100 KL 3.6682
+    adv round 11 ep 11 steps 100 KL 3.7016
+    adv round 12 ep 12 steps 100 KL 3.7078
+    adv rounds done 12/12
+  AdvInfoNCE-LGN {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 1, 'tau': 0.2, 'eta': 12} done [35s] best split0 val 0.7539
+    adv round 1 ep 1 steps 100 KL 2.9930
+    adv round 2 ep 2 steps 100 KL 3.3736
+    adv round 3 ep 3 steps 100 KL 3.5113
+    adv round 4 ep 4 steps 100 KL 3.5901
+    adv rounds done 4/4
+  AdvInfoNCE-LGN {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 1, 'tau': 0.75, 'eta': 4} done [15s] best split0 val 0.7539
+    adv round 1 ep 1 steps 100 KL 2.9930
+    adv round 2 ep 2 steps 100 KL 3.3736
+    adv round 3 ep 3 steps 100 KL 3.5113
+    adv round 4 ep 4 steps 100 KL 3.5901
+    adv round 5 ep 5 steps 100 KL 3.6127
+    adv round 6 ep 6 steps 100 KL 3.6512
+    adv round 7 ep 7 steps 100 KL 3.6820
+    adv round 8 ep 8 steps 100 KL 3.6849
+    adv round 9 ep 9 steps 100 KL 3.7094
+    adv round 10 ep 10 steps 100 KL 3.7201
+    adv round 11 ep 11 steps 100 KL 3.7480
+    adv round 12 ep 12 steps 100 KL 3.7705
+    adv rounds done 12/12
+  AdvInfoNCE-LGN {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 1, 'tau': 0.75, 'eta': 12} done [27s] best split0 val 0.7539
+    adv round 1 ep 1 steps 100 KL 3.0090
+    adv round 2 ep 2 steps 100 KL 3.2829
+    adv round 3 ep 3 steps 100 KL 3.4273
+    adv round 4 ep 4 steps 100 KL 3.5026
+    adv rounds done 4/4
+  AdvInfoNCE-LGN {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 2, 'tau': 0.2, 'eta': 4} done [9s] best split0 val 0.7539
+    adv round 1 ep 1 steps 100 KL 3.0090
+    adv round 2 ep 2 steps 100 KL 3.2829
+    adv round 3 ep 3 steps 100 KL 3.4273
+    adv round 4 ep 4 steps 100 KL 3.5026
+    adv round 5 ep 5 steps 100 KL 3.5464
+    adv round 6 ep 6 steps 100 KL 3.5983
+    adv rounds done 6/12
+  AdvInfoNCE-LGN {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 2, 'tau': 0.2, 'eta': 12} done [14s] best split0 val 0.7539
+    adv round 1 ep 1 steps 100 KL 3.2200
+    adv round 2 ep 2 steps 100 KL 3.3415
+    adv round 3 ep 3 steps 100 KL 3.4757
+    adv round 4 ep 4 steps 100 KL 3.5600
+    adv rounds done 4/4
+  AdvInfoNCE-LGN {'lr': 0.01, 'wd': 0.001, 'dim': 32, 'layers': 2, 'tau': 0.75, 'eta': 4} done [10s] best split0 val 0.7539
+    adv round 1 ep 1 steps 100 KL 3.2200
+    adv round 2 ep 2 steps 100 KL 3.3415
+    adv round 3 ep 3 steps 100 KL 3.4757
