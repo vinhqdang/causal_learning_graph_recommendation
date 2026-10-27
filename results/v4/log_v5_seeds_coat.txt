@@ -11,3 +11,53 @@ final DR-BPR-LGN-p seed 2 splits [2]: training
 final DR-BPR-LGN-p seed 3 splits [2]: training
 final DR-BPR-LGN seed 1 splits [3]: training
 final DR-BPR-LGN seed 2 splits [3]: training
+final DR-BPR-LGN seed 3 splits [3]: training
+final DR-BPR-LGN-p seed 1 splits [4]: training
+final DR-BPR-LGN-p seed 2 splits [4]: training
+final DR-BPR-LGN-p seed 3 splits [4]: training
+final DR-BPR-LGN-p2 seed 1 splits [5]: training
+final DR-BPR-LGN-p2 seed 2 splits [5]: training
+final DR-BPR-LGN-p2 seed 3 splits [5]: training
+final DR-BPR-LGN-p seed 1 splits [6]: training
+final DR-BPR-LGN-p seed 2 splits [6]: training
+final DR-BPR-LGN-p seed 3 splits [6]: training
+final DR-BPR-LGN seed 1 splits [7]: training
+final DR-BPR-LGN seed 2 splits [7]: training
+final DR-BPR-LGN seed 3 splits [7]: training
+final DR-BPR-LGN-p seed 1 splits [8]: training
+final DR-BPR-LGN-p seed 2 splits [8]: training
+final DR-BPR-LGN-p seed 3 splits [8]: training
+final DR-BPR-LGN-p seed 1 splits [9]: training
+final DR-BPR-LGN-p seed 2 splits [9]: training
+final DR-BPR-LGN-p seed 3 splits [9]: training
+final: done
+iALS iALS seed 1 splits [0, 1, 2, 3, 5, 7, 8]: training
+iALS iALS seed 2 splits [0, 1, 2, 3, 5, 7, 8]: training
+iALS iALS seed 3 splits [0, 1, 2, 3, 5, 7, 8]: training
+iALS iALS seed 1 splits [4, 6, 9]: training
+iALS iALS seed 2 splits [4, 6, 9]: training
+iALS iALS seed 3 splits [4, 6, 9]: training
+iALS: done
+DR-LightGCN DR-LightGCN seed 1 splits [0]: training
+DR-LightGCN DR-LightGCN seed 2 splits [0]: training
+DR-LightGCN DR-LightGCN seed 3 splits [0]: training
+DR-LightGCN DR-LightGCN seed 1 splits [1]: training
+DR-LightGCN DR-LightGCN seed 2 splits [1]: training
+DR-LightGCN DR-LightGCN seed 3 splits [1]: training
+DR-LightGCN DR-LightGCN seed 1 splits [2, 4, 5]: training
+DR-LightGCN DR-LightGCN seed 2 splits [2, 4, 5]: training
+DR-LightGCN DR-LightGCN seed 3 splits [2, 4, 5]: training
+DR-LightGCN DR-LightGCN seed 1 splits [3]: training
+DR-LightGCN DR-LightGCN seed 2 splits [3]: training
+DR-LightGCN DR-LightGCN seed 3 splits [3]: training
+DR-LightGCN DR-LightGCN seed 1 splits [6, 9]: training
+DR-LightGCN DR-LightGCN seed 2 splits [6, 9]: training
+DR-LightGCN DR-LightGCN seed 3 splits [6, 9]: training
+DR-LightGCN DR-LightGCN seed 1 splits [7]: training
+DR-LightGCN DR-LightGCN seed 2 splits [7]: training
+DR-LightGCN DR-LightGCN seed 3 splits [7]: training
+DR-LightGCN DR-LightGCN seed 1 splits [8]: training
+DR-LightGCN DR-LightGCN seed 2 splits [8]: training
+DR-LightGCN DR-LightGCN seed 3 splits [8]: training
+DR-LightGCN: done
+wrote results/v4/seeds_coat.json
