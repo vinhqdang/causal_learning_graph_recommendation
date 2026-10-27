@@ -20,17 +20,20 @@ class MF(torch.nn.Module):
         for e in (self.bu, self.bi):
             torch.nn.init.zeros_(e.weight)
         self.b0 = torch.nn.Parameter(torch.zeros(1))
+        self.prior, self.pbeta = None, 0.0      # fixed debiased offset (standardised logit of the imputation)
 
     def embeddings(self):
         return self.U.weight, self.V.weight
 
     def forward(self, u, i, emb=None):
         Ue, Ve = emb if emb is not None else self.embeddings()
-        return (Ue[u] * Ve[i]).sum(-1) + self.bu(u).squeeze(-1) + self.bi(i).squeeze(-1) + self.b0
+        out = (Ue[u] * Ve[i]).sum(-1) + self.bu(u).squeeze(-1) + self.bi(i).squeeze(-1) + self.b0
+        return out + self.pbeta * self.prior[u, i] if self.pbeta else out
 
     def full_scores(self, rows):
         Ue, Ve = self.embeddings()
-        return Ue[rows] @ Ve.T + self.bu.weight[rows] + self.bi.weight.T + self.b0
+        out = Ue[rows] @ Ve.T + self.bu.weight[rows] + self.bi.weight.T + self.b0
+        return out + self.pbeta * self.prior[rows] if self.pbeta else out
 
 
 class LightGCN(MF):

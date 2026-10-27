@@ -44,6 +44,8 @@ METHODS = {
     "DR-InfoNCE-LGN": ("lgncos", "drinfonce", {"tau": [0.1, 0.2], "fn": [1.0], "ipsw": [0, 1]}),
     "DR-BPR-LGN": ("lgn", "drbpr", {"fn": [0.5, 1.0]}),
     "DR-BPR-LGN-1": ("lgn", "drbpr", {"fn": [1.0]}),
+    "LightGCN-p": ("lgn", "bpr", {"pbeta": [0.5, 1.0]}),
+    "DR-BPR-LGN-p": ("lgn", "drbpr", {"fn": [1.0], "pbeta": [0.5, 1.0]}),
     "DR-BPR-yhat": ("lgn", "drbpr", {"fn": [1.0], "qmode": ["yhat"]}),
     "DR-BPR-pop": ("lgn", "drbpr", {"fn": [1.0], "qmode": ["pop"]}),
     "DR-BPR-shuf": ("lgn", "drbpr", {"fn": [1.0], "qmode": ["shuffle"]}),
@@ -55,9 +57,17 @@ METHODS = {
 }
 GRAPH = ("lgn", "navip", "simgcl", "lgncos")
 QMAT = [None]
+PRIOR = [None]
 
 
 def build(kind, m, n, d, O, Y, P, cfg):
+    model = _build(kind, m, n, d, O, Y, P, cfg)
+    if cfg.get("pbeta", 0.0):
+        model.prior, model.pbeta = PRIOR[0], cfg["pbeta"]
+    return model
+
+
+def _build(kind, m, n, d, O, Y, P, cfg):
     if kind == "mf":
         return MF(m, n, d)
     if kind == "macr":
@@ -95,6 +105,8 @@ def main():
     ap.add_argument("--epochs", type=int, default=60)
     ap.add_argument("--batch", type=int, default=1024)
     ap.add_argument("--floor", type=float, default=0.05)
+    ap.add_argument("--imp", default="add", choices=["add", "lr"], help="imputation used for Q and the prior")
+    ap.add_argument("--rank", type=int, default=16)
     ap.add_argument("--pairs_per_epoch", type=int, default=None)
     ap.add_argument("--threads", type=int, default=4)
     ap.add_argument("--patience", type=int, default=5)
@@ -125,7 +137,13 @@ def main():
     ndt = torch.float64 if m * n < 5e7 else torch.float32
     P = get_propensity(d, O.to(ndt), Y.to(ndt), a.prop).float()
     P = clip_propensity(P, a.floor)
-    Yhat = baseline_imputation(O.to(ndt), Y.to(ndt), P.to(ndt), lam=5.0).float()
+    if a.imp == "lr":
+        from drup.estimation import lowrank_imputation
+        Yhat = lowrank_imputation(O.to(ndt), Y.to(ndt), P.to(ndt), rank=a.rank, ridge=5.0).float().clamp(0.0, 1.0)
+    else:
+        Yhat = baseline_imputation(O.to(ndt), Y.to(ndt), P.to(ndt), lam=5.0).float()
+    _lg = torch.logit(Yhat.clamp(1e-3, 1 - 1e-3))
+    PRIOR[0] = (_lg - _lg.mean()) / _lg.std()
     QMAT[0] = (Yhat * (1.0 - P) / (1.0 - P * Yhat).clamp_min(1e-6)).clamp(0.0, 1.0)
     del d["O"], d["Y"]
     pop = (O * Y).sum(0)
