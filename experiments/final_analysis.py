@@ -43,24 +43,28 @@ V4, V3 = "results/v4/", "results/v3/"
 SETS = {
     "Coat": ("ndcg@5", [(V4 + "learned_coat_drbpr.json", "DR-BPR-LGN"), (V4 + "learned_coat_prior_dr.json", "DR-BPR-LGN-p"),
                         (V4 + "learned_coat_p2.json", "DR-BPR-LGN-p2")],
-             [V3 + "learned_coat_given.json"], ["LightGCN", "r-AdjNorm", "NAVIP", "DR-LightGCN", "iALS", "SimGCL", "MACR"]),
+             [V3 + "learned_coat_given.json", V4 + "learned_coat_adv.json"], ["LightGCN", "r-AdjNorm", "NAVIP", "DR-LightGCN", "iALS", "SimGCL", "MACR", "AdvInfoNCE-LGN"]),
     "Yahoo": ("ndcg@5", [(V4 + f"learned_yahoo_drbpr_lr{lr}.json", "DR-BPR-LGN-1") for lr in ("1e-2", "3e-3", "1e-3")] +
               [(V4 + "learned_yahoo_p2_lr3e-3.json", "DR-BPR-LGN-p2"), (V4 + "learned_yahoo_p_lr3e-3.json", "DR-BPR-LGN-p")],
-              glob.glob(V3 + "learned_yahoo_pop*.json"), ["LightGCN", "r-AdjNorm", "NAVIP", "iALS", "SimGCL"]),
+              glob.glob(V3 + "learned_yahoo_pop*.json") + [V4 + "learned_yahoo_adv.json"],
+              ["LightGCN", "r-AdjNorm", "NAVIP", "iALS", "SimGCL", "AdvInfoNCE-LGN"]),
     "KuaiRand": ("ndcg@10", [(V4 + "learned_kuairand_drbpr.json", "DR-BPR-LGN-1"), (V4 + "learned_kuairand_p2.json", "DR-BPR-LGN-p2"),
                              (V4 + "learned_kuairand_p.json", "DR-BPR-LGN-p")],
-                 [V3 + "learned_kuairand_pop.json"], ["LightGCN", "r-AdjNorm", "NAVIP", "iALS", "BPR-MF", "SimGCL"]),
+                 [V3 + "learned_kuairand_pop.json", V4 + "learned_kuairand_adv.json"],
+                 ["LightGCN", "r-AdjNorm", "NAVIP", "iALS", "BPR-MF", "SimGCL", "AdvInfoNCE-LGN"]),
     "KuaiRec": ("ndcg@20", [(V4 + f"learned_kuairec_drbpr_lr{lr}.json", "DR-BPR-LGN-1") for lr in ("1e-2", "3e-3")] +
                 [(V4 + f"learned_kuairec_p2_lr{lr}.json", "DR-BPR-LGN-p2") for lr in ("1e-2", "3e-3", "1e-3")] +
                 [(V4 + "learned_kuairec_p_lr3e-3.json", "DR-BPR-LGN-p")],
-                glob.glob(V3 + "learned_kuairec_pop*.json"), ["DR-JL", "MRDR", "LightGCN-pt", "DR-LightGCN", "NAVIP", "iALS", "LightGCN", "r-AdjNorm"]),
+                glob.glob(V3 + "learned_kuairec_pop*.json") + [V4 + "learned_kuairec_adv.json"],
+                ["DR-JL", "MRDR", "LightGCN-pt", "DR-LightGCN", "NAVIP", "iALS", "LightGCN", "r-AdjNorm", "AdvInfoNCE-LGN"]),
 }
 for ds, (key, jobs, bfiles, names) in SETS.items():
     jobs = [(f, n) for f, n in jobs if os.path.exists(f)]
     mine = combine(jobs, key)
     base = {}
     for f in bfiles:
-        base.update(ld(f)["results"])
+        if os.path.exists(f):
+            base.update(ld(f)["results"])
     print(f"\n{ds}: DR-BPR-LGN + offset, {mine['n_jobs']} jobs, mean {key} = {np.mean(mine['per_split']):.4f}; "
           f"beta chosen {dict(collections.Counter(c.get('pbeta', 0.0) for c in mine['chosen']))}")
     rows = []

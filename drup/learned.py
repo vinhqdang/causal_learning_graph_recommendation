@@ -4,6 +4,8 @@ weighted neighbour aggregation), r-AdjNorm (LightGCN with normalisation
 exponent r), SimGCL (LightGCN with noise-based contrastive views) and iALS
 (weighted matrix factorisation by alternating least squares)."""
 
+import math
+
 import torch
 import torch.nn.functional as F
 
@@ -68,6 +70,18 @@ class LGNCos(LightGCN):
     def full_scores(self, rows):
         Ue, Ve = self.embeddings()
         return F.normalize(Ue[rows], dim=-1) @ F.normalize(Ve, dim=-1).T
+
+
+class AdvLGN(LightGCN):
+    def __init__(self, *args, w_dim=64, tau=0.2, **kw):
+        super().__init__(*args, **kw)
+        self.Pu = torch.nn.Embedding(self.m, w_dim); self.Pi = torch.nn.Embedding(self.n, w_dim)
+        torch.nn.init.xavier_normal_(self.Pu.weight); torch.nn.init.xavier_normal_(self.Pi.weight)
+        self.tau = tau
+    def full_scores(self, rows):
+        Ue, Ve = self.embeddings()
+        s = F.normalize(Ue[rows], dim=-1) @ F.normalize(Ve, dim=-1).T / self.tau
+        return s + self.pbeta * self.prior[rows] if self.pbeta else s
 
 
 class SimGCL(LightGCN):
@@ -240,7 +254,8 @@ def _elu1(x):
 
 def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
           patience=5, pairs_per_epoch=None, seed=0, item_pop=None, gamma=0.1, log=None,
-          cl_weight=0.1, aux_weight=1e-3, tau=0.2, fn=0.0, ipsw=0, n_neg=32, clip_w=5.0, fn_w=None, qmode="dr"):
+          cl_weight=0.1, aux_weight=1e-3, tau=0.2, fn=0.0, ipsw=0, n_neg=32, clip_w=5.0, fn_w=None, qmode="dr",
+          adv_lr=1e-4, adv_interval=5, adv_eta=0, k_neg=64.0):
     """Pointwise losses: naive / IPS iterate over exposed pairs; DR samples
     pairs uniformly from all (u, i) (pseudo-label DR with a fixed imputation).
     Pairwise losses: 'bpr' (logged positives vs uniformly sampled items that
@@ -258,15 +273,21 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
     fn_w = fn if fn_w is None else fn_w
     g = torch.Generator().manual_seed(seed)
     torch.manual_seed(seed)
-    opt = torch.optim.Adam(model.parameters(), lr=lr)
     m, n = O.shape
+    ADV = loss_type in ("advinfonce", "dradvinfonce")
+    if ADV:
+        advp = [model.Pu.weight, model.Pi.weight]
+        opt = torch.optim.Adam([p for p in model.parameters() if not any(p is q for q in advp)], lr=lr)
+        opt_adv = torch.optim.Adam(advp, lr=adv_lr); n_adv = 0
+    else:
+        opt = torch.optim.Adam(model.parameters(), lr=lr)
     pos = O * Y > 0
     imp = None
     if loss_type in ("drjl", "mrdr"):
         imp = MF(m, n, model.U.weight.shape[1])
         opt_imp = torch.optim.Adam(imp.parameters(), lr=lr)
         ou, oi = torch.nonzero(O > 0, as_tuple=True)
-    if loss_type in ("infonce", "drinfonce", "drbpr", "drpn"):
+    if loss_type in ("infonce", "drinfonce", "drbpr", "drpn", "dradvinfonce"):
         # probability that a pair that is not a logged positive is a positive after all,
         # under Y independent of O given the imputation: Yhat (1 - p) / (1 - p Yhat)
         Q = (Yhat * (1.0 - P) / (1.0 - P * Yhat).clamp_min(1e-6)).clamp(0.0, 1.0)
@@ -278,13 +299,47 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
         elif qmode == "shuffle":                # control: same values, no information
             gq = torch.Generator().manual_seed(seed + 7)
             Q = Q.flatten()[torch.randperm(Q.numel(), generator=gq)].reshape(Q.shape)
-    if loss_type in ("bpr", "pda", "simgcl", "macr", "infonce", "drinfonce", "drbpr", "pn", "drpn"):
+    if loss_type in ("bpr", "pda", "simgcl", "macr", "infonce", "drinfonce", "drbpr", "pn", "drpn",
+                     "advinfonce", "dradvinfonce"):
         eu, ei = torch.nonzero(pos, as_tuple=True)
     else:
         eu, ei = torch.nonzero(O > 0, as_tuple=True)
+
+    def _negs(u):
+        J = torch.randint(0, n, (len(u), n_neg), generator=g)
+        return torch.where(pos[u[:, None], J], torch.randint(0, n, (len(u), n_neg), generator=g), J)
+
+    def _logits(u, i, J, Ue, Ve):
+        ue = F.normalize(Ue[u], dim=-1); pe = F.normalize(Ve[i], dim=-1); ne = F.normalize(Ve[J], dim=-1)
+        lp = (ue * pe).sum(-1) / tau; ln = (ue[:, None, :] * ne).sum(-1) / tau
+        if model.pbeta:
+            lp = lp + model.pbeta * model.prior[u, i]; ln = ln + model.pbeta * model.prior[u[:, None], J]
+        if loss_type == "dradvinfonce":
+            ln = ln + torch.log((1.0 - fn * Q[u[:, None], J]).clamp_min(1e-3))
+        return lp, ln
+
+    def _nll(lp, ln, logp):
+        return torch.logaddexp(lp, torch.logsumexp(ln + logp, 1) + math.log(k_neg * n_neg)) - lp
+
+    def _logp(u, J):
+        return torch.log_softmax((model.Pu.weight[u][:, None, :] * model.Pi.weight[J]).sum(-1), 1)
+
     best, bad = -1e9, 0
     for ep in range(epochs):
         model.train()
+        if ADV and ep > 0 and (ep + 3) % adv_interval == 0 and n_adv < adv_eta:
+            with torch.no_grad():
+                Ue_, Ve_ = model.embeddings()
+            pa = torch.randperm(len(eu), generator=g)
+            if pairs_per_epoch: pa = pa[:pairs_per_epoch]
+            kl = []
+            for s in range(0, len(pa), batch):
+                u, i = eu[pa[s:s+batch]], ei[pa[s:s+batch]]; J = _negs(u)
+                with torch.no_grad(): lp, ln = _logits(u, i, J, Ue_, Ve_)
+                logp = _logp(u, J); la = -_nll(lp, ln, logp).mean()
+                opt_adv.zero_grad(); la.backward(); opt_adv.step()
+                kl.append(float((logp.exp() * (logp + math.log(n_neg))).sum(1).mean()))
+            n_adv += 1; print(f"    adv round {n_adv} ep {ep} KL {sum(kl)/len(kl):.4f}", flush=True)
         if loss_type in ("dr", "drjl", "mrdr"):
             N = pairs_per_epoch or len(eu)
             su = torch.randint(0, m, (N,), generator=g)
@@ -324,6 +379,11 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
                     w = (w / w.mean()).clamp_max(clip_w)
                     nll = nll * w / w.mean()
                 loss = nll.mean()
+                reg = wd * sum((e ** 2).sum() for e in (emb[0][u], emb[1][i], emb[1][J])) / len(u)
+            elif loss_type in ("advinfonce", "dradvinfonce"):
+                J = _negs(u); lp, ln = _logits(u, i, J, emb[0], emb[1])
+                with torch.no_grad(): logp = _logp(u, J)
+                loss = _nll(lp, ln, logp).mean()
                 reg = wd * sum((e ** 2).sum() for e in (emb[0][u], emb[1][i], emb[1][J])) / len(u)
             elif loss_type in ("pn", "drpn"):
                 j = torch.randint(0, n, (len(u),), generator=g)

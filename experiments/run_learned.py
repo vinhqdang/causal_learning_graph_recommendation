@@ -21,7 +21,7 @@ import torch
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from drup.data import load_coat, load_yahoo, split_test  # noqa: E402
 from drup.estimation import baseline_imputation, clip_propensity, get_propensity  # noqa: E402
-from drup.learned import IALS, IALSLR, IALSW, LGNCos, MACR, MF, LightGCN, SimGCL, train, train_ials  # noqa: E402
+from drup.learned import IALS, IALSLR, IALSW, AdvLGN, LGNCos, MACR, MF, LightGCN, SimGCL, train, train_ials  # noqa: E402
 from drup.metrics import evaluate  # noqa: E402
 
 # name: (model kind, loss, extra grid)
@@ -56,32 +56,36 @@ METHODS = {
     "DR-iALS": ("drials", None, {"alpha": [3.0, 10.0, 30.0], "reg": [1.0, 10.0, 100.0, 1000.0], "fn": [0.5, 1.0]}),
     "DR-iALS-LR": ("drials_lr", None, {"alpha": [3.0, 10.0, 30.0], "reg": [1.0, 10.0, 100.0, 1000.0], "fn": [0.5, 1.0]}),
     "iALS": ("ials", None, {"alpha": [3.0, 10.0, 30.0], "reg": [1.0, 10.0, 100.0, 1000.0]}),
+    "AdvInfoNCE-LGN": ("advlgn", "advinfonce", {}),
+    "DR-AdvInfoNCE-LGN-p": ("advlgn", "dradvinfonce", {"fn": [1.0], "pbeta": [0.5, 1.0]}),
 }
-GRAPH = ("lgn", "navip", "simgcl", "lgncos")
+GRAPH = ("lgn", "navip", "simgcl", "lgncos", "advlgn")
 QMAT = [None]
 PRIOR = [None]
 
 
-def build(kind, m, n, d, O, Y, P, cfg):
-    model = _build(kind, m, n, d, O, Y, P, cfg)
+def build(kind, m, n, d, O, Y, P, cfg, seed=0):
+    model = _build(kind, m, n, d, O, Y, P, cfg, seed)
     if cfg.get("pbeta", 0.0):
         model.prior, model.pbeta = PRIOR[0], cfg["pbeta"]
     return model
 
 
-def _build(kind, m, n, d, O, Y, P, cfg):
+def _build(kind, m, n, d, O, Y, P, cfg, seed=0):
     if kind == "mf":
         return MF(m, n, d)
     if kind == "macr":
         return MACR(m, n, d, c=cfg["c"])
     eu, ei = torch.nonzero(O * Y > 0, as_tuple=True)
     if kind == "drials_lr":
-        return IALSLR(m, n, d, eu, ei, QMAT[0], alpha=cfg["alpha"], reg=cfg["reg"], fn=cfg["fn"], K=16)
+        return IALSLR(m, n, d, eu, ei, QMAT[0], alpha=cfg["alpha"], reg=cfg["reg"], fn=cfg["fn"], K=16, seed=seed)
     if kind == "drials":
-        return IALSW(m, n, d, eu, ei, QMAT[0], alpha=cfg["alpha"], reg=cfg["reg"], fn=cfg["fn"])
+        return IALSW(m, n, d, eu, ei, QMAT[0], alpha=cfg["alpha"], reg=cfg["reg"], fn=cfg["fn"], seed=seed)
     if kind == "ials":
-        return IALS(m, n, d, eu, ei, alpha=cfg["alpha"], reg=cfg["reg"])
+        return IALS(m, n, d, eu, ei, alpha=cfg["alpha"], reg=cfg["reg"], seed=seed)
     w = (1.0 / P[eu, ei]).float() if kind == "navip" else torch.ones(len(eu))
+    if kind == "advlgn":
+        return AdvLGN(m, n, d, eu, ei, torch.ones(len(eu)), layers=cfg["layers"], r=0.5, tau=cfg["tau"])
     if kind == "lgncos":
         return LGNCos(m, n, d, eu, ei, torch.ones(len(eu)), layers=cfg["layers"], r=0.5)
     if kind == "simgcl":
@@ -112,6 +116,11 @@ def main():
     ap.add_argument("--pairs_per_epoch", type=int, default=None)
     ap.add_argument("--threads", type=int, default=4)
     ap.add_argument("--patience", type=int, default=5)
+    ap.add_argument("--adv_taus", type=float, nargs="+", default=[0.2, 0.5])
+    ap.add_argument("--adv_etas", type=int, nargs="+", default=[4, 12])
+    ap.add_argument("--adv_lr", type=float, default=1e-4)
+    ap.add_argument("--adv_interval", type=int, default=5)
+    ap.add_argument("--n_neg", type=int, default=64)
     ap.add_argument("--seed_check", type=int, default=3,
                     help="re-train the split-0 selection with this many seeds (0: skip)")
     ap.add_argument("--out", default=None)
@@ -164,7 +173,7 @@ def main():
         ``patience`` epochs without improvement and then keeps its selection,
         so no split's selection depends on another split's data."""
         torch.manual_seed(seed)
-        model = build(kind, m, n, cfg["dim"], O, Y, P, cfg)
+        model = build(kind, m, n, cfg["dim"], O, Y, P, cfg, seed=seed)
 
         def on_epoch(mod, ep):
             with torch.no_grad():
@@ -177,7 +186,9 @@ def main():
                      patience=a.patience, pairs_per_epoch=a.pairs_per_epoch, seed=seed,
                      item_pop=item_pop, gamma=cfg.get("gamma", 0.1), cl_weight=cfg.get("cl", 0.1), tau=cfg.get("tau", 0.2),
                      fn=cfg.get("fn", 0.0), ipsw=cfg.get("ipsw", 0),
-                     qmode=cfg.get("qmode", "dr"))
+                     qmode=cfg.get("qmode", "dr"),
+                     adv_lr=a.adv_lr, adv_interval=a.adv_interval, adv_eta=cfg.get("eta", 0),
+                     n_neg=(a.n_neg if loss in ("advinfonce", "dradvinfonce") else 32))
 
     bank_path = a.dump_bank or os.path.join(os.path.dirname(out), "bank_" + os.path.basename(out))
     dumps = json.load(open(bank_path))["banks"] if os.path.exists(bank_path) else {}
@@ -186,6 +197,8 @@ def main():
             print(f"{name}: already in {out}, skipped", flush=True)
             continue
         kind, loss, extra = METHODS[name]
+        if kind == "advlgn":
+            extra = dict(extra, tau=a.adv_taus, eta=a.adv_etas)
         t0 = time.time()
         wide = name in a.wide
         dims = a.wide_dims if wide else a.dims
