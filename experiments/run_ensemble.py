@@ -5,10 +5,14 @@ cached in --cache, and work whose cache file already exists is skipped (restart-
   --stage drup     DRUP scores of each split's selected configuration
   --stage trained  retrain each split's selected component-A configuration to its epoch
   --stage blend    z-normalise both components over unlogged items, choose w per split on validation
+
+Cache files are written to <path>.tmp and renamed; a cache file that exists but does not load
+(torch.load, weights_only=True) is deleted and recomputed.
 """
 
 import argparse
 import hashlib
+import inspect
 import json
 import os
 import sys
@@ -22,25 +26,13 @@ sys.path.insert(0, HERE)
 import learned_ctx as LC  # noqa: E402
 import run_filters as RF  # noqa: E402
 import run_learned as RL  # noqa: E402,F401
+from final_config import FINAL_JOBS, PROP  # noqa: E402
 from drup.data import split_test  # noqa: E402
 from drup.metrics import evaluate  # noqa: E402
 from drup.pipeline import Nuisance  # noqa: E402
 
-PROP = {"coat": "given", "yahoo": "pop", "kuairand": "pop", "kuairec": "pop"}
-# (file, method name) of the final method, copied from the SETS[...][1] lists of experiments/final_analysis.py
-V4 = "results/v4/"
-FINAL_JOBS = {
-    "coat": [(V4 + "learned_coat_drbpr.json", "DR-BPR-LGN"), (V4 + "learned_coat_prior_dr.json", "DR-BPR-LGN-p"),
-             (V4 + "learned_coat_p2.json", "DR-BPR-LGN-p2")],
-    "yahoo": [(V4 + f"learned_yahoo_drbpr_lr{lr}.json", "DR-BPR-LGN-1") for lr in ("1e-2", "3e-3", "1e-3")] +
-             [(V4 + "learned_yahoo_p2_lr3e-3.json", "DR-BPR-LGN-p2"), (V4 + "learned_yahoo_p_lr3e-3.json", "DR-BPR-LGN-p")],
-    "kuairand": [(V4 + "learned_kuairand_drbpr.json", "DR-BPR-LGN-1"), (V4 + "learned_kuairand_p2.json", "DR-BPR-LGN-p2"),
-                 (V4 + "learned_kuairand_p.json", "DR-BPR-LGN-p")],
-    "kuairec": [(V4 + f"learned_kuairec_drbpr_lr{lr}.json", "DR-BPR-LGN-1") for lr in ("1e-2", "3e-3")] +
-               [(V4 + f"learned_kuairec_p2_lr{lr}.json", "DR-BPR-LGN-p2") for lr in ("1e-2", "3e-3", "1e-3")] +
-               [(V4 + "learned_kuairec_p_lr3e-3.json", "DR-BPR-LGN-p")],
-}
 WGRID = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+REPRO_TOL = 2e-3
 
 
 def filt_path(ds):
@@ -55,6 +47,25 @@ def save_json(path, obj):
     with open(path + ".tmp", "w") as f:
         json.dump(obj, f)
     os.replace(path + ".tmp", path)
+
+
+def cache_save(obj, path):
+    """Atomic write of a cache tensor: write path.tmp, then rename."""
+    torch.save(obj, path + ".tmp")
+    os.replace(path + ".tmp", path)
+
+
+def cache_ok(path):
+    """True if the cache file exists and loads. A file that exists but does not load is deleted."""
+    if not os.path.exists(path):
+        return False
+    try:
+        torch.load(path, weights_only=True)
+        return True
+    except Exception as e:  # corrupt or truncated cache file
+        print(f"unreadable cache {path} ({type(e).__name__}); deleting it", flush=True)
+        os.remove(path)
+        return False
 
 
 def load_index(path):
@@ -105,7 +116,7 @@ def stage_drup(ds, cache):
         return (b["floor"], b["lam"], b.get("imp", "add"))
 
     todo = [g for g in sorted(groups, key=order)
-            if not all(str(s) in index and os.path.exists(index[str(s)]["cache"]) and index[str(s)]["cfg"] == chosen[s]
+            if not all(str(s) in index and cache_ok(index[str(s)]["cache"]) and index[str(s)]["cfg"] == chosen[s]
                        for s in groups[g])]
     if not todo:
         print("drup: all splits cached", flush=True)
@@ -129,8 +140,8 @@ def stage_drup(ds, cache):
                 raise RuntimeError(f"split {s}: DRUP validation {val:.6f} != stored {val_best[s]:.6f}")
             h = md5h({"base": base, "beta": beta})
             path = os.path.join(cache, f"drup_{ds}_{h}.pt")
-            if not os.path.exists(path):
-                torch.save(S.detach().float().cpu(), path)
+            if not cache_ok(path):
+                cache_save(S.detach().float().cpu(), path)
             index[str(s)] = {"file": fpath, "name": "DRUP", "cfg": chosen[s], "hash": h,
                              "stored_val": val_best[s], "repro_val": val, "cache": path}
             print(f"drup split {s}: val {val:.6f} stored {val_best[s]:.6f}", flush=True)
@@ -153,11 +164,11 @@ def stage_trained(ds, cache, threads):
         cfg = {k: v for k, v in ch.items() if k != "epoch"}
         groups.setdefault(json.dumps([f, n, cfg], sort_keys=True), []).append(s)
     for gk, sp in groups.items():
-        if all(str(s) in index and os.path.exists(index[str(s)]["cache"]) and index[str(s)]["cfg"] == choices[s][2]
+        if all(str(s) in index and cache_ok(index[str(s)]["cache"]) and index[str(s)]["cfg"] == choices[s][2]
                for s in sp):
             continue
         f, n, cfg = json.loads(gk)
-        ja = LC.job_args(f)
+        ja = LC.job_args(f)  # train_cfg sets torch threads from ja["threads"] before training
         need = {}
         for s in sp:
             need.setdefault(choices[s][2]["epoch"], []).append(s)
@@ -169,12 +180,12 @@ def stage_trained(ds, cache, threads):
             if ep in need:
                 path = os.path.join(cache, f"trained_{ds}_{hashes[ep]}.pt")
                 paths[ep] = path
-                if not os.path.exists(path):
-                    torch.save(S.float().cpu(), path)
+                if not cache_ok(path):
+                    cache_save(S.float().cpu(), path)
                 for s in need[ep]:
                     rv = evaluate(S, ctx["splits"][s][0], ctx["ks"], ctx["row_of"])[ctx["key"]]
                     repro[s] = float(rv)
-                    if abs(rv - choices[s][3]) > 2e-3:
+                    if abs(rv - choices[s][3]) > REPRO_TOL:
                         print(f"WARNING split {s} {n} {cfg} ep {ep}: repro val {rv:.6f} vs stored {choices[s][3]:.6f}",
                               flush=True)
             return ep >= last
@@ -195,6 +206,11 @@ def stage_blend(ds, cache, out, args):
     fpath = filt_path(ds)
     fa = json.load(open(fpath))["args"]
     fres = json.load(open(fpath))["results"]["DRUP"]
+    first = next(f for f, _ in FINAL_JOBS[ds] if os.path.exists(f))
+    fja = LC.job_args(first)
+    if (fa["frac_val"], fa["seeds"]) != (fja["frac_val"], fja["seeds"]):
+        raise ValueError(f"{fpath}: frac_val/seeds {fa['frac_val']}/{fa['seeds']} differ from the first learned job "
+                         f"{first}: {fja['frac_val']}/{fja['seeds']}; the splits would not match")
     d, ks, key, by = RF.load_dataset(ds, torch.float32)
     rows_users = sorted({u for u, _, _ in d["test"]})
     rows = torch.tensor(rows_users)
@@ -206,6 +222,9 @@ def stage_blend(ds, cache, out, args):
     tix = load_index(os.path.join(cache, f"trained_{ds}_index.json"))
     choices = final_choice(ds, key)
     assert len(choices) == len(splits), "component A and B use different numbers of splits"
+    params = list(inspect.signature(select_w).parameters)
+    assert params[:3] == ["zA", "zB", "val"] and not any("test" in p for p in params), \
+        "select_w must take only the validation lists"
 
     per = {k: {"per_split": [], "per_user": [], "chosen": [], "val_best": []}
            for k in ("Ens-A+DRUP", "A-repro", "DRUP-repro", "Ens-fixed-0.5")}
@@ -214,9 +233,11 @@ def stage_blend(ds, cache, out, args):
         val, test = splits[s]
         A, B = tix[str(s)], dix[str(s)]
         assert A["cfg"] == choices[s][2], f"split {s}: trained index does not carry the selected A configuration"
+        assert A["file"] == choices[s][0] and A["name"] == choices[s][1], \
+            f"split {s}: trained index has {A['file']} {A['name']}, selected {choices[s][0]} {choices[s][1]}"
         assert B["cfg"] == fres["chosen"][s], f"split {s}: DRUP index does not carry the selected B configuration"
-        zA = rowz(torch.load(A["cache"]), mask)
-        zB = rowz(torch.load(B["cache"]), mask)
+        zA = rowz(torch.load(A["cache"], weights_only=True), mask)
+        zB = rowz(torch.load(B["cache"], weights_only=True), mask)
         assert torch.isfinite(zA).all() and torch.isfinite(zB).all()
         # leakage checks: validation and test are disjoint
         if by == "user":
@@ -227,11 +248,6 @@ def stage_blend(ds, cache, out, args):
                 if u in vm:
                     assert not (vm[u] & set(np.asarray(it).tolist())), f"item overlap for user {u}"
         w_s, curve = select_w(zA, zB, val, ks, row_of, key)
-        # select_w never receives the test lists: re-selecting after permuting every test relevance array must agree
-        rng = np.random.default_rng(12345 + s)
-        test_perm = [(u, it, rel[rng.permutation(len(rel))]) for u, it, rel in test]
-        w_chk, _ = select_w(zA, zB, val, ks, row_of, key)
-        assert w_chk == w_s and len(test_perm) == len(test)
 
         def score(w, test=test, zA=zA, zB=zB):
             return evaluate((1 - w) * zA + w * zB, test, ks, row_of, per_user=key)
@@ -251,6 +267,14 @@ def stage_blend(ds, cache, out, args):
         repro["B"].append({"stored": float(fres["val_best"][s]), "repro": B["repro_val"]})
         print(f"split {s}: w {w_s:.1f}  test {per['Ens-A+DRUP']['per_split'][-1][key]:.4f}", flush=True)
 
+    gaps = {who: max(abs(r["stored"] - r["repro"]) for r in repro[who]) for who in ("A", "B")}
+    repro_ok = all(g <= REPRO_TOL for g in gaps.values())
+    if not repro_ok:
+        print(f"REPRODUCTION GAP {ds}: max |stored-repro| A {gaps['A']:.6f}, B {gaps['B']:.6f}; "
+              f"tolerance {REPRO_TOL} exceeded, results are not reproduced", flush=True)
+    else:
+        print(f"repro ok: max |stored-repro| A {gaps['A']:.6f}, B {gaps['B']:.6f} (tolerance {REPRO_TOL})", flush=True)
+
     results = {}
     for name, r in per.items():
         agg = {k: (float(np.mean([x[k] for x in r["per_split"]])), float(np.std([x[k] for x in r["per_split"]])))
@@ -258,7 +282,8 @@ def stage_blend(ds, cache, out, args):
         results[name] = {"test": agg, "chosen": r["chosen"], "per_split": r["per_split"],
                          "val_best": r["val_best"], "per_user": r["per_user"],
                          "n_configs": len(WGRID) if name == "Ens-A+DRUP" else 1}
-    save_json(out, {"args": vars(args), "results": results, "repro": repro})
+    repro_block = {"A": repro["A"], "B": repro["B"], "max_gap": gaps, "tolerance": REPRO_TOL, "repro_ok": bool(repro_ok)}
+    save_json(out, {"args": vars(args), "results": results, "repro": repro_block})
     print(f"wrote {out}", flush=True)
 
 

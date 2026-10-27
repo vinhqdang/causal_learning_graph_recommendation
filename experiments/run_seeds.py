@@ -6,7 +6,8 @@ validation part, exactly as run_learned.run / record. Splits that share a config
 one training run per seed. DRUP is deterministic and not retrained.
 
 Checkpoint: after every (method, group, seed) the finished entries are rewritten atomically to
-<out>.partial.json, keyed "method|group hash|seed", and skipped on restart.
+<out>.partial.json, keyed "method|hash of (file, name, cfg, splits)|seed", and skipped on restart;
+a stored entry whose splits differ from the group is an error.
 """
 
 import argparse
@@ -21,16 +22,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, ".."))
 sys.path.insert(0, HERE)
 import learned_ctx as LC  # noqa: E402
-import run_ensemble as RE  # noqa: E402  (FINAL_JOBS and final_choice)
+import run_ensemble as RE  # noqa: E402  (final_choice)
+from final_config import SEED_SRC as SRC  # noqa: E402  (baseline method -> part file)
 from drup.metrics import evaluate  # noqa: E402
-
-# baseline (method name -> part file with its "chosen" per split), as named in the task
-SRC = {
-    "coat": {"iALS": "results/v3/learned_coat_given.json", "DR-LightGCN": "results/v3/learned_coat_given.json"},
-    "yahoo": {"r-AdjNorm": "results/v3/learned_yahoo_pop_A.json", "LightGCN": "results/v3/learned_yahoo_pop_B.json"},
-    "kuairand": {"r-AdjNorm": "results/v3/learned_kuairand_pop.json", "LightGCN": "results/v3/learned_kuairand_pop.json"},
-    "kuairec": {"DR-JL": "results/v3/learned_kuairec_pop_A.json", "MRDR": "results/v3/learned_kuairec_pop_A.json"},
-}
 
 
 def md5h(obj):
@@ -106,7 +100,7 @@ def main():
                                "chosen": [None] * nsp, "val_best": [None] * nsp} for sd in a.seeds}
         for gk, sp in groups.items():
             f, n, cfg = json.loads(gk)
-            h = md5h([f, n, cfg])
+            h = md5h([f, n, cfg, sp])
             ja = LC.job_args(f)
             for sd in a.seeds:
                 pk = f"{name}|{h}|{sd}"
@@ -115,6 +109,7 @@ def main():
                     partial[pk] = run_group(ctx, n, cfg, sd, ja, sp)
                     save_json(partial_path, partial)
                 ent = partial[pk]
+                assert ent["splits"] == sp, f"{pk}: stored splits {ent['splits']} differ from the group's {sp}"
                 for j, s in enumerate(ent["splits"]):
                     so = seeds_out[str(sd)]
                     so["per_user"][s] = ent["per_user"][j]

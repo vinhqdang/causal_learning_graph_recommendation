@@ -18,8 +18,8 @@ import run_learned as RL  # noqa: E402
 from drup.data import load_coat, load_yahoo, split_test  # noqa: E402
 from drup.estimation import baseline_imputation, clip_propensity, get_propensity, lowrank_imputation  # noqa: E402
 from drup.learned import train, train_ials  # noqa: E402
+from final_config import KEY  # noqa: E402,F401
 
-KEY = {"coat": "ndcg@5", "yahoo": "ndcg@5", "kuairand": "ndcg@10", "kuairec": "ndcg@20"}
 IALS_KINDS = ("ials", "drials", "drials_lr")
 
 
@@ -109,4 +109,5 @@ def train_cfg(ctx, name, cfg, seed, ja, record):
                  tau=cfg.get("tau", 0.2), fn=cfg.get("fn", 0.0), ipsw=cfg.get("ipsw", 0),
                  qmode=cfg.get("qmode", "dr"),
                  adv_lr=ja.get("adv_lr", 1e-4), adv_interval=ja.get("adv_interval", 5), adv_eta=cfg.get("eta", 0),
-                 n_neg=(ja.get("n_neg", 64) if loss in ("advinfonce", "dradvinfonce") else 32))
+                 n_neg=(ja.get("n_neg", 64) if loss in ("advinfonce", "dradvinfonce") else 32),
+                 adv_min_steps=ja.get("adv_min_steps", 100))

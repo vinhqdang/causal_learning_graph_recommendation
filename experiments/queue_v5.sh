@@ -1,14 +1,19 @@
 cd "$(dirname "$0")/.."
 case "$1" in
   ens_coat)
-    for st in drup trained blend; do OMP_NUM_THREADS=1 python3 experiments/run_ensemble.py --dataset coat --stage $st || exit 1; done ;;
+    OMP_NUM_THREADS=1 python3 experiments/run_ensemble.py --dataset coat --stage drup || exit 1
+    OMP_NUM_THREADS=2 python3 experiments/run_ensemble.py --dataset coat --stage trained || exit 1
+    OMP_NUM_THREADS=1 python3 experiments/run_ensemble.py --dataset coat --stage blend ;;
   ens_kuairec_drup)
     OMP_NUM_THREADS=2 python3 experiments/run_ensemble.py --dataset kuairec --stage drup --threads 2 ;;
   ens_kuairec_rest)
-    for st in trained blend; do OMP_NUM_THREADS=1 python3 experiments/run_ensemble.py --dataset kuairec --stage $st || exit 1; done ;;
+    OMP_NUM_THREADS=2 python3 experiments/run_ensemble.py --dataset kuairec --stage trained || exit 1
+    OMP_NUM_THREADS=1 python3 experiments/run_ensemble.py --dataset kuairec --stage blend ;;
   ens_kuairand|ens_yahoo)
     ds=${1#ens_}
-    for st in drup trained blend; do OMP_NUM_THREADS=1 python3 experiments/run_ensemble.py --dataset $ds --stage $st || exit 1; done ;;
+    OMP_NUM_THREADS=1 python3 experiments/run_ensemble.py --dataset $ds --stage drup || exit 1
+    OMP_NUM_THREADS=2 python3 experiments/run_ensemble.py --dataset $ds --stage trained || exit 1
+    OMP_NUM_THREADS=1 python3 experiments/run_ensemble.py --dataset $ds --stage blend ;;
   seeds_*)
     OMP_NUM_THREADS=1 python3 experiments/run_seeds.py --dataset ${1#seeds_} --seeds 1 2 3 ;;
   adv_coat)
