@@ -238,3 +238,5 @@ results/v3/log_*.txt
 results/v3/*.partial.json
 *.ckpt.pkl*
 *.partial.json
+
+results/v4/cache/
