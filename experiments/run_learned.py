@@ -45,6 +45,8 @@ METHODS = {
     "DR-BPR-LGN": ("lgn", "drbpr", {"fn": [0.5, 1.0]}),
     "DR-BPR-LGN-1": ("lgn", "drbpr", {"fn": [1.0]}),
     "LightGCN-p": ("lgn", "bpr", {"pbeta": [0.5, 1.0]}),
+    "DR-BPR-LGN-p2": ("lgn", "drbpr", {"fn": [1.0], "pbeta": [1.0, 2.0]}),
+    "LightGCN-p2": ("lgn", "bpr", {"pbeta": [1.0, 2.0]}),
     "DR-BPR-LGN-p": ("lgn", "drbpr", {"fn": [1.0], "pbeta": [0.5, 1.0]}),
     "DR-BPR-yhat": ("lgn", "drbpr", {"fn": [1.0], "qmode": ["yhat"]}),
     "DR-BPR-pop": ("lgn", "drbpr", {"fn": [1.0], "qmode": ["pop"]}),
