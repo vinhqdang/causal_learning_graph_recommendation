@@ -20,3 +20,12 @@ BPR-LightGCN in which a sampled negative j of user u gets weight 1 - Q_uj, Q_uj 
 
 ## Caveats
 Small effects (0.003-0.013 nDCG); one imputation model; no AdvInfoNCE reproduction (plain InfoNCE-LightGCN: 0.529 on Coat, DR-InfoNCE 0.553); tuning budgets differ (DR variants use fn = 1.0 only, 36-54 configurations); KuaiRec not improved.
+
+## D3. Imputation offset (round 6, final)
+Score = f_theta(u, i) + beta * z(logit Yhat_ui), where Yhat is the IPS-fitted additive imputation (fixed, standardised), f_theta a LightGCN trained with BPR whose negatives are weighted 1 - Q_ui. beta in {0, 0.5, 1, 2} is selected on validation data (per split, across jobs). Uniform data is used only for validation and testing. Full table: results/v4/final_summary.txt (experiments/final_analysis.py).
+- Coat nDCG@5 0.6015 (iALS 0.5812, Holm p = 0.047; LightGCN 0.5683).
+- Yahoo R3 nDCG@5 0.6866 (r-AdjNorm 0.6742, Holm p < 1e-4).
+- KuaiRand nDCG@10 0.4613 (r-AdjNorm 0.4590, Holm p = 0.019); beta = 0 chosen in 4/5 splits, the offset hurts there when forced.
+- KuaiRec nDCG@20 0.6285 (LightGCN 0.6085); still below DR-JL / MRDR (0.633, Holm p = 2e-4) and the training-free DRUP (0.638).
+- Ablations: BPR + offset only (no negative weights) Coat 0.6020; low-rank imputation for Q and offset is worse than additive (0.5887-0.5897).
+- Caveats: grids are larger than some baselines' (union of several jobs); each variant is one imputation model; no AdvInfoNCE reproduction.
