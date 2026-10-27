@@ -1,0 +1,15 @@
+/home/user/causal_learning_graph_recommendation/experiments/../drup/learned.py:52: UserWarning: Sparse invariant checks are implicitly disabled. Memory errors (e.g. SEGFAULT) will occur when operating on a sparse tensor which violates the invariants, but checks incur performance overhead. To silence this warning, explicitly opt in or out. See `torch.sparse.check_sparse_tensor_invariants.__doc__` for guidance.  (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/Context.cpp:848.)
+  self.A = torch.sparse_coo_tensor(idx, torch.cat([v_ui, v_iu]), (m + n, m + n)).coalesce()
+  DR-BPR-LGN-p {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'fn': 1.0, 'pbeta': 0.5} done [295s] best split0 val 0.4659
+  DR-BPR-LGN-p {'lr': 0.01, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'fn': 1.0, 'pbeta': 1.0} done [263s] best split0 val 0.4659
+  DR-BPR-LGN-p {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'fn': 1.0, 'pbeta': 0.5} done [244s] best split0 val 0.4660
+  DR-BPR-LGN-p {'lr': 0.01, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'fn': 1.0, 'pbeta': 1.0} done [313s] best split0 val 0.4660
+  DR-BPR-LGN-p {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'fn': 1.0, 'pbeta': 0.5} done [509s] best split0 val 0.4660
+  DR-BPR-LGN-p {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'fn': 1.0, 'pbeta': 1.0} done [525s] best split0 val 0.4660
+  DR-BPR-LGN-p {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'fn': 1.0, 'pbeta': 0.5} done [524s] best split0 val 0.4660
+  DR-BPR-LGN-p {'lr': 0.003, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'fn': 1.0, 'pbeta': 1.0} done [518s] best split0 val 0.4660
+  DR-BPR-LGN-p {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'fn': 1.0, 'pbeta': 0.5} done [518s] best split0 val 0.4660
+  DR-BPR-LGN-p {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'fn': 1.0, 'pbeta': 1.0} done [507s] best split0 val 0.4660
+  DR-BPR-LGN-p {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'fn': 1.0, 'pbeta': 0.5} done [501s] best split0 val 0.4660
+  DR-BPR-LGN-p {'lr': 0.001, 'wd': 0.0001, 'dim': 64, 'layers': 2, 'fn': 1.0, 'pbeta': 1.0} done [493s] best split0 val 0.4660
+DR-BPR-LGN-p ndcg@5=0.4018±0.0025  ndcg@10=0.4603±0.0024  ndcg@20=0.5256±0.0020  recall@5=0.3322±0.0042  recall@10=0.5419±0.0036  recall@20=0.7485±0.0020  auc=0.6151±0.0019   [5211s, 12 cfgs] seeds 0.0000±0.0000
