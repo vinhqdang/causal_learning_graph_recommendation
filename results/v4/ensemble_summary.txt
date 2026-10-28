@@ -1,20 +1,45 @@
 
 Coat: Ens-A+DRUP vs others, metric ndcg@5; users averaged over splits, Holm within dataset
   Ens-A+DRUP test 0.6031 (+-0.0164)
-  vs A-repro (w=0)            diff    +1.79e-3 [  2.39]  p 0.1421  p_Holm 0.2842
-  vs original final method    diff    +1.79e-3 [  2.39]  p 0.1421  p_Holm 0.2842
+  Holm family: 11 tests; compared baselines: LightGCN, r-AdjNorm, NAVIP, DR-LightGCN, iALS, SimGCL, MACR, AdvInfoNCE-LGN
+  vs A-repro (w=0)            diff    +1.79e-3 [  2.39]  p 0.1421  p_Holm 0.1421
   vs DRUP (w=1, stored)       diff   +59.03e-3 [ 24.57]  p 0.0000  p_Holm 0.0000
-  vs Ens-fixed-0.5            diff   +16.01e-3 [ 14.21]  p 0.0274  p_Holm 0.1097
-  vs LightGCN                 diff   +33.82e-3 [ 18.10]  p 0.0003  p_Holm 0.0023
-  vs r-AdjNorm                diff   +30.05e-3 [ 19.10]  p 0.0022  p_Holm 0.0131
-  vs NAVIP                    diff   +35.40e-3 [ 20.31]  p 0.0007  p_Holm 0.0050
-  vs DR-LightGCN              diff   +34.46e-3 [ 22.77]  p 0.0032  p_Holm 0.0159
-  vs iALS                     diff   +21.81e-3 [ 20.25]  p 0.0349  p_Holm 0.1097
+  vs Ens-fixed-0.5            diff   +16.01e-3 [ 14.21]  p 0.0274  p_Holm 0.0823
+  vs LightGCN                 diff   +33.82e-3 [ 18.10]  p 0.0003  p_Holm 0.0020
+  vs r-AdjNorm                diff   +30.05e-3 [ 19.10]  p 0.0022  p_Holm 0.0109
+  vs NAVIP                    diff   +35.40e-3 [ 20.31]  p 0.0007  p_Holm 0.0042
+  vs DR-LightGCN              diff   +34.46e-3 [ 22.77]  p 0.0032  p_Holm 0.0127
+  vs iALS                     diff   +21.81e-3 [ 20.25]  p 0.0349  p_Holm 0.0823
   vs SimGCL                   diff   +51.31e-3 [ 23.86]  p 0.0000  p_Holm 0.0003
   vs MACR                     diff   +63.25e-3 [ 27.82]  p 0.0000  p_Holm 0.0001
+  vs AdvInfoNCE-LGN           diff   +80.28e-3 [ 28.20]  p 0.0000  p_Holm 0.0000
+  vs original final method    per-user values identical to 'A-repro (w=0)'; not counted again in the Holm family
   w distribution over splits: {0.0: 9, 0.3: 1}
   A-repro        test 0.6015 (+-0.0162)
   DRUP-repro     test 0.5467 (+-0.0235)
   Ens-fixed-0.5  test 0.5889 (+-0.0134)
   repro A: max |stored-repro| validation gap 0.000000; per split [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
   repro B: max |stored-repro| validation gap 0.000000; per split [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+KuaiRec: Ens-A+DRUP vs others, metric ndcg@20; users averaged over splits, Holm within dataset
+  Ens-A+DRUP test 0.6376 (+-0.0022)
+  Holm family: 11 tests; compared baselines: DR-JL, MRDR, LightGCN-pt, DR-LightGCN, NAVIP, iALS, LightGCN, r-AdjNorm
+  vs A-repro (w=0)            diff    +8.76e-3 [  2.01]  p 0.0000  p_Holm 0.0000
+  vs DRUP (w=1, stored)       diff    -0.18e-3 [  0.19]  p 0.0664  p_Holm 0.0664
+  vs Ens-fixed-0.5            diff    +1.31e-3 [  1.11]  p 0.0207  p_Holm 0.0415
+  vs DR-JL                    diff    +4.20e-3 [  2.19]  p 0.0002  p_Holm 0.0005
+  vs MRDR                     diff    +4.42e-3 [  2.25]  p 0.0001  p_Holm 0.0005
+  vs LightGCN-pt              diff   +10.07e-3 [  2.94]  p 0.0000  p_Holm 0.0000
+  vs DR-LightGCN              diff   +16.49e-3 [  2.44]  p 0.0000  p_Holm 0.0000
+  vs NAVIP                    diff   +19.25e-3 [  2.84]  p 0.0000  p_Holm 0.0000
+  vs iALS                     diff   +24.68e-3 [  3.38]  p 0.0000  p_Holm 0.0000
+  vs LightGCN                 diff   +29.66e-3 [  3.46]  p 0.0000  p_Holm 0.0000
+  vs r-AdjNorm                diff   +29.43e-3 [  3.39]  p 0.0000  p_Holm 0.0000
+  vs original final method    per-user values identical to 'A-repro (w=0)'; not counted again in the Holm family
+  w distribution over splits: {0.8: 1, 1.0: 4}
+  A-repro        test 0.6285 (+-0.0022)
+  DRUP-repro     test 0.6378 (+-0.0019)
+  Ens-fixed-0.5  test 0.6361 (+-0.0023)
+  repro A: max |stored-repro| validation gap 0.000000; per split [0.0, 0.0, 0.0, 0.0, 0.0]
+  repro B: max |stored-repro| validation gap 0.000000; per split [0.0, 0.0, 0.0, 0.0, 0.0]
+  repro_ok True (tolerance 0.002)
