@@ -7,6 +7,7 @@ Coat: DR-BPR-LGN + offset, 3 jobs, mean ndcg@5 = 0.6015; beta chosen {1.0: 5, 2.
   vs iALS         0.5812 ( 24 cfgs)  diff  +20.02e-3 [19.74]  p_Holm 0.0469
   vs SimGCL       0.5528 (108 cfgs)  diff  +49.52e-3 [23.99]  p_Holm 0.0004
   vs MACR         0.5418 ( 36 cfgs)  diff  +61.46e-3 [27.66]  p_Holm 0.0001
+  vs AdvInfoNCE-LGN 0.5222 (216 cfgs)  diff  +78.50e-3 [27.63]  p_Holm 0.0000
 
 Yahoo: DR-BPR-LGN + offset, 5 jobs, mean ndcg@5 = 0.6866; beta chosen {1.0: 4, 0.0: 1}
   vs LightGCN     0.6708 ( 36 cfgs)  diff  +16.77e-3 [ 5.82]  p_Holm 0.0000
@@ -14,6 +15,7 @@ Yahoo: DR-BPR-LGN + offset, 5 jobs, mean ndcg@5 = 0.6866; beta chosen {1.0: 4, 0
   vs NAVIP        0.6701 ( 36 cfgs)  diff  +17.51e-3 [ 6.02]  p_Holm 0.0000
   vs iALS         0.6625 ( 12 cfgs)  diff  +24.88e-3 [ 8.77]  p_Holm 0.0000
   vs SimGCL       0.6348 ( 12 cfgs)  diff  +53.26e-3 [10.05]  p_Holm 0.0000
+  vs AdvInfoNCE-LGN 0.6477 ( 16 cfgs)  diff  +37.85e-3 [ 8.48]  p_Holm 0.0000
 
 KuaiRand: DR-BPR-LGN + offset, 3 jobs, mean ndcg@10 = 0.4613; beta chosen {0.0: 4, 0.5: 1}
   vs LightGCN     0.4569 (  6 cfgs)  diff   +3.93e-3 [ 1.53]  p_Holm 0.0000
@@ -22,6 +24,7 @@ KuaiRand: DR-BPR-LGN + offset, 3 jobs, mean ndcg@10 = 0.4613; beta chosen {0.0: 
   vs iALS         0.4528 ( 12 cfgs)  diff   +8.98e-3 [ 3.23]  p_Holm 0.0000
   vs BPR-MF       0.4475 (  6 cfgs)  diff  +13.99e-3 [ 2.62]  p_Holm 0.0000
   vs SimGCL       0.4196 ( 12 cfgs)  diff  +42.20e-3 [ 4.04]  p_Holm 0.0000
+  vs AdvInfoNCE-LGN 0.4480 (  8 cfgs)  diff  +12.79e-3 [ 2.50]  p_Holm 0.0000
 
 KuaiRec: DR-BPR-LGN + offset, 6 jobs, mean ndcg@20 = 0.6285; beta chosen {1.0: 4, 2.0: 1}
   vs DR-JL        0.6332 (  6 cfgs)  diff   -4.56e-3 [ 2.24]  p_Holm 0.0002
@@ -32,3 +35,4 @@ KuaiRec: DR-BPR-LGN + offset, 6 jobs, mean ndcg@20 = 0.6285; beta chosen {1.0: 4
   vs iALS         0.6133 ( 12 cfgs)  diff  +15.92e-3 [ 3.03]  p_Holm 0.0000
   vs LightGCN     0.6085 ( 36 cfgs)  diff  +20.90e-3 [ 2.88]  p_Holm 0.0000
   vs r-AdjNorm    0.6083 ( 12 cfgs)  diff  +20.68e-3 [ 2.75]  p_Holm 0.0000
+  vs AdvInfoNCE-LGN 0.5776 (  8 cfgs)  diff  +49.32e-3 [ 6.57]  p_Holm 0.0000
