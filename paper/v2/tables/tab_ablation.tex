@@ -1,0 +1,40 @@
+% Table 5: ablations, Panels A and B. Sources: results/v4/learned_coat_{drbpr, abl_DR-BPR-yhat,
+% abl_DR-BPR-pop, abl_DR-BPR-shuf, prior_bpr, prior_dr, p2, lrQ, lrQ_prior, driALS}.json and
+% learned_yahoo_{drbpr_lr3e-3, abl_DR-BPR-pop, abl_DR-BPR-shuf}.json (mean, sd over splits, ddof 0,
+% n_configs); LightGCN from results/v4/final_summary.txt and paper/tables/accuracy.tex.
+\begin{table}[t]
+\centering
+\caption{Ablations of the weights and of the offset (Section~\ref{sec:ablations}). Test nDCG@5 is mean $\pm$ sd
+over splits (ddof $=0$), with the number of configurations in brackets. Each row is one stored job. Dashes mark
+settings that were not run. No significance tests were run for these ablations. The decomposition of the
+selected runs on all datasets is in Table~\ref{tab:decomp}.}
+\label{tab:ablation}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}p{5.4cm}cc@{}}
+\toprule
+Variant & Coat & Yahoo! R3 \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Panel A: weights only ($\beta=0$)}} \\
+LightGCN & 0.5683 $\pm$ 0.0132 (54) & 0.6708 $\pm$ 0.0061 (36) \\
+Q-LightGCN (no offset) & 0.5912 $\pm$ 0.0122 (108)$^{\text{a}}$ & 0.6829 $\pm$ 0.0053 (12)$^{\text{b}}$ \\
+Q($\hat Y$) (imputation only) & 0.5937 $\pm$ 0.0106 (54) & -- \\
+Q(pop) (popularity only) & 0.5751 $\pm$ 0.0118 (54) & 0.6550 $\pm$ 0.0046 (12) \\
+Q(shuffled), negative control & 0.5689 $\pm$ 0.0148 (54) & 0.6689 $\pm$ 0.0054 (12) \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Panel B: offset and imputation (Coat only)}} \\
+P-LightGCN (offset only, $\beta\in\{0.5,1\}$) & 0.6020 $\pm$ 0.0148 (108) & -- \\
+\qp, $\beta\in\{0.5,1\}$ & 0.6039 $\pm$ 0.0139 (108) & -- \\
+\qp, $\beta\in\{1,2\}$ & 0.6046 $\pm$ 0.0177 (108) & -- \\
+\qp, validated $\beta$ (final) & 0.6015 $\pm$ 0.0162 (324) & -- \\
+Q-LightGCN, low-rank $\hat Y$ (rank 16) & 0.5887 $\pm$ 0.0132 (54) & -- \\
+\qp, low-rank $\hat Y$ (rank 16) & 0.5897 $\pm$ 0.0155 (108) & -- \\
+Q-iALS (iALS: 0.5812, 24) & 0.5871 $\pm$ 0.0113 (48) & -- \\
+\bottomrule
+\end{tabular}
+\\[3pt]
+{\footnotesize $^{\text{a}}$ 108 configurations with $\mathrm{fn}\in\{0.5,1\}$, against 54 with $\mathrm{fn}=1$ for the other
+Coat weight ablations, so this row is not grid-matched.
+$^{\text{b}}$ Learning rate $3\times10^{-3}$ only (12 configurations); the Yahoo! R3 LightGCN row is taken over three
+learning rates (36 configurations), so it is not grid-matched either.}
+\end{table}

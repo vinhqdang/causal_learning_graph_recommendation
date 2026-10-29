@@ -1,0 +1,23 @@
+% Table 5b (decomposition). Source: results/v4/dr_bpr_summary.txt (weighting-only selection on Yahoo! R3 and
+% KuaiRec), results/v4/learned_coat_drbpr.json and learned_kuairand_drbpr.json (single jobs), and
+% results/v4/final_summary.txt (validated combination).
+\begin{table}[t]
+\centering
+\caption{Weighting only versus the validated combination on every dataset (Section~\ref{sec:ablations}). Test
+nDCG (nDCG@5, @5, @10 and @20 for the four datasets, respectively), mean over splits. These are decompositions of selected runs, not matched
+ablations, and no standard deviations are reported for the combined selections.}
+\label{tab:decomp}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Variant & Coat & Yahoo! R3 & KuaiRand & KuaiRec \\
+\midrule
+Q-LightGCN, $\beta=0$ & 0.5912 & 0.6837$^{\text{a}}$ & 0.4623 & 0.6095$^{\text{a}}$ \\
+\qp, validated $\beta$ & 0.6015 & 0.6866 & 0.4613 & 0.6285 \\
+\bottomrule
+\end{tabular}
+\\[3pt]
+{\footnotesize $^{\text{a}}$ Selected per split among the learning-rate jobs (three on Yahoo! R3, two on KuaiRec).
+On KuaiRand the $\beta=0$ job alone gives 0.4623, above the validated combination (0.4613), because validation
+picks $\beta>0$ in one split.}
+\end{table}

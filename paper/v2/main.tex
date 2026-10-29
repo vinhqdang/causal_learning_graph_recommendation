@@ -1,0 +1,36 @@
+\documentclass[preprint,12pt,authoryear]{elsarticle}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{adjustbox}
+\usepackage{hyperref}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\newtheorem{proposition}{Proposition}
+\newtheorem{assumption}{Assumption}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\qp}{QP-LightGCN}
+\newcommand{\Yhat}{\hat Y}
+\begin{document}
+\begin{frontmatter}
+\title{Which negatives are really negative? Exposure-aware negative weighting and an imputation prior for graph collaborative filtering under exposure bias}
+\author{Anonymous}
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+\begin{keyword}
+recommender systems \sep exposure bias \sep graph collaborative filtering \sep propensity \sep doubly robust
+\end{keyword}
+\end{frontmatter}
+\input{sections/s1_intro}
+\input{sections/s2_related}
+\input{sections/s3_setting}
+\input{sections/s4_method}
+\input{sections/s5_setup}
+\input{sections/s6_results}
+\input{sections/s7_discussion}
+\input{sections/s8_conclusion}
+\bibliographystyle{elsarticle-harv}
+\bibliography{../refs,refs_new}
+\end{document}

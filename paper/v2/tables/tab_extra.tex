@@ -1,0 +1,34 @@
+% Table 2b: rows of Table 2 outside the Holm families (not tested against the final method). Means and sd
+% (ddof $=0$) from paper/tables/accuracy.tex of the same runs.
+\begin{table}[t]
+\centering
+\caption{Training-free and other methods outside the Holm families of Table~\ref{tab:main}. Their differences
+to the final method were not tested. Test nDCG is mean $\pm$ sd over splits. DR adjacency is the doubly robust
+operator without the walk correction; DRUP adds the walk correction. On Yahoo! R3 and KuaiRand, DRUP, DR adjacency and
+IPS adjacency have identical means.}
+\label{tab:extra}
+\small
+\begin{tabular}{@{}llr@{}}
+\toprule
+Dataset & Method & Test nDCG \\
+\midrule
+Coat (nDCG@5) & DRUP & 0.5467 $\pm$ 0.0235 \\
+ & DR adjacency & 0.5459 $\pm$ 0.0244 \\
+ & MRDR & 0.4869 $\pm$ 0.0187 \\
+ & DR-JL & 0.4811 $\pm$ 0.0164 \\
+\midrule
+Yahoo! R3 (nDCG@5) & DRUP & 0.6567 $\pm$ 0.0063 \\
+ & DR adjacency & 0.6567 $\pm$ 0.0063 \\
+ & DR-LightGCN & 0.5528 $\pm$ 0.0091 \\
+ & MRDR & 0.5248 $\pm$ 0.0059 \\
+ & DR-JL & 0.5225 $\pm$ 0.0043 \\
+\midrule
+KuaiRand (nDCG@10) & DRUP & 0.4492 $\pm$ 0.0013 \\
+ & DR adjacency & 0.4492 $\pm$ 0.0013 \\
+ & DR-JL & 0.3759 $\pm$ 0.0021 \\
+\midrule
+KuaiRec (nDCG@20) & DRUP & \textbf{0.6378 $\pm$ 0.0019} \\
+ & DR adjacency & \underline{0.6378 $\pm$ 0.0020} \\
+\bottomrule
+\end{tabular}
+\end{table}

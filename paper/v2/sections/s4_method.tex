@@ -1,0 +1,167 @@
+%======================================================================
+\section{Method}\label{sec:method}
+%======================================================================
+
+The method keeps LightGCN~\citep{he2020lightgcn} as the scoring model and changes two things.
+First, the negatives in the Bayesian personalised ranking loss~\citep{rendle2009bpr} are
+weighted by the probability that each sampled unlogged pair is a positive. Second, the score
+contains a fixed offset built from an imputed outcome. Both quantities come from two nuisance
+models that are fitted once on the log before training: an exposure propensity $\hat p$ and an
+imputed outcome $\Yhat$. Algorithm~\ref{alg:qp} summarises the procedure. We call the method
+\qp. Apart from the shipped Coat propensities, which are discussed below, nothing in this section
+uses uniformly collected data. Those data enter only the selection and evaluation described in
+Section~\ref{sec:setup}.
+
+\begin{algorithm}[t]
+\caption{\qp: training on the biased log with Q-weighted negatives and an imputation offset}\label{alg:qp}
+\begin{algorithmic}[1]
+\Require biased log $(O,\,O\odot Y)$; job grid $\mathcal J$ over $f_n$, $\beta$, learning rate,
+weight decay, width and depth; splits $k=1,\dots,K$ with validation parts $\mathcal V_k$ and test
+parts $\mathcal T_k$
+\Ensure for each split $k$, the test nDCG of the job, configuration and epoch with the best
+validation nDCG on $\mathcal V_k$
+\State $\hat p \gets$ logistic exposure model fitted to $O$ (on Coat, the shipped propensities),
+truncated below at $0.05$ \Comment{log only}
+\State $\Yhat \gets$ additive model fitted to $O\odot Y$ with inverse-propensity weights $O/\hat p$,
+$\lambda=5$, 20 sweeps, clipped to $[0,1]$ \Comment{log only}
+\State $Q_{ui} \gets \Yhat_{ui}(1-\hat p_{ui})/(1-\hat p_{ui}\Yhat_{ui})$ for all pairs, clipped to $[0,1]$
+\State $z_{ui} \gets$ logit of $\Yhat_{ui}$ (clipped to $[10^{-3},1-10^{-3}]$), standardised over all pairs
+\For{each job $g\in\mathcal J$}
+  \State train LightGCN $f_\theta$ with the loss of Eq.~\eqref{eq:loss} and score $f_\theta+\beta_g z$
+  on the logged positives
+  \State after each epoch, compute nDCG on the validation and test parts of every split
+  (test values are stored and never used for selection)
+\EndFor
+\For{each split $k$}
+  \State select the job, configuration and epoch with the best validation nDCG on $\mathcal V_k$
+  \State report the test nDCG of the selected model on $\mathcal T_k$
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Nuisance models}\label{sec:nuisance}
+
+\paragraph{Exposure propensity.}
+On Coat we use the propensities shipped with the dataset. On Yahoo!\,R3, KuaiRand-Pure and
+KuaiRec we fit a logistic exposure model on the log,
+\begin{equation*}
+\hat p_{ui}=\sigma\bigl(a+b\,\tilde\ell_u+c\,\tilde\ell_i\bigr),
+\end{equation*}
+where $\tilde\ell_u$ and $\tilde\ell_i$ are standardised logits of the user and item exposure
+rates (the fraction of items logged for each user, and the fraction of users who logged each
+item). The coefficients are fitted by Newton's method on all $mn$ pairs of the log. Every
+propensity is truncated below at $0.05$, including the shipped ones. The model uses the
+exposure matrix $O$ only.
+
+\paragraph{Imputed outcome.}
+We fit the additive model $\Yhat_{ui}=\min\{1,\max\{0,\mu+b_u+b_i\}\}$ to the logged outcomes
+$O\odot Y$, weighting each observed pair by $1/\hat p_{ui}$. The parameters are updated in closed
+form by 20 alternating sweeps of ridge regression with penalty $\lambda=5$. The fit uses the
+log only, and it is not cross-fitted, so the same log supplies $\Yhat$ and the training data.
+The truncation level, the penalty and the number of sweeps are fixed in the code. They are not
+selected on the validation or test data.
+
+On Coat the shipped propensities were estimated by the dataset authors from the uniform
+ratings~\citep{schnabel2016}. These are the same uniformly collected ratings that serve for
+validation and testing. Coat is therefore the one dataset where uniform data reach a training
+nuisance, indirectly. We report Coat with this caveat, and it is listed among the limitations.
+The same shipped propensities enter every propensity-based baseline on Coat (DR-LightGCN, NAVIP, DR-JL, MRDR,
+DR adjacency and DRUP), so the Coat comparison shares this input.
+
+\subsection{Posterior of an unlogged pair}\label{sec:posterior}
+
+Under the notation of Section~\ref{sec:setting}, a pair with $O_{ui}Y_{ui}=0$ is one whose outcome is not
+revealed by the log. It is either unexposed or exposed with a negative outcome. BPR draws its negatives
+from this set. The probability that such a pair is a positive is
+\begin{equation}\label{eq:posterior}
+Q_{ui}=\Pr\bigl(Y_{ui}=1\mid O_{ui}Y_{ui}=0,\,x_{ui}\bigr)=\frac{\Yhat_{ui}\,(1-\hat p_{ui})}{1-\hat p_{ui}\,\Yhat_{ui}}.
+\end{equation}
+Here $\hat p$ denotes the truncated propensity $\bar p$ that the code uses. The conditioning in $Q$ is on the
+covariates $x_{ui}$ and on $O_{ui}Y_{ui}=0$ only, not on $O_{ui}$. The derivation assumes that, given the covariates $x_{ui}$ on which the propensity depends,
+exposure is independent of the outcome, and that $\Yhat_{ui}$ estimates $\Pr(Y_{ui}=1\mid x_{ui})$.
+Then $\Pr(Y_{ui}=1,\,O_{ui}=0)=\Yhat_{ui}(1-p_{ui})$ and $\Pr(O_{ui}Y_{ui}=0)=1-p_{ui}\Yhat_{ui}$.
+The closed form therefore does not cover an exposure mechanism that depends on the outcome beyond
+those covariates; Section~\ref{sec:setting} states this as Assumption~\ref{as:indep}. We treat the independence as a
+modelling assumption and do not test it.
+
+Three properties follow. First, $0\le Q_{ui}\le\Yhat_{ui}$. Second, $Q_{ui}\to\Yhat_{ui}$ as
+$\hat p_{ui}\to 0$, so a pair that is almost never exposed keeps its prior. Third,
+$Q_{ui}\to 0$ as $\hat p_{ui}\to 1$ when $\Yhat_{ui}<1$, so a pair with an estimated exposure propensity near one
+and no logged positive keeps its full weight as a negative. The quantity has the same form as the exposure
+posterior of ExpoMF~\citep{liang2016exposure}. Here it is computed in closed form from the two
+nuisances and needs no latent-variable model. In the code, $Q$ is clipped to $[0,1]$ and the
+denominator is bounded below by $10^{-6}$. $Q$ is used as a weight. We do not claim that the
+resulting training loss is unbiased.
+
+\subsection{Q-weighted BPR}\label{sec:weighted}
+
+Training uses only the logged positives. For each positive pair $(u,i)$ one negative item $j$ is
+drawn uniformly from all items. If $(u,j)$ is itself a logged positive, $j$ is drawn once more.
+For a mini-batch $B$ of such triples the loss is
+\begin{equation}\label{eq:loss}
+\begin{split}
+\mathcal L&=-\,\frac{\sum_{(u,i,j)\in B}w_{uj}\,\log\sigma\bigl(s_{ui}-s_{uj}\bigr)}{\sum_{(u,i,j)\in B}w_{uj}}\\
+&\quad+\lambda\,\frac{1}{|B|}\sum_{(u,i,j)\in B}\bigl(\|e_u\|^2+\|e_i\|^2+\|e_j\|^2\bigr),\\
+w_{uj}&=\max\bigl\{1-f_n\,Q_{uj},\;10^{-3}\bigr\}.
+\end{split}
+\end{equation}
+where $e_u$, $e_i$ and $e_j$ are the propagated embeddings and $\lambda$ is the weight decay. The
+weight acts on the negative only. The loss is normalised by the total weight of the batch, so its
+scale does not depend on how many negatives are down-weighted. The factor $f_n$ equals 1 in every
+final job except the Coat job without offset, where $f_n\in\{0.5,1\}$ is searched. With $f_n=1$
+and $Q_{uj}$ close to one, the sampled negative contributes almost nothing.
+
+The score $s_{ui}$ is defined in Section~\ref{sec:offset}. The encoder $f_\theta$ is LightGCN with
+symmetric normalisation of the unweighted graph of logged positives and a mean over the layer
+outputs. The depth and width are tuned as described in Section~\ref{sec:setup}. Adam is used for
+optimisation, and training stops early on each split's validation score.
+
+\subsection{Imputation offset}\label{sec:offset}
+
+Let $z_{ui}=(\ell_{ui}-\bar\ell)/s_\ell$, where $\ell_{ui}=\operatorname{logit}\,\Yhat^{c}_{ui}$,
+$\Yhat^{c}$ is $\Yhat$ clipped to $[10^{-3},1-10^{-3}]$, and $\bar\ell$ and $s_\ell$ are the mean
+and standard deviation of $\ell$ over all $mn$ pairs. The score is
+\begin{equation}\label{eq:offset}
+s_{ui}=f_\theta(u,i)+\beta\,z_{ui},\qquad \beta\in\{0,\,0.5,\,1,\,2\}.
+\end{equation}
+The offset is used in training and at inference. It is added to the sampled negative as well,
+so it acts on the margin between a positive and its negative:
+$s_{ui}-s_{uj}=f_\theta(u,i)-f_\theta(u,j)+\beta(z_{ui}-z_{uj})$. The offset is fixed, so the
+training loss cannot change it. The model therefore learns a residual on top of the imputed
+preference. Logit adjustment for long-tailed classification~\citep{menon2021logit} also adds a
+fixed prior to the logits, but here the prior is an inverse-propensity estimate of a
+population-level preference rather than a class frequency. The value $\beta=0$ removes the offset.
+Each split selects $\beta$ on its validation part, as one of the jobs in the grid.
+
+\subsection{Procedure and cost}\label{sec:cost}
+
+Algorithm~\ref{alg:qp} lists the steps. Steps 1 to 4 use the log only. The uniform data are read
+only in the evaluation inside the training loop and in the selection that follows, and they never
+enter the loss. The propensity, the imputation, $Q$ and $z$ are dense
+$m\times n$ arrays, so memory grows with $mn$. The largest catalogue used here is KuaiRec, with
+7{,}176 users and 10{,}728 items. Each training step adds one lookup of $Q$ per sampled negative
+and one lookup of $z$ per positive and per negative. LightGCN itself is unchanged. For larger
+catalogues $Q$ and $z$ could be computed on the fly from the imputation parameters and the
+propensity model. We have not implemented this. We do not report run times, because the result
+files do not contain a controlled timing comparison.
+
+\subsection{Training-free DR propagation and the walk correction}\label{sec:drup}
+
+DRUP is a training-free walk-corrected propagation operator. In this paper it plays two roles: as a baseline, and as a secondary
+component whose correction we test separately. From the log it forms two edge estimates for every
+pair. The first is the inverse-propensity estimate $W^{\mathrm{IPS}}=OY/\bar p$. The second is the
+doubly robust estimate $W^{\mathrm{DR}}=\Yhat+O(Y-\Yhat)/\bar p$, where $\bar p$ is the truncated
+propensity~\citep{dudik2011doubly}. The operator propagates these estimates over three hops. A
+walk that reuses an edge contributes a biased product, and DRUP's idempotent correction removes
+the excess that such walks add. The score combines the one-hop and the corrected three-hop terms
+with a weight that is selected on validation data. Under fixed nuisances, the construction is
+designed to make the three-hop operator unbiased for propagation over the fully exposed graph. The
+argument is given in the supplement.
+
+The correction does not improve accuracy on real data in our experiments. At matched
+configurations, the corrected operator is lower on Coat and close to the uncorrected one on Yahoo!\,R3
+(Section~\ref{sec:results}). Its gain appears only in a semi-synthetic setting with true propensities and fixed
+degree weights, and in one of the tested settings it reverses at large walk weights. We therefore present the correction
+as a secondary, training-free component. The strong accuracy of training-free DR propagation on
+KuaiRec is reported as a property of the propagation, not of the correction. \qp\ does not use
+DRUP for training.

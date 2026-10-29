@@ -1,0 +1,20 @@
+\section{Conclusion}\label{sec:conclusion}
+
+We proposed a weighting and an offset for graph collaborative filtering under exposure bias. Sampled BPR
+negatives are down-weighted by one minus the probability that an unlogged pair is positive, and the standardised
+logit of an inverse-propensity-weighted additive imputation enters the score as a fixed offset. Both nuisances
+are fitted once on the biased log. Uniformly collected data are used only for validation and testing, except that
+the shipped Coat propensities were estimated by the dataset authors from a uniform sample.
+
+On Coat, Yahoo! R3, KuaiRand and KuaiRec the final method (\qp) has a higher mean than every graph baseline we
+ran, and the differences are significant except against LightGCN-pt on KuaiRec. It is the best method we ran on
+Yahoo! R3 and KuaiRand. In the main run it is above iALS on Coat and below DR-JL and MRDR on KuaiRec. Across retraining
+seeds these differences are not significant. Training-free doubly robust propagation remains the best method we
+ran (0.6378). The ablations show that the gain depends on an informative posterior: a shuffled control removes it
+on Coat and Yahoo! R3. On Coat, with unmatched grids, the offset alone recovers most of the improvement.
+
+Four extensions follow from the limitations. Computing the posterior on the fly would remove the memory limit of
+dense matrices on large catalogues. Matched offset-only runs on all four datasets would test the offset claim
+beyond Coat. A faithful reproduction of AdvInfoNCE, with its original adversary, would replace our simplified
+re-implementation. Propensities estimated without the uniform data used for testing would remove the possible
+leak on Coat.

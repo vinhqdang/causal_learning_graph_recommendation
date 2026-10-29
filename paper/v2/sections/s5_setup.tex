@@ -1,0 +1,201 @@
+%======================================================================
+\sloppy
+\section{Experimental setup}\label{sec:setup}
+%======================================================================
+
+\subsection{Datasets}\label{sec:datasets}
+
+We use four public benchmarks. Each pairs a biased log with a test set collected without the
+selection of the log, so that a debiasing method can be measured against unbiased outcomes.
+Table~\ref{tab:data} gives the sizes, which we checked against the data loaders in the repository.
+
+\begin{table}[t]\centering\scriptsize
+\caption{Datasets. ``Log'': the biased training data, with its density. ``Test'': the unbiased
+data. ``Candidates'': unbiased test items per user that are ranked (items never logged for that
+user). ``Evaluated users'': users with at least one positive candidate in the full test set.}\label{tab:data}
+\begin{adjustbox}{max width=\textwidth}
+\input{tables/datasets.tex}
+\end{adjustbox}
+\end{table}
+
+\emph{Coat}~\citep{schnabel2016} has 290 users and 300 items. The log holds 6{,}960
+self-selected ratings (8.0\% of the matrix), of which 1{,}905 are ratings of 4 or more. The test
+set holds 16 ratings per user on uniformly random items. Candidates are the items a user did not
+rate in the log, 14.7 per user on average. The dataset ships propensities, which its authors estimated from a uniform sample; the
+propensity-based methods use them on Coat (Section~\ref{sec:nuisance}).
+\emph{Yahoo!\,R3}~\citep{marlin2009collaborative} has 15{,}400 users and 1{,}000 songs. The log holds
+311{,}704 self-selected ratings (2.0\% dense). The test set holds 54{,}000 ratings of ten random
+songs for 5{,}400 users, in the version distributed with~\citep{chen2021autodebias}. A random 5\%
+of these users (270, fixed seed) is excluded from validation and testing. The remaining 5{,}130
+test users have ten candidates each, and 2{,}315 of them have a positive candidate.
+\emph{KuaiRand-Pure}~\citep{gao2022kuairand} is the only benchmark whose log records platform
+exposure: an impression is an item shown in the standard feed, and the outcome is a click. We keep
+10{,}000 users who also received randomly exposed videos, and all 7{,}583 videos. The log holds
+511{,}863 impressions (0.68\% dense), 47\% of them clicks. The test set consists of the random
+impressions of the same period, restricted to videos the user was not shown in the standard log.
+Users have 43.6 candidates on average, and 8{,}347 of them have a positive candidate.
+\emph{KuaiRec}~\citep{gao2022kuairec} provides a dense log of 10.3 million views by 7{,}176 users of
+10{,}728 items (13.4\% dense). Its test set is a fully observed matrix for 1{,}411 users and 3{,}327
+items. Each user is ranked over the test items that the user never viewed in the log, 3{,}314 on
+average.
+
+Positive outcomes are ratings of 4 or more (Coat, Yahoo!\,R3), a click (KuaiRand) and a mean watch
+ratio of at least 2 (KuaiRec). On Coat and Yahoo!\,R3, ``exposure'' means that the user chose to
+rate the item, so the propensity models self-selection and not a platform's allocation. The
+candidate sets of these two datasets hold about ten to fifteen items, which limits the range that
+nDCG can span on them. The ``evaluated users'' column of Table~\ref{tab:data} counts every user with
+a positive candidate. The test-user counts in Section~\ref{sec:protocol} are slightly lower for
+Yahoo!\,R3, KuaiRand and KuaiRec, because a user can fall in the validation part of every split and
+then has no test entry.
+
+\subsection{Baselines}\label{sec:baselines}
+
+Every method is run by us on the same splits and data preparation. No number is taken from the
+literature. Graph models are LightGCN~\citep{he2020lightgcn}, r-AdjNorm~\citep{zhao2022radjnorm},
+NAVIP~\citep{kim2022navip}, SimGCL~\citep{yu2022simgcl}, DR-LightGCN and LightGCN-pt. Matrix models
+are iALS~\citep{hu2008ials}, BPR-MF, MACR~\citep{wei2021macr}, DR-JL~\citep{wang2019drjl} and
+MRDR~\citep{guo2021mrdr}. AdvInfoNCE is the contrastive baseline (Section~\ref{sec:advsetup}).
+The training-free operators are DRUP and DR adjacency, which is DRUP without the walk correction.
+On Coat, the propensity-based baselines (DR-LightGCN, NAVIP, DR-JL, MRDR, DR adjacency and DRUP) use the
+same shipped propensities as the method.
+
+LightGCN is trained with BPR on the logged positives and uniform negatives. It is the loss of
+Section~\ref{sec:weighted} with unit weights and no offset. LightGCN-pt is LightGCN trained with a
+pointwise cross-entropy on all logged pairs (KuaiRec only). r-AdjNorm searches the normalisation
+exponent $r\in\{0.3,0.7\}$ on top of the LightGCN grid. NAVIP trains LightGCN with BPR on a
+neighbourhood aggregation in which each logged edge is weighted by the inverse of its estimated
+propensity. DR-LightGCN uses the pointwise doubly robust loss with the propensity and imputation of
+\qp, and pairs drawn uniformly from all pairs. SimGCL adds uniform noise to the propagated
+embeddings and an InfoNCE term between two noisy views, with weight in $\{0.1,0.5\}$. iALS puts
+confidence $1+\alpha$ on logged positives and 1 on the other pairs, with $\alpha\in\{3,10,30\}$ and
+regularisation in $\{1,10,100,1000\}$. BPR-MF is matrix factorisation trained with BPR. Our MACR
+baseline is a MACR-style model on a matrix factorisation backbone, with user and item branches and
+popularity removed at inference ($c\in\{0.1,0.3\}$); it is not the original code. DR-JL and MRDR fit
+matrix factorisation with the joint imputation of their losses.
+
+The final comparison contains the following methods. Coat: LightGCN, r-AdjNorm, NAVIP, DR-LightGCN,
+iALS, SimGCL, MACR and AdvInfoNCE. Yahoo!\,R3: LightGCN, r-AdjNorm, NAVIP, iALS, SimGCL and
+AdvInfoNCE. KuaiRand: LightGCN, r-AdjNorm, NAVIP, iALS, BPR-MF, SimGCL and AdvInfoNCE. KuaiRec:
+DR-JL, MRDR, LightGCN-pt, DR-LightGCN, NAVIP, iALS, LightGCN, r-AdjNorm and AdvInfoNCE. These are
+the Holm families of Section~\ref{sec:protocol}. DRUP, DR adjacency, and DR-JL and MRDR on Coat and
+Yahoo!\,R3 are reported without a test, because they are outside the families.
+
+We did not run StableDR~\citep{li2023stabledr}, DICE~\citep{zheng2021dice}, CausE~\citep{bonner2018cause}
+or AutoDebias~\citep{chen2021autodebias}. CausE and AutoDebias need uniformly collected data in
+training, which our protocol reserves for validation and testing. For StableDR and DICE, the DR and
+popularity-aware baselines we ran are the closest counterparts. We did not compare with LLM-based
+recommenders. None of the four benchmarks provides item text together with a random-exposure test
+set, so such a comparison would test a different hypothesis.
+
+\subsection{AdvInfoNCE re-implementation}\label{sec:advsetup}
+
+AdvInfoNCE~\citep{zhang2023advinfonce} is an adversarial contrastive loss. We re-implemented it on
+the same LightGCN encoder, and our numbers are for this re-implementation, not for the original
+paper. The main simplifications are these.
+
+\begin{itemize}
+\item The score is the cosine similarity of the propagated embeddings divided by a temperature
+$\tau$. Each positive is contrasted with 64 sampled negatives.
+\item The adversary is a pair of embedding tables (users and items, dimension 64) trained with Adam
+to maximise the contrastive loss, with learning rate $10^{-2}$ on Coat, $10^{-3}$ on Yahoo!\,R3 and
+KuaiRand, and $5\cdot10^{-4}$ on KuaiRec. Only this embedding-based adversary is implemented.
+\item The adversary budget of the original formulation is replaced by a number of adversarial rounds
+$\eta\in\{4,12\}$. A round runs after each epoch from the second epoch on and lasts at least one
+pass over the positives and 100 Adam steps. The adversary's KL divergence is logged but not
+projected onto a ball.
+\end{itemize}
+
+The grids differ in size. Coat has 216 configurations: three learning rates, three weight decays,
+widths $\{32,64\}$, depths $\{1,2,3\}$, $\tau\in\{0.2,0.75\}$ and $\eta\in\{4,12\}$. Yahoo!\,R3 has 16
+configurations with $\tau\in\{0.1,0.28\}$, $\eta\in\{4,12\}$, learning rates $\{3\cdot10^{-3},10^{-3}\}$,
+weight decays $\{10^{-5},10^{-4}\}$, width 128 and depth 2. KuaiRand and KuaiRec have 8 each: KuaiRand
+uses $\tau\in\{0.1,0.28\}$, learning rates $\{10^{-2},3\cdot10^{-3}\}$, weight decay $10^{-4}$, width 64
+and depth 2; KuaiRec uses $\tau\in\{0.2,2.0\}$, learning rates $\{10^{-2},3\cdot10^{-3}\}$, weight decay
+$10^{-5}$, width 64 and depth 2; both use $\eta\in\{4,12\}$. A larger grid gives a method more chances to
+fit noise in the validation data, so the Coat grid favours AdvInfoNCE and the smaller grids work
+against it.
+
+\subsection{Protocol}\label{sec:protocol}
+
+\paragraph{Splits.}
+The uniformly collected data are split into a validation part and a test part. On Coat the split is
+made within each user: 30\% of each user's candidates go to validation and the rest to test. On
+Yahoo!\,R3, KuaiRand and KuaiRec the split is made over users: 30\% of the test users go to
+validation, and no user is in both parts of a split. Coat uses ten random splits (seeds 0 to 9) and
+the other datasets use five (seeds 0 to 4).
+
+\paragraph{Training and selection.}
+Each configuration is trained once on the log, and the same run serves every split. After each epoch
+the model is scored on the validation and test parts of every split. Each split keeps its own best
+(configuration, epoch) by validation nDCG and stops when its validation score has not improved for
+the patience period: five epochs on Coat and Yahoo!\,R3, three on KuaiRand and KuaiRec. A run ends
+when every split has stopped or the epoch limit is reached. Test scores are stored for every epoch,
+but they never influence the choice. All methods on a dataset share the epoch limit, batch size and
+patience, except AdvInfoNCE on KuaiRec, which uses batch size 4{,}096 instead of 32{,}768.
+
+\paragraph{Metrics.}
+We report nDCG@5 on Coat and Yahoo!\,R3, nDCG@10 on KuaiRand and nDCG@20 on KuaiRec. Each user's
+candidates are ranked within the part being scored, and users with no positive candidate in that part
+are skipped. We rank all candidates instead of sampling negatives, because sampled metrics are not
+consistent with the full ranking metric~\citep{krichene2020sampled}. We report the mean and the
+standard deviation over splits (with $\mathrm{ddof}=0$). Evaluation uses only the uniformly collected
+test data, following the recommendation of~\citet{steck2010mnar} to evaluate on data that are not
+missing not at random.
+
+\paragraph{Tests.}
+Differences are tested at the level of users. For each user we average the user's test nDCG over the
+splits in which the user is a test user. For a method and a baseline we take the per-user differences,
+apply a one-sample $t$-test, and report the 95\% confidence interval as a half-width. Within each
+dataset the $p$-values of the family are adjusted by the Holm procedure~\citep{holm1979}. A difference
+is called significant only if the adjusted $p$ is below 0.05. Differences are reported as the mean
+per-user difference times $10^{3}$, with the half-width in brackets. This is not the difference of the
+two table means. The Holm families have 8 tests on Coat, 6 on Yahoo!\,R3, 7 on KuaiRand and 9 on
+KuaiRec. The number of users with a test entry in the final method's files is 225, 2{,}310, 8{,}321 and
+1{,}410, respectively.
+
+Splits overlap, so per-user values are not independent across splits, and paired tests over
+overlapping splits can be anti-conservative~\citep{nadeau2003}. The tests treat the training log, the
+fitted nuisances and the trained models as fixed. We do not report a corrected resampled test for the
+final method.
+
+\subsection{Seed robustness}\label{sec:seedsetup}
+
+Each split's selected configuration is retrained with seeds 1, 2 and 3. Each split re-selects its
+epoch on its own validation part, and the configuration is not changed. The retrained final method is
+compared with the two highest-scoring baselines of the main run for each dataset, where ``highest-scoring'' means
+highest main-run test mean. The family of two is therefore chosen on the test data, and its tests are descriptive: iALS and DR-LightGCN
+on Coat, r-AdjNorm and LightGCN on Yahoo!\,R3 and KuaiRand, and DR-JL and MRDR on KuaiRec. The Holm
+correction runs over those two tests. The two baselines are retrained in the same way: for each split, the
+configuration selected in their main-run files is retrained with seeds 1 to 3, and the epoch is re-selected on
+validation data, as for the final method. Their seed-0 values are the main-run values. Some main-run files also contain a re-run of split 0 with seeds
+100 to 102, stored in a separate field. These runs are not used in any table.
+
+\subsection{Tuning grids and budgets}\label{sec:grids}
+
+The final method is the union of several jobs, one per group of $\beta$ values and learning rate (and,
+on Coat, one per value of $f_n$ in the offset-free job). Each split keeps the job with the best
+validation score (Section~\ref{sec:offset}).
+
+\begin{itemize}
+\item \textbf{Coat.} Learning rate $\{10^{-2},3\cdot10^{-3},10^{-3}\}$, weight decay
+$\{10^{-5},10^{-4},10^{-3}\}$, width $\{32,64\}$, depth $\{1,2,3\}$, at most 100 epochs and batch size
+256. The three jobs (offset $\beta=0$ with $f_n\in\{0.5,1\}$; $\beta\in\{0.5,1\}$; $\beta\in\{1,2\}$)
+have 108 configurations each, 324 in total.
+\item \textbf{Yahoo!\,R3.} Learning rate $\{10^{-2},3\cdot10^{-3},10^{-3}\}$ for the $\beta=0$ jobs and
+$3\cdot10^{-3}$ for the offset jobs, weight decay $\{10^{-5},10^{-4}\}$, width $\{64,128\}$, depth
+$\{1,2,3\}$, at most 60 epochs and batch size 1{,}024. The five jobs have 84 configurations in total.
+\item \textbf{KuaiRand.} Learning rate $\{10^{-2},3\cdot10^{-3},10^{-3}\}$, weight decay
+$\{10^{-5},10^{-4}\}$, width 64, depth 2, at most 40 epochs and batch size 8{,}192. The three jobs have
+30 configurations in total.
+\item \textbf{KuaiRec.} Weight decay $\{10^{-5},10^{-4}\}$, width $\{64,128\}$, depth $\{1,2,3\}$, at most
+30 epochs and batch size 32{,}768. Learning rates are $\{10^{-2},3\cdot10^{-3}\}$ for the $\beta=0$ jobs,
+$\{10^{-2},3\cdot10^{-3},10^{-3}\}$ for $\beta\in\{1,2\}$, and $3\cdot10^{-3}$ for $\beta\in\{0.5,1\}$. The
+six jobs have 120 configurations in total. The cap of 2{,}000{,}000 pairs per epoch never binds, because
+the log holds 779{,}468 positives.
+\end{itemize}
+
+The baselines use the same learning-rate and weight-decay values and their own parameters from
+Section~\ref{sec:baselines}. The number of configurations searched for each baseline is in the ``cfgs''
+column of the main results table. The baseline counts range from 6 to 216 (AdvInfoNCE on Coat), and
+the full grid of each baseline will be listed in the supplement. The unequal budgets are a limitation
+of the comparison, since selection over more configurations can favour the method.

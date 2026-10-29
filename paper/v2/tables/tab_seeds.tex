@@ -1,0 +1,45 @@
+% Table 4: seed robustness. Source: results/v4/seeds_summary.txt (lines 3-41). The seed-0 column is the
+% main run of Table 2. Mean and sd are over seeds 1-3 (ddof $=0$); the last column is the sample sd (ddof $=1$).
+\begin{table}[t]
+\centering
+\caption{Robustness to the training seed. Seed 0 is the main run of Table~\ref{tab:main}; seeds 1--3 retrain
+the selected configuration of each split and re-select only the epoch on validation data. Test nDCG
+per seed is the mean over splits. Each dataset has a Holm family of two paired comparisons (the two
+strongest baselines of the main run). The two baselines of each dataset are the two highest-scoring baselines of the main run by test mean, and they are retrained with seeds 1--3 in the same way as the final method. Diff is the paired per-user mean difference (not the difference of the two table means), $\times10^{-3}$, with the 95\% CI half-width in brackets.}
+\label{tab:seeds}
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Method & Seed 0 & Seed 1 & Seed 2 & Seed 3 & Mean $\pm$ sd (1--3) & sd (ddof 1) \\
+\midrule
+\multicolumn{7}{@{}l}{\emph{Coat (nDCG@5)}} \\
+\qp (final) & 0.6015 & 0.5980 & 0.5879 & 0.5874 & 0.5911 $\pm$ 0.0049 & 0.0060 \\
+iALS & 0.5812 & 0.5900 & 0.5829 & 0.5858 & 0.5862 $\pm$ 0.0029 & 0.0036 \\
+DR-LightGCN & 0.5724 & 0.5550 & 0.5632 & 0.5645 & 0.5609 $\pm$ 0.0042 & 0.0051 \\
+\multicolumn{7}{@{}l}{\quad vs iALS: $+3.39$ [20.70], $p_{\text{Holm}}=0.747$} \\
+\multicolumn{7}{@{}l}{\quad vs DR-LightGCN: $+33.36$ [17.31], $p_{\text{Holm}}=0.0004$} \\
+\midrule
+\multicolumn{7}{@{}l}{\emph{Yahoo! R3 (nDCG@5)}} \\
+\qp (final) & 0.6866 & 0.6874 & 0.6882 & 0.6886 & 0.6881 $\pm$ 0.0005 & 0.0006 \\
+r-AdjNorm & 0.6742 & 0.6711 & 0.6752 & 0.6746 & 0.6736 $\pm$ 0.0018 & 0.0022 \\
+LightGCN & 0.6708 & 0.6671 & 0.6700 & 0.6702 & 0.6691 $\pm$ 0.0014 & 0.0018 \\
+\multicolumn{7}{@{}l}{\quad vs r-AdjNorm: $+14.76$ [5.23], $p_{\text{Holm}}<0.001$} \\
+\multicolumn{7}{@{}l}{\quad vs LightGCN: $+20.02$ [5.08], $p_{\text{Holm}}<0.001$} \\
+\midrule
+\multicolumn{7}{@{}l}{\emph{KuaiRand (nDCG@10)}} \\
+\qp (final) & 0.4613 & 0.4602 & 0.4601 & 0.4608 & 0.4604 $\pm$ 0.0003 & 0.0004 \\
+r-AdjNorm & 0.4590 & 0.4582 & 0.4576 & 0.4582 & 0.4580 $\pm$ 0.0003 & 0.0003 \\
+LightGCN & 0.4569 & 0.4557 & 0.4547 & 0.4561 & 0.4555 $\pm$ 0.0006 & 0.0007 \\
+\multicolumn{7}{@{}l}{\quad vs r-AdjNorm: $+2.31$ [1.23], $p_{\text{Holm}}=0.0002$} \\
+\multicolumn{7}{@{}l}{\quad vs LightGCN: $+4.87$ [1.12], $p_{\text{Holm}}<0.001$} \\
+\midrule
+\multicolumn{7}{@{}l}{\emph{KuaiRec (nDCG@20)}} \\
+\qp (final) & 0.6285 & 0.6292 & 0.6287 & 0.6291 & 0.6290 $\pm$ 0.0002 & 0.0003 \\
+DR-JL & 0.6332 & 0.6304 & 0.6308 & 0.6283 & 0.6298 $\pm$ 0.0011 & 0.0013 \\
+MRDR & 0.6328 & 0.6305 & 0.6291 & 0.6315 & 0.6304 $\pm$ 0.0010 & 0.0012 \\
+\multicolumn{7}{@{}l}{\quad vs DR-JL: $-1.03$ [1.64], $p_{\text{Holm}}=0.2213$} \\
+\multicolumn{7}{@{}l}{\quad vs MRDR: $-1.56$ [1.47], $p_{\text{Holm}}=0.0760$} \\
+\bottomrule
+\end{tabular}
+\end{table}

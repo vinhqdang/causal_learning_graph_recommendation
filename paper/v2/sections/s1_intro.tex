@@ -1,0 +1,97 @@
+\section{Introduction}\label{sec:intro}
+
+Graph-based recommenders represent users and items as nodes and score a user--item
+pair by propagating embeddings along the user--item graph. LightGCN
+\citep{he2020lightgcn} is a standard backbone of this family. Such models are
+usually trained on implicit feedback logs, in which an interaction is recorded only
+when the item was shown and the user responded. The logged graph is therefore not
+the preference graph: it records the exposure policy as much as the user's taste
+\citep{marlin2009collaborative,chen2023bias}. A model fitted to such a log treats
+every absence as informative, and the resulting bias is the subject of a large
+literature on data missing not at random.
+
+The pairwise loss that trains LightGCN, Bayesian personalised ranking (BPR)
+\citep{rendle2009bpr}, draws its negatives uniformly from the items that the user
+has no logged interaction with. Under exposure bias most of these items were never
+shown to the user, and some of them would have been liked had they been shown.
+These are false negatives, and they concentrate on rarely exposed items, where the
+log carries the least information.
+Matrix factorisation models have addressed this by treating exposure as a latent
+variable \citep{liang2016exposure} or by re-weighting the likelihood with
+propensities \citep{saito2020unbiased}. Loss-level debiasing with inverse
+propensity or doubly robust (DR) estimators \citep{schnabel2016,wang2019drjl,guo2021mrdr}
+is defined over observed or sampled entries. In our experiments a
+pointwise DR loss on LightGCN (DR-LightGCN) reaches nDCG@5 of 0.5528 on Yahoo!\,R3,
+well below BPR training of LightGCN on the same data (0.6708).
+
+This paper starts from the two nuisance functions that a DR estimator already fits:
+an exposure propensity $p_{ui}$ and an imputed preference $\hat Y_{ui}$. Under an independence
+assumption (Section~\ref{sec:setting}), Bayes' rule applied to them gives the
+probability that a pair absent from the log is a positive, conditional on its covariates,
+\begin{equation}\label{eq:Q}
+Q_{ui}=\Pr\bigl(Y_{ui}=1\mid O_{ui}Y_{ui}=0,\,x_{ui}\bigr)
+=\frac{\hat Y_{ui}\,(1-p_{ui})}{1-p_{ui}\hat Y_{ui}}.
+\end{equation}
+The quantity $Q_{ui}$ is at most $\hat Y_{ui}$, and it is close to $\hat Y_{ui}$ when
+the estimated exposure propensity is small. We use $Q$ in two places inside an otherwise unchanged LightGCN.
+Each sampled BPR negative is down-weighted by $1-Q_{uj}$, so that likely false
+negatives contribute less gradient. The standardised logit of the imputation is
+added to the score as a fixed offset, whose weight is selected on validation data.
+Both nuisance functions are fitted once on the biased log before training. Training
+therefore uses no uniformly collected data, except the shipped Coat propensities, which the dataset authors estimated from a uniform sample (Section~\ref{sec:nuisance}). We call the resulting model \qp{}
+(Q-weighted negatives with an imputation prior offset).
+
+The evaluation design follows from a concern that progress claims in top-$N$
+recommendation often do not survive a comparison with tuned simple baselines
+\citep{dacrema2019progress,rendle2019baselines,anelli2023myth}. Some reported
+debiasing gains rely on protocols that train on uniformly collected data. We use uniform data only for validation and testing (with the Coat exception noted in Section~\ref{sec:nuisance}). The
+configuration of each split is selected on validation data, the per-user comparisons
+are corrected with Holm's procedure \citep{holm1979}, and the selected configurations
+are retrained with additional seeds. The results are mixed, and we report them as
+such. \qp{} has a higher mean than every graph baseline on all four datasets (significant except
+LightGCN-pt on KuaiRec), and it is the best method among those we ran on Yahoo!\,R3 and KuaiRand.
+On Coat it is above iALS in the main run but not significantly different from it across
+retraining seeds. On KuaiRec it is below DR-JL and MRDR in the main run and not significantly
+different from them across seeds. On KuaiRec a
+training-free propagation operator, DRUP, is the strongest method we ran.
+
+DRUP, a training-free walk-corrected propagation operator, applies inverse-propensity and DR edge
+estimates to multi-hop propagation and corrects the bias that repeated edges add to
+walks of more than one hop. We keep DRUP as a baseline and as a component, and we
+report a negative finding about its correction term. At matched configurations the
+walk correction does not improve accuracy on the real datasets. It improves score
+values only in a semi-synthetic setting with known propensities. Training-free DR
+propagation remains the strongest method on KuaiRec, and the correction is not
+responsible for that result: the same operator without the correction performs
+equally well.
+
+The contributions of the paper are as follows.
+\begin{enumerate}
+\item \emph{Method.} A closed-form posterior $Q_{ui}$ for pairs that are not logged
+positives, computed from an inverse-propensity-weighted additive imputation and an
+exposure propensity (Eq.~\eqref{eq:Q}). $Q$ is used twice in LightGCN: to weight
+sampled BPR negatives and as a standardised imputation offset. The method adds one
+selected hyper-parameter, the offset weight, and one lookup per sampled negative.
+\item \emph{Evaluation.} A comparison on four public benchmarks with an unbiased test
+set (Coat, Yahoo!\,R3, KuaiRand-Pure and KuaiRec), in which uniform data are used
+only for validation and testing (Coat's shipped propensities excepted). The comparison uses per-user paired tests with Holm
+correction within each dataset, and the main configurations are retrained with three
+additional seeds.
+\item \emph{Mechanism.} Ablations that replace $Q$ by the imputation alone, by item
+popularity, or by a random permutation of its own values. The shuffled control
+returns to the level of LightGCN, which shows that the weighting requires an
+informative $Q$. The relative contribution of weighting and offset depends on the
+dataset. On Coat, with unmatched grids (108 vs 54 configurations), the offset alone
+recovers most of the gain.
+\item \emph{A negative result on walk correction.} The idempotent correction of DRUP
+does not improve accuracy on real data at matched configurations, and it improves
+scores only under semi-synthetic conditions with known propensities.
+\end{enumerate}
+
+The rest of the paper is organised as follows. Section~\ref{sec:related} reviews the
+related work and Table~\ref{tab:positioning} positions the method against the main
+families. Section~\ref{sec:setting} defines the setting and notation. Section~\ref{sec:method}
+describes the method and the DRUP baseline, Section~\ref{sec:setup} the datasets,
+baselines and protocol, and Section~\ref{sec:results} the results. Section~\ref{sec:discussion}
+discusses when the method helps and when it does not, together with its limitations,
+and Section~\ref{sec:conclusion} concludes.

@@ -1,0 +1,36 @@
+% Table 6: AdvInfoNCE re-implementation versus the final method. Sources: AdvInfoNCE mean and sd from
+% results/v4/learned_{coat,yahoo,kuairand,kuairec}_adv.json; diff, CI and p_Holm from
+% results/v4/final_summary.txt; grids from the adv_* commands of experiments/queue_v5.sh and the
+% arguments stored in the Coat JSON. Context rows from results/v4/learned_coat_new.json and
+% learned_coat_dr.json.
+\begin{table}[t]
+\centering
+\caption{Comparison with the AdvInfoNCE re-implementation (Section~\ref{sec:advinfonce}). This is not the original
+method: the adversary budget is implicit (the number of adversarial rounds), there is no KL-ball projection, and
+the grids differ across datasets (given below each dataset). Diff is the paired per-user difference of the final
+method minus AdvInfoNCE, $\times10^{-3}$, with the 95\% CI half-width; $p_{\text{Holm}}$ is adjusted within each
+dataset.}
+\label{tab:advinfonce}
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Dataset & AdvInfoNCE & Configs & \qp & Diff [CI] & $p_{\text{Holm}}$ \\
+\midrule
+Coat & 0.5222 $\pm$ 0.0204 & 216 & 0.6015 & $+78.50$ [27.63] & $<0.001$ \\
+\multicolumn{6}{@{}l}{\quad \scriptsize $\tau\in\{0.2,0.75\}$, $\eta\in\{4,12\}$, 3 learning rates, 3 weight decays} \\
+\multicolumn{6}{@{}l}{\quad \scriptsize dims $\{32,64\}$, layers $\{1,2,3\}$} \\
+Yahoo! R3 & 0.6477 $\pm$ 0.0048 & 16 & 0.6866 & $+37.85$ [8.48] & $<0.001$ \\
+\multicolumn{6}{@{}l}{\quad \scriptsize $\tau\in\{0.1,0.28\}$, $\eta\in\{4,12\}$, lr $\{3\text{e-}3,1\text{e-}3\}$} \\
+\multicolumn{6}{@{}l}{\quad \scriptsize wd $\{10^{-5},10^{-4}\}$, dim 128, 2 layers} \\
+KuaiRand & 0.4480 $\pm$ 0.0017 & 8 & 0.4613 & $+12.79$ [2.50] & $<0.001$ \\
+\multicolumn{6}{@{}l}{\quad \scriptsize $\tau\in\{0.1,0.28\}$, $\eta\in\{4,12\}$, lr $\{10^{-2},3\text{e-}3\}$, wd $10^{-4}$} \\
+KuaiRec & 0.5776 $\pm$ 0.0036 & 8 & 0.6285 & $+49.32$ [6.57] & $<0.001$ \\
+\multicolumn{6}{@{}l}{\quad \scriptsize $\tau\in\{0.2,2.0\}$, $\eta\in\{4,12\}$, lr $\{10^{-2},3\text{e-}3\}$, wd $10^{-5}$} \\
+\midrule
+\multicolumn{6}{@{}l}{\emph{Context on Coat (not part of the comparison above)}} \\
+Plain InfoNCE & 0.5290 $\pm$ 0.0199 & 108 & -- & -- & -- \\
+DR-weighted InfoNCE & 0.5531 $\pm$ 0.0094 & 216 & -- & -- & -- \\
+\bottomrule
+\end{tabular}
+\end{table}

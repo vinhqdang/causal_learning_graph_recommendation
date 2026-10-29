@@ -1,0 +1,188 @@
+\sloppy
+\section{Results}\label{sec:results}
+
+All test numbers are nDCG on uniformly exposed test data. Validation and test splits are drawn from the
+uniform data; the training log is the only data used to fit the nuisances and the model. For each
+dataset and split, the final method (\qp) is the validated combination of its jobs: each split keeps the
+job, offset weight and epoch with the best validation score. Table~\ref{tab:main} reports the main run
+(seed 0), Table~\ref{tab:seeds} the retraining with seeds 1--3, and the remaining tables the ablations
+and the walk-correction analysis. Per-user paired tests use the users who appear in the test sets of
+both methods: 225 on Coat, 2{,}310 on Yahoo! R3, 8{,}321 on KuaiRand and 1{,}410 on KuaiRec.
+
+\subsection{Main comparison}\label{sec:main}
+
+Table~\ref{tab:main} and Figure~\ref{fig:forest} give the main comparison.
+
+\begin{enumerate}
+\item \textbf{Graph baselines.} On all four datasets the final method has a higher mean than every graph
+baseline we ran: LightGCN, r-AdjNorm~\citep{zhao2022radjnorm}, NAVIP~\citep{kim2022navip}, SimGCL~\citep{yu2022simgcl}
+and the AdvInfoNCE re-implementation. DR-LightGCN is in the Holm family only on Coat and KuaiRec; on
+Yahoo! R3 and KuaiRand it was not tested for the final method. Every paired difference against a graph baseline is
+significant ($p_{\text{Holm}}\le0.0185$) except one: LightGCN-pt on KuaiRec, $+1.31$ [3.34], $p_{\text{Holm}}=0.4409$.
+Apart from LightGCN-pt, the largest adjusted p-value is $0.0185$ (KuaiRand, r-AdjNorm).
+\item \textbf{Yahoo! R3.} The final method reaches $0.6866$ against $0.6742$ for r-AdjNorm, the strongest
+baseline, a paired difference of $+12.67$ [6.01] ($\times10^{-3}$, $p_{\text{Holm}}<0.001$). It is the best
+method we ran on this dataset. The training-free DR adjacency and DRUP rows (0.6567) and the DR-JL and MRDR
+rows (about 0.52) are below it; these rows were not tested in the Holm family.
+\item \textbf{KuaiRand.} The final method reaches $0.4613$ against $0.4590$ for r-AdjNorm, a paired difference of
+$+1.94$ [1.61] ($p_{\text{Holm}}=0.0185$). The effect is small. Validation chose $\beta=0$ in four of five splits,
+so in the selected runs the gain comes mainly from the weighting. The $\beta=0$ job alone reaches $0.4623$ on the test set, above
+the validated combination, so the validation choice is not always the test-best choice.
+\item \textbf{Coat.} The final method reaches $0.6015$ against $0.5812$ for iALS, $+20.02$ [19.74]
+($p_{\text{Holm}}=0.0469$) in the main run. This difference does not survive retraining (Section~\ref{sec:seeds}),
+and the difference from iALS is not significant across seeds.
+\item \textbf{KuaiRec.} The final method reaches $0.6285$. It is below DR-JL ($0.6332$; $-4.56$ [2.24],
+$p_{\text{Holm}}<0.001$) and MRDR ($0.6328$; $-4.34$ [2.16], $p_{\text{Holm}}<0.001$), and below the training-free
+DR adjacency and DRUP operators ($0.6378$, not tested). Apart from DR-JL and MRDR it has the highest mean in
+the family, but the difference to LightGCN-pt is not significant. Section~\ref{sec:walk} discusses the training-free
+operators.
+\item \textbf{Scale.} Against the strongest graph baseline by mean, the paired differences are $+32.68$ (Coat,
+DR-LightGCN), $+12.67$ (Yahoo! R3, r-AdjNorm), $+1.94$ (KuaiRand, r-AdjNorm) and $+1.31$ (KuaiRec,
+LightGCN-pt, not significant), in units of $10^{-3}$ nDCG. The paired differences therefore range from
+$1.3$ to $32.7$ thousandths of nDCG.
+\end{enumerate}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/fig_forest}
+\caption{Per-split test difference between the final method and the strongest baseline of each dataset
+(Coat: iALS; Yahoo! R3 and KuaiRand: r-AdjNorm; KuaiRec: DR-JL). Dots are the splits (five, or ten on
+Coat); diamonds are the paired per-user mean difference from Table~\ref{tab:main} with its 95\% CI
+half-width. Units are $\times10^{-3}$ nDCG.}
+\label{fig:forest}
+\end{figure}
+
+\input{tables/tab_main}
+
+\input{tables/tab_extra}
+
+\subsection{Robustness to the training seed}\label{sec:seeds}
+
+Table~\ref{tab:seeds} retrains the selected configuration of every split with seeds 1, 2 and 3 and
+re-selects only the epoch on validation data. Seed 0 is the main run. Each dataset has a Holm family of two
+comparisons against its two strongest baselines in the main run, chosen by main-run test mean (Section~\ref{sec:seedsetup}).
+
+On Coat the seed-averaged final method reaches $0.5911\pm0.0049$ against $0.5862\pm0.0029$ for iALS. The paired
+difference is $+3.39$ [20.70] with $p_{\text{Holm}}=0.747$, which is not significant. The Coat claim is therefore
+that the difference from iALS is not significant across seeds. Against DR-LightGCN the difference remains large and significant
+($+33.36$ [17.31], $p_{\text{Holm}}=0.0004$). The spread of the final method across seeds on Coat (sd 0.0049,
+ddof $=0$) is larger than that of iALS (0.0029), and the seed-0 value of $0.6015$ is the highest of the four
+seeds. The main-run advantage over iALS on Coat should therefore be read as a single-run result.
+
+On Yahoo! R3 the seed-averaged final method reaches $0.6881\pm0.0005$, against $0.6736$ for r-AdjNorm
+($+14.76$ [5.23], $p_{\text{Holm}}<0.001$) and $0.6691$ for LightGCN ($+20.02$ [5.08], $p_{\text{Holm}}<0.001$).
+On KuaiRand it reaches $0.4604\pm0.0003$, against $0.4580$ for r-AdjNorm ($+2.31$ [1.23], $p_{\text{Holm}}=0.0002$)
+and $0.4555$ for LightGCN ($+4.87$ [1.12], $p_{\text{Holm}}<0.001$). Both gains are small in absolute terms.
+
+On KuaiRec the seed-averaged final method reaches $0.6290\pm0.0002$, against $0.6298$ for DR-JL and $0.6304$
+for MRDR. The differences are $-1.03$ [1.64] ($p_{\text{Holm}}=0.2213$) and $-1.56$ [1.47] ($p_{\text{Holm}}=0.0760$).
+The significant deficit of the main run therefore becomes a gap of $1.0$ to $1.6$ thousandths of nDCG that is not
+significant over the retraining seeds, although the seed-averaged mean is lower than both. Both statements are reported: below DR-JL and MRDR in the main run, and not
+significantly different from them across retraining seeds.
+
+\input{tables/tab_seeds}
+
+\subsection{Where does the gain come from?}\label{sec:ablations}
+
+Table~\ref{tab:ablation} and Figure~\ref{fig:ablation} separate the two ingredients: the weights on the
+sampled negatives and the fixed offset. Each row is one stored job. The rows are not matched in their
+configuration grids, and the ablation rows carry no significance tests. The one test in this section is the KuaiRec decomposition test below.
+
+\paragraph{Weights.} On Coat the full weighting (Q-LightGCN, no offset) reaches $0.5912$, against $0.5683$
+for LightGCN. Replacing Q by the imputation alone, $\hat Y$, gives $0.5937$; replacing it by rescaled item
+popularity gives $0.5751$; and a random permutation of the Q values, which keeps their marginal distribution,
+gives $0.5689$, the LightGCN level. On Yahoo! R3 the weighted model reaches $0.6829$ (learning rate $3\times10^{-3}$
+only), against $0.6708$ for LightGCN, popularity-only weights give $0.6550$, and the shuffled control gives
+$0.6689$. The shuffled control removes the gain on both datasets, so the gain is not a rescaling effect of the
+weights. Popularity-only weights are weaker than Q on both datasets, and on Yahoo! R3 they are below LightGCN.
+On Coat, dropping the propensity from Q changes little ($0.5937$ against $0.5912$), so in this comparison the information appears to lie in the
+imputation. This is an observation only: the grids are not matched and no test was run. The Coat weighted runs use 108 configurations (with $\mathrm{fn}\in\{0.5,1\}$) against 54 for the
+ablations, so these two numbers are not grid-matched.
+
+\paragraph{Offset.} All offset ablations are on Coat. LightGCN with the offset only (P-LightGCN, $\beta\in\{0.5,1\}$)
+reaches $0.6020$, with the weights as well $0.6039$ ($\beta\in\{0.5,1\}$) and $0.6046$ ($\beta\in\{1,2\}$), and the
+validated combination $0.6015$. On Coat, with unmatched grids and no test, the offset alone recovers essentially all of the gain, and the
+weighting adds little on top of it ($0.6020$ against $0.6039$). Whether this holds on the other datasets is
+untested: offset-only runs exist only for Coat.
+
+\paragraph{Imputation model.} On Coat a rank-16 low-rank imputation for Q and the offset gives $0.5887$ without
+offset and $0.5897$ with it, against $0.5912$ and $0.6039$ for the additive imputation. The more flexible model
+is worse on this dataset. Q-iALS, iALS with the same weights, reaches $0.5871$ against $0.5812$ for iALS, using
+48 and 24 configurations. It was not run on the larger datasets, where the dense solve is too slow. We report
+the Q-iALS result as an observation and make no significance claim.
+
+\paragraph{Decomposition across datasets.} Table~\ref{tab:decomp} compares the weighting-only
+selection with the validated combination on every dataset. On Yahoo! R3 the weighting-only selection reaches
+$0.6837$ and the combination $0.6866$; on KuaiRand $0.4623$ (the $\beta=0$ job) against $0.4613$; on KuaiRec
+$0.6095$ against $0.6285$. Read this way, the weighting carries most of the Yahoo! R3 and KuaiRand results.
+On KuaiRec the validated combination exceeds the weighting-only selection by $0.019$. This is a decomposition of selected runs rather than a
+matched ablation. On KuaiRec the weighting alone is not significantly better than LightGCN ($+1.39$ [1.38],
+$p_{\text{Holm}}=0.0967$) and has a lower mean than NAVIP, DR-LightGCN and iALS.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/fig_ablation}
+\caption{Ablations of the weights on Coat (left) and Yahoo! R3 (right): test nDCG@5, mean over splits, with
+standard deviation over splits. The dashed line is LightGCN. The Coat weighted model uses 108 configurations
+and the Yahoo! R3 weighted model a single learning rate (see Table~\ref{tab:ablation}). The Yahoo! R3
+imputation-only variant was not run.}
+\label{fig:ablation}
+\end{figure}
+
+\input{tables/tab_ablation}
+
+\input{tables/tab_decomp}
+
+\subsection{Comparison with AdvInfoNCE}\label{sec:advinfonce}
+
+Table~\ref{tab:advinfonce} compares the final method with our re-implementation of AdvInfoNCE. The
+implementation is simplified: the adversary budget is implicit (the number of adversarial rounds), there is no
+KL-ball projection, and the grids differ across datasets. Our numbers are for this re-implementation and are not
+those of the original paper. The final method is higher on every dataset: $0.6015$ against $0.5222$ on Coat
+($+78.50$ [27.63]), $0.6866$ against $0.6477$ on Yahoo! R3 ($+37.85$ [8.48]), $0.4613$ against $0.4480$ on KuaiRand
+($+12.79$ [2.50]) and $0.6285$ against $0.5776$ on KuaiRec ($+49.32$ [6.57]), with $p_{\text{Holm}}<0.001$ in all four
+cases. The grids favour the re-implementation on Coat, which has 216 configurations, and disfavour it on the other
+datasets, which have 8 or 16. In our hands the contrastive family is weak on Coat: plain
+InfoNCE-LightGCN reaches $0.5290$ there, and the DR-weighted variant $0.5531$.
+
+\input{tables/tab_advinfonce}
+
+\subsection{The walk correction and DRUP}\label{sec:walk}
+
+Table~\ref{tab:walk} and Figure~\ref{fig:walk} report the walk correction of DRUP, which removes repeated-edge
+terms from multi-hop doubly robust propagation, and the validated ensemble with DRUP.
+
+On real data the correction does not help accuracy at matched configurations. On Coat, DRUP minus DR
+adjacency is negative for every value of $\beta$ in the grid, from $-0.33\times10^{-3}$ at $\beta=0.03$ to
+$-8.17\times10^{-3}$ at $\beta=1000$, and is negative in all ten splits for $\beta\ge0.3$. On Yahoo! R3 the
+differences are small and negative ($-0.02$ to $-0.32\times10^{-3}$).
+
+In the semi-synthetic KuaiRec study, with true propensities and fixed degree weights, DRUP minus DR nDCG@20 is
+positive at $\beta\in\{0.3,1,3\}$ in all six cells. At $\beta=0.3$ the differences range from $+12.5$ to
+$+19.6\times10^{-3}$. The sign reverses at large $\beta$ in the two cells with $\gamma=1.0$ and $\kappa\in\{0.5,1.5\}$,
+reaching $-5.35\times10^{-3}$ at $\beta=1000$ (Supplement S4 gives the design). With imputation-based degree
+estimates, in the one stored cell with $\kappa=1.5$ and $\gamma=1.0$, DRUP minus DR is $+2.07$, $+6.25$ and
+$+2.90\times10^{-3}$ at $\beta=0.3$, $1$ and $3$, and $-5.20$ and $-9.36\times10^{-3}$ at $\beta=10$ and $1000$.
+
+The training-free operators settle the KuaiRec comparison. DRUP reaches $0.6378$ and the DR adjacency on which it
+is built also reaches $0.6378$; a five-hop DR adjacency reaches $0.6379$. The credit for the strongest KuaiRec
+result therefore goes to doubly robust propagation, not to the walk correction. On Coat, DRUP is weak
+($0.5467$). On Yahoo! R3 and KuaiRand the DRUP row equals the IPS adjacency ($0.6567$ and $0.4492$), so the
+doubly robust half of DRUP is tested only on Coat and KuaiRec.
+
+The validated ensemble $s=(1-w)\,z(A)+w\,z(\mathrm{DRUP})$ does not add to either component. On Coat $w$ is
+$0$ in nine splits and $0.3$ in one, and the ensemble reaches $0.6031$, $+1.79$ [2.39] over the final method
+($p_{\text{Holm}}=0.1421$) and $+21.81$ [20.25] over iALS ($p_{\text{Holm}}=0.0823$). On KuaiRec $w$ is $1.0$ in four
+splits and $0.8$ in one, and the ensemble reaches $0.6376$, which is $-0.18$ [0.19] against DRUP
+($p_{\text{Holm}}=0.0664$). Validation picks one component in each dataset; the two are not complementary here.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/fig_walk}
+\caption{Left: matched-configuration DRUP minus DR adjacency on Coat and Yahoo! R3 against $\beta$ (log scale),
+from Table~\ref{tab:walk}. Right: semi-synthetic DRUP minus DR nDCG@20 on KuaiRec for the six cells of the
+design, with 95\% CI half-widths; dashed lines are cells with $\gamma=1.0$. Zero lines are shown in both panels.}
+\label{fig:walk}
+\end{figure}
+
+\input{tables/tab_walk}

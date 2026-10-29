@@ -1,0 +1,87 @@
+\sloppy
+\section{Discussion}\label{sec:discussion}
+
+\subsection{Why the method works}\label{sec:why}
+
+The posterior $Q$ depends on the covariates only, through $\hat p$ and $\hat Y$; it does not depend on the realised
+exposure. Where the estimated exposure propensity is small, $Q$ is close to the imputation $\hat Y$, so sampled
+negatives are down-weighted in proportion to the estimated probability that the user would like the item. Where the
+estimated propensity is close to one, $Q=\hat Y(1-\hat p)/(1-\hat p\hat Y)$ is close to zero only if $\hat Y$ is also
+small. We did not test whether pairs with high estimated exposure propensity are in fact true negatives. Rarely
+exposed items are the ones most likely to be false negatives under exposure bias, and this is the motivation for the
+weighting. ExpoMF~\citep{liang2016exposure} computes a related posterior for unclicked items
+inside matrix factorisation. Here the posterior has a closed form in the nuisances of doubly robust estimation and
+enters a pairwise graph loss.
+
+The offset contributes a different signal. It adds a population-level preference estimate, the user and item
+effects of an IPS-weighted additive model fitted once on the log. We conjecture that a BPR objective on the observed
+positives has difficulty learning such an effect from a biased log, because the exposed items are the ones it sees.
+This conjecture was not tested directly. The shuffled-$Q$ control is a check against the explanation that the gain
+comes from the variance of the weights alone: a random permutation of $Q$
+has the same marginal distribution and removes the gain. On Coat the offset alone reaches essentially the same
+accuracy as the combination, so, with unmatched grids and no test, the offset appears to be the larger ingredient there,
+while on Yahoo! R3 and KuaiRand the weighting carries most of the gain in the selected runs.
+
+\subsection{When it does not help}\label{sec:when}
+
+KuaiRec is the setting in which the method is weakest. Its log is dense (13.4\% of the matrix is observed) and the
+test matrix is fully observed, with 3{,}314 candidates per user. These are the features that differ most from the
+other three datasets; we have no direct test of which of them causes the gap. In this setting the pointwise doubly robust
+methods (DR-JL and MRDR) and training-free DR propagation are stronger. Pointwise training does not close the gap
+either: LightGCN-pn reaches 0.5992--0.5995 and DR-LightGCN-pn 0.5992--0.6027 across the two learning rates, the
+latter being the pointwise loss with the same Q weights on negatives. Both are far below DR-JL and MRDR.
+On Coat the difference from iALS is not significant across seeds, and iALS has a higher main-run mean than every graph baseline there.
+
+\subsection{Practical guidance}\label{sec:practical}
+
+The following guidance summarises the selections observed in these experiments. It is based on the observed
+selections and was not tested as a procedure. For a practitioner with a biased log and a uniform validation sample,
+four steps follow from the results. First,
+fit the additive IPS imputation and the exposure model on the log, and check that Q is informative with a
+shuffled control; if the shuffled model matches the plain model, the weights carry no information in this comparison, and an offset-only model is the natural alternative to test. Second, select the offset weight on validation data and include $\beta=0$ in the grid, because the
+validation choice is not always the test-best one (KuaiRand). Third, report the comparison against the strongest
+simple baselines, including iALS, because they remain close on some datasets. Fourth, on dense logs with a fully
+observed target, compare against training-free DR propagation, which needs no gradient training; on KuaiRec it
+reaches 0.6378, against 0.6285 for the trained method.
+
+\subsection{Limitations}\label{sec:limitations}
+
+\begin{enumerate}
+\item \textbf{Unequal tuning budgets.} The final method is the union of several jobs. It was tuned with 324
+configurations on Coat, against 24 for iALS, 54 for LightGCN and 108 for r-AdjNorm; with 84 on Yahoo! R3 against
+72 for r-AdjNorm; with 30 on KuaiRand against 12 for r-AdjNorm; and with 120 on KuaiRec against 6 for DR-JL and
+MRDR. Selecting over more configurations can favour the method. The AdvInfoNCE grid is largest on Coat
+(216 configurations) and smallest elsewhere (8 or 16), so the comparison with it is unequal in both directions.
+\item \textbf{AdvInfoNCE is a simplified re-implementation.} The adversary budget is implicit (the number of
+adversarial rounds, with $\eta\in\{4,12\}$), there is no KL-ball projection, and only an embedding-based adversary was
+tried. Its numbers are not those of the original paper.
+\item \textbf{Small effects.} The KuaiRand gain is $+1.94\times10^{-3}$ in the main run and $+2.31\times10^{-3}$ over
+the seeds. The paired differences against the strongest graph baseline range from 0.0013 to 0.0327 nDCG
+(Section~\ref{sec:main}), and the confidence-interval half-widths on Coat are between 0.017 and 0.028.
+\item \textbf{Main run versus seed runs.} Table~\ref{tab:main} is a single training seed with full selection. The seed
+runs retrain only the selected configurations and compare against two baselines per dataset, chosen by main-run test
+means. Over these runs the Coat difference from iALS and the KuaiRec differences from DR-JL and MRDR are not significant.
+\item \textbf{KuaiRec is lost to the doubly robust baselines.} In the main run the method is below DR-JL and MRDR, and
+in all runs it is below training-free DRUP and DR adjacency ($0.6378$).
+\item \textbf{One imputation family.} The propensity and the imputation come from one additive model, and on Coat
+from one low-rank alternative. Other imputation families are untested.
+\item \textbf{Ablations are mostly on Coat.} The offset-only, imputation-only, low-rank and Q-iALS ablations were run
+on Coat only. Yahoo! R3 has the popularity and shuffled controls only, and KuaiRand and KuaiRec have only the
+decomposition of the selected runs. No significance tests were run for the ablations, except the single KuaiRec
+decomposition test reported in Section~\ref{sec:ablations}.
+\item \textbf{Coat propensities may leak.} The Coat propensities were estimated by the dataset authors with the uniform
+sample~\citep{schnabel2016} that we also use for validation and testing. This is a possible leak that affects Coat only.
+The same propensities are used by every propensity-based method on Coat, so the Coat comparison shares this input.
+\item \textbf{Exposure semantics.} On Coat and Yahoo! R3, ``exposure'' is self-selection by users rather than platform
+exposure. The derivation of $Q$ assumes that exposure is independent of the outcome given the covariates of the
+propensity model.
+\item \textbf{Overlapping splits.} Per-user $t$-tests over overlapping splits treat the log and the fitted nuisances as
+fixed. They can be anti-conservative~\citep{nadeau2003}.
+\item \textbf{Scale.} $Q$ and the offset are dense $m\times n$ matrices. The implementation therefore fits the catalogues
+used here, the largest being KuaiRec with 7{,}176 users and 10{,}728 items. Computing $Q$ on the fly from the nuisances
+would remove this limit; it is not implemented.
+\item \textbf{Methods not compared.} StableDR, DICE, CausE, AutoDebias and large language model based recommenders
+are not in the comparison. Q-iALS was not run on the larger datasets.
+\item \textbf{Validation choice is not always test-best.} On KuaiRand the $\beta=0$ job reaches $0.4623$ on test, against
+$0.4613$ for the validated combination.
+\end{enumerate}

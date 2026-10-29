@@ -1,0 +1,518 @@
+\begin{thebibliography}{53}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\href}[2]{#2}
+\providecommand{\path}[1]{#1}
+\providecommand{\DOIprefix}{doi:}
+\providecommand{\ArXivprefix}{arXiv:}
+\providecommand{\URLprefix}{URL: }
+\providecommand{\Pubmedprefix}{pmid:}
+\providecommand{\doi}[1]{\href{http://dx.doi.org/#1}{\path{#1}}}
+\providecommand{\Pubmed}[1]{\href{pmid:#1}{\path{#1}}}
+\providecommand{\bibinfo}[2]{#2}
+\ifx\xfnm\relax \def\xfnm[#1]{\unskip,\space#1}\fi
+%Type = Inproceedings
+\bibitem[{Anelli et~al.(2023)Anelli, Malitesta, Pomo, Bellogin, Di~Sciascio and
+  Di~Noia}]{anelli2023myth}
+\bibinfo{author}{Anelli, V.W.}, \bibinfo{author}{Malitesta, D.},
+  \bibinfo{author}{Pomo, C.}, \bibinfo{author}{Bellogin, A.},
+  \bibinfo{author}{Di~Sciascio, E.}, \bibinfo{author}{Di~Noia, T.},
+  \bibinfo{year}{2023}.
+\newblock \bibinfo{title}{Challenging the myth of graph collaborative
+  filtering: a reasoned and reproducibility-driven analysis}, in:
+  \bibinfo{booktitle}{Proceedings of the 17th ACM Conference on Recommender
+  Systems}, \bibinfo{publisher}{ACM}. pp. \bibinfo{pages}{350--361}.
+\newblock \DOIprefix\doi{10.1145/3604915.3609489}.
+%Type = Article
+\bibitem[{Bai et~al.(2025)Bai, Chen, Yang and Shi}]{bai2025invariant}
+\bibinfo{author}{Bai, T.}, \bibinfo{author}{Chen, W.}, \bibinfo{author}{Yang,
+  C.}, \bibinfo{author}{Shi, C.}, \bibinfo{year}{2025}.
+\newblock \bibinfo{title}{Invariant debiasing learning for recommendation via
+  biased imputation}.
+\newblock \bibinfo{journal}{Information Processing \& Management}
+  \bibinfo{volume}{62}, \bibinfo{pages}{104028}.
+\newblock \DOIprefix\doi{10.1016/j.ipm.2024.104028}.
+%Type = Inproceedings
+\bibitem[{Bonner and Vasile(2018)}]{bonner2018cause}
+\bibinfo{author}{Bonner, S.}, \bibinfo{author}{Vasile, F.},
+  \bibinfo{year}{2018}.
+\newblock \bibinfo{title}{Causal embeddings for recommendation}, in:
+  \bibinfo{booktitle}{Proceedings of the 12th ACM Conference on Recommender
+  Systems}, pp. \bibinfo{pages}{104--112}.
+\newblock \DOIprefix\doi{10.1145/3240323.3240360}.
+%Type = Article
+\bibitem[{Boratto et~al.(2021)Boratto, Fenu and Marras}]{boratto2021connecting}
+\bibinfo{author}{Boratto, L.}, \bibinfo{author}{Fenu, G.},
+  \bibinfo{author}{Marras, M.}, \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{Connecting user and item perspectives in popularity
+  debiasing for collaborative recommendation}.
+\newblock \bibinfo{journal}{Information Processing \& Management}
+  \bibinfo{volume}{58}, \bibinfo{pages}{102387}.
+\newblock \DOIprefix\doi{10.1016/j.ipm.2020.102387}.
+%Type = Inproceedings
+\bibitem[{Chen et~al.(2021)Chen, Dong, Qiu, He, Xin, Chen, Lin and
+  Yang}]{chen2021autodebias}
+\bibinfo{author}{Chen, J.}, \bibinfo{author}{Dong, H.}, \bibinfo{author}{Qiu,
+  Y.}, \bibinfo{author}{He, X.}, \bibinfo{author}{Xin, X.},
+  \bibinfo{author}{Chen, L.}, \bibinfo{author}{Lin, G.}, \bibinfo{author}{Yang,
+  K.}, \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{{AutoDebias}: Learning to debias for recommendation},
+  in: \bibinfo{booktitle}{Proceedings of the 44th International ACM SIGIR
+  Conference on Research and Development in Information Retrieval}, pp.
+  \bibinfo{pages}{21--30}.
+\newblock \DOIprefix\doi{10.1145/3404835.3462919}.
+%Type = Article
+\bibitem[{Chen et~al.(2023)Chen, Dong, Wang, Feng, Wang and He}]{chen2023bias}
+\bibinfo{author}{Chen, J.}, \bibinfo{author}{Dong, H.}, \bibinfo{author}{Wang,
+  X.}, \bibinfo{author}{Feng, F.}, \bibinfo{author}{Wang, M.},
+  \bibinfo{author}{He, X.}, \bibinfo{year}{2023}.
+\newblock \bibinfo{title}{Bias and debias in recommender system: A survey and
+  future directions}.
+\newblock \bibinfo{journal}{ACM Transactions on Information Systems}
+  \bibinfo{volume}{41}, \bibinfo{pages}{1--39}.
+\newblock \DOIprefix\doi{10.1145/3564284}.
+%Type = Article
+\bibitem[{Chen et~al.(2024)Chen, Wu, Chen, Xin, Li and He}]{chen2024gcnpop}
+\bibinfo{author}{Chen, J.}, \bibinfo{author}{Wu, J.}, \bibinfo{author}{Chen,
+  J.}, \bibinfo{author}{Xin, X.}, \bibinfo{author}{Li, Y.},
+  \bibinfo{author}{He, X.}, \bibinfo{year}{2024}.
+\newblock \bibinfo{title}{How graph convolutions amplify popularity bias for
+  recommendation?}
+\newblock \bibinfo{journal}{Frontiers of Computer Science}
+  \bibinfo{volume}{18}.
+\newblock \DOIprefix\doi{10.1007/s11704-023-2655-2}.
+%Type = Inproceedings
+\bibitem[{Choi et~al.(2023)Choi, Hong, Park and Cho}]{choi2023bspm}
+\bibinfo{author}{Choi, J.}, \bibinfo{author}{Hong, S.}, \bibinfo{author}{Park,
+  N.}, \bibinfo{author}{Cho, S.B.}, \bibinfo{year}{2023}.
+\newblock \bibinfo{title}{Blurring-sharpening process models for collaborative
+  filtering}, in: \bibinfo{booktitle}{Proceedings of the 46th International ACM
+  SIGIR Conference on Research and Development in Information Retrieval},
+  \bibinfo{publisher}{ACM}. pp. \bibinfo{pages}{1096--1106}.
+\newblock \DOIprefix\doi{10.1145/3539618.3591645}.
+%Type = Inproceedings
+\bibitem[{Chuang et~al.(2020)Chuang, Robinson, Lin, Torralba and
+  Jegelka}]{chuang2020dcl}
+\bibinfo{author}{Chuang, C.Y.}, \bibinfo{author}{Robinson, J.},
+  \bibinfo{author}{Lin, Y.C.}, \bibinfo{author}{Torralba, A.},
+  \bibinfo{author}{Jegelka, S.}, \bibinfo{year}{2020}.
+\newblock \bibinfo{title}{Debiased contrastive learning}, in:
+  \bibinfo{booktitle}{Advances in Neural Information Processing Systems 33
+  (NeurIPS 2020)}.
+%Type = Inproceedings
+\bibitem[{Dai et~al.(2022)Dai, Li, Wu, Dong, Zhou, Zhang, Zhang and
+  Sun}]{dai2022gdr}
+\bibinfo{author}{Dai, Q.}, \bibinfo{author}{Li, H.}, \bibinfo{author}{Wu, P.},
+  \bibinfo{author}{Dong, Z.}, \bibinfo{author}{Zhou, X.H.},
+  \bibinfo{author}{Zhang, R.}, \bibinfo{author}{Zhang, R.},
+  \bibinfo{author}{Sun, J.}, \bibinfo{year}{2022}.
+\newblock \bibinfo{title}{A generalized doubly robust learning framework for
+  debiasing post-click conversion rate prediction}, in:
+  \bibinfo{booktitle}{Proceedings of the 28th ACM SIGKDD Conference on
+  Knowledge Discovery and Data Mining}, \bibinfo{publisher}{ACM}. pp.
+  \bibinfo{pages}{252--262}.
+\newblock \DOIprefix\doi{10.1145/3534678.3539270}.
+%Type = Inproceedings
+\bibitem[{Ding et~al.(2020)Ding, Quan, Yao, Li and Jin}]{ding2020srns}
+\bibinfo{author}{Ding, J.}, \bibinfo{author}{Quan, Y.}, \bibinfo{author}{Yao,
+  Q.}, \bibinfo{author}{Li, Y.}, \bibinfo{author}{Jin, D.},
+  \bibinfo{year}{2020}.
+\newblock \bibinfo{title}{Simplify and robustify negative sampling for implicit
+  collaborative filtering}, in: \bibinfo{booktitle}{Advances in Neural
+  Information Processing Systems 33 (NeurIPS 2020)}.
+%Type = Inproceedings
+\bibitem[{Dud{\'\i}k et~al.(2011)Dud{\'\i}k, Langford and Li}]{dudik2011doubly}
+\bibinfo{author}{Dud{\'\i}k, M.}, \bibinfo{author}{Langford, J.},
+  \bibinfo{author}{Li, L.}, \bibinfo{year}{2011}.
+\newblock \bibinfo{title}{Doubly robust policy evaluation and learning}, in:
+  \bibinfo{booktitle}{Proceedings of the 28th International Conference on
+  Machine Learning}, pp. \bibinfo{pages}{1097--1104}.
+%Type = Inproceedings
+\bibitem[{Ferrari~Dacrema et~al.(2019)Ferrari~Dacrema, Cremonesi and
+  Jannach}]{dacrema2019progress}
+\bibinfo{author}{Ferrari~Dacrema, M.}, \bibinfo{author}{Cremonesi, P.},
+  \bibinfo{author}{Jannach, D.}, \bibinfo{year}{2019}.
+\newblock \bibinfo{title}{Are we really making much progress? {A} worrying
+  analysis of recent neural recommendation approaches}, in:
+  \bibinfo{booktitle}{Proceedings of the 13th ACM Conference on Recommender
+  Systems}, \bibinfo{publisher}{ACM}. pp. \bibinfo{pages}{101--109}.
+\newblock \DOIprefix\doi{10.1145/3298689.3347058}.
+%Type = Inproceedings
+\bibitem[{Gao et~al.(2022a)Gao, Li, Lei, Chen, Li, Jiang, He, Mao and
+  Chua}]{gao2022kuairec}
+\bibinfo{author}{Gao, C.}, \bibinfo{author}{Li, S.}, \bibinfo{author}{Lei, W.},
+  \bibinfo{author}{Chen, J.}, \bibinfo{author}{Li, B.}, \bibinfo{author}{Jiang,
+  P.}, \bibinfo{author}{He, X.}, \bibinfo{author}{Mao, J.},
+  \bibinfo{author}{Chua, T.S.}, \bibinfo{year}{2022}a.
+\newblock \bibinfo{title}{{KuaiRec}: A fully-observed dataset and insights for
+  evaluating recommender systems [data set]}, in:
+  \bibinfo{booktitle}{Proceedings of the 31st ACM International Conference on
+  Information and Knowledge Management (CIKM)}, pp. \bibinfo{pages}{540--550}.
+\newblock \DOIprefix\doi{10.1145/3511808.3557220}.
+%Type = Inproceedings
+\bibitem[{Gao et~al.(2022b)Gao, Li, Zhang, Chen, Li, Lei, Jiang and
+  He}]{gao2022kuairand}
+\bibinfo{author}{Gao, C.}, \bibinfo{author}{Li, S.}, \bibinfo{author}{Zhang,
+  Y.}, \bibinfo{author}{Chen, J.}, \bibinfo{author}{Li, B.},
+  \bibinfo{author}{Lei, W.}, \bibinfo{author}{Jiang, P.}, \bibinfo{author}{He,
+  X.}, \bibinfo{year}{2022}b.
+\newblock \bibinfo{title}{{KuaiRand}: An unbiased sequential recommendation
+  dataset with randomly exposed videos [data set]}, in:
+  \bibinfo{booktitle}{Proceedings of the 31st ACM International Conference on
+  Information \& Knowledge Management (CIKM)}, pp. \bibinfo{pages}{3953--3957}.
+\newblock \DOIprefix\doi{10.1145/3511808.3557624}.
+%Type = Article
+\bibitem[{Gao et~al.(2024)Gao, Zheng, Wang, Feng, He and
+  Li}]{gao2024causalsurvey}
+\bibinfo{author}{Gao, C.}, \bibinfo{author}{Zheng, Y.}, \bibinfo{author}{Wang,
+  W.}, \bibinfo{author}{Feng, F.}, \bibinfo{author}{He, X.},
+  \bibinfo{author}{Li, Y.}, \bibinfo{year}{2024}.
+\newblock \bibinfo{title}{Causal inference in recommender systems: A survey and
+  future directions}.
+\newblock \bibinfo{journal}{ACM Transactions on Information Systems}
+  \bibinfo{volume}{42}, \bibinfo{pages}{1--32}.
+\newblock \DOIprefix\doi{10.1145/3639048}.
+%Type = Inproceedings
+\bibitem[{Guo et~al.(2021)Guo, Zou, Liu, Ye, Cheng, Wang, Chen, Yin and
+  Chang}]{guo2021mrdr}
+\bibinfo{author}{Guo, S.}, \bibinfo{author}{Zou, L.}, \bibinfo{author}{Liu,
+  Y.}, \bibinfo{author}{Ye, W.}, \bibinfo{author}{Cheng, S.},
+  \bibinfo{author}{Wang, S.}, \bibinfo{author}{Chen, H.}, \bibinfo{author}{Yin,
+  D.}, \bibinfo{author}{Chang, Y.}, \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{Enhanced doubly robust learning for debiasing
+  post-click conversion rate estimation}, in: \bibinfo{booktitle}{Proceedings
+  of the 44th International ACM SIGIR Conference on Research and Development in
+  Information Retrieval}, pp. \bibinfo{pages}{275--284}.
+\newblock \DOIprefix\doi{10.1145/3404835.3462917}.
+%Type = Inproceedings
+\bibitem[{He et~al.(2020)He, Deng, Wang, Li, Zhang and Wang}]{he2020lightgcn}
+\bibinfo{author}{He, X.}, \bibinfo{author}{Deng, K.}, \bibinfo{author}{Wang,
+  X.}, \bibinfo{author}{Li, Y.}, \bibinfo{author}{Zhang, Y.},
+  \bibinfo{author}{Wang, M.}, \bibinfo{year}{2020}.
+\newblock \bibinfo{title}{{LightGCN}: Simplifying and powering graph
+  convolution network for recommendation}, in: \bibinfo{booktitle}{Proceedings
+  of the 43rd International ACM SIGIR Conference on Research and Development in
+  Information Retrieval}, pp. \bibinfo{pages}{639--648}.
+%Type = Article
+\bibitem[{Holm(1979)}]{holm1979}
+\bibinfo{author}{Holm, S.}, \bibinfo{year}{1979}.
+\newblock \bibinfo{title}{A simple sequentially rejective multiple test
+  procedure}.
+\newblock \bibinfo{journal}{Scandinavian Journal of Statistics}
+  \bibinfo{volume}{6}, \bibinfo{pages}{65--70}.
+%Type = Inproceedings
+\bibitem[{Hu et~al.(2008)Hu, Koren and Volinsky}]{hu2008ials}
+\bibinfo{author}{Hu, Y.}, \bibinfo{author}{Koren, Y.},
+  \bibinfo{author}{Volinsky, C.}, \bibinfo{year}{2008}.
+\newblock \bibinfo{title}{Collaborative filtering for implicit feedback
+  datasets}, in: \bibinfo{booktitle}{2008 Eighth IEEE International Conference
+  on Data Mining (ICDM)}, pp. \bibinfo{pages}{263--272}.
+\newblock \DOIprefix\doi{10.1109/ICDM.2008.22}.
+%Type = Misc
+\bibitem[{Islam et~al.(2026)Islam, Faruk, Medya and Zheleva}]{dpaa2026}
+\bibinfo{author}{Islam, M.A.}, \bibinfo{author}{Faruk, A.S.},
+  \bibinfo{author}{Medya, S.}, \bibinfo{author}{Zheleva, E.},
+  \bibinfo{year}{2026}.
+\newblock \bibinfo{title}{Debiasing message passing to mitigate popularity bias
+  in {GNN}-based collaborative filtering}.
+\newblock \href{http://arxiv.org/abs/2605.11145}{{\tt arXiv:2605.11145}}.
+  \bibinfo{note}{preprint}.
+%Type = Inproceedings
+\bibitem[{Kim et~al.(2022)Kim, Oh, Do and Lee}]{kim2022navip}
+\bibinfo{author}{Kim, M.}, \bibinfo{author}{Oh, J.}, \bibinfo{author}{Do, J.},
+  \bibinfo{author}{Lee, S.}, \bibinfo{year}{2022}.
+\newblock \bibinfo{title}{Debiasing neighbor aggregation for graph neural
+  network in recommender systems}, in: \bibinfo{booktitle}{Proceedings of the
+  31st ACM International Conference on Information and Knowledge Management
+  (CIKM)}, pp. \bibinfo{pages}{4128--4132}.
+\newblock \DOIprefix\doi{10.1145/3511808.3557576}.
+%Type = Inproceedings
+\bibitem[{Krichene and Rendle(2020)}]{krichene2020sampled}
+\bibinfo{author}{Krichene, W.}, \bibinfo{author}{Rendle, S.},
+  \bibinfo{year}{2020}.
+\newblock \bibinfo{title}{On sampled metrics for item recommendation}, in:
+  \bibinfo{booktitle}{Proceedings of the 26th ACM SIGKDD International
+  Conference on Knowledge Discovery and Data Mining}, pp.
+  \bibinfo{pages}{1748--1757}.
+%Type = Inproceedings
+\bibitem[{Li et~al.(2023)Li, Zheng and Wu}]{li2023stabledr}
+\bibinfo{author}{Li, H.}, \bibinfo{author}{Zheng, C.}, \bibinfo{author}{Wu,
+  P.}, \bibinfo{year}{2023}.
+\newblock \bibinfo{title}{{StableDR}: Stabilized doubly robust learning for
+  recommendation on data missing not at random}, in:
+  \bibinfo{booktitle}{International Conference on Learning Representations
+  (ICLR)}.
+%Type = Inproceedings
+\bibitem[{Liang et~al.(2016)Liang, Charlin, McInerney and
+  Blei}]{liang2016exposure}
+\bibinfo{author}{Liang, D.}, \bibinfo{author}{Charlin, L.},
+  \bibinfo{author}{McInerney, J.}, \bibinfo{author}{Blei, D.M.},
+  \bibinfo{year}{2016}.
+\newblock \bibinfo{title}{Modeling user exposure in recommendation}, in:
+  \bibinfo{booktitle}{Proceedings of the 25th International Conference on World
+  Wide Web}, pp. \bibinfo{pages}{951--961}.
+\newblock \DOIprefix\doi{10.1145/2872427.2883090}.
+%Type = Inproceedings
+\bibitem[{Mao et~al.(2021)Mao, Zhu, Xiao, Lu, Wang and He}]{mao2021ultragcn}
+\bibinfo{author}{Mao, K.}, \bibinfo{author}{Zhu, J.}, \bibinfo{author}{Xiao,
+  X.}, \bibinfo{author}{Lu, B.}, \bibinfo{author}{Wang, Z.},
+  \bibinfo{author}{He, X.}, \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{{UltraGCN}: Ultra simplification of graph
+  convolutional networks for recommendation}, in:
+  \bibinfo{booktitle}{Proceedings of the 30th ACM International Conference on
+  Information and Knowledge Management}, pp. \bibinfo{pages}{1253--1262}.
+\newblock \DOIprefix\doi{10.1145/3459637.3482291}.
+%Type = Inproceedings
+\bibitem[{Marlin and Zemel(2009)}]{marlin2009collaborative}
+\bibinfo{author}{Marlin, B.M.}, \bibinfo{author}{Zemel, R.S.},
+  \bibinfo{year}{2009}.
+\newblock \bibinfo{title}{Collaborative prediction and ranking with non-random
+  missing data [data set]}, in: \bibinfo{booktitle}{Proceedings of the Third
+  ACM Conference on Recommender Systems (RecSys)}, pp. \bibinfo{pages}{5--12}.
+\newblock \DOIprefix\doi{10.1145/1639714.1639717}.
+%Type = Inproceedings
+\bibitem[{Menon et~al.(2021)Menon, Jayasumana, Rawat, Jain, Veit and
+  Kumar}]{menon2021logit}
+\bibinfo{author}{Menon, A.K.}, \bibinfo{author}{Jayasumana, S.},
+  \bibinfo{author}{Rawat, A.S.}, \bibinfo{author}{Jain, H.},
+  \bibinfo{author}{Veit, A.}, \bibinfo{author}{Kumar, S.},
+  \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{Long-tail learning via logit adjustment}, in:
+  \bibinfo{booktitle}{International Conference on Learning Representations
+  (ICLR)}.
+%Type = Article
+\bibitem[{Nadeau and Bengio(2003)}]{nadeau2003}
+\bibinfo{author}{Nadeau, C.}, \bibinfo{author}{Bengio, Y.},
+  \bibinfo{year}{2003}.
+\newblock \bibinfo{title}{Inference for the generalization error}.
+\newblock \bibinfo{journal}{Machine Learning} \bibinfo{volume}{52},
+  \bibinfo{pages}{239--281}.
+\newblock \DOIprefix\doi{10.1023/a:1024068626366}.
+%Type = Article
+\bibitem[{Okamura et~al.(2024)Okamura, Maeda, Togo, Ogawa and
+  Haseyama}]{okamura2024flexibly}
+\bibinfo{author}{Okamura, H.}, \bibinfo{author}{Maeda, K.},
+  \bibinfo{author}{Togo, R.}, \bibinfo{author}{Ogawa, T.},
+  \bibinfo{author}{Haseyama, M.}, \bibinfo{year}{2024}.
+\newblock \bibinfo{title}{Flexibly manipulating popularity bias for tackling
+  trade-offs in recommendation}.
+\newblock \bibinfo{journal}{Information Processing \& Management}
+  \bibinfo{volume}{61}, \bibinfo{pages}{103606}.
+\newblock \DOIprefix\doi{10.1016/j.ipm.2023.103606}.
+%Type = Inproceedings
+\bibitem[{Que et~al.(2025)Que, Zhang, Zhao and Ma}]{que2025caged}
+\bibinfo{author}{Que, Y.}, \bibinfo{author}{Zhang, Y.}, \bibinfo{author}{Zhao,
+  X.}, \bibinfo{author}{Ma, C.}, \bibinfo{year}{2025}.
+\newblock \bibinfo{title}{Causality-aware graph aggregation weight estimator
+  for popularity debiasing in top-k recommendation}, in:
+  \bibinfo{booktitle}{Proceedings of the 34th ACM International Conference on
+  Information and Knowledge Management}, \bibinfo{publisher}{ACM}. pp.
+  \bibinfo{pages}{2471--2481}.
+\newblock \DOIprefix\doi{10.1145/3746252.3761155}.
+%Type = Inproceedings
+\bibitem[{Rendle et~al.(2009)Rendle, Freudenthaler, Gantner and
+  Schmidt-Thieme}]{rendle2009bpr}
+\bibinfo{author}{Rendle, S.}, \bibinfo{author}{Freudenthaler, C.},
+  \bibinfo{author}{Gantner, Z.}, \bibinfo{author}{Schmidt-Thieme, L.},
+  \bibinfo{year}{2009}.
+\newblock \bibinfo{title}{{BPR}: Bayesian personalized ranking from implicit
+  feedback}, in: \bibinfo{booktitle}{Proceedings of the 25th Conference on
+  Uncertainty in Artificial Intelligence (UAI)}, pp. \bibinfo{pages}{452--461}.
+%Type = Misc
+\bibitem[{Rendle et~al.(2019)Rendle, Zhang and Koren}]{rendle2019baselines}
+\bibinfo{author}{Rendle, S.}, \bibinfo{author}{Zhang, L.},
+  \bibinfo{author}{Koren, Y.}, \bibinfo{year}{2019}.
+\newblock \bibinfo{title}{On the difficulty of evaluating baselines: A study on
+  recommender systems}.
+\newblock \href{http://arxiv.org/abs/1905.01395}{{\tt arXiv:1905.01395}}.
+  \bibinfo{note}{preprint}.
+%Type = Inproceedings
+\bibitem[{Saito(2020)}]{saito2020ictir}
+\bibinfo{author}{Saito, Y.}, \bibinfo{year}{2020}.
+\newblock \bibinfo{title}{Unbiased pairwise learning from biased implicit
+  feedback}, in: \bibinfo{booktitle}{Proceedings of the 2020 ACM SIGIR
+  International Conference on Theory of Information Retrieval (ICTIR)}, pp.
+  \bibinfo{pages}{5--12}.
+%Type = Inproceedings
+\bibitem[{Saito et~al.(2020)Saito, Yaginuma, Nishino, Sakata and
+  Nakata}]{saito2020unbiased}
+\bibinfo{author}{Saito, Y.}, \bibinfo{author}{Yaginuma, S.},
+  \bibinfo{author}{Nishino, Y.}, \bibinfo{author}{Sakata, H.},
+  \bibinfo{author}{Nakata, K.}, \bibinfo{year}{2020}.
+\newblock \bibinfo{title}{Unbiased recommender learning from
+  missing-not-at-random implicit feedback}, in: \bibinfo{booktitle}{Proceedings
+  of the 13th International Conference on Web Search and Data Mining (WSDM)},
+  pp. \bibinfo{pages}{501--509}.
+%Type = Inproceedings
+\bibitem[{Schnabel et~al.(2016)Schnabel, Swaminathan, Singh, Chandak and
+  Joachims}]{schnabel2016}
+\bibinfo{author}{Schnabel, T.}, \bibinfo{author}{Swaminathan, A.},
+  \bibinfo{author}{Singh, A.}, \bibinfo{author}{Chandak, N.},
+  \bibinfo{author}{Joachims, T.}, \bibinfo{year}{2016}.
+\newblock \bibinfo{title}{Recommendations as treatments: Debiasing learning and
+  evaluation [data set]}, in: \bibinfo{booktitle}{Proceedings of the 33rd
+  International Conference on Machine Learning (ICML)}, pp.
+  \bibinfo{pages}{1670--1679}.
+%Type = Inproceedings
+\bibitem[{Shen et~al.(2021)Shen, Wu, Zhang, Shan, Zhang, Letaief and
+  Li}]{shen2021gfcf}
+\bibinfo{author}{Shen, Y.}, \bibinfo{author}{Wu, Y.}, \bibinfo{author}{Zhang,
+  Y.}, \bibinfo{author}{Shan, C.}, \bibinfo{author}{Zhang, J.},
+  \bibinfo{author}{Letaief, K.B.}, \bibinfo{author}{Li, D.},
+  \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{How powerful is graph convolution for
+  recommendation?}, in: \bibinfo{booktitle}{Proceedings of the 30th ACM
+  International Conference on Information and Knowledge Management (CIKM)}, pp.
+  \bibinfo{pages}{1619--1629}.
+%Type = Inproceedings
+\bibitem[{Steck(2010)}]{steck2010mnar}
+\bibinfo{author}{Steck, H.}, \bibinfo{year}{2010}.
+\newblock \bibinfo{title}{Training and testing of recommender systems on data
+  missing not at random}, in: \bibinfo{booktitle}{Proceedings of the 16th ACM
+  SIGKDD International Conference on Knowledge Discovery and Data Mining}, pp.
+  \bibinfo{pages}{713--722}.
+%Type = Inproceedings
+\bibitem[{Steck(2019)}]{steck2019ease}
+\bibinfo{author}{Steck, H.}, \bibinfo{year}{2019}.
+\newblock \bibinfo{title}{Embarrassingly shallow autoencoders for sparse data},
+  in: \bibinfo{booktitle}{The World Wide Web Conference},
+  \bibinfo{publisher}{ACM}. pp. \bibinfo{pages}{3251--3257}.
+\newblock \DOIprefix\doi{10.1145/3308558.3313710}.
+%Type = Inproceedings
+\bibitem[{Swaminathan and Joachims(2015)}]{swaminathan2015snips}
+\bibinfo{author}{Swaminathan, A.}, \bibinfo{author}{Joachims, T.},
+  \bibinfo{year}{2015}.
+\newblock \bibinfo{title}{The self-normalized estimator for counterfactual
+  learning}, in: \bibinfo{booktitle}{Advances in Neural Information Processing
+  Systems}, pp. \bibinfo{pages}{3231--3239}.
+%Type = Inproceedings
+\bibitem[{Wang et~al.(2019a)Wang, He, Wang, Feng and Chua}]{wang2019ngcf}
+\bibinfo{author}{Wang, X.}, \bibinfo{author}{He, X.}, \bibinfo{author}{Wang,
+  M.}, \bibinfo{author}{Feng, F.}, \bibinfo{author}{Chua, T.S.},
+  \bibinfo{year}{2019}a.
+\newblock \bibinfo{title}{Neural graph collaborative filtering}, in:
+  \bibinfo{booktitle}{Proceedings of the 42nd International ACM SIGIR
+  Conference on Research and Development in Information Retrieval}, pp.
+  \bibinfo{pages}{165--174}.
+\newblock \DOIprefix\doi{10.1145/3331184.3331267}.
+%Type = Inproceedings
+\bibitem[{Wang et~al.(2019b)Wang, Zhang, Sun and Qi}]{wang2019drjl}
+\bibinfo{author}{Wang, X.}, \bibinfo{author}{Zhang, R.}, \bibinfo{author}{Sun,
+  Y.}, \bibinfo{author}{Qi, J.}, \bibinfo{year}{2019}b.
+\newblock \bibinfo{title}{Doubly robust joint learning for recommendation on
+  data missing not at random}, in: \bibinfo{booktitle}{Proceedings of the 36th
+  International Conference on Machine Learning (ICML)}, pp.
+  \bibinfo{pages}{6638--6647}.
+%Type = Inproceedings
+\bibitem[{Wang et~al.(2020)Wang, Chen, Wen, Huang, Kuruoglu and
+  Zheng}]{wang2020cvib}
+\bibinfo{author}{Wang, Z.}, \bibinfo{author}{Chen, X.}, \bibinfo{author}{Wen,
+  R.}, \bibinfo{author}{Huang, S.L.}, \bibinfo{author}{Kuruoglu, E.E.},
+  \bibinfo{author}{Zheng, Y.}, \bibinfo{year}{2020}.
+\newblock \bibinfo{title}{Information theoretic counterfactual learning from
+  missing-not-at-random feedback}, in: \bibinfo{booktitle}{Advances in Neural
+  Information Processing Systems}.
+%Type = Inproceedings
+\bibitem[{Wei et~al.(2021)Wei, Feng, Chen, Wu, Yi and He}]{wei2021macr}
+\bibinfo{author}{Wei, T.}, \bibinfo{author}{Feng, F.}, \bibinfo{author}{Chen,
+  J.}, \bibinfo{author}{Wu, Z.}, \bibinfo{author}{Yi, J.}, \bibinfo{author}{He,
+  X.}, \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{Model-agnostic counterfactual reasoning for
+  eliminating popularity bias in recommender system}, in:
+  \bibinfo{booktitle}{Proceedings of the 27th ACM SIGKDD Conference on
+  Knowledge Discovery and Data Mining}, pp. \bibinfo{pages}{1791--1800}.
+\newblock \DOIprefix\doi{10.1145/3447548.3467289}.
+%Type = Inproceedings
+\bibitem[{Wu et~al.(2021)Wu, Wang, Feng, He, Chen, Lian and Xie}]{wu2021sgl}
+\bibinfo{author}{Wu, J.}, \bibinfo{author}{Wang, X.}, \bibinfo{author}{Feng,
+  F.}, \bibinfo{author}{He, X.}, \bibinfo{author}{Chen, L.},
+  \bibinfo{author}{Lian, J.}, \bibinfo{author}{Xie, X.}, \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{Self-supervised graph learning for recommendation},
+  in: \bibinfo{booktitle}{Proceedings of the 44th International ACM SIGIR
+  Conference on Research and Development in Information Retrieval}, pp.
+  \bibinfo{pages}{726--735}.
+\newblock \DOIprefix\doi{10.1145/3404835.3462862}.
+%Type = Article
+\bibitem[{Wu et~al.(2023)Wu, Sun, Zhang, Xie and Cui}]{wu2022gnnsurvey}
+\bibinfo{author}{Wu, S.}, \bibinfo{author}{Sun, F.}, \bibinfo{author}{Zhang,
+  W.}, \bibinfo{author}{Xie, X.}, \bibinfo{author}{Cui, B.},
+  \bibinfo{year}{2023}.
+\newblock \bibinfo{title}{Graph neural networks in recommender systems: A
+  survey}.
+\newblock \bibinfo{journal}{ACM Computing Surveys} \bibinfo{volume}{55},
+  \bibinfo{pages}{1--37}.
+\newblock \DOIprefix\doi{10.1145/3535101}.
+%Type = Inproceedings
+\bibitem[{Yu et~al.(2022)Yu, Yin, Xia, Chen, Cui and Nguyen}]{yu2022simgcl}
+\bibinfo{author}{Yu, J.}, \bibinfo{author}{Yin, H.}, \bibinfo{author}{Xia, X.},
+  \bibinfo{author}{Chen, T.}, \bibinfo{author}{Cui, L.},
+  \bibinfo{author}{Nguyen, Q.V.H.}, \bibinfo{year}{2022}.
+\newblock \bibinfo{title}{Are graph augmentations necessary?: Simple graph
+  contrastive learning for recommendation}, in: \bibinfo{booktitle}{Proceedings
+  of the 45th International ACM SIGIR Conference on Research and Development in
+  Information Retrieval}, \bibinfo{publisher}{ACM}. pp.
+  \bibinfo{pages}{1294--1303}.
+\newblock \DOIprefix\doi{10.1145/3477495.3531937}.
+%Type = Inproceedings
+\bibitem[{Zhang et~al.(2022)Zhang, Ma, Wang and Chua}]{zhang2022bc}
+\bibinfo{author}{Zhang, A.}, \bibinfo{author}{Ma, W.}, \bibinfo{author}{Wang,
+  X.}, \bibinfo{author}{Chua, T.S.}, \bibinfo{year}{2022}.
+\newblock \bibinfo{title}{Incorporating bias-aware margins into contrastive
+  loss for collaborative filtering}, in: \bibinfo{booktitle}{Advances in Neural
+  Information Processing Systems 35 (NeurIPS 2022)}.
+%Type = Inproceedings
+\bibitem[{Zhang et~al.(2023)Zhang, Sheng, Cai, Wang and
+  Chua}]{zhang2023advinfonce}
+\bibinfo{author}{Zhang, A.}, \bibinfo{author}{Sheng, L.}, \bibinfo{author}{Cai,
+  Z.}, \bibinfo{author}{Wang, X.}, \bibinfo{author}{Chua, T.S.},
+  \bibinfo{year}{2023}.
+\newblock \bibinfo{title}{Empowering collaborative filtering with principled
+  adversarial contrastive loss}, in: \bibinfo{booktitle}{Advances in Neural
+  Information Processing Systems 36 (NeurIPS 2023)}.
+%Type = Inproceedings
+\bibitem[{Zhang et~al.(2021)Zhang, Feng, He, Wei, Song, Ling and
+  Zhang}]{zhang2021pda}
+\bibinfo{author}{Zhang, Y.}, \bibinfo{author}{Feng, F.}, \bibinfo{author}{He,
+  X.}, \bibinfo{author}{Wei, T.}, \bibinfo{author}{Song, C.},
+  \bibinfo{author}{Ling, G.}, \bibinfo{author}{Zhang, Y.},
+  \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{Causal intervention for leveraging popularity bias in
+  recommendation}, in: \bibinfo{booktitle}{Proceedings of the 44th
+  International ACM SIGIR Conference on Research and Development in Information
+  Retrieval}, pp. \bibinfo{pages}{11--20}.
+\newblock \DOIprefix\doi{10.1145/3404835.3462875}.
+%Type = Inproceedings
+\bibitem[{Zhao et~al.(2022)Zhao, Wu, Liang, Chen, Zhang, Deng, Wang, Shen, Lv
+  and Wu}]{zhao2022radjnorm}
+\bibinfo{author}{Zhao, M.}, \bibinfo{author}{Wu, L.}, \bibinfo{author}{Liang,
+  Y.}, \bibinfo{author}{Chen, L.}, \bibinfo{author}{Zhang, J.},
+  \bibinfo{author}{Deng, Q.}, \bibinfo{author}{Wang, K.},
+  \bibinfo{author}{Shen, X.}, \bibinfo{author}{Lv, T.}, \bibinfo{author}{Wu,
+  R.}, \bibinfo{year}{2022}.
+\newblock \bibinfo{title}{Investigating accuracy-novelty performance for
+  graph-based collaborative filtering}, in: \bibinfo{booktitle}{Proceedings of
+  the 45th International ACM SIGIR Conference on Research and Development in
+  Information Retrieval}, \bibinfo{publisher}{ACM}. pp.
+  \bibinfo{pages}{50--59}.
+\newblock \DOIprefix\doi{10.1145/3477495.3532005}.
+%Type = Inproceedings
+\bibitem[{Zheng et~al.(2021)Zheng, Gao, Li, He, Li and Jin}]{zheng2021dice}
+\bibinfo{author}{Zheng, Y.}, \bibinfo{author}{Gao, C.}, \bibinfo{author}{Li,
+  X.}, \bibinfo{author}{He, X.}, \bibinfo{author}{Li, Y.},
+  \bibinfo{author}{Jin, D.}, \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{Disentangling user interest and conformity for
+  recommendation with causal embedding}, in: \bibinfo{booktitle}{Proceedings of
+  the Web Conference (WWW)}, pp. \bibinfo{pages}{2980--2991}.
+%Type = Inproceedings
+\bibitem[{Zhou et~al.(2023)Zhou, Chen, Dong, Zha, Zhou and
+  Huang}]{zhou2023apda}
+\bibinfo{author}{Zhou, H.}, \bibinfo{author}{Chen, H.}, \bibinfo{author}{Dong,
+  J.}, \bibinfo{author}{Zha, D.}, \bibinfo{author}{Zhou, C.},
+  \bibinfo{author}{Huang, X.}, \bibinfo{year}{2023}.
+\newblock \bibinfo{title}{Adaptive popularity debiasing aggregator for graph
+  collaborative filtering}, in: \bibinfo{booktitle}{Proceedings of the 46th
+  International ACM SIGIR Conference on Research and Development in Information
+  Retrieval}, \bibinfo{publisher}{ACM}. pp. \bibinfo{pages}{7--17}.
+\newblock \DOIprefix\doi{10.1145/3539618.3591635}.
+
+\end{thebibliography}

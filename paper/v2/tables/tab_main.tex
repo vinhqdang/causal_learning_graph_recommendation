@@ -1,0 +1,61 @@
+% Table 2: main comparison. Sources: results/v4/final_summary.txt (method and paired diffs, p_Holm,
+% configuration counts), paper/tables/accuracy.tex (sd of baselines and extra rows), ensemble_summary
+% and final_analysis (sd of the final method). Diff = paired per-user mean difference (final minus
+% baseline) x 1e-3, 95% CI half-width in brackets.
+\begin{table}[t]
+\centering
+\caption{Main comparison (seed 0, full selection). Test nDCG is mean $\pm$ sd over splits. Diff is the paired per-user difference of the final method minus the baseline, $\times10^{-3}$, with the 95\% CI half-width. $p_{\text{Holm}}$ is adjusted within each dataset over the block's family (sizes 8, 6, 7, 9). Bold: best of the block; underline: second (KuaiRec: within the family). The final method is tuned over 324, 84, 30 and 120 configurations (Coat, Yahoo! R3, KuaiRand, KuaiRec), against 6 to 216 for the baselines (Configs column). Rows marked re-impl.\ use a simplified AdvInfoNCE (Section~\ref{sec:advsetup}). On KuaiRec the final method ranks third within its Holm family.}
+\label{tab:main}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{0.9}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Method & Test nDCG & Configs & Diff $\times10^{-3}$ [95\% CI] & $p_{\text{Holm}}$ \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{Coat (nDCG@5; 10 splits)}} \\
+\qp (final) & \textbf{0.6015 $\pm$ 0.0162} & 324 & -- & -- \\
+iALS & \underline{0.5812 $\pm$ 0.0101} & 24 & $+20.02$ [19.74] & 0.0469 \\
+DR-LightGCN & 0.5724 $\pm$ 0.0205 & 54 & $+32.68$ [23.12] & 0.0116 \\
+r-AdjNorm & 0.5722 $\pm$ 0.0134 & 108 & $+28.27$ [18.42] & 0.0083 \\
+LightGCN & 0.5683 $\pm$ 0.0132 & 54 & $+32.03$ [17.27] & 0.0016 \\
+NAVIP & 0.5664 $\pm$ 0.0163 & 54 & $+33.62$ [19.63] & 0.0035 \\
+SimGCL & 0.5528 $\pm$ 0.0141 & 108 & $+49.52$ [23.99] & 0.0004 \\
+MACR & 0.5418 $\pm$ 0.0134 & 36 & $+61.46$ [27.66] & $<0.001$ \\
+AdvInfoNCE (re-impl.) & 0.5222 $\pm$ 0.0204 & 216 & $+78.50$ [27.63] & $<0.001$ \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{Yahoo! R3 (nDCG@5; 5 splits)}} \\
+\qp (final) & \textbf{0.6866 $\pm$ 0.0034} & 84 & -- & -- \\
+r-AdjNorm & \underline{0.6742 $\pm$ 0.0047} & 72 & $+12.67$ [6.01] & $<0.001$ \\
+LightGCN & 0.6708 $\pm$ 0.0061 & 36 & $+16.77$ [5.82] & $<0.001$ \\
+NAVIP & 0.6701 $\pm$ 0.0039 & 36 & $+17.51$ [6.02] & $<0.001$ \\
+iALS & 0.6625 $\pm$ 0.0043 & 12 & $+24.88$ [8.77] & $<0.001$ \\
+AdvInfoNCE (re-impl.) & 0.6477 $\pm$ 0.0048 & 16 & $+37.85$ [8.48] & $<0.001$ \\
+SimGCL & 0.6348 $\pm$ 0.0048 & 12 & $+53.26$ [10.05] & $<0.001$ \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{KuaiRand (nDCG@10; 5 splits)}} \\
+\qp (final) & \textbf{0.4613 $\pm$ 0.0024} & 30 & -- & -- \\
+r-AdjNorm & \underline{0.4590 $\pm$ 0.0024} & 12 & $+1.94$ [1.61] & 0.0185 \\
+LightGCN & 0.4569 $\pm$ 0.0010 & 6 & $+3.93$ [1.53] & $<0.001$ \\
+NAVIP & 0.4565 $\pm$ 0.0017 & 6 & $+4.36$ [1.46] & $<0.001$ \\
+iALS & 0.4528 $\pm$ 0.0017 & 12 & $+8.98$ [3.23] & $<0.001$ \\
+AdvInfoNCE (re-impl.) & 0.4480 $\pm$ 0.0017 & 8 & $+12.79$ [2.50] & $<0.001$ \\
+BPR-MF & 0.4475 $\pm$ 0.0027 & 6 & $+13.99$ [2.62] & $<0.001$ \\
+SimGCL & 0.4196 $\pm$ 0.0022 & 12 & $+42.20$ [4.04] & $<0.001$ \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{KuaiRec (nDCG@20; 5 splits)}} \\
+\textbf{DR-JL} & \textbf{0.6332 $\pm$ 0.0026} & 6 & $-4.56$ [2.24] & $<0.001$ \\
+MRDR & \underline{0.6328 $\pm$ 0.0020} & 6 & $-4.34$ [2.16] & $<0.001$ \\
+\qp (final) & 0.6285 $\pm$ 0.0022 & 120 & -- & -- \\
+LightGCN-pt & 0.6271 $\pm$ 0.0023 & 36 & $+1.31$ [3.34] & 0.4409 \\
+DR-LightGCN & 0.6212 $\pm$ 0.0071 & 6 & $+7.73$ [2.01] & $<0.001$ \\
+NAVIP & 0.6186 $\pm$ 0.0024 & 6 & $+10.49$ [2.28] & $<0.001$ \\
+iALS & 0.6133 $\pm$ 0.0027 & 12 & $+15.92$ [3.03] & $<0.001$ \\
+LightGCN & 0.6085 $\pm$ 0.0028 & 36 & $+20.90$ [2.88] & $<0.001$ \\
+r-AdjNorm & 0.6083 $\pm$ 0.0031 & 12 & $+20.68$ [2.75] & $<0.001$ \\
+AdvInfoNCE (re-impl.) & 0.5776 $\pm$ 0.0036 & 8 & $+49.32$ [6.57] & $<0.001$ \\
+\bottomrule
+\end{tabular}
+\\[2pt]
+{\footnotesize Beta per split: Coat 1.0 (5 splits), 2.0 (2), 0.5 (1), 0.0 (2); Yahoo! R3 1.0 (4), 0.0 (1); KuaiRand 0.0 (4), 0.5 (1); KuaiRec 1.0 (4), 2.0 (1). Training-free and other rows: Table~\ref{tab:extra}.}
+\end{table}
