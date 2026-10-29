@@ -10,6 +10,16 @@ coat (metric ndcg@5); seeds: final method via combine, baselines from part files
     vs iALS         diff    +3.39e-3 [ 20.70]  p 0.7470  p_Holm 0.7470
     vs DR-LightGCN  diff   +33.36e-3 [ 17.31]  p 0.0002  p_Holm 0.0004
 
+yahoo (metric ndcg@5); seeds: final method via combine, baselines from part files
+  method             seed0     seed1     seed2     seed3   mean+-std0(1-3)  sd1(1-3)    mean+-std0(0-3)  sd1(0-3)
+  final             0.6866    0.6874    0.6882    0.6886   0.6881+-0.0005  0.0006    0.6877+-0.0008  0.0009
+  r-AdjNorm         0.6742    0.6711    0.6752    0.6746   0.6736+-0.0018  0.0022    0.6738+-0.0016  0.0018
+  LightGCN          0.6708    0.6671    0.6700    0.6702   0.6691+-0.0014  0.0018    0.6695+-0.0014  0.0017
+  per-user paired tests, final vs baseline (seeds 1-3, all splits), Holm within dataset:
+  Holm family: 2 tests; compared baselines: r-AdjNorm, LightGCN
+    vs r-AdjNorm    diff   +14.76e-3 [  5.23]  p 0.0000  p_Holm 0.0000
+    vs LightGCN     diff   +20.02e-3 [  5.08]  p 0.0000  p_Holm 0.0000
+
 kuairand (metric ndcg@10); seeds: final method via combine, baselines from part files
   method             seed0     seed1     seed2     seed3   mean+-std0(1-3)  sd1(1-3)    mean+-std0(0-3)  sd1(0-3)
   final             0.4613    0.4602    0.4601    0.4608   0.4604+-0.0003  0.0004    0.4606+-0.0005  0.0006
