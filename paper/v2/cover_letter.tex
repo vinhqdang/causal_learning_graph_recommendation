@@ -1,0 +1,19 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\pagestyle{empty}
+\begin{document}
+\noindent Dear Editors,\bigskip
+
+\noindent I submit the manuscript ``Which negatives are really negative? Exposure-aware negative weighting and an imputation prior for graph collaborative filtering under exposure bias'' for consideration in \emph{Information Sciences}.
+
+Graph collaborative filtering models such as LightGCN are trained on logs in which an item can be chosen only if it was shown, so many sampled negatives are unexposed items whose preference is unknown. The manuscript weights each sampled negative by the posterior probability that the unlogged pair is positive, computed from a propensity and an imputation fitted on the biased log, and adds a fixed score offset derived from the same imputation. No uniformly collected data are used for training; they serve only for validation and testing (Coat's shipped propensities are the one exception, which the manuscript states).
+
+The evaluation uses Coat, Yahoo! R3, KuaiRand-Pure and KuaiRec, per-split model selection, per-user paired tests with Holm correction, three further seeds, shuffled-weight controls and a simplified re-implementation of AdvInfoNCE. The method has a higher mean nDCG than every graph baseline on all four datasets and is the best method on Yahoo! R3 and KuaiRand. It does not exceed iALS on Coat across seeds, and it is below DR-JL, MRDR and a training-free propagation operator on KuaiRec. The manuscript reports these limits, the unequal tuning budgets and the small size of several effects in the main text.
+
+The work is original, is not under consideration elsewhere and has not been published. A previous manuscript on a related training-free operator was submitted to another journal and rejected; the present manuscript has a different method, evaluation and conclusions. Code, configurations and result files are public. I have no competing interests.\bigskip
+
+\noindent Sincerely,\\
+Quang-Vinh Dang\\
+British University Vietnam, Hung Yen, Vietnam\\
+vinh.dq4@buv.edu.vn
+\end{document}

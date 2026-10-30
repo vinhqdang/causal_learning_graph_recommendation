@@ -2,13 +2,13 @@
 % configuration counts), paper/tables/accuracy.tex (sd of baselines and extra rows), ensemble_summary
 % and final_analysis (sd of the final method). Diff = paired per-user mean difference (final minus
 % baseline) x 1e-3, 95% CI half-width in brackets.
-\begin{table}[t]
+\begin{table}[p]
 \centering
 \caption{Main comparison (seed 0, full selection). Test nDCG is mean $\pm$ sd over splits. Diff is the paired per-user difference of the final method minus the baseline, $\times10^{-3}$, with the 95\% CI half-width. $p_{\text{Holm}}$ is adjusted within each dataset over the block's family (sizes 8, 6, 7, 9). Bold: best of the block; underline: second (KuaiRec: within the family). The final method is tuned over 324, 84, 30 and 120 configurations (Coat, Yahoo! R3, KuaiRand, KuaiRec), against 6 to 216 for the baselines (Configs column). Rows marked re-impl.\ use a simplified AdvInfoNCE (Section~\ref{sec:advsetup}). On KuaiRec the final method ranks third within its Holm family.}
 \label{tab:main}
-\footnotesize
+\scriptsize
 \setlength{\tabcolsep}{4pt}
-\renewcommand{\arraystretch}{0.9}
+\renewcommand{\arraystretch}{0.85}
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
 Method & Test nDCG & Configs & Diff $\times10^{-3}$ [95\% CI] & $p_{\text{Holm}}$ \\

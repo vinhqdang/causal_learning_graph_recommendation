@@ -14,13 +14,13 @@ The pairwise loss that trains LightGCN, Bayesian personalised ranking (BPR)
 \citep{rendle2009bpr}, draws its negatives uniformly from the items that the user
 has no logged interaction with. Under exposure bias most of these items were never
 shown to the user, and some of them would have been liked had they been shown.
-These are false negatives, and they concentrate on rarely exposed items, where the
-log carries the least information.
+These are false negatives, and they may be concentrated among rarely exposed items,
+where the log carries the least information.
 Matrix factorisation models have addressed this by treating exposure as a latent
 variable \citep{liang2016exposure} or by re-weighting the likelihood with
-propensities \citep{saito2020unbiased}. Loss-level debiasing with inverse
+propensities \citep{saito2020unbiased}. Loss-level debiasing with pointwise inverse
 propensity or doubly robust (DR) estimators \citep{schnabel2016,wang2019drjl,guo2021mrdr}
-is defined over observed or sampled entries. In our experiments a
+is another line of work. In our experiments a
 pointwise DR loss on LightGCN (DR-LightGCN) reaches nDCG@5 of 0.5528 on Yahoo!\,R3,
 well below BPR training of LightGCN on the same data (0.6708).
 
@@ -39,7 +39,7 @@ negatives contribute less gradient. The standardised logit of the imputation is
 added to the score as a fixed offset, whose weight is selected on validation data.
 Both nuisance functions are fitted once on the biased log before training. Training
 therefore uses no uniformly collected data, except the shipped Coat propensities, which the dataset authors estimated from a uniform sample (Section~\ref{sec:nuisance}). We call the resulting model \qp{}
-(Q-weighted negatives with an imputation prior offset).
+(Q-weighted negatives with an imputation prior offset). The novelty is limited to the Q-posterior weighting of sampled negatives and the imputation-logit offset, both inside the pairwise loss of a graph model. We did not find a previous study that combines these two in that way, although the search used general web search engines only (Section~\ref{sec:related}).
 
 The evaluation design follows from a concern that progress claims in top-$N$
 recommendation often do not survive a comparison with tuned simple baselines
@@ -48,14 +48,14 @@ debiasing gains rely on protocols that train on uniformly collected data. We use
 configuration of each split is selected on validation data, the per-user comparisons
 are corrected with Holm's procedure \citep{holm1979}, and the selected configurations
 are retrained with additional seeds. The results are mixed, and we report them as
-such. \qp{} has a higher mean than every graph baseline on all four datasets (significant except
-LightGCN-pt on KuaiRec), and it is the best method among those we ran on Yahoo!\,R3 and KuaiRand.
+such. \qp{} has a higher mean than every trained graph baseline in the Holm family on all four datasets, and the differences are significant except against LightGCN-pt on KuaiRec. It is the best method among those we ran on Yahoo!\,R3 and KuaiRand, with a larger tuning budget than the baselines.
 On Coat it is above iALS in the main run but not significantly different from it across
 retraining seeds. On KuaiRec it is below DR-JL and MRDR in the main run and not significantly
-different from them across seeds. On KuaiRec a
-training-free propagation operator, DRUP, is the strongest method we ran.
+different from them across seeds. DR-LightGCN was tested only on Coat and KuaiRec. On KuaiRec, the
+training-free propagation operators DRUP and the DR adjacency it is built on (0.6378) are higher than \qp{}.
 
-DRUP, a training-free walk-corrected propagation operator, applies inverse-propensity and DR edge
+This paper also studies DRUP, a training-free walk-corrected propagation operator. DRUP
+applies inverse-propensity and DR edge
 estimates to multi-hop propagation and corrects the bias that repeated edges add to
 walks of more than one hop. We keep DRUP as a baseline and as a component, and we
 report a negative finding about its correction term. At matched configurations the
@@ -73,18 +73,18 @@ exposure propensity (Eq.~\eqref{eq:Q}). $Q$ is used twice in LightGCN: to weight
 sampled BPR negatives and as a standardised imputation offset. The method adds one
 selected hyper-parameter, the offset weight, and one lookup per sampled negative.
 \item \emph{Evaluation.} A comparison on four public benchmarks with an unbiased test
-set (Coat, Yahoo!\,R3, KuaiRand-Pure and KuaiRec), in which uniform data are used
-only for validation and testing (Coat's shipped propensities excepted). The comparison uses per-user paired tests with Holm
+set (Coat, Yahoo!\,R3, KuaiRand-Pure and KuaiRec). Uniform data are used only for
+validation and testing, as in CDR \citep{song2023cdr} and PPD \citep{islam2026ppd}; this protocol is not a contribution in itself, and Coat's shipped propensities are the exception. The comparison uses per-user paired tests with Holm
 correction within each dataset, and the main configurations are retrained with three
 additional seeds.
 \item \emph{Mechanism.} Ablations that replace $Q$ by the imputation alone, by item
 popularity, or by a random permutation of its own values. The shuffled control
-returns to the level of LightGCN, which shows that the weighting requires an
+returns to the level of LightGCN on Coat and Yahoo!\,R3; without a significance test, this suggests that the weighting needs an
 informative $Q$. The relative contribution of weighting and offset depends on the
 dataset. On Coat, with unmatched grids (108 vs 54 configurations), the offset alone
 recovers most of the gain.
-\item \emph{A negative result on walk correction.} The idempotent correction of DRUP
-does not improve accuracy on real data at matched configurations, and it improves
+\item \emph{A negative result on walk correction.} The walk correction of DRUP, a
+training-free operator studied in this paper, does not improve accuracy on real data at matched configurations, and it improves
 scores only under semi-synthetic conditions with known propensities.
 \end{enumerate}
 

@@ -2,18 +2,32 @@
 
 Scope: `sections/s1_intro.tex`, `sections/s2_related.tex`, `sections/s3_setting.tex`.
 
-## Not added to refs_new.bib (authors, venue or year not certain)
+## Still to verify by the author
 
-- **iALS revisited (OUTLINE TODO-C9).** The outline lists Rendle, Krichene, Zhang and Koren (RecSys 2022). The author list is not confirmed, so no entry was added and the text does not cite it. Add once the publisher page is checked.
+Each item below is a field or claim that the checks on 2026-10-29 (`refs_verified.md`, `lit_search.md`) did not confirm. The field is omitted from the entry in `refs_new.bib`, or the claim is hedged in the text.
+
+- **rendle2009bpr:** the UAI proceedings have no DOI. Page range 452--461 is from a repository record and an index; the PMLR reprint is paginated 460--469.
+- **holm1979:** the JSTOR page did not load; volume, issue and pages are from secondary records. No DOI.
+- **zhang2023advinfonce:** NeurIPS 2023 proceedings hash and page not retrieved; acceptance confirmed from the arXiv and poster pages.
+- **zhang2022bc:** NeurIPS volume 35 not read off the proceedings page.
+- **chuang2020dcl:** arXiv id 2007.00224 is from the authors' lab BibTeX only.
+- **menon2021logit:** OpenReview id and ICLR proceedings URL not retrieved.
+- **saito2020ictir:** paper content (propensity estimation) not read; bibliographic record only.
+- **liu2020kdcrec (KDCRec):** pages and DOI omitted; full text not read and bibliographic data not confirmed against the proceedings. Abstract-level description only (uniform data used for training).
+- **lee2022biser (BISER):** DOI not in the entry (the arXiv copy has a placeholder).
+- **zhang2026conalign (ConAlign), yin2026cw (Correct-and-Weight):** arXiv preprints; venue not established.
+- **dpaa2026:** arXiv primary category and any later publication.
+- **steck2010mnar:** the abstract was available only as a paraphrase; the corrected sentence in Section 2 is based on it.
+- **Table 1, IPS, SNIPS, DR, DR-JL, MRDR, "Uniform data = no":** not checked against the original papers (propensity estimation in schnabel2016 can use a randomised sample).
+- **Table 1, Uniform data for CAGED, DPAA, APDA:** based on published descriptions (caption says so); full texts not read. NAVIP was read in full text.
+- **AdvDrop and PPD (table rows and text):** IPS and DR baseline details, and the validation protocol of DR-GNN, are as described in the search summary and not separately checked.
+- **InterD (ding2022interd) and KBDR (li2024kbdr):** not added to the text. The search did not verify their protocols (InterD split not verified; KBDR section silent on the role of unbiased ratings).
 - **Earlier DRUP work.** The introduction says "DRUP, which we introduced in earlier work". No bib entry for that work exists in `paper/refs.bib`. Add its key when the reference is confirmed.
-
-## Added to refs_new.bib from memory: verify each against the publisher page before submission
-
-rendle2009bpr, holm1979, zhang2023advinfonce, saito2020ictir (pages), ding2020srns, chuang2020dcl, zhang2022bc, steck2010mnar, menon2021logit, krichene2020sampled (pages). Keys are used in the sections as follows: rendle2009bpr and holm1979 in the introduction, the other keys in Section 2.
+- **Gap statement (Section 2, "Evaluation protocols and the gap").** The search used general web search engines only, not bibliographic databases. The claim is hedged accordingly; a database search may find further papers.
 
 ## Claims without a verified source
 
-1. **Gap statement (Section 2.6, outline Section 9, TODO-G1).** "To our knowledge, no previous study uses the DR nuisances to weight the negatives of a graph recommender" and the sentence on the evaluation protocols of other work. The literature search has not been run. Do not submit before G1 is done. Do not write "first".
+1. **Gap statement (Section 2.6, outline Section 9, TODO-G1).** Literature search run on 2026-10-29 (`lit_search.md`); the text now uses the narrower wording and states the search limits. Do not write "first".
 2. **Table 1, cells not stated in the outline.** These are based on the method families and were not checked against the original papers:
    - the "Uniform data" entries for NAVIP, r-AdjNorm, APDA, CAGED and DPAA (set to "no");
    - "depends" for ExpoMF, Rel-MF and UBPR;

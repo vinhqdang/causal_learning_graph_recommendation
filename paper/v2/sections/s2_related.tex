@@ -2,16 +2,13 @@
 
 \subsection{Graph collaborative filtering}
 
-LightGCN \citep{he2020lightgcn} removes the feature transformations and non-linearities
-of earlier graph convolutional recommenders \citep{wang2019ngcf}, which reduces
-propagation to a weighted sum of powers of a normalised adjacency matrix. Later
-variants approximate infinitely many propagation layers \citep{mao2021ultragcn} or add
-contrastive views of the graph \citep{wu2021sgl,yu2022simgcl}. Closed-form and
-linear models are strong competitors. EASE \citep{steck2019ease} learns an item--item
-matrix in closed form, GF-CF \citep{shen2021gfcf} casts collaborative filtering as
-graph signal filtering, and BSPM \citep{choi2023bspm} uses a related diffusion view.
-Implicit matrix factorisation with weighted least squares \citep{hu2008ials} remains a
-competitive baseline, and carefully tuned simple methods often match published graph
+LightGCN \citep{he2020lightgcn} is the backbone used here. It is one of several graph
+convolutional recommenders, which include NGCF \citep{wang2019ngcf}. Other graph models
+include UltraGCN \citep{mao2021ultragcn}, and self-supervised and contrastive graph variants
+include SGL \citep{wu2021sgl} and SimGCL \citep{yu2022simgcl}. Linear and closed-form models
+include EASE \citep{steck2019ease}, GF-CF \citep{shen2021gfcf} and BSPM \citep{choi2023bspm}.
+Implicit matrix factorisation with weighted least squares, iALS \citep{hu2008ials,rendle2022ials},
+is a standard baseline, and carefully tuned simple methods often match published graph
 models \citep{anelli2023myth}. A survey of graph-based recommenders is given by
 \citet{wu2022gnnsurvey}. These models fit or propagate over the logged graph and do not
 model which pairs were exposed. The present method keeps the propagation of LightGCN and
@@ -24,20 +21,21 @@ Ratings and implicit feedback are missing not at random
 causal methods that address them \citep{chen2023bias,gao2024causalsurvey}. Propensity
 methods re-weight the loss by inverse propensities or self-normalised estimators
 \citep{schnabel2016,swaminathan2015snips,saito2020unbiased}. Steck \citep{steck2010mnar}
-studied how training and evaluation should account for missingness when a uniformly
-sampled subset is available. Doubly robust learning adds an imputation model
+showed that missing ratings carry information, proposed test measures that can be
+estimated without bias when ratings are missing not at random, and derived
+training objectives that account for the missing entries. Doubly robust learning adds an imputation model
 \citep{wang2019drjl}, and later variants reduce its bias or variance
-\citep{guo2021mrdr,dai2022gdr,li2023stabledr}. An information-theoretic counterfactual
-formulation is given by \citet{wang2020cvib}. Some debiasing methods use a small uniform
-sample for training, as in AutoDebias \citep{chen2021autodebias} and CausE
-\citep{bonner2018cause}. Causal approaches to popularity bias use counterfactual
-reasoning \citep{wei2021macr}, confounder adjustment \citep{zhang2021pda} or
-disentangled representations \citep{zheng2021dice}, and later work studies popularity
-debiasing through the balance of user and item perspectives \citep{boratto2021connecting},
-controllable trade-offs \citep{okamura2024flexibly} and invariant learning
-\citep{bai2025invariant}. These methods correct the loss or the output of a model. The
-present method applies propensity and DR estimation to the nuisances that define which
-pairs act as negatives.
+\citep{guo2021mrdr,dai2022gdr,li2023stabledr}. Information-theoretic counterfactual
+learning from MNAR feedback is studied by \citet{wang2020cvib}. Some debiasing methods use a small uniform
+sample for training, as in AutoDebias \citep{chen2021autodebias}, CausE
+\citep{bonner2018cause} and KDCRec \citep{liu2020kdcrec}, which distils from a model fitted on uniform data into one trained on the biased log.
+Work on popularity bias includes model-agnostic counterfactual reasoning \citep{wei2021macr},
+causal intervention \citep{zhang2021pda}, disentangled user interest and conformity
+\citep{zheng2021dice}, popularity debiasing that connects user and item perspectives
+\citep{boratto2021connecting}, flexible manipulation of popularity bias
+\citep{okamura2024flexibly} and invariant debiasing learning via biased imputation
+\citep{bai2025invariant}. The present method applies propensity and DR estimation to the
+nuisances that define which pairs act as negatives.
 
 \subsection{False negatives and negative weighting in implicit feedback}
 
@@ -48,9 +46,13 @@ by propensity, and unbiased pairwise learning \citep{saito2020ictir} applies the
 idea to pairwise objectives. Sampling-based methods treat false negatives directly.
 SRNS \citep{ding2020srns} identifies likely false negatives in the sampling step, and
 debiased contrastive learning \citep{chuang2020dcl} corrects the sampling of negatives
-that are in fact positives. In contrastive collaborative filtering, the bias-aware
-margins of the BC loss \citep{zhang2022bc} and the adversarial re-weighting of negatives
-in AdvInfoNCE \citep{zhang2023advinfonce} change how hard negatives are weighted.
+that are in fact positives. In contrastive collaborative filtering, the BC loss
+\citep{zhang2022bc} adds a margin that depends on the popularity-bias degree of each
+interaction, and AdvInfoNCE \citep{zhang2023advinfonce} assigns each negative an
+adversarially learned hardness weight. Correct-and-Weight \citep{yin2026cw} combines a loss
+correction with a weighting of negatives against false negatives, and is tested with MF,
+LightGCN and XSimGCL on random splits. Exposure-aware negative sampling for graph
+recommenders uses in-community item popularity as a proxy for exposure \citep{chen2026icpns}.
 The present weight $1-Q$ has the posterior form of ExpoMF but is computed in closed form
 from the nuisances of a DR estimator. It is applied to a graph model with a pairwise
 loss and is combined with a prior offset. The original formulations of ExpoMF, SRNS and
@@ -59,14 +61,21 @@ AdvInfoNCE do not use a propensity and an imputation of this kind.
 \subsection{Debiasing inside graph models}
 
 NAVIP \citep{kim2022navip} weights neighbour aggregation by inverse propensities inside
-a graph neural recommender. r-AdjNorm \citep{zhao2022radjnorm} tunes the normalisation
-of the adjacency matrix to control popularity amplification, and graph convolutions are
-analysed as amplifiers of popularity bias by \citet{chen2024gcnpop}. APDA
+a graph neural recommender. IPS-weighted BPR on LightGCN has been studied on simulated
+data \citep{raja2025ipsbpr}. r-AdjNorm \citep{zhao2022radjnorm} tunes the normalisation
+of the adjacency matrix to control popularity amplification, and how graph convolutions
+amplify popularity bias is the subject of \citet{chen2024gcnpop}. APDA
 \citep{zhou2023apda}, CAGED \citep{que2025caged} and DPAA \citep{dpaa2026} learn
-aggregation weights or debiased message passing. These methods change which adjacency
-is propagated or how neighbours are aggregated. The present method leaves the
-propagation of LightGCN unchanged. It changes which pairs count as negatives in the
-loss and adds a prior to the score.
+aggregation weights or debiased message passing. AdvDrop \citep{zhang2024advdrop} learns an
+adversarial edge dropout on the interaction graph and reports IPS and DR baselines on
+Coat, Yahoo and KuaiRec. PPD \citep{islam2026ppd} removes a popularity direction from
+pre-trained LightGCN embeddings without retraining, and is evaluated on KuaiRec, Coat and
+Yahoo! R3 with unbiased test data. DR-GNN \citep{wang2024drgnn} applies distributionally
+robust optimisation over graph neighbourhoods; its exposure-shift experiments use Coat and
+Yahoo, and it does not use propensities or imputations. These methods change the
+aggregation, the graph, the embeddings or the robust training objective. The present method
+leaves the propagation of LightGCN unchanged. It changes which pairs count as negatives in
+the loss and adds a prior to the score.
 
 \subsection{Score offsets and priors}
 
@@ -77,33 +86,38 @@ used here is different in one respect: it is a debiased estimate of population-l
 preference, obtained from an inverse-propensity-weighted imputation, and not a
 class prior.
 
-\begin{table}[t]
+\begin{table}[p]
 \centering
 \caption{Positioning of the method relative to the main related families. Entries are
 qualitative. ``Acts on'' names the part of the model that the correction changes.
-``Uniform data'' indicates whether a uniformly collected sample enters training
-(``depends'': the original propensity estimation can use one). For
-the methods that we did not run (APDA, CAGED, DPAA) the entries follow their published
+``Uniform data'' indicates whether a uniformly collected sample enters training; where
+a method uses it only for validation, the cell says so. For
+the methods that we did not run (APDA, CAGED, AdvDrop, PPD, DPAA, DR-GNN, Correct-and-Weight) the entries follow their published
 descriptions. Coat ships its propensities, which were estimated from a uniform sample
 by the dataset authors; this affects the propensity-based rows on Coat only.}
 \label{tab:positioning}
-\small
+\scriptsize
 \adjustbox{max width=\textwidth}{%
-\begin{tabular}{p{3.6cm}p{2.0cm}p{1.8cm}p{1.6cm}p{2.9cm}p{1.5cm}}
+\begin{tabular}{p{3.2cm}p{1.9cm}p{1.8cm}p{1.6cm}p{2.6cm}p{1.8cm}}
 \toprule
 Method family & Graph backbone & Propensity & Imputation & Acts on & Uniform data \\
 \midrule
 LightGCN, SimGCL & yes & no & no & none (BPR or contrastive loss) & no \\
 NAVIP & yes & yes & no & adjacency & no \\
 r-AdjNorm, APDA, CAGED, DPAA & yes & no & no & adjacency or aggregation & no \\
-IPS, SNIPS, DR, DR-JL, MRDR & no (matrix factorisation) & yes & DR only & loss & no \\
-ExpoMF, Rel-MF, UBPR & no & latent or yes & no & loss or exposure posterior & depends \\
-AdvInfoNCE, BC loss & varies & no & no & negatives or margins & no \\
-AutoDebias, CausE & varies & learned weights & no & loss & yes \\
+AdvDrop & yes & no (IPS-CN baseline only) & no (DR baseline only) & graph (edge dropout) & no (not stated) \\
+PPD & yes & no & no & embeddings (post hoc) & no (validation only) \\
+DR-GNN & yes & no & no & robust objective over neighbourhoods & not stated \\
+Correct-and-Weight & yes & no & no & loss (correction and negative weights) & no \\
+IPS, SNIPS, DR, DR-JL, MRDR & no (matrix factorisation) & yes & DR only & loss & no (as described) \\
+ExpoMF, Rel-MF, UBPR & no & latent or yes & no & loss or exposure posterior & no \\
+AdvInfoNCE, BC loss & varies & no & no & loss (negative weights or margins) & no \\
+AutoDebias & no (matrix factorisation) & learned weights & learned & loss (weights and imputation) & yes \\
+CausE & no (matrix factorisation) & no & no & embeddings (discrepancy regulariser) & yes \\
 DRUP (walk correction) & yes & yes & yes & multi-hop adjacency & no \\
 DR adjacency (no correction) & yes & yes & yes & adjacency & no \\
 \midrule
-\qp{} (this paper) & yes & yes & yes & negatives and score & no \\
+\qp{} (this paper) & yes & yes & yes & negatives and score & no (Coat: shipped propensities) \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -112,21 +126,39 @@ DR adjacency (no correction) & yes & yes & yes & adjacency & no \\
 
 Progress claims in top-$N$ recommendation depend on the strength of the baselines and on
 the evaluation protocol \citep{dacrema2019progress,rendle2019baselines,anelli2023myth}.
-Per-user comparisons of models must account for the overlap between evaluation splits,
-since standard t-tests treat the splits as independent \citep{nadeau2003}. Sampled
+Inference for the generalisation error under resampling is treated by \citet{nadeau2003}.
+Sampled
 evaluation metrics can also be inconsistent with their exact counterparts
 \citep{krichene2020sampled}. Section~\ref{sec:setup} describes the protocol used here.
 
-% TODO verify literature search before submission
+The uses of uniform data differ across debiasing papers. CDR \citep{song2023cdr} uses 10\%
+of the unbiased data for validation and 90\% for evaluation on Coat, Yahoo! R3 and KuaiRand,
+with a matrix-factorisation backbone. DCE \citep{kweon2024dce} holds out 10\% of the biased
+training set for validation, does not use the unbiased test set for training, and evaluates on
+Coat, Yahoo! R3 and KuaiRec. BISER \citep{lee2022biser} trains on MNAR data and evaluates on
+MAR data on Coat and Yahoo! R3, with 30\% of each user's training ratings held out for
+validation. ConAlign \citep{zhang2026conalign}, an arXiv preprint, trains a dual-tower model in
+which an unbiased tower is trained on uniform data, on Coat, Yahoo! R3 and KuaiRand-Pure.
+
 Three lines of work meet in this paper but have rarely been combined. Doubly robust and
 propensity methods (IPS, DR-JL, MRDR) are pointwise and are usually applied to matrix
 factorisation. Graph recommenders that address exposure or popularity bias (NAVIP,
-r-AdjNorm, APDA, CAGED) change the adjacency or the aggregation rather than the training
-signal. False-negative-aware sampling (ExpoMF, SRNS, AdvInfoNCE) does not use the
-propensity and imputation that DR estimation provides. We are not aware of a previous
-study that uses the DR nuisances to weight the negatives of a graph recommender, and few
-evaluate graph debiasing on Coat, Yahoo!\,R3, KuaiRand and KuaiRec together with
-uniform data held out from training. Some debiasing methods train on uniformly collected data
-\citep{chen2021autodebias,bonner2018cause}, and several studies report that tuned simple
-baselines are competitive with published recommenders
+r-AdjNorm, APDA, CAGED, AdvDrop, PPD, DPAA) act on the adjacency, the aggregation, the graph
+or the embeddings rather than on the sampled negatives. Exposure-aware and false-negative-aware
+methods (ExpoMF, SRNS, DCL, AdvInfoNCE) do not use the propensity and imputation that DR
+estimation provides. Partial overlaps also include IPS-weighted BPR on LightGCN with simulated
+propensities \citep{raja2025ipsbpr} and exposure-aware negative sampling with a popularity proxy
+\citep{chen2026icpns}; neither uses an imputation or an unbiased-test evaluation. We are not aware of a previous study that uses a propensity and an
+IPS-fitted imputation to build a posterior for non-logged pairs and uses it to weight the
+sampled negatives of a graph recommender's pairwise loss, or that adds a debiased imputation
+prior to a graph model's score. We are also not aware of a study that evaluates a graph model
+on KuaiRand-Pure together with Coat, Yahoo! R3 and KuaiRec, with uniform data used only for
+validation and testing. Coat, Yahoo! R3 and KuaiRec are already used for graph debiasing by
+AdvDrop, PPD and DPAA; we found no graph study that uses KuaiRand. The novelty claimed here is
+therefore limited to the Q-posterior weighting of negatives and the imputation-logit offset,
+both inside the pairwise loss of a graph model. We did not find a study that combines these two
+in that way. The search used general web search engines, not bibliographic databases, so the
+absence of a hit is not proof of absence.
+
+Several studies report that tuned simple baselines are competitive with published recommenders
 \citep{dacrema2019progress,rendle2019baselines,anelli2023myth}.
