@@ -11,10 +11,10 @@ ran, and the differences are significant except against LightGCN-pt on KuaiRec. 
 Yahoo! R3 and KuaiRand. In the main run it is above iALS on Coat and below DR-JL and MRDR on KuaiRec. Across retraining
 seeds these differences are not significant. Training-free doubly robust propagation remains the best method we
 ran (0.6378). The ablations show that the gain depends on an informative posterior: a shuffled control removes it
-on Coat and Yahoo! R3. On Coat, with unmatched grids, the offset alone recovers most of the improvement.
+on Coat and Yahoo! R3. On Coat (unmatched grids) and KuaiRec, the offset alone recovers most of the improvement.
 
 Four extensions follow from the limitations. Computing the posterior on the fly would remove the memory limit of
-dense matrices on large catalogues. Matched offset-only runs on all four datasets would test the offset claim
+dense matrices on large catalogues. Matched offset-only runs on Yahoo! R3 and KuaiRand would test the offset claim
 beyond Coat. A faithful reproduction of AdvInfoNCE, with its original adversary, would replace our simplified
 re-implementation. Propensities estimated without the uniform data used for testing would remove the possible
 leak on Coat.

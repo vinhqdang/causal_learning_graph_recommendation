@@ -65,8 +65,8 @@ means. Over these runs the Coat difference from iALS and the KuaiRec differences
 in all runs it is below training-free DRUP and DR adjacency ($0.6378$).
 \item \textbf{One imputation family.} The propensity and the imputation come from one additive model, and on Coat
 from one low-rank alternative. Other imputation families are untested.
-\item \textbf{Ablations are mostly on Coat.} The offset-only, imputation-only, low-rank and Q-iALS ablations were run
-on Coat only. Yahoo! R3 has the popularity and shuffled controls only, and KuaiRand and KuaiRec have only the
+\item \textbf{Ablations are mostly on Coat.} The imputation-only, low-rank and Q-iALS ablations were run
+on Coat only, and the offset-only ablation on Coat and KuaiRec. Yahoo! R3 has the popularity and shuffled controls only, and KuaiRand and KuaiRec have only the
 decomposition of the selected runs. No significance tests were run for the ablations, except the single KuaiRec
 decomposition test reported in Section~\ref{sec:ablations}.
 \item \textbf{Coat propensities may leak.} The Coat propensities were estimated by the dataset authors with the uniform

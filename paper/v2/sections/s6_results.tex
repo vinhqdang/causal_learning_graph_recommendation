@@ -99,11 +99,12 @@ On Coat, dropping the propensity from Q changes little ($0.5937$ against $0.5912
 imputation. This is an observation only: the grids are not matched and no test was run. The Coat weighted runs use 108 configurations (with $\mathrm{fn}\in\{0.5,1\}$) against 54 for the
 ablations, so these two numbers are not grid-matched.
 
-\paragraph{Offset.} All offset ablations are on Coat. LightGCN with the offset only (P-LightGCN, $\beta\in\{0.5,1\}$)
+\paragraph{Offset.} On Coat, LightGCN with the offset only (P-LightGCN, $\beta\in\{0.5,1\}$)
 reaches $0.6020$, with the weights as well $0.6039$ ($\beta\in\{0.5,1\}$) and $0.6046$ ($\beta\in\{1,2\}$), and the
 validated combination $0.6015$. On Coat, with unmatched grids and no test, the offset alone recovers essentially all of the gain, and the
-weighting adds little on top of it ($0.6020$ against $0.6039$). Whether this holds on the other datasets is
-untested: offset-only runs exist only for Coat.
+weighting adds little on top of it ($0.6020$ against $0.6039$). On KuaiRec, with the same grid as the weighted run with the offset
+($\beta\in\{0.5,1\}$, one learning rate), the offset alone reaches nDCG@20 $0.6288$ and the weighted run with the offset
+$0.6281$, so the weighting adds nothing there either. Offset-only runs for Yahoo! R3 and KuaiRand were not completed and are untested.
 
 \paragraph{Imputation model.} On Coat a rank-16 low-rank imputation for Q and the offset gives $0.5887$ without
 offset and $0.5897$ with it, against $0.5912$ and $0.6039$ for the additive imputation. The more flexible model
