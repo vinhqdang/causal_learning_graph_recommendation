@@ -28,6 +28,12 @@ case "$1" in
     OMP_NUM_THREADS=1 python3 experiments/run_learned.py --dataset kuairec --prop pop --seeds 5 --threads 1 --epochs 30 --patience 3 --batch 4096 --pairs_per_epoch 2000000 --lrs 1e-2 3e-3 --wds 1e-5 --seed_check 0 --methods AdvInfoNCE-LGN --adv_taus 0.2 2.0 --adv_etas 4 12 --adv_lr 5e-4 --adv_interval 1 --adv_min_steps 100 --n_neg 64 --out results/v4/learned_kuairec_adv.json ;;
   advdr_kuairec)
     OMP_NUM_THREADS=1 python3 experiments/run_learned.py --dataset kuairec --prop pop --seeds 5 --threads 1 --epochs 30 --patience 3 --batch 4096 --pairs_per_epoch 2000000 --lrs 1e-2 3e-3 --wds 1e-5 --seed_check 0 --methods DR-AdvInfoNCE-LGN-p --adv_taus 2.0 --adv_etas 4 12 --adv_lr 5e-4 --adv_interval 1 --adv_min_steps 100 --n_neg 64 --out results/v4/learned_kuairec_advdr.json ;;
+  offs_yahoo)
+    OMP_NUM_THREADS=1 python3 experiments/run_learned.py --dataset yahoo --prop pop --seeds 5 --threads 1 --epochs 60 --patience 5 --batch 1024 --lrs 3e-3 --wds 1e-5 1e-4 --dims 64 --layers 2 --seed_check 0 --methods LightGCN-p --wide LightGCN-p --wide_layers 1 2 3 --wide_dims 64 128 --out results/v4/learned_yahoo_offonly.json ;;
+  offs_kuairand)
+    OMP_NUM_THREADS=1 python3 experiments/run_learned.py --dataset kuairand --prop pop --seeds 5 --threads 1 --epochs 40 --patience 3 --batch 8192 --lrs 1e-2 3e-3 1e-3 --wds 1e-5 1e-4 --dims 64 --layers 2 --seed_check 0 --methods LightGCN-p --out results/v4/learned_kuairand_offonly.json ;;
+  offs_kuairec)
+    OMP_NUM_THREADS=1 python3 experiments/run_learned.py --dataset kuairec --prop pop --seeds 5 --threads 1 --epochs 30 --patience 3 --batch 32768 --pairs_per_epoch 2000000 --lrs 3e-3 --wds 1e-5 1e-4 --dims 64 --layers 2 --seed_check 0 --methods LightGCN-p --wide LightGCN-p --wide_layers 1 2 3 --wide_dims 64 128 --out results/v4/learned_kuairec_offonly.json ;;
   *)
     echo "usage: $0 {ens_coat|ens_kuairec_drup|ens_kuairec_rest|ens_kuairand|ens_yahoo|seeds_<dataset>|adv_coat|advdr_coat|adv_yahoo|adv_kuairand|adv_kuairec|advdr_kuairec}" >&2
     echo "unknown label: $1" >&2
