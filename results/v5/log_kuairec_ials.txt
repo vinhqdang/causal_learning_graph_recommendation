@@ -26,3 +26,18 @@
   iALS-p {'dim': 64, 'alpha': 30.0, 'reg': 100.0, 'pbeta': 1.0} done [69s] best split0 val 0.6225
   iALS-p {'dim': 64, 'alpha': 30.0, 'reg': 300.0, 'pbeta': 0.1} done [86s] best split0 val 0.6225
   iALS-p {'dim': 64, 'alpha': 30.0, 'reg': 300.0, 'pbeta': 0.2} done [80s] best split0 val 0.6225
+  iALS-p {'dim': 64, 'alpha': 30.0, 'reg': 300.0, 'pbeta': 0.3} done [91s] best split0 val 0.6225
+  iALS-p {'dim': 64, 'alpha': 30.0, 'reg': 300.0, 'pbeta': 0.5} done [69s] best split0 val 0.6225
+  iALS-p {'dim': 64, 'alpha': 30.0, 'reg': 300.0, 'pbeta': 1.0} done [72s] best split0 val 0.6225
+  iALS-p {'dim': 64, 'alpha': 100.0, 'reg': 10.0, 'pbeta': 0.1} done [88s] best split0 val 0.6225
+  iALS-p {'dim': 64, 'alpha': 100.0, 'reg': 10.0, 'pbeta': 0.2} done [84s] best split0 val 0.6225
+  iALS-p {'dim': 64, 'alpha': 100.0, 'reg': 10.0, 'pbeta': 0.3} done [87s] best split0 val 0.6225
+  iALS-p {'dim': 64, 'alpha': 100.0, 'reg': 10.0, 'pbeta': 0.5} done [66s] best split0 val 0.6225
+  iALS-p {'dim': 64, 'alpha': 100.0, 'reg': 10.0, 'pbeta': 1.0} done [67s] best split0 val 0.6225
+  iALS-p {'dim': 64, 'alpha': 100.0, 'reg': 100.0, 'pbeta': 0.1} done [82s] best split0 val 0.6225
+  iALS-p {'dim': 64, 'alpha': 100.0, 'reg': 100.0, 'pbeta': 0.2} done [82s] best split0 val 0.6225
+  iALS-p {'dim': 64, 'alpha': 100.0, 'reg': 100.0, 'pbeta': 0.3} done [85s] best split0 val 0.6225
+  iALS-p {'dim': 64, 'alpha': 100.0, 'reg': 100.0, 'pbeta': 0.5} done [65s] best split0 val 0.6225
+  iALS-p {'dim': 64, 'alpha': 100.0, 'reg': 100.0, 'pbeta': 1.0} done [67s] best split0 val 0.6225
+  iALS-p {'dim': 64, 'alpha': 100.0, 'reg': 300.0, 'pbeta': 0.1} done [80s] best split0 val 0.6225
+  iALS-p {'dim': 64, 'alpha': 100.0, 'reg': 300.0, 'pbeta': 0.2} done [82s] best split0 val 0.6225
