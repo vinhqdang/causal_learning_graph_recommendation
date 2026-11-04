@@ -89,48 +89,18 @@ need a multiple-testing correction, for which we use the step-down procedure of
 
 \subsection{Gap and positioning}\label{sec:related-gap}
 
-The contribution of this paper is evidence rather than a new method. The graph debiasers and the
-candidate models of Section~\ref{sec:methods} are evaluated under one protocol, and the study measures how far
-each conclusion depends on evaluation choices. Table~\ref{tab:positioning} summarises how the
-related studies use uniformly collected data and which benchmarks they use. The uses differ.
-Some studies train on uniform data (AutoDebias, CausE, ConAlign), some select configurations on
-part of it (CDR, PPD, ConAlign), and some keep it out of both training and selection (DCE, BISER).
+The contribution is evidence rather than a new method: the graph debiasers and the candidate models of
+Section~\ref{sec:methods} are evaluated under one protocol. Table~\ref{tab:positioning} shows that related studies
+differ in how they use uniformly collected data. Some train on it (AutoDebias, CausE, ConAlign), some select
+configurations on part of it (CDR, PPD, ConAlign), and some keep it out of both (DCE, BISER).
 
-\begin{table}[t]
-\centering
-\caption{Positioning of related studies by their protocol. Entries follow the protocols as
-described in the cited papers; ``not stated'' marks a point that the description does not
-settle. Uniform data are the uniformly collected or randomised samples of the benchmark.}
-\label{tab:positioning}
-\footnotesize
-\adjustbox{max width=\textwidth}{%
-\begin{tabular}{p{2.6cm}p{1.9cm}p{2.5cm}p{2.0cm}p{2.6cm}p{2.4cm}}
-\toprule
-Study & Graph backbone & Propensity or imputation & Uniform data in training & Uniform data for validation or selection & Unbiased test benchmarks \\
-\midrule
-AutoDebias \citep{chen2021autodebias} & no (matrix factorisation) & learned weights and imputation & yes, small sample & yes, small sample & Coat, Yahoo! R3 \\
-CausE \citep{bonner2018cause} & no (matrix factorisation) & none & yes, randomised sample & no, validation from logged policy & MovieLens, Netflix \\
-CDR \citep{song2023cdr} & no (matrix factorisation) & doubly robust family & no & yes, part of unbiased data & Coat, Yahoo! R3, KuaiRand \\
-DCE \citep{kweon2024dce} & no (MF or NCF) & doubly robust loss & no & no, held out from biased training data & Coat, Yahoo! R3, KuaiRec \\
-BISER \citep{lee2022biser} & no & self-inverse propensity & no & no, held out from biased training data & Coat, Yahoo! R3 \\
-ConAlign \citep{zhang2026conalign} & no (dual tower) & MF-IPS and MF-DR baselines & yes & yes & Coat, Yahoo! R3, KuaiRand-Pure \\
-NAVIP \citep{kim2022navip} & yes & inverse propensity on edges & no & pseudo-unbiased popularity sample & Yahoo! R3 and pseudo-unbiased sets \\
-AdvDrop \citep{zhang2024advdrop} & yes & IPS and DR baselines only & no, for its own method & not stated & Coat, Yahoo!, KuaiRec \\
-PPD \citep{islam2026ppd} & yes, post hoc & none & no & yes on Coat and KuaiRec; biased sample on Yahoo! R3 & Coat, Yahoo! R3, KuaiRec \\
-DPAA \citep{dpaa2026} & yes & none & no & validation present, construction not confirmed & Coat, Yahoo! R3, KuaiRec \\
-DR-GNN \citep{wang2024drgnn} & yes & none & not stated & not stated & Coat, Yahoo \\
-\midrule
-This study & yes & IPS-fitted imputation and propensity & no, except Coat shipped propensities & yes & Coat, Yahoo! R3, KuaiRand-Pure, KuaiRec \\
-\bottomrule
-\end{tabular}}
-\end{table}
+Table~\ref{tab:positioning} in \ref{app:search} lists each study's protocol.
 
-A web search in October 2026 found no graph recommender that uses a posterior probability,
-built from a propensity and an imputation, to weight sampled negatives, and none that adds a
-debiased imputation to a graph model's score. It also found no graph study that uses
-KuaiRand-Pure. The search used general web sources and cannot be exhaustive. Coat, Yahoo! R3 and
-KuaiRec are already used for graph debiasing by AdvDrop, PPD and DPAA. We therefore do not claim
-that the posterior weighting or the imputation offset is new. The claim we make is narrower: we
-found no study that evaluates graph debiasers on all four benchmarks under one protocol, with
-uniform data excluded from training, and with an analysis of how the budget and the selection
-rule change the conclusions.
+
+A literature search in October 2026 over general web sources, which cannot be exhaustive, found no graph
+recommender that weights sampled negatives by a posterior built from a propensity and an imputation, none that adds
+a debiased imputation to a graph model's score, and no graph study that uses KuaiRand-Pure. Coat, Yahoo! R3 and
+KuaiRec are already used for graph debiasing by AdvDrop, PPD and DPAA, so we do not claim that the posterior
+weighting or the imputation offset is new. The claim is narrower: no study we found evaluates graph debiasers on all
+four benchmarks under one protocol, with uniform data excluded from training, and analyses how the budget and the
+selection rule change the conclusions.

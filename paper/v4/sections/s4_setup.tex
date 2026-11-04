@@ -4,13 +4,13 @@
 
 Every method is run by us on the splits and the data preparation of Section~\ref{sec:protocol}. No number in
 this study is taken from the literature. Configuration counts are the numbers stored in the result files.
-Each count is the product of the grid values listed below, and those values are the arguments of the run
+Each count is the product of the search-space values listed below, and those values are the arguments of the run
 scripts of the repository. Table~\ref{tab:T4} lists the counts of every method in the main comparison.
 
-Four refinements of the additive prior (Sections~\ref{sec:qweight} to \ref{sec:drgp}) were developed by us in
-earlier versions of this work, as candidate methods. Here they are reported as one family, with every
-configuration count, and the members that serve as controls are reported as controls. None of them is claimed
-as a contribution.
+Four refinements of the additive prior were developed by us as candidate methods. They are the Q-weighted
+negatives, the QP-LightGCN family, the ensemble with DRUP and the leave-edge-out DR prior (DRGP). \ref{app:refine}
+describes them and gives their configuration counts (Table~\ref{tab:T13}). The members that serve as controls are
+labelled as controls there, and none of the refinements is claimed as a contribution.
 
 \subsection{Datasets}\label{sec:datasets}
 
@@ -18,7 +18,7 @@ We use four public benchmarks. Each pairs a biased log with a test set collected
 log, so that a debiasing method can be measured against unbiased outcomes. Table~\ref{tab:datasets} gives the
 sizes, which were checked against the data loaders of the repository.
 
-\begin{table}[t]\centering\footnotesize
+\begin{table}[htbp]\centering\footnotesize
 \caption{Datasets. ``Log'': the biased training data, with its density. ``Test'': the unbiased data.
 ``Candidates'': the unbiased test items per user that are ranked, which are the items never logged for that
 user. ``Evaluated users'': users with at least one positive candidate in the full test set. The analysis uses
@@ -62,13 +62,13 @@ hold about ten to fifteen items, which limits the range that nDCG can span on th
 The training-free operators are computed from the log and need no training. Pop ranks items by their popularity
 in the log. Impute ranks by the additive imputation of Section~\ref{sec:prior} alone. Obs, EASE, GF-CF, IPS, DR,
 DRUP, EASE-DR and GF-CF-DR are further training-free baselines, with the configuration counts of
-Table~\ref{tab:T4}. DR and DRUP are defined here because the ensemble of Section~\ref{sec:ensemble} uses DRUP.
+Table~\ref{tab:T4}. DR and DRUP are defined here because the ensemble of \ref{app:refine} uses DRUP.
 The doubly robust edge estimate is
 \begin{equation}\label{eq:dredge}
 W_{ui}=\hat Y_{ui}+\frac{O_{ui}(Y_{ui}-\hat Y_{ui})}{\bar p_{ui}},
 \end{equation}
 which is unbiased for $Y_{ui}$ under correct propensities. Let $C_{ui}=d_u^{-\alpha}d_i^{-(1-\alpha)}$, where
-$d_u$ and $d_i$ are the row and column sums of $W$ or of $\hat Y$ (a grid choice), and let $\alpha$ be a grid
+$d_u$ and $d_i$ are the row and column sums of $W$ or of $\hat Y$ (a choice within the search space), and let $\alpha$ be a search space
 value. DRUP scores a pair by its one-hop term and its three-hop term, which is a walk-corrected propagation on
 the weighted graph $C\circ W$:
 \begin{equation}\label{eq:drup}
@@ -76,83 +76,19 @@ S_{ui}=\frac{(C\circ W)_{ui}}{\overline{|C\circ W|}_u}+\beta\,\frac{T_{ui}}{\ove
 \end{equation}
 where $T$ is the three-hop term with the walks that reuse an edge replaced by their unbiased counterparts, and
 $\overline{|\cdot|}_u$ is the mean absolute value over the items of user $u$. DR adjacency is the same operator
-without the walk correction. The weight $\beta$ and the other grid values are chosen on validation data.
-The training-free grids are the products of the following values, as run by the repository. On Coat, the
+without the walk correction. The weight $\beta$ and the other search space values are chosen on validation data.
+The training-free search spaces are the products of the following values, as run by the repository. On Coat, the
 propensity floor takes five values, the imputation penalty three, the imputation source two, $\alpha$ three,
 the degree source two and $\beta$ eight values, which gives $5\times3\times2\times3\times2\times8=1{,}440$ for DR
 and for DRUP. On Yahoo!\,R3, the floor takes two values, the imputation penalty one, $\alpha$ two, the control-variate weight
 of the DR estimate four, the imputation source two, the degree source two and $\beta$ eight values, which gives
-$2\times1\times2\times4\times2\times2\times8=512$. On KuaiRec, the grid has three floors, two values for each of the
+$2\times1\times2\times4\times2\times2\times8=512$. On KuaiRec, the search space has three floors, two values for each of the
 other terms except $\beta$, and the eight values of $\beta$, which gives 384.
 
-The trained baselines are the following. Their grids are given per dataset, and the learning rate and weight
+The trained baselines are the following. Their search spaces are given per dataset, and the learning rate and weight
 decay are shared by all trained models unless stated otherwise.
 
-\paragraph{Coat.}
-The grid is learning rate in $\{10^{-2},3\cdot10^{-3},10^{-3}\}$, weight decay in $\{10^{-5},10^{-4},10^{-3}\}$
-and width in $\{32,64\}$. For LightGCN, LightGCN-pt, r-AdjNorm, NAVIP, DR-LightGCN and SimGCL the depth ranges
-over $\{1,2,3\}$. Epochs are limited to 100, the batch size is 256 and the patience is 5. Configurations: LightGCN
-54, LightGCN-pt 54, NAVIP 54, DR-LightGCN 54, r-AdjNorm 108 (with $r\in\{0.3,0.7\}$), SimGCL 108 (with weight
-$\lambda_{\mathrm{cl}}\in\{0.1,0.5\}$), MACR 36 (with $c\in\{0.1,0.3\}$), PDA 36 (with $\gamma\in\{0.1,0.2\}$),
-MF, IPS-MF, DR-MF, BPR-MF, DR-JL and MRDR 18 each, iALS 24 (with $\alpha\in\{3,10,30\}$, regularisation in
-$\{1,10,100,1000\}$ and width in $\{32,64\}$) and iALS grid B 18 (with $\alpha\in\{10,30,100\}$ and regularisation
-in $\{10,100,300\}$). The iALS runs of the prior family use an epoch limit of 30 on Coat, and the stored iALS run
-uses 100. The epoch limits are therefore not the same across the iALS rows.
-
-\paragraph{Yahoo!\,R3.}
-The grid is learning rate in $\{10^{-2},3\cdot10^{-3},10^{-3}\}$, weight decay in $\{10^{-5},10^{-4}\}$ (with
-$10^{-3}$ added for the matrix models), width 64 and depth 2. For LightGCN, NAVIP and r-AdjNorm the width ranges
-over $\{64,128\}$ and the depth over $\{1,2,3\}$. Epochs are limited to 60, the batch size is 1{,}024 and the
-patience is 5. Configurations: LightGCN 36, NAVIP 36, r-AdjNorm 72, LightGCN-pt 6, DR-LightGCN 6, SimGCL 12, MACR
-18, PDA 18, iALS 12 (with the iALS grid above and width 64), MF, IPS-MF, DR-MF, BPR-MF, DR-JL and MRDR 9 each.
-
-\paragraph{KuaiRand-Pure.}
-The grid is learning rate in $\{10^{-2},3\cdot10^{-3},10^{-3}\}$ and weight decay in $\{10^{-5},10^{-4}\}$, with
-width 64 and depth 2 for every model. Epochs are limited to 40, the batch size is 8{,}192 and the patience is 3.
-Configurations: LightGCN 6, LightGCN-pt 6, NAVIP 6, DR-JL 6, MF 6, DR-MF 6, BPR-MF 6, r-AdjNorm 12, SimGCL 12, MACR
-12 and iALS 12. MRDR, IPS-MF, PDA and DR-LightGCN were not run on this dataset.
-
-\paragraph{KuaiRec.}
-The grid is learning rate in $\{10^{-2},3\cdot10^{-3},10^{-3}\}$ and weight decay in $\{10^{-5},10^{-4}\}$. For
-LightGCN and LightGCN-pt the width ranges over $\{64,128\}$ and the depth over $\{1,2,3\}$, and the other models
-use width 64 and depth 2. Epochs are limited to 30, the batch size is 32{,}768, the patience is 3, and each epoch
-is capped at 2{,}000{,}000 pairs. Configurations: LightGCN 36, LightGCN-pt 36, r-AdjNorm 12, NAVIP 6,
-DR-LightGCN 6, SimGCL 12, MACR 12, iALS 12, MF 6, IPS-MF 6, DR-MF 6, BPR-MF 6, DR-JL 6 and MRDR 6. PDA (12
-configurations) and two pointwise negative-sampling variants, LightGCN-pn and DR-LightGCN-pn (24 configurations
-each), were also run on KuaiRec and are not in the main comparison.
-
-Across datasets, the graph models were given depth grids $\{1,2,3\}$ on Coat, Yahoo!\,R3 and KuaiRec, and only
-depth 2 on KuaiRand. Budgets are therefore unequal, and the counts make the difference visible. The selection
-rule of Section~\ref{sec:selection} is applied to each grid as it stands, and the sensitivity of the conclusions
-to the size of the grid is measured in the results.
-
-\subsection{AdvInfoNCE re-implementation}\label{sec:advsetup}
-
-AdvInfoNCE~\citep{zhang2023advinfonce} is an adversarial contrastive loss. We re-implemented it on the LightGCN
-encoder. Our numbers are for this re-implementation and not for the original method, and the official code was
-not run. The main simplifications are these.
-\begin{itemize}
-\item The score is the cosine similarity of the propagated embeddings divided by a temperature $\tau$. Each
-positive is contrasted with 64 sampled negatives.
-\item The adversary is a pair of embedding tables (users and items, dimension 64) trained with Adam to maximise
-the contrastive loss. Its learning rate is $10^{-2}$ on Coat, $10^{-3}$ on Yahoo!\,R3 and KuaiRand, and
-$5\cdot10^{-4}$ on KuaiRec. Only this embedding-based adversary is implemented.
-\item The adversary budget of the original formulation is replaced by a number of adversarial rounds
-$\eta\in\{4,12\}$. A round runs after each epoch from the second epoch on and lasts at least one pass over the
-positives and 100 Adam steps. The adversary's KL divergence is logged but not projected onto a ball.
-\end{itemize}
-
-The grids differ in size, and the budgets are unequal. Coat has 216 configurations: three learning rates, three
-weight decays, widths $\{32,64\}$, depths $\{1,2,3\}$, $\tau\in\{0.2,0.75\}$ and $\eta\in\{4,12\}$. Yahoo!\,R3 has
-16 configurations with $\tau\in\{0.1,0.28\}$, $\eta\in\{4,12\}$, learning rates $\{3\cdot10^{-3},10^{-3}\}$,
-weight decays $\{10^{-5},10^{-4}\}$, width 128 and depth 2. KuaiRand has 8 configurations with
-$\tau\in\{0.1,0.28\}$, learning rates $\{10^{-2},3\cdot10^{-3}\}$, weight decay $10^{-4}$, width 64 and depth 2.
-KuaiRec has 8 configurations with $\tau\in\{0.2,2.0\}$, learning rates $\{10^{-2},3\cdot10^{-3}\}$, weight decay
-$10^{-5}$, width 64 and depth 2. KuaiRand and KuaiRec both use $\eta\in\{4,12\}$. On Coat, AdvInfoNCE thus has 216
-configurations against 54 for LightGCN and 108 for r-AdjNorm. A larger grid gives a method more chances to fit
-noise in the validation data, so the Coat grid favours AdvInfoNCE and the smaller grids work against it. We did
-not match budgets for this baseline. The only wider re-tuning in this study is the Coat iALS grid
-(Table~\ref{tab:T11}).
+The per-dataset search spaces of the trained baselines, the AdvInfoNCE re-implementation and their search spaces are given in \ref{app:search}.
 
 \subsection{The additive prior and the learners iALS-p and LightGCN-p}\label{sec:prior}
 
@@ -165,13 +101,13 @@ of the log,
 where $\tilde\ell_u$ and $\tilde\ell_i$ are standardised logits of the user and item exposure rates. The
 coefficients are fitted by Newton's method on all $mn$ pairs. On Coat, the shipped propensities are used
 instead. Every propensity is then truncated below at a floor $f$, which gives $\bar p_{ui}=\max\{\hat p_{ui},f\}$.
-The floor is an argument of each run and is not part of any configuration grid. Its values are 0.05 for every
+The floor is an argument of each run and is not part of any configuration search space. Its values are 0.05 for every
 LightGCN-p and QP-LightGCN run on all four datasets. The exceptions are the following. On Coat, iALS-p and
 DRGP-iALS use 0.1, the prior alone uses 0.1, and the DRGP-LGN learners use 0.1. On Yahoo!\,R3, the prior alone
 uses 0.1. On KuaiRand, the prior alone uses 0.02. On KuaiRec, iALS-p, the prior alone and the DRGP-LGN learners
 use 0.2. The DRGP prior alone was run at floors 0.05, 0.1 and 0.2 on Coat and at 0.1 and 0.2 on KuaiRec. The
-result files do not record a rule for these values, The floors of the training-free operators are part of their grids: Coat 0.01 to 0.2, Yahoo!\,R3
-0.1 and 0.2, and KuaiRec 0.05 to 0.2.
+stored result files do not record a rule for these values. The floors of the training-free operators are part of
+their search spaces: Coat 0.01 to 0.2, Yahoo!\,R3 0.1 and 0.2, and KuaiRec 0.05 to 0.2.
 
 \paragraph{Additive imputation.}
 The imputed outcome is $\hat Y_{ui}=\min\{1,\max\{0,\mu+b_u+b_i\}\}$. Its parameters are fitted to the logged
@@ -191,16 +127,16 @@ The iALS objective of Hu et al.~\citep{hu2008ials} receives a fixed offset,
 \begin{equation*}
 \sum_{u,i}c_{ui}\bigl(y_{ui}-\beta z_{ui}-x_u^{\top}y_i\bigr)^2+\mathrm{reg}\,\bigl(\|x_u\|^2+\|y_i\|^2\bigr),
 \end{equation*}
-where $c_{ui}=1+\alpha$ on logged positives and $c_{ui}=1$ elsewhere. The grid is $\alpha\in\{10,30,100\}$,
+where $c_{ui}=1+\alpha$ on logged positives and $c_{ui}=1$ elsewhere. The search space is $\alpha\in\{10,30,100\}$,
 regularisation in $\{10,100,300\}$, $\beta\in\{0.1,0.2,0.3,0.5,1\}$ and width in $\{32,64\}$, which gives 90
-configurations on Coat. On KuaiRec the main-table row uses an eight-configuration grid, $\alpha\in\{10,30\}$,
-regularisation in $\{100,1000\}$, $\beta\in\{0.5,1\}$ and width 64. The grid of the DRGP queue has 45
+configurations on Coat. On KuaiRec the main-table row uses an eight-configuration search space, $\alpha\in\{10,30\}$,
+regularisation in $\{100,1000\}$, $\beta\in\{0.5,1\}$ and width 64. The DRGP runs use a larger search space of 45
 configurations on KuaiRec ($\alpha\in\{10,30,100\}$, regularisation in $\{10,100,300\}$, the five values of
-$\beta$, width 64). It is reported as a reference row.
+$\beta$, width 64). Its additive row is reported as a reference outside the main comparison (Table~\ref{tab:T12-kuairec}).
 
 \paragraph{LightGCN-p.}
 The offset enters the BPR margin of the LightGCN learner, so that $s_{ui}-s_{uj}=f_\theta(u,i)-f_\theta(u,j)+\beta(z_{ui}-z_{uj})$,
-with $\beta\in\{0.5,1\}$. The grids are as follows. On Coat, learning rate in $\{10^{-2},3\cdot10^{-3},10^{-3}\}$,
+with $\beta\in\{0.5,1\}$. The search spaces are as follows. On Coat, learning rate in $\{10^{-2},3\cdot10^{-3},10^{-3}\}$,
 weight decay in $\{10^{-5},10^{-4},10^{-3}\}$, width in $\{32,64\}$ and depth in $\{1,2,3\}$, which gives 108
 configurations. On Yahoo!\,R3, learning rate $3\cdot10^{-3}$, weight decay in $\{10^{-5},10^{-4}\}$, width in
 $\{64,128\}$ and depth in $\{1,2,3\}$, which gives 24. On KuaiRand, learning rate in $\{10^{-2},3\cdot10^{-3},10^{-3}\}$,
@@ -208,135 +144,4 @@ weight decay in $\{10^{-5},10^{-4}\}$, width 64 and depth 2, which gives 12. On 
 $3\cdot10^{-3}$, weight decay in $\{10^{-5},10^{-4}\}$, width in $\{64,128\}$ and depth in $\{1,2,3\}$, which gives
 24.
 
-\subsection{Prior variants}\label{sec:variants}
-
-The variants below change the additive imputation or the way it enters the score. Each is defined in the code of
-the repository. In every variant, the prior is the standardised logit of the variant's imputation, except for
-\texttt{pop}, which replaces the offset by a popularity score.
-\begin{description}
-\item[add.] The imputation of Section~\ref{sec:prior}, fitted with weights $O/\bar p$.
-\item[add\_noips.] The same ridge fit with weights $O$ in place of $O/\bar p$, so that the fit uses the exposed
-pairs without inverse-propensity weights.
-\item[pop.] The imputation, and therefore $Q$, is unchanged. The offset is replaced by the standardised
-logarithm of the number of positives of each item in the log, $\log(1+\sum_v O_{vi}Y_{vi})$, broadcast to every
-user.
-\item[shuf\_item.] The item biases $b_i$ are permuted across items by a fixed permutation (seed 0). The
-parameters $\mu$ and $b_u$ are kept, and the imputation and the prior are recomputed from the permuted biases.
-\item[user\_only.] The item biases are set to zero, so every item has the same score within a user. The ranking
-within a user is then decided by tie-breaking.
-\end{description}
-In the learners of this analysis, only the prior enters the score. The variant's $Q$ is used only by the
-Q-weighted methods, and the prior-anatomy runs do not use them.
-
-The prior-anatomy runs are the following. On Coat, iALS-p and LightGCN-p are run over the ten splits with the
-variants add, add\_noips, pop and shuf\_item. On KuaiRec, iALS-p is run over the five splits with the same four
-variants on the eight-configuration grid. The prior alone is run for all five variants on all four datasets,
-with the floors listed in Section~\ref{sec:prior}. The floor of the Coat LightGCN-p runs is 0.05, and that of the
-Coat iALS-p runs is 0.1.
-
-\subsection{Q-weighted negatives}\label{sec:qweight}
-
-The probability that an unlogged pair is a positive is
-\begin{equation}\label{eq:Q}
-Q_{ui}=\frac{\hat Y_{ui}(1-\bar p_{ui})}{1-\bar p_{ui}\hat Y_{ui}},
-\end{equation}
-clipped to $[0,1]$. This is the posterior under the assumption that exposure and outcome are independent given
-the covariates on which the propensity depends.
-
-The Q-weighted BPR loss uses only logged positives. For each positive $(u,i)$ one negative $j$ is drawn uniformly
-from the items, and it is redrawn once if $(u,j)$ is itself logged. The negative is weighted by
-$w_{uj}=\max\{1-f_nQ_{uj},10^{-3}\}$, and the loss over a batch $B$ is
-\begin{equation*}
-\mathcal L=-\frac{\sum_{(u,i,j)\in B}w_{uj}\log\sigma\bigl(s_{ui}-s_{uj}\bigr)}{\sum_{(u,i,j)\in B}w_{uj}}
-+\lambda\,\frac{1}{|B|}\sum_{(u,i,j)\in B}\bigl(\|e_u\|^2+\|e_i\|^2+\|e_j\|^2\bigr),
-\end{equation*}
-where $e_u$, $e_i$ and $e_j$ are the embeddings and $\lambda$ is the weight decay. The normalisation by the total
-weight keeps the loss scale independent of how many negatives are down-weighted. The factor $f_n$ is 1 in every
-job except the Coat job without offset, where $f_n\in\{0.5,1\}$. The encoder is LightGCN.
-
-The Q-weighted iALS (DR-iALS) uses the same weights as confidences. Logged positives get $c_{ui}=1+\alpha$, and
-unlogged pairs get $c_{ui}=\max\{1-f_nQ_{ui},10^{-3}\}$. Its grid is $\alpha\in\{3,10,30\}$, regularisation in
-$\{1,10,100,1000\}$, $f_n\in\{0.5,1\}$ and width in $\{32,64\}$, which gives 48 configurations on Coat.
-
-The configuration counts of the Q-weighted LightGCN (DR-BPR-LGN) are 108 on Coat (with $f_n\in\{0.5,1\}$), and
-DR-BPR-LGN-1 (with $f_n=1$) has 54 on Coat, 36 on Yahoo!\,R3, 6 on KuaiRand and 24 on KuaiRec.
-
-A low-rank variant replaces $\hat Y$ in $Q$, and in the prior of its offset variant, by a rank-16 low-rank
-imputation with ridge penalty 5. It has 54 configurations on Coat in the Q-only form and 108 in the offset form.
-
-Three control weightings replace $Q$ in the same learner. The first is $Q$ computed from $\hat Y$ alone, with no
-propensity correction (DR-BPR-yhat; 54 configurations on Coat). The second is $Q$ computed from item popularity,
-rescaled to the mean of the DR weight (DR-BPR-pop; 54 on Coat and 12 on Yahoo!\,R3). The third is a fixed random
-permutation of the values of $Q$ over the matrix (DR-BPR-shuf; 54 on Coat and 12 on Yahoo!\,R3). The controls
-test whether the information in $Q$ matters, and they are not proposed methods.
-
-\subsection{QP-LightGCN}\label{sec:qp}
-
-QP-LightGCN combines the Q weighting with the offset of Section~\ref{sec:prior}, so that $f_n=1$ and the BPR
-margin contains $\beta(z_{ui}-z_{uj})$. Two offset grids are used. DR-BPR-LGN-p has $\beta\in\{0.5,1\}$, and
-DR-BPR-LGN-p2 has $\beta\in\{1,2\}$. The configurations of each offset grid are 108 on Coat, 24 on Yahoo!\,R3 (learning rate $3\cdot10^{-3}$) and 12
-on KuaiRand. On KuaiRec, DR-BPR-LGN-p has 24 configurations (learning rate $3\cdot10^{-3}$) and DR-BPR-LGN-p2 has 72
-(learning rates $10^{-2}$, $3\cdot10^{-3}$ and $10^{-3}$).
-
-The QP-LightGCN family of each dataset pools its jobs. For each split, the job, configuration and epoch with the
-highest validation score are selected. The family contains DR-BPR-LGN, DR-BPR-LGN-p and DR-BPR-LGN-p2 on Coat,
-which gives 324 configurations. On Yahoo!\,R3 it contains DR-BPR-LGN-1, DR-BPR-LGN-p and DR-BPR-LGN-p2, which gives
-84 configurations. On KuaiRand and KuaiRec the family contains the same job types, DR-BPR-LGN-1, DR-BPR-LGN-p and DR-BPR-LGN-p2,
-and it has 30 and 120 configurations respectively.
-
-\subsection{Ensemble with DRUP}\label{sec:ensemble}
-
-For each split, component A is the QP-LightGCN family configuration selected for that split, and component B is
-the DRUP configuration selected for that split. The scores of each component are standardised within each user
-over the unlogged items of the training log, that is, over the pairs with $O_{ui}=0$. The standardised score
-is $\tilde S_{ui}=(S_{ui}-\bar S_u)/s_u$, with the mean and the standard deviation taken over those pairs. The
-ensemble score is
-\begin{equation*}
-(1-w)\,\tilde S^{A}_{ui}+w\,\tilde S^{B}_{ui},\qquad w\in\{0,0.1,\dots,1\}.
-\end{equation*}
-The weight $w$ is the first maximiser over this grid of the validation nDCG, and the test score is computed with
-that $w$. The ensemble stage also stores the rows $w=0$ (component A), $w=1$ (DRUP) and $w=0.5$ as checks. The
-weight is chosen from validation lists only. The ensemble adds no configuration of its own, so the components
-carry the configuration counts.
-
-\subsection{DRGP: a leave-edge-out DR graph prior}\label{sec:drgp}
-
-DRGP has two stages. It was run on Coat and KuaiRec only, and its runs have not been replicated over seeds. On KuaiRec, 5 of 5
-jobs completed, with 57 configurations in total, in a single run without seed repeats.
-
-\paragraph{Stage A: the prior.}
-For each pair, define the leave-edge-out 3-hop term of the DR graph. Let $C$ be the degree weights defined above, with the degrees taken from $\hat Y$. Let $\mathrm{sq}=C\circ C\circ W$ and
-$A_{ui}=\sum_j\mathrm{sq}_{uj}+\sum_v\mathrm{sq}_{vi}-2\,\mathrm{sq}_{ui}$. Then
-\begin{equation*}
-T^{\mathrm{LEO}}_{ui}=T_{ui}-(W_{ui}-\hat Y_{ui})\,(C_{ui}A_{ui}+C_{ui}^3),
-\end{equation*}
-where $T$ is the walk-corrected three-hop term on $C\circ W$. The term $T^{\mathrm{LEO}}_{ui}$ does not depend on
-the exposure and outcome of the pair $(u,i)$. The same construction applied to the observed positive graph
-$O\circ Y$, with base 0, gives a third feature.
-
-The features are $\phi_1=\operatorname{logit}\hat Y$, $\phi_2$ and $\phi_3$ equal to $T^{\mathrm{LEO}}$ of the DR
-graph with $\alpha\in\{0.5,0.7\}$, and $\phi_4$ equal to $T^{\mathrm{LEO}}$ of the observed positive graph with
-$\alpha=0.5$. Each feature is standardised over the matrix. The prior is
-\begin{equation*}
-\pi_{ui}=a_u+\sum_k\theta_{k,b(u)}\,\phi_{k,ui},
-\end{equation*}
-where $b(u)$ is a user-activity bucket defined by the quantiles of each user's number of exposures. The
-coefficients minimise $\sum_{u,i}(\pi_{ui}-W_{ui})^2+\rho\|\theta\|^2$ with $\rho=1$. This objective equals the
-DR squared risk up to a constant for each pair. By the Frisch-Waugh theorem, it is a ridge regression of the
-row-demeaned $W$ on the row-demeaned features, within each bucket. The imputation inside the features uses
-penalty $\lambda=5$ on Coat and $\lambda=20$ elsewhere. The nuisances of the prior are cross-fitted over
-ten folds. The prior is the standardised logit $z(\pi)$ of $\pi$, and the number of buckets is 1 or 2 on Coat
-and 4 on KuaiRec.
-
-\paragraph{Stage B: the learners.}
-DRGP-iALS is iALS-p with the prior $z(\pi)$ as its offset. Its grid is that of iALS-p, with 90 configurations on
-Coat and 45 on KuaiRec. DRGP-LGN-bpr is LightGCN with the BPR margin and the offset $\beta z(\pi)$, with
-$\beta\in\{0.1,0.2,0.5,1\}$; it has 72 configurations on Coat and 8 on KuaiRec. DRGP-LGN-dr is a LightGCN learner
-with a self-imputing pointwise doubly robust loss. Writing $\tilde\pi=\min\{0.99,\max\{0.01,\pi\}\}$ and
-$\ell$ for the binary cross-entropy on logits,
-\begin{equation*}
-\frac{1}{mn}\sum_{u,i}\Bigl[\ell(s_{ui},\tilde\pi_{ui})+\frac{O_{ui}}{\bar p_{ui}}\bigl(\ell(s_{ui},Y_{ui})-\ell(s_{ui},\tilde\pi_{ui})\bigr)\Bigr].
-\end{equation*}
-Its score offset is $\operatorname{logit}\tilde\pi$ with weight 1, so the imputed term vanishes at initialisation.
-It has 18 configurations on Coat and 2 on KuaiRec. DRGP-LGN-hyb adds this loss to the BPR loss with weight
-$\eta\in\{0.3,1\}$, and it has 36 configurations on Coat.
+The prior variants of the anatomy analysis (the IPS-free fit, the popularity offset, the shuffled item term and the user-only offset) are defined in \ref{sec:variants}.

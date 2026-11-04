@@ -1,4 +1,4 @@
-\begin{table}[t]
+\begin{table}[htbp]
 \centering
 \footnotesize
 \caption{Sensitivity of the primary conclusions to evaluation choices. A check mark means the sign of the difference (and, for Main, significance at $p_\mathrm{Holm}<0.05$) survives the choice; the value is the difference $\times10^{3}$ under that choice. Main: per-user difference. Oracle, configuration-oracle and matched-budget columns: split-mean difference, compared in sign with the split-mean validation-selected difference.}
@@ -24,5 +24,5 @@ KuaiRec & P3 & QP family (pooled) -- LightGCN-p (add prior) & $\times$ -0.32 & $
 KuaiRec & P4 & DRUP -- DR-JL & $\checkmark$ +4.38 & $\checkmark$ +5.48 & $\checkmark$ +5.45 & $\times$ -14.90 & 6 & 78.4\% & n/a & $\times$ & $\checkmark$ \\
 \bottomrule
 \end{tabular}}
-\par\smallskip\raggedright\footnotesize Flip share: fraction of 1,000 random subgrids of $k_\mathrm{min}$ configurations per method whose sign differs from the full grid. Alt.\ metric: nDCG@10 (Coat, Yahoo), nDCG@20 (KuaiRand), nDCG@50 (KuaiRec), on the stored selections.
+\par\smallskip\raggedright\footnotesize Flip share: fraction of 1,000 random subsets of $k_\mathrm{min}$ configurations per method whose sign differs from the full search space. Alt.\ metric: nDCG@10 (Coat, Yahoo), nDCG@20 (KuaiRand), nDCG@50 (KuaiRec), on the stored selections.
 \end{table}

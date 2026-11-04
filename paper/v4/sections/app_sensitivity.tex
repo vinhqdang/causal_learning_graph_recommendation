@@ -1,0 +1,79 @@
+%======================================================================
+\section{Sensitivity and robustness}\label{app:sens}
+%======================================================================
+
+This appendix collects the sensitivity analyses referred to in Section~\ref{sec:results}. They use the stored
+per-split results and the per-epoch records of the search, and they train no model.
+
+\subsection{Size of the searched space}\label{sec:res-budget}
+
+The searched spaces differ in size, from 6 configurations for several KuaiRand-Pure and KuaiRec baselines to 324 for
+the QP family on Coat. To measure how much this matters, we drew 1,000 random subsets of $k_\mathrm{min}$
+configurations for each comparison and counted how often its sign changed (Table~\ref{tab:T7}). Flips are common for
+comparisons whose effects are near zero. The QP family against LightGCN-p changes sign in $35.3\%$ of the subsets on
+Coat and $30.9\%$ on KuaiRec. The largest instability is DRUP against DR-JL on KuaiRec. At $k_\mathrm{min}=6$, $78.4\%$
+of the subsets flip the sign, and the split-mean difference at matched budget is $-14.90$, while the full-search-space
+per-user difference is $+4.38$ [2.21]. DRUP is training-free but searches 384 configurations on KuaiRec, against 6 for
+DR-JL, so its advantage over DR-JL depends on the budget granted to each method. The matched-budget values in
+Table~\ref{tab:T5} are split means and carry no test.
+
+\input{tables/T7_sensitivity}
+
+\subsection{Weighting unit, metric and seeds}
+
+The weighting unit can also change a sign. For DR-LightGCN against LightGCN on Coat, the split-mean difference at
+matched budget ($k=54$) is $+4.11$, while the per-user paired difference is $-0.65$ [30.16]. Every test in this paper
+uses the per-user unit. Changing the metric changes 3 of the 14 pairwise conclusions in Table~\ref{tab:T7}: the Coat
+comparisons of DR-LightGCN with LightGCN and of the QP family with LightGCN-p, and the KuaiRec comparison of
+DR-LightGCN with LightGCN. The alternative metric is nDCG@10 on Coat and Yahoo! R3, nDCG@20 on KuaiRand-Pure and
+nDCG@50 on KuaiRec. Of the 14 comparisons in Table~\ref{tab:T7}, 7 are significant at $p_\mathrm{Holm}<0.05$ in the
+main run. Over all 14 comparisons, the sign survives the per-split test oracle in 12, the configuration-level oracle in
+11, the matched budget in 13 and the alternative metric in 11.
+
+Retraining the selected configurations with seeds 1 to 3 changes two main-run conclusions (the seeds column of
+Table~\ref{tab:T5}). These comparisons are descriptive, because the two baselines of each dataset were chosen on test
+data. On Coat, \qp{} against iALS is $+20.02$ [19.74] in the main run ($p_\mathrm{Holm}=0.0469$, nominal, in a family of
+eight baselines). Over seeds 1 to 3 the difference is $+3.39$ [20.70] ($p_\mathrm{Holm}=0.747$, in a family of two),
+which is not significant. On KuaiRec the main-run deficits of \qp{} against DR-JL and MRDR, $-4.56$ [2.24] and $-4.34$
+[2.16], shrink over seeds 1 to 3 to $-1.03$ [1.64] ($p_\mathrm{Holm}=0.2213$) and $-1.56$ [1.47] ($p_\mathrm{Holm}=0.0760$).
+On Yahoo! R3 and KuaiRand-Pure the \qp{} family exceeds r-AdjNorm by $+14.76$ [5.23] and by $+2.31$ [1.23] over seeds 1
+to 3; these seed comparisons are descriptive and carry no significance claim. The seed-to-seed standard deviation of
+\qp{} on Coat ($0.0049$, ddof 0) is larger than that of iALS ($0.0029$), so the main-run Coat result is a single-run
+result.
+
+\subsection{Bootstrap ranks}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{figs/rank_distribution}
+\caption{Bootstrap rank distributions over 2,000 user resamples. For each dataset the rows are the eight methods with the
+highest mean validation score, excluding control rows, and the columns are the rank by mean test score (1 is best). On
+Coat the splits are resampled together with the users. Each cell gives the probability of that rank.}
+\label{fig:rank}
+\end{figure}
+
+The bootstrap ranks (Figure~\ref{fig:rank}) show how stable the leader is. On Yahoo! R3 the QP family ranks first in
+95.0\% of user resamples, and on KuaiRand-Pure in 99.8\%. On KuaiRec, DR and DRUP have the same mean score (0.6378) and
+exchange first place, with probabilities 0.873 and 0.127. The bootstrap therefore cannot separate them. On Coat no
+method is a stable leader. The most frequent first place is DR-BPR-LGN-p2, with probability 0.319, and the QP family
+ranks first with probability 0.090.
+
+\subsection{Two checks on the prior inputs}
+
+Coat's shipped propensities were estimated by the dataset authors from the uniform sample, so the prior rows were
+refitted with the estimator used on the other three datasets (Table~\ref{tab:T10}). The estimated-minus-shipped
+difference is $+2.63$ [5.27] for iALS-p and $+1.64$ [10.30] for LightGCN-p, and the imputation alone changes by $-1.14$
+[7.26]. None is significant. The gain over the no-prior reference remains as a point estimate: $+19.44$ [18.66] for
+iALS-p ($p_\mathrm{Holm}=0.330$, not significant) and $+33.62$ [16.72] for LightGCN-p. The estimated-propensity run of
+LightGCN was not carried out, and the other propensity-based Coat rows were not refitted.
+
+\input{tables/T10_estimated_propensity}
+
+The stored iALS search space selects its largest value of the confidence weight $\alpha$ (30) in all 10 splits, and the
+wider search space of Table~\ref{tab:T11} selects its largest value (1000) in four splits. The stored search space is
+therefore bounded at its edge, and the wider one is not exhausted. Over the stored iALS, the wider search space gives
+$+12.92$ [8.01] ($p_\mathrm{Holm}=0.003$), against $+16.82$ [18.04] for the offset model over the same stored iALS. The
+wider search space is not significantly different from iALS-p ($-3.90$ [15.99], $p_\mathrm{Holm}=0.631$). The two
+differences cannot be separated: the wider search space has 32 configurations against 90 for iALS-p.
+
+\input{tables/T11_wider_ials_grid}

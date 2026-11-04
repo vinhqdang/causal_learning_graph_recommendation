@@ -1,7 +1,29 @@
 \section{Conclusion}\label{sec:conclusion}
 
-We re-evaluated exposure-bias corrections for graph recommenders on four benchmarks with uniformly exposed test data, under one protocol in which uniform data serve for validation and testing, and, through Coat's shipped propensities, for one nuisance that we check for the prior rows. The study asked how much evaluation choices move conclusions, how much graph-specific debiasing adds over an equally tuned backbone, which ingredient carries the gains that remain, and whether exact unbiasedness of the propagation matters for ranking.
+We re-evaluated exposure-bias corrections for graph recommenders on four benchmarks with uniformly exposed test data,
+under one protocol in which uniform data serve for validation and testing, and, through Coat's shipped propensities,
+for one nuisance that we check for the prior rows. The study asked how much evaluation choices move conclusions, how
+much graph-specific debiasing adds over an equally tuned backbone, which ingredient carries the gains that remain, and
+whether exact unbiasedness of the propagation matters for ranking.
 
-Four findings stand out. First, the protocol is sensitive to evaluation choices. Selecting on test data inflates Coat scores by up to $0.030$ nDCG@5, and under the per-split test oracle it reverses the order of iALS and LightGCN. A wider iALS grid on Coat raises iALS by $+12.92$ ($\times10^{-3}$), so tuning budget alone can produce gaps of the same order as the differences being compared. Second, third-party graph-specific debiasers add at most $+4.10$ ($\times10^{-3}$) nDCG over LightGCN in the point estimates on Coat, Yahoo! R3 and KuaiRand-Pure, and none of these gains survives the correction for overlapping splits. On KuaiRec the gains are larger, but a pointwise loss without any debiasing gives a larger mean difference. Our own QP-LightGCN family adds $+16.77$ on Yahoo! R3 and $+3.93$ on KuaiRand-Pure over LightGCN, and these differences are not significant under the same correction. Third, an additive prior, fitted once on the exposed log and added to the score, gives the largest point-estimate gains over LightGCN on Coat and KuaiRec. The Coat gain is not robust to the correction for overlapping splits. Removing the inverse-propensity weights does not reduce the gain, a shuffled item term removes the KuaiRec gain, and popularity does not reproduce it. The mechanism is not identified. Fourth, the walk correction, which makes multi-hop doubly robust propagation exactly unbiased, does not improve ranking on Coat, Yahoo! R3 or KuaiRec. DR and DRUP were not run on KuaiRand-Pure.
+First, the protocol is sensitive to evaluation choices. Selecting on test data inflates Coat scores by up to $0.030$
+nDCG@5, and under the per-split test oracle it reverses the order of iALS and LightGCN. The search space of a backbone
+can move a baseline by an amount comparable to the gain of a prior. Second, third-party graph-specific debiasers add at
+most $+4.10\times10^{-3}$ nDCG over LightGCN in the point estimates on Coat, Yahoo! R3 and KuaiRand-Pure, and none of
+these gains survives the correction for overlapping splits on those datasets. On KuaiRec the gains are larger, NAVIP's
+gain survives the correction, and a pointwise loss without any debiasing gives a larger mean difference. The QP-LightGCN
+family is not significant under the correction on Yahoo! R3 or KuaiRand-Pure. Third, an additive prior, fitted once on
+the exposed log and added to the score, gives the largest point-estimate gains over LightGCN on Coat and KuaiRec. The
+Coat gain is not robust to the correction for overlapping splits, and the KuaiRec gain is. Removing the
+inverse-propensity weights does not reduce the gain, a shuffled item term removes the KuaiRec gain, and popularity does
+not reproduce it. The mechanism is not identified. Fourth, the walk correction, which makes multi-hop doubly robust
+propagation exactly unbiased, does not improve ranking on Coat, Yahoo! R3 or KuaiRec. In a semi-synthetic KuaiRec study
+with known labels, DRUP has the higher nDCG@20 in seven of nine cells. That setting differs from the real logs, and we
+do not take it to show that the correction helps there. DR and DRUP were not run on KuaiRand-Pure.
 
-The study does not propose a method. It does not show that debiasing is ineffective in general, because its scope is four public benchmarks, one cut-off per dataset and offline evaluation of implicit-feedback learners trained on the biased log. It does not establish equivalence on Coat, where the study is underpowered. For evaluation, the practical requirements are to select per split on validation data, to match budgets, to include the simple baselines, and to report minimum detectable effects and corrected tests with every claim that two methods are equal or that one is better.
+The study does not propose a method. It does not show that debiasing is ineffective in general, because its scope is
+four public benchmarks, one cut-off per dataset and offline evaluation of implicit-feedback learners trained on the
+biased log. It does not establish equivalence on Coat, where the study is underpowered. For evaluation, the practical
+requirements are to select per split on validation data, to match budgets, to include the simple baselines, and to
+report minimum detectable effects and corrected tests with every claim that two methods are equal or that one is
+better.

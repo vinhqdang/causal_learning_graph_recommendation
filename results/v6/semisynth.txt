@@ -1,0 +1,14 @@
+A5 semi-synthetic KuaiRec appendix tables (experiments/v7_semisynth.py)
+replications 30, density 0.13, beta 1.0, m 1411 users, n 3327 items, positive rate 0.0463
+ndcg20 indep/true/fixed: IPS 0.0967, IPS+WC 0.0967, DR 0.0973, DRUP 0.1071; DRUP-DR +0.0099
+ndcg20 indep/true/yhat: IPS 0.1202, IPS+WC 0.1202, DR 0.3769, DRUP 0.3697; DRUP-DR -0.0072
+ndcg20 indep/est/fixed: IPS 0.0569, IPS+WC 0.0569, DR 0.0294, DRUP 0.0379; DRUP-DR +0.0085
+ndcg20 xfit/true/fixed: IPS 0.0967, IPS+WC 0.0967, DR 0.0510, DRUP 0.0683; DRUP-DR +0.0173
+ndcg20 xfit/true/yhat: IPS 0.1915, IPS+WC 0.1915, DR 0.3203, DRUP 0.3218; DRUP-DR +0.0015
+ndcg20 xfit/est/fixed: IPS 0.0559, IPS+WC 0.0559, DR 0.0206, DRUP 0.0303; DRUP-DR +0.0097
+ndcg20 split/true/fixed: IPS 0.0926, IPS+WC 0.0913, DR 0.0303, DRUP 0.0479; DRUP-DR +0.0176
+ndcg20 split/true/yhat: IPS 0.1545, IPS+WC 0.1500, DR 0.2742, DRUP 0.2723; DRUP-DR -0.0019
+ndcg20 split/est/fixed: IPS 0.0657, IPS+WC 0.0711, DR 0.0198, DRUP 0.0293; DRUP-DR +0.0096
+DRUP above DR in 7 of 9 cells with nDCG@20
+written: paper/v4/tables/T14_semisynth_ndcg.tex
+written: paper/v4/tables/T15_semisynth_bias.tex

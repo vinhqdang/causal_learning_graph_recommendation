@@ -1,0 +1,23 @@
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Semi-synthetic KuaiRec study: nDCG@20 on unexposed candidates against the true labels. Mean over 30 replications with the standard error in parentheses.}
+\label{tab:T14}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lllrrrrr}
+\toprule
+Nuisance fit & Propensity & Degree weights & IPS & IPS+WC & DR & DRUP & $\Delta$ DRUP$-$DR \\
+\midrule
+independent & true & fixed & 0.0967 (0.0011) & 0.0967 (0.0011) & 0.0973 (0.0015) & 0.1071 (0.0012) & +0.0099 \\
+independent & true & imputed & 0.1202 (0.0018) & 0.1202 (0.0018) & 0.3769 (0.0011) & 0.3697 (0.0011) & -0.0072 \\
+independent & estimated & fixed & 0.0569 (0.0005) & 0.0569 (0.0005) & 0.0294 (0.0004) & 0.0379 (0.0003) & +0.0085 \\
+cross-fitted & true & fixed & 0.0967 (0.0011) & 0.0967 (0.0011) & 0.0510 (0.0011) & 0.0683 (0.0010) & +0.0173 \\
+cross-fitted & true & imputed & 0.1915 (0.0018) & 0.1915 (0.0018) & 0.3203 (0.0009) & 0.3218 (0.0009) & +0.0015 \\
+cross-fitted & estimated & fixed & 0.0559 (0.0004) & 0.0559 (0.0004) & 0.0206 (0.0003) & 0.0303 (0.0004) & +0.0097 \\
+20\% split & true & fixed & 0.0926 (0.0012) & 0.0913 (0.0011) & 0.0303 (0.0009) & 0.0479 (0.0013) & +0.0176 \\
+20\% split & true & imputed & 0.1545 (0.0012) & 0.1500 (0.0012) & 0.2742 (0.0029) & 0.2723 (0.0027) & -0.0019 \\
+20\% split & estimated & fixed & 0.0657 (0.0007) & 0.0711 (0.0007) & 0.0198 (0.0004) & 0.0293 (0.0004) & +0.0096 \\
+\bottomrule
+\end{tabular}}
+\par\smallskip\raggedright\footnotesize The last column is the difference of the two means, which is not a paired test: the standard error of the difference is not stored. Higher values are better. Nuisance fit: \emph{independent} uses a log independent of the one scored, \emph{cross-fitted} uses folds of the same log, and \emph{20\% split} uses a 20\% sample split. The degree weights are \emph{fixed} (the true-degree normalisation) or \emph{imputed} from the imputation.
+\end{table}

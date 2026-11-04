@@ -1,0 +1,24 @@
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Semi-synthetic KuaiRec study: relative bias of the three-hop term, averaged over the draws. The last row is the five-hop term.}
+\label{tab:T15}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lllrrrr}
+\toprule
+Nuisance fit & Propensity & Degree weights & IPS & IPS+WC & DR & DRUP \\
+\midrule
+independent & true & fixed & 0.56 & 0.27 & 1.95 & 0.88 \\
+independent & true & imputed & 0.66 & 0.65 & 0.67 & 0.66 \\
+independent & estimated & fixed & 6.37 & 4.80 & 9.47 & 5.66 \\
+cross-fitted & true & fixed & 0.56 & 0.27 & 2.29 & 1.10 \\
+cross-fitted & true & imputed & 0.71 & 0.74 & 0.72 & 0.75 \\
+cross-fitted & estimated & fixed & 6.26 & 4.70 & 10.88 & 6.47 \\
+20\% split & true & fixed & 0.81 & 0.55 & 2.09 & 1.02 \\
+20\% split & true & imputed & 0.47 & 0.31 & 0.53 & 0.32 \\
+20\% split & estimated & fixed & 9.47 & 7.90 & 11.78 & 8.19 \\
+independent (K=5) & true & fixed & -- & -- & 3.46 & 0.32 \\
+\bottomrule
+\end{tabular}}
+\par\smallskip\raggedright\footnotesize Relative bias: mean absolute bias of the averaged estimate over the entries of the three-hop term, divided by the mean absolute true three-hop term. IPS and IPS+WC (the walk-corrected IPS estimator) are shown for reference. The column definitions are those of Table~\ref{tab:T14}.
+\end{table}

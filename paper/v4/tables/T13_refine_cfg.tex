@@ -1,0 +1,27 @@
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Configurations searched by the refinement family, its controls and the DRGP runs (stored counts).}
+\label{tab:T13}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrr}
+\toprule
+Member & Coat & Yahoo & KuaiRand & KuaiRec \\
+\midrule
+DR-BPR-LGN (Q-weighted LightGCN) & 108 & -- & -- & -- \\
+DR-BPR-LGN-1 (Q-only) & 54 & 36 & 6 & 24 \\
+DR-BPR-LGN-p (offset, $\beta\in\{0.5,1\}$) & 108 & 24 & 12 & 24 \\
+DR-BPR-LGN-p2 (offset, $\beta\in\{1,2\}$) & 108 & 24 & 12 & 72 \\
+DR-iALS & 48 & -- & -- & -- \\
+QP family (pooled over its jobs) & 324 & 84 & 30 & 120 \\
+Control: shuffled Q & 54 & 12 & -- & -- \\
+Control: popularity Q & 54 & 12 & -- & -- \\
+DRGP prior alone & 6 & -- & -- & 2 \\
+DRGP-iALS (iALS-p with the DRGP prior) & 90 & -- & -- & 45 \\
+DRGP-LGN-bpr & 72 & -- & -- & 8 \\
+DRGP-LGN-dr & 18 & -- & -- & 2 \\
+DRGP-LGN-hyb & 36 & -- & -- & -- \\
+\bottomrule
+\end{tabular}}
+\par\smallskip\raggedright\footnotesize Counts are the configurations stored in the result files. The QP family pools the jobs listed above it for each dataset, and its count is their sum. The DRGP prior alone has one configuration per run. Controls are not proposed methods. A dash marks a member that was not run on the dataset.
+\end{table}

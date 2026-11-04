@@ -1,0 +1,145 @@
+%======================================================================
+\section{Refinement family}\label{app:refine}
+%======================================================================
+
+This appendix describes the four refinements of the additive prior that are reported as one evaluated family in Section~\ref{sec:methods}, with the Q-weighted negatives, the QP-LightGCN family, the ensemble with DRUP and the leave-edge-out DR prior (DRGP). Their configuration counts are in Table~\ref{tab:T13}, and the paired tests of the refinements against the simple prior are in Table~\ref{tab:T6}.
+
+\input{tables/T13_refine_cfg}
+
+\subsection{Q-weighted negatives}\label{sec:qweight}
+
+The probability that an unlogged pair is a positive is
+\begin{equation}\label{eq:Q}
+Q_{ui}=\frac{\hat Y_{ui}(1-\bar p_{ui})}{1-\bar p_{ui}\hat Y_{ui}},
+\end{equation}
+clipped to $[0,1]$. This is the posterior under the assumption that exposure and outcome are independent given
+the covariates on which the propensity depends.
+
+The Q-weighted BPR loss uses only logged positives. For each positive $(u,i)$ one negative $j$ is drawn uniformly
+from the items, and it is redrawn once if $(u,j)$ is itself logged. The negative is weighted by
+$w_{uj}=\max\{1-f_nQ_{uj},10^{-3}\}$, and the loss over a batch $B$ is
+\begin{equation*}
+\mathcal L=-\frac{\sum_{(u,i,j)\in B}w_{uj}\log\sigma\bigl(s_{ui}-s_{uj}\bigr)}{\sum_{(u,i,j)\in B}w_{uj}}
++\lambda\,\frac{1}{|B|}\sum_{(u,i,j)\in B}\bigl(\|e_u\|^2+\|e_i\|^2+\|e_j\|^2\bigr),
+\end{equation*}
+where $e_u$, $e_i$ and $e_j$ are the embeddings and $\lambda$ is the weight decay. The normalisation by the total
+weight keeps the loss scale independent of how many negatives are down-weighted. The factor $f_n$ is 1 in every
+job except the Coat job without offset, where $f_n\in\{0.5,1\}$. The encoder is LightGCN.
+
+The Q-weighted iALS (DR-iALS) uses the same weights as confidences. Logged positives get $c_{ui}=1+\alpha$, and
+unlogged pairs get $c_{ui}=\max\{1-f_nQ_{ui},10^{-3}\}$. Its search space is $\alpha\in\{3,10,30\}$, regularisation in
+$\{1,10,100,1000\}$, $f_n\in\{0.5,1\}$ and width in $\{32,64\}$, which gives 48 configurations on Coat.
+
+The configuration counts of the Q-weighted LightGCN (DR-BPR-LGN) are 108 on Coat (with $f_n\in\{0.5,1\}$), and
+DR-BPR-LGN-1 (with $f_n=1$) has 54 on Coat, 36 on Yahoo!\,R3, 6 on KuaiRand and 24 on KuaiRec.
+
+A low-rank variant replaces $\hat Y$ in $Q$, and in the prior of its offset variant, by a rank-16 low-rank
+imputation with ridge penalty 5. It has 54 configurations on Coat in the Q-only form and 108 in the offset form.
+
+Three control weightings replace $Q$ in the same learner. The first is $Q$ computed from $\hat Y$ alone, with no
+propensity correction (DR-BPR-yhat; 54 configurations on Coat). The second is $Q$ computed from item popularity,
+rescaled to the mean of the DR weight (DR-BPR-pop; 54 on Coat and 12 on Yahoo!\,R3). The third is a fixed random
+permutation of the values of $Q$ over the matrix (DR-BPR-shuf; 54 on Coat and 12 on Yahoo!\,R3). The controls
+test whether the information in $Q$ matters, and they are not proposed methods.
+
+\subsection{QP-LightGCN}\label{sec:qp}
+
+QP-LightGCN combines the Q weighting with the offset of Section~\ref{sec:prior}, so that $f_n=1$ and the BPR
+margin contains $\beta(z_{ui}-z_{uj})$. Two offset search spaces are used. DR-BPR-LGN-p has $\beta\in\{0.5,1\}$, and
+DR-BPR-LGN-p2 has $\beta\in\{1,2\}$. The configurations of each offset search space are 108 on Coat, 24 on Yahoo!\,R3 (learning rate $3\cdot10^{-3}$) and 12
+on KuaiRand. On KuaiRec, DR-BPR-LGN-p has 24 configurations (learning rate $3\cdot10^{-3}$) and DR-BPR-LGN-p2 has 72
+(learning rates $10^{-2}$, $3\cdot10^{-3}$ and $10^{-3}$).
+
+The QP-LightGCN family of each dataset pools its jobs. For each split, the job, configuration and epoch with the
+highest validation score are selected. The family contains DR-BPR-LGN, DR-BPR-LGN-p and DR-BPR-LGN-p2 on Coat,
+which gives 324 configurations. On Yahoo!\,R3 it contains DR-BPR-LGN-1, DR-BPR-LGN-p and DR-BPR-LGN-p2, which gives
+84 configurations. On KuaiRand and KuaiRec the family contains the same job types, DR-BPR-LGN-1, DR-BPR-LGN-p and DR-BPR-LGN-p2,
+and it has 30 and 120 configurations respectively.
+
+\subsection{Ensemble with DRUP}\label{sec:ensemble}
+
+For each split, component A is the QP-LightGCN family configuration selected for that split, and component B is
+the DRUP configuration selected for that split. The scores of each component are standardised within each user
+over the unlogged items of the training log, that is, over the pairs with $O_{ui}=0$. The standardised score
+is $\tilde S_{ui}=(S_{ui}-\bar S_u)/s_u$, with the mean and the standard deviation taken over those pairs. The
+ensemble score is
+\begin{equation*}
+(1-w)\,\tilde S^{A}_{ui}+w\,\tilde S^{B}_{ui},\qquad w\in\{0,0.1,\dots,1\}.
+\end{equation*}
+The weight $w$ is the first maximiser over this search space of the validation nDCG, and the test score is computed with
+that $w$. The ensemble stage also stores the rows $w=0$ (component A), $w=1$ (DRUP) and $w=0.5$ as checks. The
+weight is chosen from validation lists only. The ensemble adds no configuration of its own, so the components
+carry the configuration counts.
+
+\subsection{DRGP: a leave-edge-out DR graph prior}\label{sec:drgp}
+
+DRGP has two stages. It was run on Coat and KuaiRec only, as single runs without seed repeats. On Coat, 10 of 10
+jobs completed, with 222 configurations in total, and on KuaiRec, 5 of 5 jobs completed, with 57 configurations in
+total (Table~\ref{tab:T13}).
+
+\paragraph{Stage A: the prior.}
+For each pair, define the leave-edge-out 3-hop term of the DR graph. Let $C$ be the degree weights defined above, with the degrees taken from $\hat Y$. Let $\mathrm{sq}=C\circ C\circ W$ and
+$A_{ui}=\sum_j\mathrm{sq}_{uj}+\sum_v\mathrm{sq}_{vi}-2\,\mathrm{sq}_{ui}$. Then
+\begin{equation*}
+T^{\mathrm{LEO}}_{ui}=T_{ui}-(W_{ui}-\hat Y_{ui})\,(C_{ui}A_{ui}+C_{ui}^3),
+\end{equation*}
+where $T$ is the walk-corrected three-hop term on $C\circ W$. The term $T^{\mathrm{LEO}}_{ui}$ does not depend on
+the exposure and outcome of the pair $(u,i)$. The same construction applied to the observed positive graph
+$O\circ Y$, with base 0, gives a third feature.
+
+The features are $\phi_1=\operatorname{logit}\hat Y$, $\phi_2$ and $\phi_3$ equal to $T^{\mathrm{LEO}}$ of the DR
+graph with $\alpha\in\{0.5,0.7\}$, and $\phi_4$ equal to $T^{\mathrm{LEO}}$ of the observed positive graph with
+$\alpha=0.5$. Each feature is standardised over the matrix. The prior is
+\begin{equation*}
+\pi_{ui}=a_u+\sum_k\theta_{k,b(u)}\,\phi_{k,ui},
+\end{equation*}
+where $b(u)$ is a user-activity bucket defined by the quantiles of each user's number of exposures. The
+coefficients minimise $\sum_{u,i}(\pi_{ui}-W_{ui})^2+\rho\|\theta\|^2$ with $\rho=1$. This objective equals the
+DR squared risk up to a constant for each pair. By the Frisch-Waugh theorem, it is a ridge regression of the
+row-demeaned $W$ on the row-demeaned features, within each bucket. The imputation inside the features uses
+penalty $\lambda=5$ on Coat and $\lambda=20$ elsewhere. The nuisances of the prior are cross-fitted over
+ten folds. The prior is the standardised logit $z(\pi)$ of $\pi$, and the number of buckets is 1 or 2 on Coat
+and 4 on KuaiRec.
+
+\paragraph{Stage B: the learners.}
+DRGP-iALS is iALS-p with the prior $z(\pi)$ as its offset. Its search space is that of iALS-p, with 90 configurations on
+Coat and 45 on KuaiRec. DRGP-LGN-bpr is LightGCN with the BPR margin and the offset $\beta z(\pi)$, with
+$\beta\in\{0.1,0.2,0.5,1\}$; it has 72 configurations on Coat and 8 on KuaiRec. DRGP-LGN-dr is a LightGCN learner
+with a self-imputing pointwise doubly robust loss. Writing $\tilde\pi=\min\{0.99,\max\{0.01,\pi\}\}$ and
+$\ell$ for the binary cross-entropy on logits,
+\begin{equation*}
+\frac{1}{mn}\sum_{u,i}\Bigl[\ell(s_{ui},\tilde\pi_{ui})+\frac{O_{ui}}{\bar p_{ui}}\bigl(\ell(s_{ui},Y_{ui})-\ell(s_{ui},\tilde\pi_{ui})\bigr)\Bigr].
+\end{equation*}
+Its score offset is $\operatorname{logit}\tilde\pi$ with weight 1, so the imputed term vanishes at initialisation.
+It has 18 configurations on Coat and 2 on KuaiRec. DRGP-LGN-hyb adds this loss to the BPR loss with weight
+$\eta\in\{0.3,1\}$, and it has 36 configurations on Coat.
+
+\subsection{Results of the refinement family}\label{sec:refine-results}
+
+The refinements built on the prior do not improve on the simple prior of the same learner on Coat and KuaiRec
+(Table~\ref{tab:T6}). On Coat, the QP family is not different from LightGCN-p ($+0.05$ [8.29], and the TOST analysis
+excludes differences larger than $0.010$, $p=0.009$). The largest refinement difference from LightGCN-p is $+3.27$ [6.94]
+(DR-BPR-LGN-p2), which is not significant. The Q-only variants are $-8.02$ [18.85] and $-10.79$ [19.26] below it. On
+iALS, DR-iALS is $-10.22$ [15.96] against iALS-p ($p_\mathrm{Holm}=0.208$). On KuaiRec the QP family is $-0.32$ [0.50]
+against LightGCN-p ($p_\mathrm{Holm}=0.211$, within $\pm0.003$). On Yahoo! R3 and KuaiRand-Pure the QP family does
+exceed LightGCN-p, by $+18.20$ [5.64] and $+4.74$ [1.54] (both $p_\mathrm{Holm}<0.001$; Table~\ref{tab:T6}), so the
+refinements are not controls there. Every refinement in the study is below DRUP ($0.6378$) on KuaiRec.
+
+\input{tables/T6_refinements}
+
+The leave-edge-out prior of the DRGP family reaches $0.6318$ on KuaiRec, which is $-5.58$ [1.90] against DRUP
+($p_\mathrm{Holm}<0.0001$), and $0.5992$ on Coat, which is $-0.13$ [15.11] against \qp{} ($p_\mathrm{Holm}=1.000$).
+These are single runs without seed repeats (\ref{sec:drgp}).
+
+A validated ensemble of \qp{} and DRUP selects one component in most splits and does not add to either: DRUP in four
+of five KuaiRec splits and \qp{} in nine of ten Coat splits (stored ensemble summary). On KuaiRec the ensemble is
+$-0.18$ [0.19] against DRUP ($p_\mathrm{Holm}=0.0664$), and on Coat it is $+1.79$ [2.39] against \qp{}
+($p_\mathrm{Holm}=0.1421$).
+
+The prior alone, without a learner, is a training-free scorer. On KuaiRec the unweighted prior alone reaches $0.6367$
+and the weighted prior alone $0.6216$, and popularity alone reaches $0.5766$ (Table~\ref{tab:T9}). On KuaiRand-Pure
+popularity alone ($0.4204$) exceeds the weighted prior alone ($0.3637$) by $+56.41$ [5.19] ($p_\mathrm{Holm}<0.001$),
+and the unweighted prior alone ($0.3837$) exceeds the weighted one by $+19.90$ [2.45]. On Coat and Yahoo! R3,
+popularity alone is not significantly different from the weighted prior alone. No paired test of the prior alone
+against DRUP is in the stored results, so the $0.0011$ gap between the unweighted prior alone and DRUP on KuaiRec is
+a difference of means only.

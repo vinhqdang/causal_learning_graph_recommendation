@@ -1,0 +1,45 @@
+%======================================================================
+\section{Walk correction: synthetic, semi-synthetic and training-free evidence}\label{app:walk}
+%======================================================================
+
+This appendix gives the evidence on the walk correction that is not based on the real logs, and the training-free
+operators on KuaiRec. The values are read from the stored outputs of the synthetic and semi-synthetic studies and of the
+training-free runs.
+
+\subsection{Synthetic MNAR study}
+
+On a synthetic MNAR model with independent exposure, the walk correction reduces the relative $|\mathrm{bias}|$ of the
+DR adjacency from $1.756$ to $0.019$ at $K=3$ and from $8.350$ to $0.039$ at $K=5$ (stored synthetic-study outputs).
+This is a bias result on a model in which the true propensities and outcomes are known. It does not measure ranking on
+real logs.
+
+\subsection{Semi-synthetic KuaiRec study}
+
+The semi-synthetic study builds its logs from the dense KuaiRec setting, with 30 replications, $\beta=1$, true
+propensities and fixed degree weights. The relative bias of the three-hop term is $1.95$ for DR and $0.88$ for DRUP,
+and $3.46$ against $0.32$ at $K=5$. With estimated propensities the same comparison gives $9.47$ against $5.66$. In the
+three cells with degree weights computed from the imputation and true propensities, the walk correction changes the
+relative bias from $0.67$ to $0.66$ (independent nuisance fit), from $0.72$ to $0.75$ (cross-fitted) and from $0.53$ to
+$0.32$ (20\% split). Table~\ref{tab:T15} gives all cells.
+
+The same study scores the candidates by nDCG@20 against the true labels on unexposed items (Table~\ref{tab:T14}). DRUP
+is higher than DR in seven of the nine cells. In the two cells with imputed degree weights and an independent or a
+20\% split nuisance fit, DR is higher ($0.3769$ against $0.3697$, and $0.2742$ against $0.2723$). The differences of
+means are not paired tests, because their standard errors are not stored. These are results for a known-label world
+with a known exposure mechanism, and they are not evidence about the real logs, where the correction did not raise
+nDCG (Section~\ref{sec:res-walk}).
+
+\input{tables/T14_semisynth_ndcg}
+
+\input{tables/T15_semisynth_bias}
+
+\subsection{Training-free operators on KuaiRec}
+
+Among the training-free operators, the best KuaiRec mean goes to doubly robust propagation, not to the walk correction.
+DRUP reaches $0.6378$, the DR adjacency on which it is built also reaches $0.6378$, and a five-hop DR adjacency reaches
+$0.6379$ (stored training-free runs). No trained model in Table~\ref{tab:T4} exceeds $0.6378$ on KuaiRec: the best is
+DR-JL at $0.6332$, and the QP family reaches $0.6285$. On Coat, DRUP is weak at $0.5467$, and on Yahoo! R3 the DRUP and
+DR rows coincide at $0.6567$. In the bootstrap, DR ranks first in $87.3\%$ of resamples on KuaiRec and DRUP in $12.7\%$
+(Figure~\ref{fig:rank}), which reflects the tie in their means. The unweighted prior alone ($0.6367$) is the one
+training-free result close to DRUP, and it is reported in Table~\ref{tab:T9}. The reason the walk correction does not
+change the ranking on these logs is not identified by our runs.

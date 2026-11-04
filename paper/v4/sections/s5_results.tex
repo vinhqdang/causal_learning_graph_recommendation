@@ -1,82 +1,137 @@
 \section{Results}\label{sec:results}
 
-This section answers the four research questions in turn. All test numbers are nDCG on uniformly exposed test data. Uniform data are used for validation and testing. The one exception is Coat's shipped propensities, which the dataset authors estimated from the uniform sample; Section~\ref{sec:res-ingredient} reports a refit for the prior rows with the estimator used on the other datasets. Otherwise nuisances are fitted on the exposed log, and every configuration and epoch is selected on validation data within each split. Table~\ref{tab:T4} gives the benchmark, with the mean and standard deviation over splits and the number of configurations searched for each method. Paired differences are per-user averages of the difference between two methods, taken over the users who appear in both test sets. They are given in units of $10^{-3}$ nDCG, with the 95\% confidence-interval half-width in brackets. A difference is called significant only when its Holm-adjusted p-value is below 0.05, and the Holm family is stated wherever a p-value is given. The analysis uses 225 users on Coat, 2,310 on Yahoo! R3, 8,321 on KuaiRand-Pure and 1,410 on KuaiRec. There are 10 splits on Coat and 5 on the other three datasets. The metric is nDCG@5 on Coat and Yahoo! R3, nDCG@10 on KuaiRand-Pure and nDCG@20 on KuaiRec.
+This section answers the four research questions in turn. Test scores are nDCG on uniformly exposed test data, and
+Table~\ref{tab:T4} gives the benchmark with the number of configurations searched for each method. Paired differences
+are per-user averages of the difference between two methods, taken over the users who appear in both test sets. They
+are given in units of $10^{-3}$ nDCG, with the 95\% confidence-interval half-width in brackets. A difference is called
+significant only when its Holm-adjusted p-value is below 0.05, and the Holm family is stated wherever a p-value is
+given. The analysis uses 225 users on Coat, 2,310 on Yahoo! R3, 8,321 on KuaiRand-Pure and 1,410 on KuaiRec. There
+are 10 splits on Coat and 5 on the other three datasets.
 
 \input{tables/T4_main}
 
-Table~\ref{tab:T5} reports the primary comparisons. P1 compares the strongest third-party graph debiaser with LightGCN, and P2 compares a simple debiased prior with its backbone; both are reported on all four datasets. P3 compares the best refinement with the simple prior of the same learner, and P4 compares training-free doubly robust propagation with the best trained model on KuaiRec. P3 is reported on Coat and KuaiRec only, and P4 on KuaiRec only. The equivalence (TOST) margins are $\pm0.010$ on Coat and Yahoo! R3 and $\pm0.003$ on KuaiRand-Pure and KuaiRec. They are sensitivity thresholds chosen before the analysis and are not derived from the literature, and the TOST results are presented as a sensitivity analysis. On Coat, the TOST column states only which differences the data exclude.
-
-The appendix table of every method against LightGCN (Tables~\ref{tab:T12-coat} to \ref{tab:T12-kuairec}) gives the backbone family used in several statements below.
-
-\subsection{Effects of evaluation choices (RQ1)}\label{sec:res-eval}
-
-Selecting on the test split inflates the reported scores, and the inflation differs between methods. Across the trained methods in the sensitivity analysis, the per-split test oracle exceeds the validation-selected score by a mean of $+0.0207$ on Coat (range $+0.0097$ to $+0.0302$), $+0.0044$ on Yahoo! R3 (range $+0.0015$ to $+0.0088$), $+0.0012$ on KuaiRand-Pure (range $+0.0005$ to $+0.0022$) and $+0.0009$ on KuaiRec (range $+0.0000$ to $+0.0028$). On Coat the inflation is largest for DR-JL ($+0.0302$) and smallest for iALS ($+0.0097$), while LightGCN inflates by $+0.0241$. This is enough to change an order. Under validation selection iALS scores $0.5812$ and LightGCN $0.5683$. Under the per-split test oracle, which chooses on test data and is a diagnostic only, the scores are $0.5909$ for iALS and $0.5924$ for LightGCN, so the order reverses. The configuration-level oracle, which picks one configuration by its mean test score, keeps the validation order, with $0.5843$ for iALS and $0.5807$ for LightGCN. The two kinds of test oracle therefore do not agree on Coat. The reversal is a property of the per-split test oracle only.
-
-The searched grids differ in size, from 6 configurations for several KuaiRand-Pure and KuaiRec baselines to 324 for the QP family on Coat. To measure how much this matters, we drew 1,000 random subgrids of $k_\mathrm{min}$ configurations for each comparison and counted how often its sign changed (Table~\ref{tab:T7}). Flips are common for comparisons whose effects are near zero. The QP family against LightGCN-p changes sign in 35.3\% of the subgrids on Coat and 30.9\% on KuaiRec. The largest instability is DRUP against DR-JL on KuaiRec. At $k_\mathrm{min}=6$, 78.4\% of the subgrids flip the sign, and the split-mean difference at matched budget is $-14.90$, while the full-grid per-user difference is $+4.38$ [2.21]. DRUP is training-free but searches 384 configurations on KuaiRec, against 6 for DR-JL, so its advantage over DR-JL depends on the budget granted to each method. The matched-budget values in Table~\ref{tab:T5} are split means and carry no test.
-
-The weighting unit can also change a sign. For DR-LightGCN against LightGCN on Coat, the split-mean difference at matched budget ($k=54$) is $+4.11$, while the per-user paired difference is $-0.65$ [30.16]. Every test in this paper uses the per-user unit. The split-mean values are reported only as matched-budget descriptions, and they are not tested.
-
-Retraining the selected configurations with seeds 1 to 3 changes two main-run conclusions (the seeds column of Table~\ref{tab:T5}). These comparisons are descriptive, because the two baselines of each dataset were chosen on test data. On Coat, \qp{} against iALS is $+20.02$ [19.74] in the main run ($p_\mathrm{Holm}=0.0469$, in a family of eight baselines). Over seeds 1 to 3 the difference is $+3.39$ [20.70] ($p_\mathrm{Holm}=0.747$, in a family of two), which is not significant. On KuaiRec the main-run deficits of \qp{} against DR-JL and MRDR, $-4.56$ [2.24] and $-4.34$ [2.16], shrink over seeds 1 to 3 to $-1.03$ [1.64] ($p_\mathrm{Holm}=0.2213$) and $-1.56$ [1.47] ($p_\mathrm{Holm}=0.0760$). On Yahoo! R3 and KuaiRand-Pure the \qp{} family exceeds r-AdjNorm by $+14.76$ [5.23] and by $+2.31$ [1.23] over seeds 1 to 3; these seed comparisons are descriptive and carry no significance claim. The seed-to-seed standard deviation of \qp{} on Coat (0.0049) is larger than that of iALS (0.0029), so the main-run Coat result is a single-run result.
-
-Changing the metric changes 3 of the 14 pairwise conclusions in Table~\ref{tab:T7}: the Coat comparisons of DR-LightGCN with LightGCN and of the QP family with LightGCN-p, and the KuaiRec comparison of DR-LightGCN with LightGCN. The alternative metric is nDCG@10 on Coat and Yahoo! R3, nDCG@20 on KuaiRand-Pure and nDCG@50 on KuaiRec. Of the 14 conclusions, 7 are significant at $p_\mathrm{Holm}<0.05$ in the main run. Their signs survive the per-split test oracle in 12 cases, the configuration-level oracle in 11, matched budget in 13 and the alternative metric in 11.
-
-\input{tables/T7_sensitivity}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{figs/rank_distribution}
-\caption{Bootstrap rank distributions over 2,000 user resamples. For each dataset the rows are the eight methods with the highest mean validation score, excluding control rows, and the columns are the rank by mean test score (1 is best). On Coat the splits are resampled together with the users. Each cell gives the probability of that rank.}
-\label{fig:rank}
-\end{figure}
-
-The bootstrap ranks (Figure~\ref{fig:rank}) show how stable the leader is. On Yahoo! R3 the QP family ranks first in 95.0\% of user resamples, and on KuaiRand-Pure in 99.8\%. On KuaiRec, DR and DRUP have the same mean score (0.6378) and exchange first place, with probabilities 0.873 and 0.127. The bootstrap therefore cannot separate them. On Coat no method is a stable leader. The most frequent first place is DR-BPR-LGN-p2, with probability 0.319, and the QP family ranks first with probability 0.090.
-
-\subsection{What graph debiasing adds over an equally tuned backbone (RQ2)}\label{sec:res-debias}
-
-On Coat the graph debiasers are not separated from LightGCN. The three with stored Coat results differ from it by $+3.76$ [5.74] (r-AdjNorm), $-1.59$ [10.13] (NAVIP) and $-0.65$ [30.16] (DR-LightGCN), and none of these is significant. For r-AdjNorm the TOST analysis at $\pm0.010$ excludes differences larger than the margin (TOST p = 0.017). For NAVIP (p = 0.0515) and DR-LightGCN (p = 0.271) it does not. The minimum detectable difference for the primary comparison P1 on Coat is $43.07$ ($\times10^{-3}$), so the study cannot exclude a gain of that size for DR-LightGCN. On Coat, iALS differs from LightGCN by $+12.01$ [16.12] (p = 0.143, not significant). The 95\% half-widths of the three debiasers on Coat range from $\pm6$ (r-AdjNorm) to $\pm30$ (DR-LightGCN), so the Coat comparisons are underpowered.
-
-On Yahoo! R3, r-AdjNorm is $+4.10$ [3.29] above LightGCN (p = 0.015, $p_\mathrm{Holm}$ = 0.029 in the two-comparison primary family). Adjusting over all comparisons with LightGCN (Table~\ref{tab:T12-yahoo}) gives $p_\mathrm{Holm}$ = 0.073, and the Nadeau-Bengio correction for overlapping splits gives $p_\mathrm{Holm}$ = 0.883. On KuaiRand-Pure, r-AdjNorm is $+1.99$ [1.02] above LightGCN ($p_\mathrm{Holm}<0.001$). This difference is significant and also lies inside the sensitivity margin of $\pm0.003$ (TOST p = 0.026), so the margin does not make it a null result. The Nadeau-Bengio correction gives $p_\mathrm{Holm}$ = 1.000. Across Coat, Yahoo! R3 and KuaiRand-Pure, then, the best third-party graph debiaser adds at most $+4.10$ ($\times10^{-3}$) nDCG over the equally tuned backbone in the point estimate, and the Nadeau-Bengio correction removes its significance. The bound applies to third-party debiasers only. Our own QP-LightGCN family adds $+16.77$ [5.82] over LightGCN on Yahoo! R3 ($p_\mathrm{Holm}<0.001$; $+20.02$ over seeds 1 to 3) and $+3.93$ [1.53] on KuaiRand-Pure ($p_\mathrm{Holm}<0.001$; $+4.87$ over seeds 1 to 3). Under the Nadeau-Bengio correction neither difference is significant ($p_\mathrm{NB,Holm}$ = 0.434 and 1.000). These refinements are reported as members of the evaluated family in Section~\ref{sec:res-ingredient}.
-
-KuaiRec, whose test matrix is fully observed, differs. DR-LightGCN is $+13.17$ [3.31] above LightGCN ($p_\mathrm{Holm}<0.001$) and NAVIP is $+10.41$ [1.82] above it (Table~\ref{tab:T12-kuairec}). Under the Nadeau-Bengio correction the DR-LightGCN difference has $p_\mathrm{NB,Holm}$ = 0.787. The pointwise LightGCN-pt, which has no debiasing, is $+19.59$ [4.55] above the BPR backbone. This is a difference of means: no paired test compares it with the $+13.17$ of DR-LightGCN, and the two intervals overlap. The training-free operators are stronger on this dataset (Section~\ref{sec:res-walk}).
-
-The re-implementation of AdvInfoNCE is below LightGCN on all four datasets: $-46.47$ [25.16] on Coat, $-21.08$ [7.78] on Yahoo! R3, $-8.86$ [2.50] on KuaiRand-Pure and $-28.42$ [6.46] on KuaiRec, each significant under the Holm adjustment of the backbone family (Table~\ref{tab:T12-coat} to Table~\ref{tab:T12-kuairec}). SimGCL and MACR are below LightGCN on all four datasets and significantly so on Yahoo! R3, KuaiRand-Pure and KuaiRec. On Coat, their differences ($-17.49$ [23.88] and $-29.43$ [24.60]) are not significant. These comparisons use our implementations, which are described in the protocol section.
-
-Table~\ref{tab:T5} gives the primary comparisons with their Nadeau-Bengio columns. Under that correction, none of the four P1 comparisons is significant. The two P2 comparisons on KuaiRec remain significant, with $p_\mathrm{NB,Holm}$ of 0.009 for LightGCN-p and 0.043 for iALS-p. The P4 comparison, DRUP against DR-JL, is significant under the per-user test ($+4.38$ [2.21], $p_\mathrm{Holm}<0.001$) but not under the correction ($p_\mathrm{NB,Holm}$ = 0.426).
+Table~\ref{tab:T5} reports the primary comparisons. P1 compares the strongest third-party graph debiaser with LightGCN,
+and P2 compares a simple debiased prior with its backbone; both are reported on all four datasets. P3 compares the best
+refinement with the simple prior of the same learner (Coat and KuaiRec), and P4 compares training-free doubly robust
+propagation with the best trained model on KuaiRec. The equivalence (TOST) margins are sensitivity thresholds chosen
+before the analysis and are not derived from the literature.
 
 \input{tables/T5_effects}
 
+\subsection{Effects of evaluation choices (RQ1)}\label{sec:res-eval}
+
+Selecting on the test split inflates the scores of the trained methods by a mean of $+0.0207$ on Coat (range $+0.0097$
+to $+0.0302$), $+0.0044$ on Yahoo! R3, $+0.0012$ on KuaiRand-Pure and $+0.0009$ on KuaiRec. On Coat this inflation
+changes an order: under validation selection iALS scores $0.5812$ and LightGCN $0.5683$, but under the per-split test
+oracle, which chooses on test data and is a diagnostic only, they score $0.5909$ and $0.5924$, so the order reverses.
+The configuration-level oracle keeps the validation order. The sensitivity to the size of the searched space, the
+weighting unit, the metric and the seed comparisons is reported in \ref{app:sens}.
+
+\subsection{What graph debiasing adds over an equally tuned backbone (RQ2)}\label{sec:res-debias}
+
+On Coat the three graph debiasers with stored results differ from LightGCN by $+3.76$ [5.74] (r-AdjNorm), $-1.59$
+[10.13] (NAVIP) and $-0.65$ [30.16] (DR-LightGCN), and none of these is significant. The TOST analysis at $\pm0.010$
+excludes differences larger than the margin for r-AdjNorm (TOST $p=0.017$), but not for NAVIP ($p=0.0515$) or
+DR-LightGCN ($p=0.271$). The minimum detectable difference of P1 on Coat is $43.07$, so the study cannot exclude a gain
+of that size for DR-LightGCN. The 95\% half-widths of the three debiasers range from $\pm6$ (r-AdjNorm) to $\pm30$
+(DR-LightGCN).
+
+On Yahoo! R3, r-AdjNorm is $+4.10$ [3.29] above LightGCN ($p_\mathrm{Holm}=0.029$ in the two-comparison primary family;
+$p_\mathrm{Holm}=0.073$ over all comparisons with LightGCN in Table~\ref{tab:T12-yahoo}; $p_\mathrm{NB,Holm}=0.883$ under
+the Nadeau-Bengio correction). On KuaiRand-Pure, r-AdjNorm is $+1.99$ [1.02] above LightGCN ($p_\mathrm{Holm}<0.001$),
+and this difference lies inside the sensitivity margin of $\pm0.003$ (TOST $p=0.026$), so the margin does not make it
+a null result. Its $p_\mathrm{NB,Holm}$ is 1.000. Across Coat, Yahoo! R3 and KuaiRand-Pure, then, the best third-party
+graph debiaser adds at most $+4.10\times10^{-3}$ nDCG over the equally tuned backbone in the point estimate, and the
+Nadeau-Bengio correction removes its significance. The other third-party debasers with stored Yahoo! R3 results are
+below LightGCN: MACR by $-48.31$, SimGCL by $-36.49$ and AdvInfoNCE by $-21.08$ [7.78], each with $p_\mathrm{Holm}<0.05$.
+The bound applies to third-party debiasers only. Our own QP-LightGCN family adds $+16.77$ [5.82] over LightGCN on
+Yahoo! R3 ($p_\mathrm{Holm}<0.001$; $+20.02$ over seeds 1 to 3) and $+3.93$ [1.53] on KuaiRand-Pure ($p_\mathrm{Holm}<0.001$;
+$+4.87$ over seeds 1 to 3). Under the Nadeau-Bengio correction neither difference is significant ($p_\mathrm{NB,Holm}=0.434$
+and $1.000$). The refinements of the prior are reported as members of the evaluated family in \ref{app:refine}.
+
+On KuaiRec, whose test matrix is fully observed, DR-LightGCN is $+13.17$ [3.31] above LightGCN ($p_\mathrm{Holm}<0.001$),
+and NAVIP is $+10.41$ [1.82] above it (Table~\ref{tab:T12-kuairec}). Under the Nadeau-Bengio correction the
+DR-LightGCN difference is not significant ($p_\mathrm{NB,Holm}=0.787$), but the NAVIP difference ($p_\mathrm{NB,Holm}=0.034$)
+remains significant. The pointwise LightGCN-pt, which has no debiasing, is $+19.59$ [4.55] above the BPR backbone and
+also remains significant under the correction ($p_\mathrm{NB,Holm}=0.030$). The pointwise difference is a difference of
+means: no paired test compares it with the $+13.17$ of DR-LightGCN, and the two intervals overlap. The training-free
+operators are stronger on this dataset (Section~\ref{sec:res-walk}).
+
+The re-implementation of AdvInfoNCE is below LightGCN on all four datasets, by $-46.47$ [25.16] on Coat, $-8.86$ [2.50]
+on KuaiRand-Pure and $-28.42$ [6.46] on KuaiRec, each significant under the Holm adjustment of the backbone family
+(Tables~\ref{tab:T12-coat} to \ref{tab:T12-kuairec}). SimGCL and MACR are below LightGCN on all four datasets and
+significantly so on Yahoo! R3, KuaiRand-Pure and KuaiRec. On Coat, their differences ($-17.49$ [23.88] and $-29.43$
+[24.60]) are not significant. These comparisons use our implementations, described in \ref{sec:advsetup}.
+
+Under the Nadeau-Bengio correction none of the four P1 comparisons is significant. The two P2 comparisons on KuaiRec
+remain significant, with $p_\mathrm{NB,Holm}$ of 0.009 for LightGCN-p and 0.043 for iALS-p. The P4 comparison, DRUP
+against DR-JL, is significant under the per-user test ($+4.38$ [2.21], $p_\mathrm{Holm}<0.001$) but not under the
+correction ($p_\mathrm{NB,Holm}=0.426$).
+
 \subsection{Which ingredient carries the gain (RQ3)}\label{sec:res-ingredient}
 
-The simple prior is the additive imputation $\hat\mu+b_u+b_i$, fitted once on the exposed log with inverse-propensity weights and added to the score as an offset. Within a user its ranking is the ranking of the item term $b_i$. Used as an offset on LightGCN (LightGCN-p), it gives $+31.98$ [20.65] on Coat ($p_\mathrm{Holm}$ = 0.013 in the primary family of Table~\ref{tab:T5}; 0.046 in the family of Table~\ref{tab:T9}), and $+21.22$ [2.86] on KuaiRec ($p_\mathrm{Holm}<0.001$). On Yahoo! R3 it gives $-1.43$ [3.93] ($p_\mathrm{Holm}$ = 0.475), and on KuaiRand-Pure $-0.81$ [1.33] ($p_\mathrm{Holm}$ = 0.234). The offset-only summary uses a different Holm family and reports 0.008 for Coat and 0.468 for KuaiRand-Pure. The offset-only gain on Coat is not robust to the Nadeau-Bengio correction ($p_\mathrm{NB,Holm}$ = 1.000 in the primary family), and it is 0.061 over all comparisons with LightGCN (Table~\ref{tab:T12-coat}). The offset helps on Coat and KuaiRec and not on Yahoo! R3 or KuaiRand-Pure. The tests here do not explain this pattern.
+The simple prior is the additive imputation $\hat\mu+b_u+b_i$, fitted once on the exposed log with inverse-propensity
+weights and added to the score as an offset. Within a user its ranking is the ranking of the item term $b_i$. Used as an
+offset on LightGCN (LightGCN-p), it gives $+31.98$ [20.65] on Coat ($p_\mathrm{Holm}=0.013$ in the primary family of
+Table~\ref{tab:T5}, $p_\mathrm{Holm}=0.061$ over all comparisons with LightGCN in Table~\ref{tab:T12-coat}, and
+$p_\mathrm{NB,Holm}=1.000$ under the Nadeau-Bengio correction), and $+21.22$ [2.86] on KuaiRec ($p_\mathrm{Holm}<0.001$;
+$p_\mathrm{NB,Holm}=0.009$). On Yahoo! R3 it gives $-1.43$ [3.93] and on KuaiRand-Pure $-0.81$ [1.33], neither
+significant. The offset helps on Coat and KuaiRec and not on Yahoo! R3 or KuaiRand-Pure, and the tests here do not
+explain this pattern.
 
-Table~\ref{tab:T9} separates the additive prior into its parts: the IPS weighting, the item term, and popularity. Removing the IPS weights does not reduce the gain. On KuaiRec, the unweighted prior added to iALS gives $+22.79$ [4.04] over iALS, and it exceeds the weighted prior by $+8.05$ [2.06] ($p_\mathrm{Holm}$ < 0.001). On Coat the unweighted prior is above the weighted one by $+6.27$ [6.97] for iALS and $+4.01$ [10.01] for LightGCN, neither significant. Popularity does not reproduce the effect on KuaiRec: its offset adds $+1.06$ [2.46] to iALS ($p_\mathrm{Holm}$ = 1.000), against $+14.74$ [3.43] for the weighted prior. Replacing the item term by a random permutation across items removes the KuaiRec gain and reverses it, with $-112.07$ [9.39] against iALS ($p_\mathrm{Holm}$ < 0.001). On Coat the same permutation gives $-14.06$ [18.53] for iALS and $-12.95$ [24.18] for LightGCN, neither significant, so the Coat result does not isolate the item term. The lowest offset weight of the grid was selected in all five KuaiRec splits for the shuffled item term, so the reported harm is an upper bound under that grid.
+Table~\ref{tab:T9} separates the additive prior into its parts. Removing the inverse-propensity weights does not reduce
+the gain. On KuaiRec the unweighted prior added to iALS gives $+22.79$ [4.04] over iALS, which exceeds the weighted prior
+by $+8.05$ [2.06] ($p_\mathrm{Holm}<0.001$). On Coat the unweighted prior is above the weighted one by $+6.27$ [6.97] for
+iALS and $+4.01$ [10.01] for LightGCN, neither significant. Popularity does not reproduce the effect on KuaiRec: its
+offset adds $+1.06$ [2.46] to iALS ($p_\mathrm{Holm}=1.000$), against $+14.74$ [3.43] for the weighted prior. Replacing
+the item term by a random permutation across items removes the KuaiRec gain and reverses it, with $-112.07$ [9.39]
+against iALS ($p_\mathrm{Holm}<0.001$). On KuaiRec the lowest offset weight of the search space was selected in all five
+splits for this control, so the reported harm is an upper bound. On Coat the same permutation gives $-14.06$ [18.53] for
+iALS and $-12.95$ [24.18] for LightGCN, neither significant, so the Coat result does not isolate the item term.
 
 \input{tables/T9_prior_anatomy}
 
-The training-free rows of Table~\ref{tab:T9} show the prior alone, with no learner. On KuaiRec the unweighted prior alone reaches $0.6367$, and the weighted prior alone $0.6216$. Popularity alone reaches $0.5766$. On KuaiRand-Pure the picture is different: popularity alone ($0.4204$) exceeds the weighted prior alone ($0.3637$) by $+56.41$ [5.19] ($p_\mathrm{Holm}$ < 0.001), and the unweighted prior alone ($0.3837$) exceeds the weighted one by $+19.90$ [2.45]. On Coat and Yahoo! R3, popularity alone is not significantly different from the weighted prior alone. The paired tests in the table are between the variants of the prior. No paired test of the prior alone against the training-free DRUP operator is in the result files, so the $0.0011$ gap between the unweighted prior alone and DRUP on KuaiRec is reported as a difference of means only.
+The weights on the sampled negatives are a second ingredient, and their support differs by dataset. On Yahoo! R3 the
+weights without the offset (DR-BPR-LGN-1) exceed LightGCN-p by $+15.15$ [5.84] ($p_\mathrm{Holm}<0.001$;
+$p_\mathrm{NB,Holm}=0.031$). A shuffled Q removes the gain of the weighted learner over the backbone, with $-1.01$ [3.20]
+against LightGCN ($p_\mathrm{Holm}=0.534$), and popularity weights are significantly below LightGCN ($-15.91$ [6.06],
+$p_\mathrm{Holm}<0.001$). On Coat, shuffled Q gives $+0.97$ [5.50] against LightGCN ($p_\mathrm{Holm}=0.73$), while
+popularity weights give $+6.91$ [6.04] ($p_\mathrm{Holm}=0.0505$, not significant). The QP family exceeds LightGCN-p on
+Yahoo! R3 by $+18.20$ [5.64] ($p_\mathrm{Holm}<0.001$; $p_\mathrm{NB,Holm}=0.002$) and on KuaiRand-Pure by $+4.74$ [1.54]
+($p_\mathrm{Holm}<0.001$; $p_\mathrm{NB,Holm}=0.054$). No shuffled control was run on KuaiRand-Pure, and the validated
+combination selected $\beta=0$ (no offset) in four of five splits, so the gain there is not from the offset in those
+splits. The weight claim is therefore supported by the shuffled control on Yahoo! R3 and is not established on Coat,
+KuaiRec or KuaiRand-Pure.
 
-The weights on the sampled negatives form the second ingredient. On Yahoo! R3 the weights without the offset (DR-BPR-LGN-1) exceed LightGCN-p by $+15.15$ [5.84] ($p_\mathrm{Holm}$ < 0.001). On Yahoo! R3 a shuffled Q removes the gain of the weighted learner over the backbone, with $-1.01$ [3.20] against LightGCN ($p_\mathrm{Holm}$ = 0.534), and popularity weights are significantly below LightGCN ($-15.91$ [6.06], $p_\mathrm{Holm}<0.001$). On Coat, shuffled Q gives $+0.97$ [5.50] against LightGCN ($p_\mathrm{Holm}$ = 0.73), while popularity weights give $+6.91$ [6.04] ($p_\mathrm{Holm}$ = 0.0505, not significant). The QP family exceeds LightGCN-p on KuaiRand-Pure by $+4.74$ [1.54] ($p_\mathrm{Holm}<0.001$), but the Nadeau-Bengio correction gives $p_\mathrm{NB,Holm}$ = 0.054 for this comparison, and no shuffled control was run on KuaiRand-Pure. In that dataset the validated combination selected $\beta=0$ in four of five splits, so the gain there comes from the weights in those splits. The weight claim is therefore supported by the shuffled control on Yahoo! R3 and by the selection counts on KuaiRand-Pure, and it is not established on KuaiRec or Coat.
+The refinements built on the prior do not improve on the simple prior of the same learner on Coat and KuaiRec, and they
+exceed it on Yahoo! R3 and KuaiRand-Pure (Table~\ref{tab:T6} in \ref{app:refine}). DRGP, a leave-edge-out prior,
+was run on Coat and KuaiRec only, as single runs without seed repeats (10 of 10 and 5 of 5 jobs completed). The prior
+alone, without a learner, is reported in Table~\ref{tab:T9} and in \ref{app:refine}.
 
-The refinements built on the prior do not improve on the simple prior of the same learner on Coat and KuaiRec. On Coat, the QP family is not different from LightGCN-p ($+0.05$ [8.29], TOST excludes differences larger than $0.010$, p = 0.009). The largest refinement difference from LightGCN-p is $+3.27$ [6.94] (DR-BPR-LGN-p2), which is not significant. The Q-only variants are $-8.02$ [18.85] and $-10.79$ [19.26] below it. On iALS, DR-iALS is $-10.22$ [15.96] against iALS-p ($p_\mathrm{Holm}$ = 0.208). On KuaiRec the QP family is $-0.32$ [0.50] against LightGCN-p ($p_\mathrm{Holm}$ = 0.211, within $\pm0.003$). On Yahoo! R3 and KuaiRand-Pure the QP family does exceed LightGCN-p, by $+18.20$ [5.64] and $+4.74$ [1.54] (both $p_\mathrm{Holm}<0.001$, Table~\ref{tab:T6}), so the refinements are not controls there. Every refinement in the study is below DRUP ($0.6378$) on KuaiRec. The DRGP refinement, which uses a leave-edge-out DR-fitted prior, reaches $0.6318$, which is $-5.58$ [1.90] against DRUP ($p_\mathrm{Holm}$ < 0.0001). These are single-run results with no seed repeats, and DRGP was run on Coat and KuaiRec only. Its Coat score of $0.5992$ is $-0.13$ [15.11] against \qp{} ($p_\mathrm{Holm}$ = 1.000). A validated ensemble of \qp{} and DRUP selects one component in most splits and does not add to either: DRUP in four of five KuaiRec splits and \qp{} in nine of ten Coat splits (\path{results/v4/ensemble_summary.txt}). On KuaiRec the ensemble is $-0.18$ [0.19] against DRUP ($p_\mathrm{Holm}$ = 0.0664), and on Coat it is $+1.79$ [2.39] against \qp{} ($p_\mathrm{Holm}$ = 0.1421).
+Two checks concern the inputs of the prior (\ref{app:sens}). Refitting the Coat prior rows with propensities
+estimated from the log changes the iALS-p and LightGCN-p gains by $+2.63$ [5.27] and $+1.64$ [10.30], and neither
+difference is significant. A wider iALS search space on Coat raises the stored iALS by $+12.92$ [8.01]
+($p_\mathrm{Holm}=0.003$), a difference of the same order as the gain of the offset model over the same stored iALS
+($+16.82$ [18.04]). The choice of search space therefore moves the backbone by an amount of the same order as the prior,
+and the two cannot be separated by the present tests.
 
-\input{tables/T6_refinements}
+\subsection{Exact unbiasedness of the propagation (RQ4)}\label{sec:res-walk}
 
-Two checks on the prior concern its inputs. The first is the propensity model. Coat's shipped propensities were estimated by the dataset authors from the uniform sample, so we refitted the prior rows with the estimator used on the other three datasets. Table~\ref{tab:T10} shows that this changes little. The estimated-minus-shipped difference is $+2.63$ [5.27] for iALS-p and $+1.64$ [10.30] for LightGCN-p, and the imputation alone changes by $-1.14$ [7.26]. None is significant. The gain over the no-prior reference remains as a point estimate: $+19.44$ [18.66] for iALS-p ($p_\mathrm{Holm}$ = 0.330, not significant) and $+33.62$ [16.72] for LightGCN-p. The estimated-propensity run of LightGCN was not carried out, and the other propensity-based Coat rows were not refitted.
-
-\input{tables/T10_estimated_propensity}
-
-The second check is the tuning budget of the backbone. The stored iALS grid selects its largest value of the confidence weight $\alpha$ (30) in all 10 splits, and the wider grid of Table~\ref{tab:T11} selects its largest value (1000) in four splits. The stored grid is therefore bounded at its edge, and the wider grid is not exhausted. Over the stored iALS, the wider grid gives $+12.92$ [8.01] ($p_\mathrm{Holm}$ = 0.003), against $+16.82$ [18.04] for the offset model over the same stored iALS. The wider grid is not significantly different from iALS-p ($-3.90$ [15.99], $p_\mathrm{Holm}$ = 0.631). The two differences cannot be separated: the wider grid has 32 configurations against 90 for iALS-p, and the gap between iALS and the prior-augmented model on Coat is not resolved by the present tests.
-
-\input{tables/T11_wider_ials_grid}
-
-The stored Yahoo! R3 DR-LightGCN row (0.5528, 6 configurations) lies far below the other graph models. It is one of the three replay exceptions of Section~\ref{sec:reconcile}, and we cannot tell whether under-tuning or an implementation limit causes this. The Impute row on KuaiRec (0.6194, Table~\ref{tab:T4}) differs from the prior alone (0.6216, Table~\ref{tab:T9}) in its propensity floor and penalty. The Impute row is produced by the training-free runner, which fixes the floor of the imputation fit at 0.05 and selects the penalty $\lambda=20$ from $\{5,20\}$. The prior alone uses floor 0.2 and penalty $\lambda=5$. The two rows are therefore not separate fits of the same model.
-
-\subsection{Exact unbiasedness of the propagation and the training-free results (RQ4)}\label{sec:res-walk}
-
-The walk correction removes the repeated-edge terms of multi-hop doubly robust propagation. On a synthetic MNAR model (\path{results/v2/mc_stress_K3_p1.0.json} and \path{results/v2/mc_stress_K5_p1.0.json}, independent exposure), it reduces the relative $|\mathrm{bias}|$ of the DR adjacency from $1.756$ to $0.019$ at $K=3$ and from $8.350$ to $0.039$ at $K=5$. On a semi-synthetic KuaiRec log built from the dense setting (\path{results/v3/semisynth_kuairec_dense.json}; 30 replications; $\beta=1$; true propensities; fixed degree weights), the relative bias of the three-hop term is $1.95$ for DR and $0.88$ for DRUP, and $3.46$ against $0.32$ at $K=5$. With estimated propensities the same comparison gives $9.47$ against $5.66$. In the three cells with degree weights computed from the imputation (true propensities), the walk correction changes the relative bias from $0.67$ to $0.66$ (independent), from $0.72$ to $0.75$ (cross-fitted) and from $0.53$ to $0.32$ (split). The stored semi-synthetic runs measure relative bias of the three-hop term at $\beta=1$ only. They do not contain nDCG values, so the effect of the correction on ranking in that setting is not measured.
-
-On the real logs the correction does not help at matched configurations. On Coat, DRUP minus DR is negative at every value of $\beta$ in the grid, from $-0.33$ at $\beta=0.03$ to $-8.17$ at $\beta=1000$, and it is negative in all ten splits for $\beta\geq0.3$. On Yahoo! R3 the differences are small and negative, from $-0.02$ to $-0.32$. Among the selected runs, the difference is $+1.40$ [3.86] on Coat ($p_\mathrm{Holm}$ = 0.475), and the data exclude differences larger than $0.010$ (TOST p < 0.001). On KuaiRec the selected-run difference is $-0.12$ [0.15] ($p_\mathrm{Holm}$ = 0.113), within $\pm0.003$ (TOST p < 0.001). Table~\ref{tab:T8} gives the matched-configuration and selected-run values. Exact unbiasedness therefore does not improve ranking on the three real logs on which DR and DRUP were run. DR and DRUP were not run on KuaiRand-Pure.
+The walk correction removes the repeated-edge terms of multi-hop doubly robust propagation. On the three real logs on
+which DR and DRUP were run, it does not help at matched configurations. On Coat, DRUP minus DR is negative at every
+value of $\beta$ in the search space, from $-0.33$ at $\beta=0.03$ to $-8.17$ at $\beta=1000$, and it is negative in all
+ten splits for $\beta\geq0.3$. On Yahoo! R3 the differences are small and negative, from $-0.02$ to $-0.32$. In the
+selected runs, the difference is $+1.40$ [3.86] on Coat ($p_\mathrm{Holm}=0.475$), where the data exclude differences
+larger than $0.010$ in absolute value and equivalence is not claimed; it is $-0.12$ [0.15] on KuaiRec ($p_\mathrm{Holm}=0.113$,
+within $\pm0.003$); and it is identically zero on Yahoo! R3, where the two selected runs coincide, so that row is
+uninformative. Table~\ref{tab:T8} gives the values. DR and DRUP were not run on KuaiRand-Pure.
 
 \input{tables/T8_walk}
 
-Among the training-free operators, the best KuaiRec mean goes to doubly robust propagation, not to the walk correction. DRUP reaches $0.6378$ and the DR adjacency on which it is built also reaches $0.6378$, and a five-hop DR adjacency reaches $0.6379$ (\path{results/v2/filters_kuairec_pop.json}). No trained model in Table~\ref{tab:T4} exceeds $0.6378$ on KuaiRec: the best is DR-JL at $0.6332$, and the QP family reaches $0.6285$. On Coat, DRUP is weak at $0.5467$, and on Yahoo! R3 the DRUP and DR rows coincide at $0.6567$. In the bootstrap, DR ranks first in 87.3\% of resamples on KuaiRec and DRUP in 12.7\% (Figure~\ref{fig:rank}), which reflects the tie in their means. The unweighted prior alone ($0.6367$) is the one training-free result close to DRUP, and it is reported in Table~\ref{tab:T9}. The reason the walk correction does not change the ranking on these logs is not identified by our runs.
+A semi-synthetic KuaiRec study with known true labels gives a different picture, which is reported in
+\ref{app:walk}. Its nDCG@20 on unexposed candidates is higher for DRUP than for DR in seven of nine cells
+(Table~\ref{tab:T14}), and its relative bias for the three-hop term is lower for DRUP in eight of nine cells
+(Table~\ref{tab:T15}). The exceptions are the two imputed-weight cells with an independent or a 20\% split nuisance fit,
+where DR has the higher nDCG, and the cross-fitted imputed-weight cell, where DRUP has the larger bias. This setting
+differs from the real logs, and we do not claim that the gain carries over to them. Exact unbiasedness therefore does
+not improve ranking on the three real logs on which DR and DRUP were run.

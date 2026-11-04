@@ -1,4 +1,4 @@
-\begin{table}[t]
+\begin{table}[htbp]
 \centering
 \footnotesize
 \caption{Coat with estimated propensities versus the shipped propensities.}
@@ -12,13 +12,13 @@ iALS-p & shipped & 0.5984 $\pm$ 0.0128 & +16.82 [18.04] & 0.380 & -- & -- \\
 iALS-p & estimated & 0.6009 $\pm$ 0.0120 & +19.44 [18.66] & 0.330 & +2.63 [5.27] & 1.000 \\
 LightGCN-p & shipped & 0.6020 $\pm$ 0.0156 & +31.98 [20.65] & 0.023 & -- & -- \\
 LightGCN-p & estimated & 0.6025 $\pm$ 0.0154 & +33.62 [16.72] & $<$0.001 & +1.64 [10.30] & 1.000 \\
-iALS (grid B), sanity check & shipped & 0.5869 $\pm$ 0.0124 & +7.39 [7.52] & 0.380 & -- & -- \\
-iALS (grid B), sanity check & estimated & 0.5869 $\pm$ 0.0124 & +7.39 [7.52] & 0.380 & 0 (identical) & 1 \\
+iALS (search B), sanity check & shipped & 0.5869 $\pm$ 0.0124 & +7.39 [7.52] & 0.380 & -- & -- \\
+iALS (search B), sanity check & estimated & 0.5869 $\pm$ 0.0124 & +7.39 [7.52] & 0.380 & 0 (identical) & 1 \\
 imputation alone (add) & shipped & 0.5585 $\pm$ 0.0105 & -- & -- & -- & -- \\
 imputation alone (add) & estimated & 0.5573 $\pm$ 0.0097 & -- & -- & -1.14 [7.26] & 1.000 \\
 iALS (no prior) & shipped & 0.5812 $\pm$ 0.0107 & -- & -- & -- & -- \\
 LightGCN (no prior) & shipped & 0.5683 $\pm$ 0.0139 & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}}
-\par\smallskip\raggedright\footnotesize The no-prior reference of each learner is the stored run. Plain iALS and LightGCN do not read the propensities (only NAVIP does), so the shipped no-prior run is the reference for the estimated rows. LightGCN with estimated propensities was not run. The iALS (grid B) row is a sanity check: plain iALS does not read the propensities, so its difference is zero by construction. Only the prior rows and the imputation alone were refitted. $p_\mathrm{Holm}$ over the tests of this table.
+\par\smallskip\raggedright\footnotesize The no-prior reference of each learner is the stored run. Plain iALS and LightGCN do not read the propensities (only NAVIP does), so the shipped no-prior run is the reference for the estimated rows. LightGCN with estimated propensities was not run. The iALS (search B) row is a sanity check: plain iALS does not read the propensities, so its difference is zero by construction. Only the prior rows and the imputation alone were refitted. $p_\mathrm{Holm}$ over the tests of this table.
 \end{table}

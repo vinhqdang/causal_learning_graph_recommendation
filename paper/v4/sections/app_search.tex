@@ -1,0 +1,147 @@
+%======================================================================
+\section{Search spaces, variants and reconciliation}\label{app:search}
+%======================================================================
+
+This appendix lists the search spaces of the trained baselines and the AdvInfoNCE re-implementation, the prior
+variants, the reconciliation of the stored results, and the protocol of each related study (Section~\ref{sec:related}).
+
+\subsection{Trained baselines and AdvInfoNCE}\label{sec:grids}
+
+\paragraph{Coat.}
+The search space is learning rate in $\{10^{-2},3\cdot10^{-3},10^{-3}\}$, weight decay in $\{10^{-5},10^{-4},10^{-3}\}$
+and width in $\{32,64\}$. For LightGCN, LightGCN-pt, r-AdjNorm, NAVIP, DR-LightGCN and SimGCL the depth ranges
+over $\{1,2,3\}$. Epochs are limited to 100, the batch size is 256 and the patience is 5. Configurations: LightGCN
+54, LightGCN-pt 54, NAVIP 54, DR-LightGCN 54, r-AdjNorm 108 (with $r\in\{0.3,0.7\}$), SimGCL 108 (with weight
+$\lambda_{\mathrm{cl}}\in\{0.1,0.5\}$), MACR 36 (with $c\in\{0.1,0.3\}$), PDA 36 (with $\gamma\in\{0.1,0.2\}$),
+MF, IPS-MF, DR-MF, BPR-MF, DR-JL and MRDR 18 each, iALS 24 (with $\alpha\in\{3,10,30\}$, regularisation in
+$\{1,10,100,1000\}$ and width in $\{32,64\}$) and iALS search space B 18 (with $\alpha\in\{10,30,100\}$ and regularisation
+in $\{10,100,300\}$). The iALS runs of the prior family use an epoch limit of 30 on Coat, and the stored iALS run
+uses 100. The epoch limits are therefore not the same across the iALS rows.
+
+\paragraph{Yahoo!\,R3.}
+The search space is learning rate in $\{10^{-2},3\cdot10^{-3},10^{-3}\}$, weight decay in $\{10^{-5},10^{-4}\}$ (with
+$10^{-3}$ added for the matrix models), width 64 and depth 2. For LightGCN, NAVIP and r-AdjNorm the width ranges
+over $\{64,128\}$ and the depth over $\{1,2,3\}$. Epochs are limited to 60, the batch size is 1{,}024 and the
+patience is 5. Configurations: LightGCN 36, NAVIP 36, r-AdjNorm 72, LightGCN-pt 6, DR-LightGCN 6, SimGCL 12, MACR
+18, PDA 18, iALS 12 (with the iALS search space above and width 64), MF, IPS-MF, DR-MF, BPR-MF, DR-JL and MRDR 9 each.
+
+\paragraph{KuaiRand-Pure.}
+The search space is learning rate in $\{10^{-2},3\cdot10^{-3},10^{-3}\}$ and weight decay in $\{10^{-5},10^{-4}\}$, with
+width 64 and depth 2 for every model. Epochs are limited to 40, the batch size is 8{,}192 and the patience is 3.
+Configurations: LightGCN 6, LightGCN-pt 6, NAVIP 6, DR-JL 6, MF 6, DR-MF 6, BPR-MF 6, r-AdjNorm 12, SimGCL 12, MACR
+12 and iALS 12. MRDR, IPS-MF, PDA and DR-LightGCN were not run on this dataset.
+
+\paragraph{KuaiRec.}
+The search space is learning rate in $\{10^{-2},3\cdot10^{-3},10^{-3}\}$ and weight decay in $\{10^{-5},10^{-4}\}$. For
+LightGCN and LightGCN-pt the width ranges over $\{64,128\}$ and the depth over $\{1,2,3\}$, and the other models
+use width 64 and depth 2. Epochs are limited to 30, the batch size is 32{,}768, the patience is 3, and each epoch
+is capped at 2{,}000{,}000 pairs. Configurations: LightGCN 36, LightGCN-pt 36, r-AdjNorm 12, NAVIP 6,
+DR-LightGCN 6, SimGCL 12, MACR 12, iALS 12, MF 6, IPS-MF 6, DR-MF 6, BPR-MF 6, DR-JL 6 and MRDR 6. PDA (12
+configurations) and two pointwise negative-sampling variants, LightGCN-pn and DR-LightGCN-pn (24 configurations
+each), were also run on KuaiRec and are not in the main comparison.
+
+Across datasets, the graph models were given depth search spaces $\{1,2,3\}$ on Coat, Yahoo!\,R3 and KuaiRec, and only
+depth 2 on KuaiRand. Budgets are therefore unequal, and the counts make the difference visible. The selection
+rule of Section~\ref{sec:selection} is applied to each search space as it stands, and the sensitivity of the conclusions
+to the size of the search space is measured in the results.
+
+\subsection{AdvInfoNCE re-implementation}\label{sec:advsetup}
+
+AdvInfoNCE~\citep{zhang2023advinfonce} is an adversarial contrastive loss. We re-implemented it on the LightGCN
+encoder. Our numbers are for this re-implementation and not for the original method, and the official code was
+not run. The main simplifications are these.
+\begin{itemize}
+\item The score is the cosine similarity of the propagated embeddings divided by a temperature $\tau$. Each
+positive is contrasted with 64 sampled negatives.
+\item The adversary is a pair of embedding tables (users and items, dimension 64) trained with Adam to maximise
+the contrastive loss. Its learning rate is $10^{-2}$ on Coat, $10^{-3}$ on Yahoo!\,R3 and KuaiRand, and
+$5\cdot10^{-4}$ on KuaiRec. Only this embedding-based adversary is implemented.
+\item The adversary budget of the original formulation is replaced by a number of adversarial rounds
+$\eta\in\{4,12\}$. A round runs after each epoch from the second epoch on and lasts at least one pass over the
+positives and 100 Adam steps. The adversary's KL divergence is logged but not projected onto a ball.
+\end{itemize}
+
+The search spaces differ in size, and the budgets are unequal. Coat has 216 configurations: three learning rates, three
+weight decays, widths $\{32,64\}$, depths $\{1,2,3\}$, $\tau\in\{0.2,0.75\}$ and $\eta\in\{4,12\}$. Yahoo!\,R3 has
+16 configurations with $\tau\in\{0.1,0.28\}$, $\eta\in\{4,12\}$, learning rates $\{3\cdot10^{-3},10^{-3}\}$,
+weight decays $\{10^{-5},10^{-4}\}$, width 128 and depth 2. KuaiRand has 8 configurations with
+$\tau\in\{0.1,0.28\}$, learning rates $\{10^{-2},3\cdot10^{-3}\}$, weight decay $10^{-4}$, width 64 and depth 2.
+KuaiRec has 8 configurations with $\tau\in\{0.2,2.0\}$, learning rates $\{10^{-2},3\cdot10^{-3}\}$, weight decay
+$10^{-5}$, width 64 and depth 2. KuaiRand and KuaiRec both use $\eta\in\{4,12\}$. On Coat, AdvInfoNCE thus has 216
+configurations against 54 for LightGCN and 108 for r-AdjNorm. A larger search space gives a method more chances to fit
+noise in the validation data, so the Coat search space favours AdvInfoNCE and the smaller search spaces work against it. We did
+not match budgets for this baseline. The only wider re-tuning in this study is the Coat iALS search space
+(Table~\ref{tab:T11}).
+
+
+\subsection{Prior variants}\label{sec:variants}
+
+The variants below change the additive imputation or the way it enters the score. Each is defined in the code of
+the repository. In every variant, the prior is the standardised logit of the variant's imputation, except for
+\texttt{pop}, which replaces the offset by a popularity score.
+\begin{description}
+\item[add.] The imputation of Section~\ref{sec:prior}, fitted with weights $O/\bar p$.
+\item[add\_noips.] The same ridge fit with weights $O$ in place of $O/\bar p$, so that the fit uses the exposed
+pairs without inverse-propensity weights.
+\item[pop.] The imputation, and therefore $Q$, is unchanged. The offset is replaced by the standardised
+logarithm of the number of positives of each item in the log, $\log(1+\sum_v O_{vi}Y_{vi})$, broadcast to every
+user.
+\item[shuf\_item.] The item biases $b_i$ are permuted across items by a fixed permutation (seed 0). The
+parameters $\mu$ and $b_u$ are kept, and the imputation and the prior are recomputed from the permuted biases.
+\item[user\_only.] The item biases are set to zero, so every item has the same score within a user. The ranking
+within a user is then decided by tie-breaking.
+\end{description}
+In the learners of this analysis, only the prior enters the score. The variant's $Q$ is used only by the
+Q-weighted methods, and the prior-anatomy runs do not use them.
+
+The prior-anatomy runs are the following. On Coat, iALS-p and LightGCN-p are run over the ten splits with the
+variants add, add\_noips, pop and shuf\_item. On KuaiRec, iALS-p is run over the five splits with the same four
+variants on the eight-configuration search space. The prior alone is run for all five variants on all four datasets,
+with the floors listed in Section~\ref{sec:prior}. The floor of the Coat LightGCN-p runs is 0.05, and that of the
+Coat iALS-p runs is 0.1.
+
+
+\subsection{Reconciliation of the stored results}\label{sec:reconcile}
+
+Before the analysis, the selection of each (file, method) pair was recomputed from its stored per-epoch records. The
+recomputation applies the training-time rule of Section~\ref{sec:selection}, including the patience value recorded
+with the records, and its mean test score is compared with the stored mean. Of the 154 (file, method) pairs in the
+reconciliation, 151 agree within 0.002 in nDCG. The three that do not agree are DR-LightGCN on KuaiRec (recomputed mean
+higher by $0.0033$), DR-LightGCN on Yahoo!\,R3 (higher by $0.0058$) and MACR on Yahoo!\,R3 (higher by $0.0060$). All
+three come from two earlier result files that do not record the patience value. The stored selections are reproduced
+only under patience values of 3 (KuaiRec) and 5 (Yahoo!\,R3), which the files do not record. The KuaiRec DR-LightGCN
+value enters the P1 comparison of Table~\ref{tab:T5}, and the Yahoo!\,R3 DR-LightGCN and MACR values appear in
+Table~\ref{tab:T4}. Because the selections cannot be recomputed from the records as stored, we report the stored
+values. Every sensitivity number in the results is reported relative to the reconciled selection.
+
+
+\subsection{Positioning of related studies}\label{sec:positioning}
+
+\begin{table}[htbp]
+\centering
+\caption{Positioning of related studies by their protocol. Entries follow the protocols as
+described in the cited papers; ``not stated'' marks a point that the description does not
+settle. Uniform data are the uniformly collected or randomised samples of the benchmark.}
+\label{tab:positioning}
+\footnotesize
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{p{2.6cm}p{1.9cm}p{2.5cm}p{2.0cm}p{2.6cm}p{2.4cm}}
+\toprule
+Study & Graph backbone & Propensity or imputation & Uniform data in training & Uniform data for validation or selection & Unbiased test benchmarks \\
+\midrule
+AutoDebias \citep{chen2021autodebias} & no (matrix factorisation) & learned weights and imputation & yes, small sample & yes, small sample & Coat, Yahoo! R3 \\
+CausE \citep{bonner2018cause} & no (matrix factorisation) & none & yes, randomised sample & no, validation from logged policy & MovieLens, Netflix \\
+CDR \citep{song2023cdr} & no (matrix factorisation) & doubly robust family & no & yes, part of unbiased data & Coat, Yahoo! R3, KuaiRand \\
+DCE \citep{kweon2024dce} & no (MF or NCF) & doubly robust loss & no & no, held out from biased training data & Coat, Yahoo! R3, KuaiRec \\
+BISER \citep{lee2022biser} & no & self-inverse propensity & no & no, held out from biased training data & Coat, Yahoo! R3 \\
+ConAlign \citep{zhang2026conalign} & no (dual tower) & MF-IPS and MF-DR baselines & yes & yes & Coat, Yahoo! R3, KuaiRand-Pure \\
+NAVIP \citep{kim2022navip} & yes & inverse propensity on edges & no & pseudo-unbiased popularity sample & Yahoo! R3 and pseudo-unbiased sets \\
+AdvDrop \citep{zhang2024advdrop} & yes & IPS and DR baselines only & no, for its own method & not stated & Coat, Yahoo!, KuaiRec \\
+PPD \citep{islam2026ppd} & yes, post hoc & none & no & yes on Coat and KuaiRec; biased sample on Yahoo! R3 & Coat, Yahoo! R3, KuaiRec \\
+DPAA \citep{dpaa2026} & yes & none & no & validation present, construction not confirmed & Coat, Yahoo! R3, KuaiRec \\
+DR-GNN \citep{wang2024drgnn} & yes & none & not stated & not stated & Coat, Yahoo \\
+\midrule
+This study & yes & IPS-fitted imputation and propensity & no, except Coat shipped propensities & yes & Coat, Yahoo! R3, KuaiRand-Pure, KuaiRec \\
+\bottomrule
+\end{tabular}}
+\end{table}

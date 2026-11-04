@@ -1,132 +1,83 @@
 \section{Introduction}\label{sec:intro}
 
-Graph-based recommenders represent users and items as nodes and score a user-item
-pair by propagating embeddings over the user-item graph. LightGCN
-\citep{he2020lightgcn} is a standard backbone of this family, and it is usually trained
-on implicit feedback logs. In such a log an interaction is recorded only when the item
-was shown and the user responded. The logged graph therefore reflects the exposure
-policy as well as user taste \citep{marlin2009collaborative,chen2023bias}. A model fitted
-to the log treats every absence as informative, and the resulting bias is the subject of
-a large literature on data missing not at random.
+Under one controlled protocol with unbiased test data, the gains reported for exposure-bias corrections of graph
+recommenders depend strongly on evaluation choices, and third-party corrections add little over an equally tuned
+backbone.
 
-The pairwise loss that trains LightGCN, Bayesian personalised ranking
-\citep{rendle2009bpr}, draws its negatives uniformly from the items the user has no logged
-interaction with. Under exposure bias most of these items were never shown, and some of
-them would have been liked had they been shown. Such false negatives may be concentrated
-among rarely exposed items, where the log carries the least information. Matrix
-factorisation models address exposure by treating it as a latent variable
-\citep{liang2016exposure} or by re-weighting the likelihood with propensities
-\citep{saito2020unbiased}. Pointwise inverse propensity and doubly robust (DR) estimators
-\citep{schnabel2016,wang2019drjl,guo2021mrdr} act on the loss. Graph models have received
-their own corrections, among them inverse-propensity aggregation \citep{kim2022navip},
-adjacency normalisation \citep{zhao2022radjnorm} and post-hoc popularity correction
-\citep{islam2026ppd}.
+Graph-based recommenders represent users and items as nodes and score a user-item pair by propagating embeddings over
+the user-item graph. LightGCN \citep{he2020lightgcn} is a standard backbone of this family, and it is usually trained on
+implicit feedback logs. In such a log an interaction is recorded only when the item was shown and the user responded.
+The logged graph therefore reflects the exposure policy as well as user taste \citep{marlin2009collaborative,chen2023bias},
+and a model fitted to the log treats every absence as informative. The pairwise loss that trains LightGCN, Bayesian
+personalised ranking \citep{rendle2009bpr}, draws its negatives uniformly from the items the user has no logged
+interaction with. Under exposure bias most of these items were never shown. Corrections act on the loss
+\citep{schnabel2016,wang2019drjl,guo2021mrdr}, on the latent exposure or on the likelihood weights
+\citep{liang2016exposure,saito2020unbiased}, and, for graph models, on aggregation or adjacency
+\citep{kim2022navip,zhao2022radjnorm,islam2026ppd}.
 
-This paper starts from the two nuisance functions that a DR estimator already fits: an
-exposure propensity $p_{ui}$ and an imputed preference $\Yhat_{ui}$. Under an independence
-assumption between exposure and preference given covariates, Bayes' rule gives the
-probability that a pair absent from the log is a positive,
+This paper starts from the two nuisance functions that a DR estimator already fits: an exposure propensity $p_{ui}$ and
+an imputed preference $\Yhat_{ui}$. Under an independence assumption between exposure and preference given covariates,
+Bayes' rule gives the probability that a pair absent from the log is a positive,
 \begin{equation}\label{eq:Qintro}
 Q_{ui}=\Pr\bigl(Y_{ui}=1\mid O_{ui}Y_{ui}=0,\,x_{ui}\bigr)
 =\frac{\Yhat_{ui}\,(1-p_{ui})}{1-p_{ui}\,\Yhat_{ui}}.
 \end{equation}
-The candidate models use $Q$ in two places inside an otherwise unchanged LightGCN. Each
-sampled BPR negative is down-weighted by $1-Q_{uj}$, and the standardised logit of the
-imputation is added to the score as a fixed offset whose weight is chosen on validation
-data. Both nuisance functions are fitted on the biased log before training. The one
-exception to the rule that training uses no uniformly collected data is Coat, whose shipped
-propensities were estimated by the dataset authors from a uniform sample. We call the full
-model QP-LightGCN and evaluate it together with its variants as one family.
+The candidate models use $Q$ in two places inside an otherwise unchanged LightGCN. Each sampled BPR negative is
+down-weighted by $1-Q_{uj}$, and the standardised logit of the imputation is added to the score as a fixed offset whose
+weight is chosen on validation data. Both nuisance functions are fitted on the biased log before training. The one
+exception to the rule that training uses no uniformly collected data is Coat, whose shipped propensities were estimated
+by the dataset authors from a uniform sample. We call the full model QP-LightGCN and evaluate it with its variants as one
+family.
 
-The gains reported for these corrections are hard to compare, for three reasons. First, the
-studies use uniformly collected data in different ways. Some train on it, some select
-configurations on it, and some use it only for testing (Section~\ref{sec:related}). Second,
-tuning budgets differ, so a method given a larger grid can obtain a higher test score through
-selection alone. Third, single runs are common, and the ordering of close methods can depend
-on the random seed. Our own runs illustrate the third point. In the main run, QP-LightGCN is
-above iALS on Coat by $+20.02\times10^{-3}$ [19.74], which is significant after Holm
-correction over the eight baseline comparisons ($p_\mathrm{Holm}=0.047$). When the selected
-configurations are retrained with seeds 1 to 3, the difference is $+3.39\times10^{-3}$
-[20.70], with $p_\mathrm{Holm}=0.75$ over the two baseline comparisons of that check. These
-seed comparisons are descriptive, because the two baselines of each dataset were chosen on
-test data.
+The gains reported for these corrections are hard to compare, for three reasons. First, the studies use uniformly
+collected data in different ways: some train on it, some select configurations on it, and some use it only for testing
+(Section~\ref{sec:related}). Second, tuning budgets differ, so a method given a larger search space can obtain a higher
+test score through selection alone. Third, single runs are common, and the ordering of close methods can depend on the
+random seed. Our own runs illustrate the third point. In the main run, QP-LightGCN is above iALS on Coat by
+$+20.02\times10^{-3}$ [19.74], which is nominally significant after Holm correction over the eight baseline comparisons
+($p_\mathrm{Holm}=0.047$). When the selected configurations are retrained with seeds 1 to 3, the difference is
+$+3.39\times10^{-3}$ [20.70], with $p_\mathrm{Holm}=0.75$ over the two baseline comparisons of that check. These seed
+comparisons are descriptive, because the two baselines of each dataset were chosen on test data.
 
-This study asks four research questions.
-\begin{description}
-\item[RQ1] How much do evaluation choices change the conclusions? We vary the selection
-split, the tuning budget, the retraining seed, the early-stopping rule and the
-multiple-comparison family.
-\item[RQ2] How much do graph-specific corrections add over an equally tuned backbone?
-\item[RQ3] Which ingredient carries the gains that remain?
-\item[RQ4] Does making the multi-hop propagation exactly unbiased matter for ranking?
-\end{description}
+The study asks four research questions, which Table~\ref{tab:rq} answers and locates.
 
-Our reading of the evidence is as follows. On Coat, Yahoo! R3 and KuaiRand-Pure, once
-uniform data are kept out of training and configurations are selected on validation data,
-the third-party graph-specific corrections change the nDCG of an equally tuned LightGCN by
-point-estimate amounts of at most $+4.10\times10^{-3}$ (a few thousandths; $+5.26\times10^{-3}$
-in the seed 1 to 3 re-runs). On Yahoo! R3 the inflation that selecting on the test split adds
-to LightGCN (about 0.004 nDCG@5) is as large as the gain of the best of these corrections
-($+4.10\times10^{-3}$ [3.29]). On Yahoo! R3 and KuaiRand-Pure our own QP-LightGCN family adds $+16.77\times10^{-3}$ [5.82] over LightGCN on Yahoo! R3 and
-$+3.93\times10^{-3}$ [1.53] on KuaiRand-Pure, but neither difference survives the correction for
-overlapping splits. The largest point-estimate effects in our runs come from two simple
-ingredients. The first is a fixed, inverse-propensity-fitted additive imputation added to the
-score, which we call the prior. It raises LightGCN on Coat ($+31.98\times10^{-3}$ [20.65]; this
-gain is not robust to the correction for overlapping splits) and on KuaiRec ($+21.22\times10^{-3}$
-[2.86]), but not on Yahoo! R3 ($-1.43\times10^{-3}$ [3.93]) or KuaiRand-Pure
-($-0.81\times10^{-3}$ [1.33]). Its inverse-propensity weights do not appear to be what matters
-in our runs: on KuaiRec, the iALS model with the same imputation without those weights scores
-$+8.05\times10^{-3}$ [2.06] above the one with them. The second is a training-free doubly robust
-propagation of the log, which has the highest mean of the methods we ran on the fully observed
-KuaiRec. Making that propagation exactly unbiased does not change ranking accuracy on the three
-real logs on which it was run (Coat, Yahoo! R3 and KuaiRec). On KuaiRec, DR-LightGCN lies
-$+13.17\times10^{-3}$ [3.31] above the BPR backbone, and the same backbone trained pointwise,
-without any debiasing, lies $+19.59\times10^{-3}$ [4.55] above it. The pointwise difference is
-larger, but the two differences are not compared by a paired test, so this is a difference of means.
+\begin{table}[htbp]\centering\footnotesize
+\caption{Research questions, short answers and the sections that answer them.}\label{tab:rq}
+\begin{tabular}{p{4.6cm}p{7.2cm}l}
+\toprule
+Question & Short answer & Section \\
+\midrule
+RQ1: How much do evaluation choices change the conclusions? & A lot. Selection on the test split inflates scores and can reverse an order. Many pairwise signs depend on the search budget, the seed or the metric. & Section~\ref{sec:res-eval} \\
+RQ2: How much do graph-specific corrections add over an equally tuned backbone? & Little, on Coat, Yahoo! R3 and KuaiRand-Pure. On KuaiRec the gains are larger, and a pointwise loss without debiasing gives a larger difference of means. & Section~\ref{sec:res-debias} \\
+RQ3: Which ingredient carries the gains that remain? & An additive prior fitted once on the exposed log. Its inverse-propensity weights are not what matters in our runs, and the mechanism is not identified. & Section~\ref{sec:res-ingredient} \\
+RQ4: Does exact unbiasedness of the propagation matter for ranking? & Not on the three real logs on which it was run. & Section~\ref{sec:res-walk} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 The paper makes four contributions. None of them is a new estimator.
 \begin{enumerate}
-\item \emph{A controlled protocol and its sensitivity (RQ1).} Four public benchmarks with unbiased
-test data (Coat, Yahoo! R3, KuaiRand-Pure and KuaiRec), uniform data used only for validation
-and testing, per-split selection on validation data, per-user paired tests with Holm
-correction, retraining with seeds 1 to 3, and configuration counts for every method. The new
-part is the sensitivity analysis. Selecting on the test split instead of on validation raises
-the score of the trained methods on Coat by 0.021 nDCG@5 on average (range 0.010 to 0.030).
-\item \emph{Graph-specific debiasing adds little over an equally tuned backbone (RQ2).} On Coat,
-Yahoo! R3 and KuaiRand-Pure, the third-party graph debiasers change the paired score of
-LightGCN by at most $+4.10\times10^{-3}$ [3.29], for r-AdjNorm on Yahoo! R3
-($p_\mathrm{Holm}=0.029$ in the primary family of that dataset, and not significant under the
-correction for overlapping splits). The bound applies to these third-party debiasers only. The
-refinements of the prior that we built are reported as members of the evaluated family, with
-their configuration counts, and the QP-LightGCN family is the largest of them.
-\item \emph{Prior anatomy (RQ3).} The gains over the backbone that the prior provides are
-examined with controls. Removing the inverse-propensity weights does not reduce them, a shuffled
-item term removes the KuaiRec gain, and popularity does not reproduce it. The shuffled and
-popularity weightings of the refinements are reported as controls. The mechanism is not
-identified.
-\item \emph{A negative result on walk correction (RQ4, secondary).} The walk correction of DRUP
-removes the repeated-edge bias of multi-hop DR propagation. On KuaiRec, DRUP minus DR is
-$-0.12\times10^{-3}$ [0.15], which is not significant ($p_\mathrm{Holm}=0.113$). On Coat, at
-matched configurations, the correction lowers the mean nDCG@5 for every value tested.
+\item \emph{Protocol and its sensitivity (RQ1).} Four public benchmarks with unbiased test data, uniform data used only for
+validation and testing, per-split selection on validation data, per-user paired tests with Holm correction, and
+retraining with seeds. Selecting on the test split inflates Coat scores by up to $0.030$ nDCG@5.
+\item \emph{Third-party debiasers add little over an equally tuned backbone (RQ2).} On Coat, Yahoo! R3 and KuaiRand-Pure
+the largest point-estimate gain of a third-party debiaser over LightGCN is $+4.10\times10^{-3}$ nDCG, and none of these
+gains survives a correction for overlapping splits on those datasets.
+\item \emph{Prior anatomy (RQ3).} The gains over the backbone that the additive prior provides are examined with controls.
+Removing its inverse-propensity weights does not reduce them, a shuffled item term removes the KuaiRec gain, and
+popularity does not reproduce it. The mechanism is not identified.
+\item \emph{A negative result on walk correction (RQ4).} The walk correction of DRUP removes the repeated-edge bias of
+multi-hop DR propagation. It does not improve ranking on Coat, Yahoo! R3 or KuaiRec.
 \end{enumerate}
 
-We do not propose a new estimator, and the refinements in Section~\ref{sec:methods} are members
-of an evaluated family, not contributions in their own right. We do not claim that debiasing is
-useless in general. The scope is four public benchmarks, offline evaluation, top-$K$ nDCG at
-the cut-off used for each dataset (5 for Coat and Yahoo! R3, 10 for KuaiRand-Pure, 20 for
-KuaiRec), and implicit-feedback learners trained on the biased log. Coat has 225 evaluated
-users, so its power is low. For Coat we report the differences that the data exclude, and we
-do not report equality. We do not claim that AdvInfoNCE, NAVIP, r-AdjNorm, SimGCL or MACR fail
-in general. Our implementations, tuned with the stated budgets under this protocol, do not beat
-the backbone by more than the amounts reported. Propagation with DR weights is not generally
-the best method either: on Yahoo! R3 its mean score is below that of trained LightGCN. We do
-not give a mechanism for why the prior helps beyond the controls reported in
-Section~\ref{sec:res-ingredient}. The reading that the prior acts as a debiased item-quality
-score is a hypothesis.
+The QP-LightGCN family and its refinements are members of the evaluated family (\ref{app:refine}), not
+contributions in their own right. We do not claim that debiasing is useless in general.
 
-Section~\ref{sec:related} reviews related work and positions the study. Section~\ref{sec:protocol}
-describes the protocol: datasets, leakage controls, selection, seeds and statistical tests.
-Section~\ref{sec:methods} describes the evaluated methods, including the prior family. Section~\ref{sec:results}
-reports the results for RQ1 to RQ4. Section~\ref{sec:discussion} discusses why the effects are
-small, gives recommendations for evaluating debiasing methods and states the limitations.
-Section~\ref{sec:conclusion} concludes.
+The scope is four public benchmarks, offline evaluation, top-$K$ nDCG at the cut-off used for each dataset (5 for Coat
+and Yahoo! R3, 10 for KuaiRand-Pure, 20 for KuaiRec), and implicit-feedback learners trained on the biased log. The
+walk-correction claim concerns Coat, Yahoo! R3 and KuaiRec, the three real logs on which DR and DRUP were run. Coat has
+225 evaluated users, so its power is low. For Coat we report the differences that the data exclude, and we do not report
+equality. We do not claim that AdvInfoNCE, NAVIP, r-AdjNorm, SimGCL or MACR fail in general. Our implementations, tuned
+with the stated budgets under this protocol, do not beat the backbone by more than the amounts reported. We do not give a
+mechanism for why the prior helps beyond the controls of Section~\ref{sec:res-ingredient}, and the reading that the
+prior acts as a debiased item-quality score is a hypothesis.

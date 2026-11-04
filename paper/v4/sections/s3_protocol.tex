@@ -15,7 +15,7 @@ Table~\ref{tab:leakage} lists the stages of the pipeline and the data each stage
 biased training log, which holds the exposure matrix and the outcomes of the exposed pairs.
 ``Validation'' and ``test'' are the parts of the uniformly collected data that a split assigns to each role.
 
-\begin{table}[t]\centering\footnotesize
+\begin{table}[htbp]\centering\footnotesize
 \caption{Permitted uses of each data source. The Coat row for the propensity is the one exception to the
 rule, and it is discussed in the text.}\label{tab:leakage}
 \begin{tabular}{lccc}
@@ -34,7 +34,7 @@ Reported test score of the chosen model & no & no & yes \\
 \end{table}
 
 The additive imputation is fitted on the log without cross-fitting, so the same log supplies $\hat Y$ and the
-training data. The DRGP prior of Section~\ref{sec:drgp} is cross-fitted over ten folds before its
+training data. The DRGP prior of \ref{sec:drgp} is cross-fitted over ten folds before its
 coefficients are fitted. Test scores are computed after every epoch and stored, but no choice reads them.
 The sensitivity analysis of the results reads them only to measure what selection on test data would
 change, and it does not report such a selection as a method.
@@ -77,7 +77,7 @@ Candidates are ranked for each user within the part being scored, and users with
 that part are skipped. We rank all candidates and do not sample negatives, because sampled metrics do not
 agree with the full ranking metric~\citep{krichene2020sampled}. The metric is nDCG@5 on Coat and
 Yahoo!\,R3, nDCG@10 on KuaiRand and nDCG@20 on KuaiRec. Tables report the mean over splits and the standard
-deviation over splits with $\mathrm{ddof}=0$. The ensemble stage of Section~\ref{sec:ensemble} asserts, for
+deviation over splits with $\mathrm{ddof}=0$. The ensemble stage of \ref{sec:ensemble} asserts, for
 every split it reads, that validation and test users are disjoint (on Yahoo!\,R3, KuaiRand and KuaiRec) or
 that validation and test items are disjoint for each user (on Coat).
 
@@ -89,14 +89,14 @@ validation and test parts of every split. Each split keeps the (configuration, e
 validation nDCG, and the first maximum wins a tie. A split stops when its validation score has not improved
 for the patience period: five epochs on Coat and Yahoo!\,R3, and three epochs on KuaiRand and KuaiRec. The
 shared run ends when every split has stopped or the epoch limit is reached. Once a split has stopped, its
-selection is fixed. Later epochs are stored in the banks but cannot be chosen.
+selection is fixed. Later epochs are recorded but cannot be chosen.
 
 The gradient-trained models use epoch limits of 100 (Coat), 60 (Yahoo!\,R3), 40 (KuaiRand) and 30 (KuaiRec).
 Batch sizes are 256, 1{,}024, 8{,}192 and 32{,}768. Within a dataset, all methods share the epoch limit,
 batch size and patience, except AdvInfoNCE on KuaiRec, which uses batch size 4{,}096. On KuaiRec, each
 training epoch is capped at 2{,}000{,}000 pairs.
 
-Three further quantities are computed from the same banks for the sensitivity analysis. Each is defined on the
+Three further quantities are computed from the same per-epoch records for the sensitivity analysis. Each is defined on the
 rows that the stopping rule of its split allows to be chosen.
 \begin{itemize}
 \item The per-split test oracle is the largest test value of a split over all configurations and epochs.
@@ -104,24 +104,13 @@ It chooses on test data.
 \item The configuration-level oracle is the configuration whose mean test value, at its own
 validation-selected epoch, is largest. It also chooses on test data.
 \item The expected maximum of the validation-selected test value over $k$ configurations is computed as a
-function of $k$~\citep{dodge2019showyourwork}, and the share of 1{,}000 random subgrids of size $k_{\min}$ in
-which the sign of a primary comparison flips is reported. Here $k_{\min}$ is the smaller of the two grids of
-the comparison.
+function of $k$~\citep{dodge2019showyourwork}, and the share of 1{,}000 random subsets of size $k_{\min}$ in
+which the sign of a primary comparison flips is reported. Here $k_{\min}$ is the smaller of the two configuration
+counts of the comparison.
 \end{itemize}
 The first two are diagnostics. They are never reported as the result of a method.
 
-\subsection{Reconciliation of the stored results}\label{sec:reconcile}
-
-Before the analysis, the selection of each (file, method) pair was replayed from its stored bank. The replay
-applies the training-time rule of Section~\ref{sec:selection}, including the patience value recorded in the bank,
-and its mean test score is compared with the stored mean. Of the 154 (file, method) pairs in the reconciliation,
-151 agree within 0.002 in nDCG. The three that do not agree are DR-LightGCN on KuaiRec (replayed mean higher by
-$0.0033$), DR-LightGCN on Yahoo!\,R3 (higher by $0.0058$) and MACR on Yahoo!\,R3 (higher by $0.0060$). All three
-come from two unsplit legacy result files that do not record the patience value, and the stored selections are
-reproduced only under patience values of 3 (KuaiRec) and 5 (Yahoo!\,R3). These three stored values are used in the
-tables: the KuaiRec DR-LightGCN value enters the P1 comparison of Table~\ref{tab:T5}, and the Yahoo!\,R3 DR-LightGCN
-and MACR values appear in Table~\ref{tab:T4}. Their selections cannot be reproduced from the banks, so we report the
-stored values. Every sensitivity number in the results is reported relative to the reconciled selection.
+The reconciliation of the stored results, which checks that every reported selection can be recomputed from its per-epoch records, is described in \ref{sec:reconcile}.
 
 \subsection{Seeds}\label{sec:seeds}
 
@@ -173,16 +162,18 @@ and popularity controls against LightGCN, on the datasets where those controls w
 Table~\ref{tab:T12-kuairec} in the appendix.
 \end{description}
 
-The Nadeau and Bengio correction~\citep{nadeau2003} is applied as a second test to the split means, and we
-describe the variant we use. With $J$ splits, split-level differences $e_j$ and $\rho=0.3$ the validation
-fraction, the variance is $\hat\sigma^2 = s_e^2\,(1/J+(1-\rho)/\rho)$, where $s_e^2$ is the sample variance of the
-$e_j$. The statistic $\bar e/\hat\sigma$ is compared with a $t$ distribution with $J-1$ degrees of freedom, and
-Holm adjustment is applied to these second $p$-values within the same families. This is a heuristic correction,
-and it is not the standard form. The standard form uses the ratio of test to training size, $n_2/n_1$, and here
-the ratio is $(1-\rho)/\rho=n_1/n_2$. The models are trained once and only the selection and test splits vary,
-so the standard derivation does not apply directly. With $J=5$ the variance factor is $1/5+7/3\approx2.53$, against
-$1/5+3/7\approx0.63$ under the standard ratio, so the correction is conservative for these splits. We report its
-values beside the standard paired test and do not treat either as exact.
+The Nadeau and Bengio correction~\citep{nadeau2003} is applied as a second test to the split means. With $J$ splits
+and split-level differences $e_j$, the variance is $\hat\sigma^2 = s_e^2\,(1/J+n_2/n_1)$, where $s_e^2$ is the sample
+variance of the $e_j$. The statistic $\bar e/\hat\sigma$ is compared with a $t$ distribution with $J-1$ degrees of
+freedom, and Holm adjustment is applied to these second $p$-values within the same families. In the split design,
+the selection part is $n_1$ and holds 30\% of the users (or of each user's candidates), and the test part is $n_2$
+and holds the remaining 70\%. The code uses $n_2/n_1=(1-\rho)/\rho=0.7/0.3=7/3$ with $\rho=0.3$, which is the
+standard ratio with the selection part in the role of the training part. The standard derivation does not apply
+directly, because the models are trained once on the log and only the selection and test parts vary. With $J=5$ the
+variance factor is $1/5+7/3\approx2.53$. Reading the same 70/30 proportions the other way (test as $n_1$) would give
+$n_2/n_1=3/7$ and a factor of $1/5+3/7\approx0.63$. The larger factor is used, so the correction is conservative
+relative to that reading. For Coat with $J=10$ the factor is $1/10+7/3\approx2.43$ (against $0.53$). We report the
+corrected values beside the standard paired test and do not treat either as exact.
 
 Equivalence is assessed with two one-sided tests~\citep{schuirmann1987} at margin $\delta$, each at level 0.05. The
 two null hypotheses are $\bar d\le-\delta$ and $\bar d\ge\delta$. The reported TOST $p$-value is the larger of the two
