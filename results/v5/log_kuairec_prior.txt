@@ -1,0 +1,3 @@
+  DRGP prior built [1046s]
+  DRGP {'dim': 0} done [8s] best split0 val 0.6349
+DRGP         ndcg@10=0.6809±0.0009  ndcg@20=0.6327±0.0014  ndcg@50=0.5157±0.0013  recall@10=0.1132±0.0010  recall@20=0.1929±0.0021  recall@50=0.2698±0.0022  auc=0.8061±0.0008   [8s, 1 cfgs] seeds 0.0000±0.0000
