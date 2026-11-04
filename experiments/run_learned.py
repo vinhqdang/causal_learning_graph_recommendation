@@ -9,6 +9,7 @@ Per-user test metrics of the selected model are stored for user-level tests.
 """
 
 import argparse
+import hashlib
 import itertools
 import json
 import os
@@ -21,8 +22,9 @@ import torch
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from drup.data import load_coat, load_yahoo, split_test  # noqa: E402
 from drup.estimation import baseline_imputation, clip_propensity, get_propensity  # noqa: E402
-from drup.learned import IALS, IALSLR, IALSW, AdvLGN, LGNCos, MACR, MF, LightGCN, SimGCL, train, train_ials  # noqa: E402
+from drup.learned import IALS, IALSLR, IALSP, IALSW, AdvLGN, LGNCos, MACR, MF, LightGCN, SimGCL, train, train_ials  # noqa: E402
 from drup.metrics import evaluate  # noqa: E402
+from drup.propagation import drgp_prior  # noqa: E402
 
 # name: (model kind, loss, extra grid)
 METHODS = {
@@ -58,20 +60,37 @@ METHODS = {
     "iALS": ("ials", None, {"alpha": [3.0, 10.0, 30.0], "reg": [1.0, 10.0, 100.0, 1000.0]}),
     "AdvInfoNCE-LGN": ("advlgn", "advinfonce", {}),
     "DR-AdvInfoNCE-LGN-p": ("advlgn", "dradvinfonce", {"fn": [1.0], "pbeta": [0.5, 1.0]}),
+    "DRGP": ("prior", None, {}),
+    "iALS-p": ("ialsp", None, {"alpha": [10.0, 30.0, 100.0], "reg": [10.0, 100.0, 300.0], "pbeta": [0.1, 0.2, 0.3, 0.5, 1.0]}),
+    "DRGP-LGN-bpr": ("lgn", "bpr", {"pbeta": [0.1, 0.2, 0.5, 1.0]}),
+    "DRGP-LGN-dr": ("lgn", "drres", {"pbeta": [1.0], "init": [0.01]}),
+    "DRGP-LGN-hyb": ("lgn", "bprdr", {"pbeta": [1.0], "eta": [0.3, 1.0]}),
+    "iALS-wide": ("ials", None, {"alpha": [10.0, 30.0, 100.0], "reg": [10.0, 100.0, 300.0]}),
 }
 GRAPH = ("lgn", "navip", "simgcl", "lgncos", "advlgn")
+IALS_KINDS = ("ials", "drials", "drials_lr", "ialsp")
 QMAT = [None]
 PRIOR = [None]
+PIMP = [None]
+
+
+class PriorScores:
+    """A fixed prior used as the scorer of the 'prior' kind (no training)."""
+
+    def full_scores(self, rows):
+        return PRIOR[0][rows]
 
 
 def build(kind, m, n, d, O, Y, P, cfg, seed=0):
     model = _build(kind, m, n, d, O, Y, P, cfg, seed)
-    if cfg.get("pbeta", 0.0):
+    if kind != "ialsp" and cfg.get("pbeta", 0.0):
         model.prior, model.pbeta = PRIOR[0], cfg["pbeta"]
     return model
 
 
 def _build(kind, m, n, d, O, Y, P, cfg, seed=0):
+    if kind == "prior":
+        return PriorScores()
     if kind == "mf":
         return MF(m, n, d)
     if kind == "macr":
@@ -83,6 +102,8 @@ def _build(kind, m, n, d, O, Y, P, cfg, seed=0):
         return IALSW(m, n, d, eu, ei, QMAT[0], alpha=cfg["alpha"], reg=cfg["reg"], fn=cfg["fn"], seed=seed)
     if kind == "ials":
         return IALS(m, n, d, eu, ei, alpha=cfg["alpha"], reg=cfg["reg"], seed=seed)
+    if kind == "ialsp":
+        return IALSP(m, n, d, eu, ei, PRIOR[0], beta=cfg["pbeta"], alpha=cfg["alpha"], reg=cfg["reg"], seed=seed)
     w = (1.0 / P[eu, ei]).float() if kind == "navip" else torch.ones(len(eu))
     if kind == "advlgn":
         return AdvLGN(m, n, d, eu, ei, torch.ones(len(eu)), layers=cfg["layers"], r=0.5, tau=cfg["tau"])
@@ -90,7 +111,31 @@ def _build(kind, m, n, d, O, Y, P, cfg, seed=0):
         return LGNCos(m, n, d, eu, ei, torch.ones(len(eu)), layers=cfg["layers"], r=0.5)
     if kind == "simgcl":
         return SimGCL(m, n, d, eu, ei, w, layers=cfg["layers"], r=0.5)
-    return LightGCN(m, n, d, eu, ei, w, layers=cfg["layers"], r=cfg.get("r", 0.5))
+    return LightGCN(m, n, d, eu, ei, w, layers=cfg["layers"], r=cfg.get("r", 0.5), init_std=cfg.get("init", 0.1))
+
+
+def drgp_cached(a, d, O, Y, ndt, lam):
+    """drgp_prior with a disk cache keyed by every argument that changes the prior. The file is
+    written under a .tmp name and renamed, so an interrupted run leaves no partial cache."""
+    key = {"dataset": a.dataset, "prop": a.prop, "floor": a.floor, "lam": lam, "imp": a.imp,
+           "alphas": a.gf_alphas, "buckets": a.gf_buckets, "ridge": a.gf_ridge, "xfit": a.gf_xfit,
+           "obs": a.gf_obs, "loo": a.gf_loo}
+    h = hashlib.md5(json.dumps(key, sort_keys=True).encode()).hexdigest()
+    path = os.path.join(a.prior_cache, f"drgp_{a.dataset}_{h}.pt")
+    if os.path.exists(path):
+        c = torch.load(path, weights_only=False)
+        print(f"  DRGP prior loaded from {path}", flush=True)
+        return c["pi"], c["z"], c["theta"]
+    t0 = time.time()
+    pi, z, theta = drgp_prior(d, O.to(ndt), Y.to(ndt), a.prop, a.floor, lam, alphas=tuple(a.gf_alphas),
+                              n_buckets=a.gf_buckets, ridge=a.gf_ridge, K=a.gf_xfit, imp=a.imp,
+                              loo=bool(a.gf_loo), obs=bool(a.gf_obs))
+    pi, z, theta = pi.float(), z.float(), theta.float()
+    print(f"  DRGP prior built [{time.time() - t0:.0f}s]", flush=True)
+    os.makedirs(a.prior_cache, exist_ok=True)
+    torch.save({"pi": pi, "z": z, "theta": theta, "args": key}, path + ".tmp")
+    os.replace(path + ".tmp", path)
+    return pi, z, theta
 
 
 def main():
@@ -125,6 +170,17 @@ def main():
     ap.add_argument("--n_neg", type=int, default=64)
     ap.add_argument("--seed_check", type=int, default=3,
                     help="re-train the split-0 selection with this many seeds (0: skip)")
+    ap.add_argument("--prior", default="add", choices=["add", "drgp"],
+                    help="graph-free prior: the additive imputation (add) or the DR-fitted leave-edge-out prior (drgp)")
+    ap.add_argument("--gf_alphas", type=float, nargs="+", default=[0.5, 0.7])
+    ap.add_argument("--gf_buckets", type=int, default=4, help="user activity buckets of the DRGP coefficients")
+    ap.add_argument("--gf_ridge", type=float, default=1.0)
+    ap.add_argument("--gf_xfit", type=int, default=10, help="cross-fitting folds of the DRGP nuisances")
+    ap.add_argument("--gf_obs", type=int, default=1, help="include the observed-positive-graph 3-hop feature")
+    ap.add_argument("--gf_loo", type=int, default=1, help="leave-edge-out features (0: ablation)")
+    ap.add_argument("--gf_lam", type=float, default=None,
+                    help="imputation ridge of the DRGP prior (default 5 on Coat, 20 elsewhere)")
+    ap.add_argument("--prior_cache", default="results/v5/cache", help="directory of the DRGP prior cache")
     ap.add_argument("--out", default=None)
     ap.add_argument("--dump_bank", default=None,
                     help="write every (configuration, epoch)'s validation and test score per split "
@@ -157,7 +213,14 @@ def main():
         Yhat = baseline_imputation(O.to(ndt), Y.to(ndt), P.to(ndt), lam=5.0).float()
     _lg = torch.logit(Yhat.clamp(1e-3, 1 - 1e-3))
     PRIOR[0] = (_lg - _lg.mean()) / _lg.std()
+    PIMP[0] = Yhat.clamp(0.01, 0.99)
     QMAT[0] = (Yhat * (1.0 - P) / (1.0 - P * Yhat).clamp_min(1e-6)).clamp(0.0, 1.0)
+    prior_info = None
+    if a.prior == "drgp":
+        lam = a.gf_lam if a.gf_lam is not None else (5.0 if a.dataset == "coat" else 20.0)
+        pi, z, theta = drgp_cached(a, d, O, Y, ndt, lam)
+        PRIOR[0], PIMP[0] = z, pi.clamp(0.01, 0.99)
+        prior_info = {"theta": theta.tolist(), "lam": lam}
     del d["O"], d["Y"]
     pop = (O * Y).sum(0)
     item_pop = (pop / pop.max()).clamp_min(1.0 / pop.max())
@@ -182,7 +245,10 @@ def main():
                 S = mod.full_scores(rows)
             vals = [evaluate(S, v, ks, row_of)[key] for v, _ in splits]
             return bool(record(vals, S, ep))
-        if kind in ("ials", "drials", "drials_lr"):
+        if kind == "prior":
+            on_epoch(model, 0)
+            return None
+        if kind in IALS_KINDS:
             return train_ials(model, a.epochs, on_epoch)
         return train(model, O, Y, P, Yhat, loss, cfg["lr"], cfg["wd"], a.epochs, a.batch, on_epoch,
                      patience=a.patience, pairs_per_epoch=a.pairs_per_epoch, seed=seed,
@@ -191,7 +257,8 @@ def main():
                      qmode=cfg.get("qmode", "dr"),
                      adv_lr=a.adv_lr, adv_interval=a.adv_interval, adv_eta=cfg.get("eta", 0),
                      adv_min_steps=a.adv_min_steps,
-                     n_neg=(a.n_neg if loss in ("advinfonce", "dradvinfonce") else 32))
+                     n_neg=(a.n_neg if loss in ("advinfonce", "dradvinfonce") else 32),
+                     pimp=PIMP[0], eta=cfg.get("eta", 1.0))
 
     bank_path = a.dump_bank or os.path.join(os.path.dirname(out), "bank_" + os.path.basename(out))
     dumps = json.load(open(bank_path))["banks"] if os.path.exists(bank_path) else {}
@@ -206,7 +273,9 @@ def main():
         wide = name in a.wide
         dims = a.wide_dims if wide else a.dims
         layers = (a.wide_layers if wide else a.layers) if kind in GRAPH else [0]
-        if kind in ("ials", "drials", "drials_lr"):
+        if kind == "prior":
+            grid_keys, grid_vals = ["dim"], [[0]]
+        elif kind in IALS_KINDS:
             grid_keys, grid_vals = ["dim"] + list(extra), [dims] + [extra[k] for k in extra]
         else:
             grid_keys = ["lr", "wd", "dim", "layers"] + list(extra)
@@ -289,7 +358,10 @@ def main():
         print(f"{name:12s} {txt}   [{time.time() - t0:.0f}s, {n_cfg} cfgs] seeds {sc.get('mean', 0):.4f}"
               f"±{sc.get('std', 0):.4f}", flush=True)
         with open(out, "w") as f:
-            json.dump({"args": vars(a), "results": results}, f)
+            obj = {"args": vars(a), "results": results}
+            if prior_info is not None:
+                obj["args_extra"] = prior_info
+            json.dump(obj, f)
 
 
 if __name__ == "__main__":

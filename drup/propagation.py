@@ -39,6 +39,8 @@ from __future__ import annotations
 import numpy as np
 import torch
 
+from .estimation import clip_propensity
+
 
 def edge_estimate(O, Y, P, Yhat=None, cv=1.0):
     """Edge-level unbiased estimate W of the potential-outcome matrix Y.
@@ -158,3 +160,122 @@ def local_three_hop(w_u, c_u, G_corr, rows_u_W=None):
     delta = wt * wt - c_u * c_u * w_u
     return (wt @ G_corr - wt * (delta.sum(-1, keepdim=True) - 2 * delta)
             - (wt ** 3 - c_u ** 3 * w_u))
+
+
+def loo_three_hop(W, C, base, correct=True):
+    """Leave-edge-out corrected 3-hop: T with W_ui replaced by base_ui at (u, i) only.
+    T_ui is affine in W_ui: T = R + (C*A + C^3) * W with A = rowsum(sq) + colsum(sq) - 2 sq,
+    sq = C^2 W (corrected squares). Requires correct=True (for binary W both coincide)."""
+    T = three_hop(W, C, correct=correct)
+    sq = C * C * W
+    A = sq.sum(1, keepdim=True) + sq.sum(0, keepdim=True) - 2 * sq
+    return T - (W - base) * (C * A + C ** 3)
+
+
+def _standardise(x):
+    return (x - x.mean()) / x.std().clamp_min(1e-12)
+
+
+def _user_buckets(O, n_buckets):
+    """User activity buckets: quantiles of the number of exposures per user."""
+    cnt = O.sum(1)
+    if n_buckets <= 1:
+        return torch.zeros(O.shape[0], dtype=torch.long)
+    qs = torch.linspace(0.0, 1.0, n_buckets + 1, dtype=torch.float64)[1:-1]
+    edges = torch.quantile(cnt.double(), qs).to(cnt.dtype)
+    return torch.bucketize(cnt, edges, right=True)
+
+
+def gf_features(O, Y, P, Yhat, alphas=(0.5, 0.7), obs=True, Yhat_lr=None, loo=True):
+    """Features of the DR-fitted prior, each standardised over the whole matrix.
+
+    loo=True (default): logit of the additive imputation, the leave-edge-out DR 3-hop at each
+    alpha, the leave-edge-out 3-hop of the observed positive graph (if obs), and logit(Yhat_lr)
+    if given. Every term is independent of the pair's own exposure and outcome.
+    loo=False (ablation): the 1-hop term is the raw DR edge estimate W, and the 3-hop terms are
+    the plain corrected 3-hops, which contain the pair's own W_ui.
+    Returns (list of dense tensors, names).
+    """
+    W = edge_estimate(O, Y, P, Yhat)
+    feats, names = [], []
+
+    def add(name, x):
+        feats.append(_standardise(x))
+        names.append(name)
+
+    if loo:
+        add("logit_yhat", torch.logit(Yhat.clamp(1e-3, 1 - 1e-3)))
+    else:
+        add("W", W)
+    for a in alphas:
+        C = degree_weights(W, a, D=Yhat)
+        T = loo_three_hop(W, C, Yhat) if loo else three_hop(W, C)
+        add(f"dr3_{a}", T)
+        del C, T
+    if obs:
+        A = O * Y
+        C = degree_weights(A, 0.5, D=Yhat)
+        T = loo_three_hop(A, C, torch.zeros_like(A)) if loo else three_hop(A, C)
+        add("obs3", T)
+        del C, T
+    if Yhat_lr is not None:
+        add("logit_lr", torch.logit(Yhat_lr.clamp(1e-3, 1 - 1e-3)))
+    return feats, names
+
+
+def fit_dr_filter(feats, W, buckets, ridge=1.0):
+    """Coefficients of the prior fitted by the DR squared risk, per user bucket.
+
+    With the DR edge estimate W, the risk sum (s - W)^2 equals the DR squared loss up to a
+    constant per pair. Minimising it over user fixed effects a_u and bucket-specific
+    coefficients theta is, by Frisch-Waugh, a ridge regression of the row-demeaned W on the
+    row-demeaned features within each bucket. The Gram matrices are accumulated feature pair by
+    feature pair, in float64, on the rows of one bucket at a time.
+    Returns theta (B, K) and pi = rowmean(W) + sum_k theta[b(u), k] (phi_k - rowmean(phi_k)).
+    """
+    B, K = int(buckets.max()) + 1, len(feats)
+
+    def dm(x):
+        return x - x.mean(1, keepdim=True)
+
+    G = torch.zeros(B, K, K, dtype=torch.float64)
+    h = torch.zeros(B, K, dtype=torch.float64)
+    for b in range(B):
+        r = torch.nonzero(buckets == b, as_tuple=True)[0]
+        Wb = dm(W[r])
+        for k in range(K):
+            fk = dm(feats[k][r])
+            h[b, k] = (fk * Wb).sum(dtype=torch.float64)
+            for l in range(k, K):
+                fl = fk if l == k else dm(feats[l][r])
+                G[b, k, l] = G[b, l, k] = (fk * fl).sum(dtype=torch.float64)
+            del fk
+        del Wb
+    eye = torch.eye(K, dtype=torch.float64)
+    theta = torch.stack([torch.linalg.solve(G[b] + ridge * eye, h[b]) for b in range(B)])
+    pi = W.mean(1, keepdim=True).expand_as(W).clone()
+    coef = theta[buckets].to(W.dtype)                 # (m, K)
+    for k in range(K):
+        pi += coef[:, k:k + 1] * dm(feats[k])
+    return theta, pi
+
+
+def drgp_prior(d, O, Y, prop, floor, lam, alphas=(0.5, 0.7), n_buckets=4, ridge=1.0, K=10, imp="add",
+               loo=True, obs=True):
+    """DR-fitted leave-edge-out graph prior (Stage A of DRGP).
+
+    Uses only the training log (O, Y) and the propensities of the nuisance model, cross-fitted
+    over K folds (pipeline.Nuisance). The dataset dict is read only for a shipped propensity
+    (d["P_given"]). Returns (pi, z, theta): pi on the probability scale, z the standardised logit
+    of pi (the convention of the additive prior), theta (n_buckets, K).
+    """
+    from .pipeline import Nuisance
+    nz = Nuisance(d, O, Y, prop, K=K)
+    P = clip_propensity(nz.P, floor)
+    Yhat = nz.imputation(floor, {"lam": lam, "imp": imp})
+    W = edge_estimate(O, Y, P, Yhat)
+    feats, _ = gf_features(O, Y, P, Yhat, alphas=alphas, obs=obs, loo=loo)
+    buckets = _user_buckets(O, n_buckets).to(O.device)
+    theta, pi = fit_dr_filter(feats, W, buckets, ridge=ridge)
+    z = _standardise(torch.logit(pi.clamp(1e-3, 1 - 1e-3)))
+    return pi, z, theta

@@ -11,14 +11,14 @@ import torch.nn.functional as F
 
 
 class MF(torch.nn.Module):
-    def __init__(self, m, n, d):
+    def __init__(self, m, n, d, init_std=0.1):
         super().__init__()
         self.U = torch.nn.Embedding(m, d)
         self.V = torch.nn.Embedding(n, d)
         self.bu = torch.nn.Embedding(m, 1)
         self.bi = torch.nn.Embedding(n, 1)
         for e in (self.U, self.V):
-            torch.nn.init.normal_(e.weight, std=0.1)
+            torch.nn.init.normal_(e.weight, std=init_std)
         for e in (self.bu, self.bi):
             torch.nn.init.zeros_(e.weight)
         self.b0 = torch.nn.Parameter(torch.zeros(1))
@@ -42,8 +42,8 @@ class LightGCN(MF):
     """LightGCN over a (possibly weighted) user-item graph of positive edges.
     Normalisation D^-r A D^-(1-r); r = 0.5 is LightGCN, other r is r-AdjNorm."""
 
-    def __init__(self, m, n, d, edges_u, edges_i, weights, layers=2, r=0.5):
-        super().__init__(m, n, d)
+    def __init__(self, m, n, d, edges_u, edges_i, weights, layers=2, r=0.5, init_std=0.1):
+        super().__init__(m, n, d, init_std=init_std)
         self.m, self.n, self.layers = m, n, layers
         w = weights.float()
         du = torch.zeros(m).index_add_(0, edges_u, w).clamp_min(1e-8)
@@ -235,6 +235,42 @@ class IALSLR:
         return self.U[rows] @ self.V.T
 
 
+class IALSP(IALS):
+    """iALS with a fixed offset beta * Z (Z dense m x n, the standardised prior). The fit is
+    sum_ui c_ui (y_ui - beta z_ui - x_u^T y_i)^2 + reg, so the right-hand side of each user
+    solve gains -beta (Z F)_u - alpha beta sum_{i in pos} z_ui y_i, and the item solve is the
+    same with Z^T. Z is kept by reference."""
+
+    def __init__(self, m, n, d, eu, ei, Z, beta=1.0, alpha=10.0, reg=1.0, seed=0):
+        super().__init__(m, n, d, eu, ei, alpha=alpha, reg=reg, seed=seed)
+        self.Z, self.beta = Z, beta
+
+    def _solve(self, X, Fx, ru, ri, nrows, Zm, chunk=2048):
+        d = Fx.shape[1]
+        G = Fx.T @ Fx + self.reg * torch.eye(d)
+        ZF = self.beta * (Zm @ Fx)                                    # (nrows, d)
+        order = torch.argsort(ru)
+        ru, ri = ru[order], ri[order]
+        zp = Zm[ru, ri]                                               # z at the positives, sorted
+        bounds = torch.searchsorted(ru, torch.arange(0, nrows + chunk, chunk).clamp(max=nrows))
+        for c, s in enumerate(range(0, nrows, chunk)):
+            e = min(s + chunk, nrows)
+            lo, hi = int(bounds[c]), int(bounds[c + 1])
+            r, f = ru[lo:hi] - s, Fx[ri[lo:hi]]
+            A = G.expand(e - s, d, d).clone()
+            A.index_add_(0, r, self.alpha * f[:, :, None] * f[:, None, :])
+            b = torch.zeros(e - s, d).index_add_(0, r, (1.0 + self.alpha) * f) - ZF[s:e]
+            b.index_add_(0, r, -self.alpha * self.beta * zp[lo:hi, None] * f)
+            X[s:e] = torch.linalg.solve(A, b.unsqueeze(-1)).squeeze(-1)
+
+    def step(self):
+        self._solve(self.U, self.V, self.eu, self.ei, self.U.shape[0], self.Z)
+        self._solve(self.V, self.U, self.ei, self.eu, self.V.shape[0], self.Z.T)
+
+    def full_scores(self, rows):
+        return self.U[rows] @ self.V.T + self.beta * self.Z[rows]
+
+
 def train_ials(model, iters, on_epoch):
     for ep in range(iters):
         model.step()
@@ -255,7 +291,7 @@ def _elu1(x):
 def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
           patience=5, pairs_per_epoch=None, seed=0, item_pop=None, gamma=0.1, log=None,
           cl_weight=0.1, aux_weight=1e-3, tau=0.2, fn=0.0, ipsw=0, n_neg=32, clip_w=5.0, fn_w=None, qmode="dr",
-          adv_lr=1e-4, adv_interval=5, adv_eta=0, k_neg=64.0, adv_min_steps=100):
+          adv_lr=1e-4, adv_interval=5, adv_eta=0, k_neg=64.0, adv_min_steps=100, pimp=None, eta=1.0):
     """Pointwise losses: naive / IPS iterate over exposed pairs; DR samples
     pairs uniformly from all (u, i) (pseudo-label DR with a fixed imputation).
     Pairwise losses: 'bpr' (logged positives vs uniformly sampled items that
@@ -267,6 +303,9 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
     2021): an imputation model predicts the label, the imputed error is the loss
     against it, and the imputation is fitted to the observed errors with weights
     1/p (DR-JL) or (1-p)/p^2 (MRDR).
+    'drres' (needs pimp, the probability-scale prior): self-imputing DR loss with the prior as
+    imputation, estimated from uniform pairs (imputed term) and uniform exposed pairs (residual
+    term, weights 1/p). 'bprdr': BPR plus eta times the 'drres' term on the same step.
     on_epoch(model, ep) evaluates the model and returns either the early-
     stopping criterion (higher is better; ``patience`` applies) or a bool
     (True: stop now), which lets the caller run its own per-split stopping."""
@@ -282,6 +321,12 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
     else:
         opt = torch.optim.Adam(model.parameters(), lr=lr)
     pos = O * Y > 0
+    if loss_type in ("drres", "bprdr"):
+        if pimp is None:
+            raise ValueError(f"loss {loss_type} needs the imputation pimp")
+        pim = pimp.float()
+        xo_u, xo_i = torch.nonzero(O > 0, as_tuple=True)      # exposed pairs
+        w_exp = len(xo_u) / (m * n)                           # N_e / N
     imp = None
     if loss_type in ("drjl", "mrdr"):
         imp = MF(m, n, model.U.weight.shape[1])
@@ -300,7 +345,7 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
             gq = torch.Generator().manual_seed(seed + 7)
             Q = Q.flatten()[torch.randperm(Q.numel(), generator=gq)].reshape(Q.shape)
     if loss_type in ("bpr", "pda", "simgcl", "macr", "infonce", "drinfonce", "drbpr", "pn", "drpn",
-                     "advinfonce", "dradvinfonce"):
+                     "advinfonce", "dradvinfonce", "bprdr"):
         eu, ei = torch.nonzero(pos, as_tuple=True)
     else:
         eu, ei = torch.nonzero(O > 0, as_tuple=True)
@@ -323,6 +368,17 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
 
     def _logp(u, J):
         return torch.log_softmax(torch.einsum('bd,bnd->bn', model.Pu.weight[u], model.Pi.weight[J]), 1)
+
+    def _drres_loss(emb, s, e):
+        """Self-imputing DR loss on batch s:e: mean over uniform pairs of BCE(s, pimp) plus
+        (N_e / N) times the mean over uniform exposed pairs of (BCE(s, Y) - BCE(s, pimp)) / p."""
+        a, b = au[s:e], ai[s:e]
+        loss_all = F.binary_cross_entropy_with_logits(model(a, b, emb), pim[a, b], reduction="none").mean()
+        x, y = ea[s:e], eb[s:e]
+        lx = model(x, y, emb)
+        l_obs = F.binary_cross_entropy_with_logits(lx, Y[x, y].float(), reduction="none")
+        l_imp = F.binary_cross_entropy_with_logits(lx, pim[x, y], reduction="none")
+        return loss_all + w_exp * ((l_obs - l_imp) / P[x, y].float()).mean()
 
     best, bad = -1e9, 0
     for ep in range(epochs):
@@ -349,8 +405,8 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
             kl_tail = kl[-10:]
             n_adv += 1
             print(f"    adv round {n_adv} ep {ep} steps {steps} KL {sum(kl_tail)/max(1, len(kl_tail)):.4f}", flush=True)
-        if loss_type in ("dr", "drjl", "mrdr"):
-            N = pairs_per_epoch or len(eu)
+        if loss_type in ("dr", "drjl", "mrdr", "drres"):
+            N = pairs_per_epoch or (min(len(eu), 2000000) if loss_type == "drres" else len(eu))
             su = torch.randint(0, m, (N,), generator=g)
             si = torch.randint(0, n, (N,), generator=g)
         else:
@@ -358,6 +414,14 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
             if pairs_per_epoch:
                 perm = perm[:pairs_per_epoch]
             su, si = eu[perm], ei[perm]
+        if loss_type in ("drres", "bprdr"):
+            if loss_type == "drres":
+                au, ai = su, si
+            else:
+                au = torch.randint(0, m, (len(su),), generator=g)
+                ai = torch.randint(0, n, (len(su),), generator=g)
+            ka = torch.randint(0, len(xo_u), (len(au),), generator=g)
+            ea, eb = xo_u[ka], xo_i[ka]
         for s in range(0, len(su), batch):
             u, i = su[s:s + batch], si[s:s + batch]
             emb = model.embeddings()
@@ -401,7 +465,10 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
                 wn = (1.0 - fn_w * Q[u, j]).clamp_min(1e-3) if loss_type == "drpn" else torch.ones(len(u))
                 loss = (F.softplus(-fp) + wn * F.softplus(fneg)).mean()
                 reg = wd * sum((e ** 2).sum() for e in (emb[0][u], emb[1][i], emb[1][j])) / len(u)
-            elif loss_type in ("bpr", "pda", "simgcl", "drbpr"):
+            elif loss_type == "drres":
+                loss = _drres_loss(emb, s, s + batch)
+                reg = wd * sum((e ** 2).sum() for e in (emb[0][u], emb[1][i])) / len(u)
+            elif loss_type in ("bpr", "pda", "simgcl", "drbpr", "bprdr"):
                 j = torch.randint(0, n, (len(u),), generator=g)
                 bad_neg = pos[u, j]
                 j = torch.where(bad_neg, torch.randint(0, n, (len(u),), generator=g), j)
@@ -422,6 +489,8 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
                     uq = uq[torch.randperm(len(uq), generator=g)[:2048]]
                     iq = iq[torch.randperm(len(iq), generator=g)[:2048]]
                     loss = loss + cl_weight * (_infonce(v1[0][uq], v2[0][uq]) + _infonce(v1[1][iq], v2[1][iq]))
+                if loss_type == "bprdr":
+                    loss = loss + eta * _drres_loss(emb, s, s + batch)
             elif loss_type in ("drjl", "mrdr"):
                 # 1) imputation step on logged pairs
                 k = torch.randint(0, len(ou), (len(u),), generator=g)

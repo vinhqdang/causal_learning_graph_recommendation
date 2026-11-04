@@ -240,3 +240,4 @@ results/v3/*.partial.json
 *.partial.json
 
 results/v4/cache/
+results/v5/cache/
