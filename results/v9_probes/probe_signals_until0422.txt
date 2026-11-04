@@ -1,0 +1,14 @@
+kuairand EASE+pop: test 0.4362 +- 0.0015 (val 0.4369, 12 cfg-epochs)
+    chosen: [{'lam': 1000.0, 'beta': 0.25}, {'lam': 3000.0, 'beta': 0.25}, {'lam': 3000.0, 'beta': 0.25}]
+    vs iALS                 ref 0.4528  diff  -16.18 [ 3.51] p=2.12e-19 n=8321
+    vs LightGCN             ref 0.4569  diff  -21.22 [ 3.66] p=1.01e-29 n=8321
+    vs r-AdjNorm            ref 0.4590  diff  -23.22 [ 3.62] p=5.42e-36 n=8321
+    vs LightGCN-p           ref 0.4565  diff  -20.41 [ 3.57] p=5.94e-29 n=8321
+    vs QP family            ref 0.4613  diff  -25.15 [ 3.59] p=1.55e-42 n=8321
+kuairand EASE+impressions+pop: test 0.4450 +- 0.0013 (val 0.4458, 36 cfg-epochs)
+    chosen: [{'lam': 3000.0, 'g': 1.0, 'beta': 0.5}, {'lam': 3000.0, 'g': 1.0, 'beta': 0.25}, {'lam': 3000.0, 'g': 1.0, 'beta': 0.25}]
+    vs iALS                 ref 0.4528  diff   -7.20 [ 3.28] p=1.67e-05 n=8321
+    vs LightGCN             ref 0.4569  diff  -12.25 [ 3.42] p=2.37e-12 n=8321
+    vs r-AdjNorm            ref 0.4590  diff  -14.24 [ 3.37] p=1.25e-16 n=8321
+    vs LightGCN-p           ref 0.4565  diff  -11.44 [ 3.36] p=2.51e-11 n=8321
+    vs QP family            ref 0.4613  diff  -16.18 [ 3.39] p=1.11e-20 n=8321

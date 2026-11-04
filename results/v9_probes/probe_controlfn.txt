@@ -1,0 +1,5 @@
+additive (no covariate) 0.3839
+control e rho [0.0276] 0.3809
+control e,e^2 rho [ 0.04   -0.0038] 0.3799
+control logpop_i rho [0.0129] 0.377
+control e,logpop rho [0.0267 0.0086] 0.3768

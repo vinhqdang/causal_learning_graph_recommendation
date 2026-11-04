@@ -1,0 +1,10 @@
+is_click rand rate 0.1761 H1 all users: prior (np.float64(0.3883931881415004), 22847) LOO item oracle (np.float64(0.5072173704399455), 22847) random (np.float64(0.33288428778658025), 22847)
+is_click H2 B: item-only(A) (np.float64(0.5850375494761394), 19474) log prior (np.float64(0.49340318120972637), 19474)
+is_click H2 rank 4 [(0.5, np.float64(0.585)), (1, np.float64(0.585)), (2, np.float64(0.585)), (4, np.float64(0.5848))]
+is_click H2 rank 16 [(0.5, np.float64(0.585)), (1, np.float64(0.585)), (2, np.float64(0.5847)), (4, np.float64(0.5844))]
+is_click H2 rank 64 [(0.5, np.float64(0.5851)), (1, np.float64(0.5848)), (2, np.float64(0.5843)), (4, np.float64(0.583))]
+long_view rand rate 0.0849 H1 all users: prior (np.float64(0.32466254260805893), 18399) LOO item oracle (np.float64(0.4433324990009813), 18399) random (np.float64(0.2542892046763283), 18399)
+long_view H2 B: item-only(A) (np.float64(0.5233934535243561), 14526) log prior (np.float64(0.42755462428070984), 14526)
+long_view H2 rank 4 [(0.5, np.float64(0.5235)), (1, np.float64(0.5234)), (2, np.float64(0.5235)), (4, np.float64(0.5236))]
+long_view H2 rank 16 [(0.5, np.float64(0.5234)), (1, np.float64(0.523)), (2, np.float64(0.5229)), (4, np.float64(0.5223))]
+long_view H2 rank 64 [(0.5, np.float64(0.5234)), (1, np.float64(0.5233)), (2, np.float64(0.5229)), (4, np.float64(0.5199))]

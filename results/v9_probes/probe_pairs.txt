@@ -1,0 +1,8 @@
+probe_signals_kuairand_EASE+impressions+pop.json - probe_signals_kuairand_EASE+pop.json: +9.22 [2.24] p=9.36e-16 n=8321
+probe_signals_kuairand_EASE+author+pop.json - probe_signals_kuairand_EASE+pop.json: +0.25 [0.50] p=0.337 n=8321
+probe_signals_kuairand_EASE-multibehaviour+pop.json - probe_signals_kuairand_EASE+pop.json: +0.00 [0.00] p=nan n=8321
+probe_signals_kuairand_EASE+impressions(g>=1)+pop.json - probe_signals_kuairand_EASE+pop.json: +9.39 [2.53] p=3.66e-13 n=8321
+probe_signals_kuairand_EASE(impressions only)+pop.json - probe_signals_kuairand_EASE+pop.json: +9.24 [3.01] p=1.95e-09 n=8321
+probe_signals_kuairand_EASE+notclicked-channel+pop.json - probe_signals_kuairand_EASE+pop.json: +3.35 [2.11] p=0.00186 n=8321
+probe_signals_kuairand_EASE(clicks + w*notclicked)+pop.json - probe_signals_kuairand_EASE+pop.json: +12.31 [2.89] p=7.2e-17 n=8321
+probe_signals_until0422_kuairand_EASE+impressions+pop.json - probe_signals_until0422_kuairand_EASE+pop.json: +8.97 [2.19] p=9.53e-16 n=8322

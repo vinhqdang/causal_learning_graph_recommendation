@@ -1,0 +1,49 @@
+stat cols ['video_id', 'counts', 'show_cnt', 'show_user_num', 'play_cnt', 'play_user_num', 'play_duration', 'complete_play_cnt', 'complete_play_user_num', 'valid_play_cnt', 'valid_play_user_num', 'long_time_play_cnt', 'long_time_play_user_num', 'short_time_play_cnt', 'short_time_play_user_num', 'play_progress', 'comment_stay_duration', 'like_cnt', 'like_user_num', 'click_like_cnt', 'double_click_cnt', 'cancel_like_cnt', 'cancel_like_user_num', 'comment_cnt', 'comment_user_num', 'direct_comment_cnt', 'reply_comment_cnt', 'delete_comment_cnt', 'delete_comment_user_num', 'comment_like_cnt', 'comment_like_user_num', 'follow_cnt', 'follow_user_num', 'cancel_follow_cnt', 'cancel_follow_user_num', 'share_cnt', 'share_user_num', 'download_cnt', 'download_user_num', 'report_cnt', 'report_user_num', 'reduce_similar_cnt', 'reduce_similar_user_num', 'collect_cnt', 'collect_user_num', 'cancel_collect_cnt', 'cancel_collect_user_num', 'direct_comment_user_num', 'reply_comment_user_num', 'share_all_cnt', 'share_all_user_num', 'outsite_share_all_cnt']
+stat rows 7583 unique vids 7583
+log ctr all tabs                    n=7303 spearman(click)=0.251 spearman(longview)=0.290
+log ctr tab1                        n=7079 spearman(click)=0.184 spearman(longview)=0.198
+log longview                        n=7303 spearman(click)=0.197 spearman(longview)=0.322
+log longview tab1                   n=7079 spearman(click)=0.114 spearman(longview)=0.235
+log like                            n=7303 spearman(click)=-0.167 spearman(longview)=-0.128
+log playratio                       n=7303 spearman(click)=-0.454 spearman(longview)=-0.476
+log impressions (pop)               n=7303 spearman(click)=0.410 spearman(longview)=0.427
+log clicks (pop)                    n=7303 spearman(click)=0.448 spearman(longview)=0.474
+platform show_cnt/show              n=7334 spearman(click)=nan spearman(longview)=nan
+platform play_cnt/show              n=7334 spearman(click)=0.247 spearman(longview)=0.309
+platform complete_play_cnt/show     n=7334 spearman(click)=0.316 spearman(longview)=0.402
+platform valid_play_cnt/show        n=7334 spearman(click)=0.392 spearman(longview)=0.425
+platform long_time_play_cnt/show    n=7334 spearman(click)=0.369 spearman(longview)=0.462
+platform like_cnt/show              n=7334 spearman(click)=-0.078 spearman(longview)=-0.019
+platform follow_cnt/show            n=7334 spearman(click)=-0.112 spearman(longview)=-0.054
+platform share_cnt/show             n=7334 spearman(click)=-0.143 spearman(longview)=-0.124
+platform show_cnt                   n=7334 spearman(click)=0.375 spearman(longview)=0.385
+tab x click std {0: 0.091, 1: 0.523, 2: 0.48, 3: 0.022, 4: 0.615, 5: 0.278, 6: 0.176, 7: 0.403, 8: 0.041, 9: 0.993, 10: 1.0, 11: 0.0, 12: 0.136, 13: 0.348, 14: 0.0}
+date range std 20220409 20220508 rnd 20220422 20220508
+upload dt range 2022-04-09 2022-04-11
+imp          spearman with uniform click rate +0.410
+clk          spearman with uniform click rate +0.448
+lv           spearman with uniform click rate +0.441
+imp_early    spearman with uniform click rate +0.402
+imp_late     spearman with uniform click rate +0.367
+clk_late     spearman with uniform click rate +0.409
+users        spearman with uniform click rate +0.415
+tab1_share   spearman with uniform click rate +0.149
+ctr          spearman with uniform click rate +0.294
+last_day     spearman with uniform click rate +0.263
+first_day    spearman with uniform click rate -0.019
+trend        spearman with uniform click rate +0.009
+dur          spearman with uniform click rate -0.078
+early CTR first 10 impressions: spearman (np.float64(0.154), 7303)  clicks count (np.float64(0.192), 7303)
+early CTR first 20 impressions: spearman (np.float64(0.173), 7303)  clicks count (np.float64(0.264), 7303)
+early CTR first 50 impressions: spearman (np.float64(0.2), 7303)  clicks count (np.float64(0.363), 7303)
+early CTR first 100 impressions: spearman (np.float64(0.228), 7303)  clicks count (np.float64(0.414), 7303)
+early CTR first 1000000000 impressions: spearman (np.float64(0.268), 7303)  clicks count (np.float64(0.448), 7303)
+tab 0 (178087 imps): CTR spearman (np.float64(-0.002), 6026) clicks (np.float64(0.124), 6026) imps (np.float64(0.149), 6026)
+tab 1 (1058389 imps): CTR spearman (np.float64(0.201), 7079) clicks (np.float64(0.429), 7079) imps (np.float64(0.397), 7079)
+tab 2 (48364 imps): CTR spearman (np.float64(0.193), 5078) clicks (np.float64(0.382), 5078) imps (np.float64(0.334), 5078)
+tab 4 (93165 imps): CTR spearman (np.float64(0.053), 4476) clicks (np.float64(0.422), 4476) imps (np.float64(0.438), 4476)
+tab 6 (42785 imps): CTR spearman (np.float64(0.336), 648) clicks (np.float64(0.148), 648) imps (np.float64(0.021), 648)
+users with 0-20 imps: CTR (np.float64(0.261), 4894) clicks (np.float64(0.376), 4894)
+users with 20-60 imps: CTR (np.float64(0.235), 6917) clicks (np.float64(0.425), 6917)
+users with 60-1000000000 imps: CTR (np.float64(0.238), 7267) clicks (np.float64(0.449), 7267)
+split-half reliability of uniform item click rate: spearman(halfA, halfB)=0.772; spearman(halfA, log clicks)=0.416; items 7326

@@ -1,0 +1,16 @@
+decomp pop (clicks) 0.4204
+decomp pop (impressions) 0.4154
+decomp EASE lam=300.0: personal 0.4224 item-avg of EASE 0.42 personal - user mean + item avg(std) 0.4224
+   pop-std + g*personal-std 0.25 0.4279
+   pop-std + g*personal-std 1.0 0.4349
+decomp EASE lam=3000.0: personal 0.4432 item-avg of EASE 0.4177 personal - user mean + item avg(std) 0.4432
+   pop-std + g*personal-std 0.25 0.4263
+   pop-std + g*personal-std 1.0 0.4337
+decomp EASE lam=30000.0: personal 0.4371 item-avg of EASE 0.4138 personal - user mean + item avg(std) 0.4371
+   pop-std + g*personal-std 0.25 0.4232
+   pop-std + g*personal-std 1.0 0.4265
+oracle LOO item rate (10K users) 0.4889
+oracle + g*EASE personal 0.1 0.4948
+oracle + g*EASE personal 0.25 0.4956
+oracle + g*EASE personal 0.5 0.4962
+oracle + g*EASE personal 1.0 0.4934

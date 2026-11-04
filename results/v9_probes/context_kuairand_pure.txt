@@ -1,0 +1,9 @@
+ctx-diag rank by rand (0.3317, 22855)
+ctx-diag rank by pop (0.4231, 22855)
+ctx-diag rank by dur (0.335, 22855)
+ctx-diag rank by loo (0.507, 22855)
+ctx-diag rank by state_all (0.3353, 22855)
+ctx-diag rank by recent (0.3203, 22855)
+ctx-diag rank by loo+0.5*recent-rank (0.4675, 22855)
+click rate by minutes since previous std impression {'mean': {Interval(0.0, 1.0, closed='right'): 0.061, Interval(1.0, 5.0, closed='right'): 0.115, Interval(5.0, 30.0, closed='right'): 0.143, Interval(30.0, 120.0, closed='right'): 0.162, Interval(120.0, 1440.0, closed='right'): 0.174, Interval(1440.0, 1000000000.0, closed='right'): 0.184}, 'size': {Interval(0.0, 1.0, closed='right'): 4353, Interval(1.0, 5.0, closed='right'): 20321, Interval(5.0, 30.0, closed='right'): 64592, Interval(30.0, 120.0, closed='right'): 81753, Interval(120.0, 1440.0, closed='right'): 363191, Interval(1440.0, 1000000000.0, closed='right'): 644593}}
+click rate by hour {0: 0.162, 1: 0.165, 2: 0.16, 3: 0.17, 4: 0.174, 5: 0.177, 6: 0.184, 7: 0.196, 8: 0.186, 9: 0.177, 10: 0.175, 11: 0.176, 12: 0.194, 13: 0.186, 14: 0.179, 15: 0.173, 16: 0.17, 17: 0.176, 18: 0.179, 19: 0.181, 20: 0.172, 21: 0.17, 22: 0.166, 23: 0.169}

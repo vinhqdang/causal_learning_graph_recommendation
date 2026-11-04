@@ -1,0 +1,23 @@
+/home/user/causal_learning_graph_recommendation/drup/data2.py:106: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)
+  M[torch.as_tensor(g.index.get_level_values(0).values), torch.as_tensor(g.index.get_level_values(1).values)] = \
+kuairand EASE-multibehaviour+pop: test 0.4433 +- 0.0021 (val 0.4450, 72 cfg-epochs)
+    chosen: [{'lam': 1000.0, 'a': 0.0, 'b': 0.0, 'beta': 0.25}, {'lam': 3000.0, 'a': 0.0, 'b': 0.0, 'beta': 0.25}, {'lam': 3000.0, 'a': 0.0, 'b': 0.0, 'beta': 0.0}]
+    vs iALS                 ref 0.4528  diff   -9.11 [ 2.92] p=1.05e-09 n=8321
+    vs LightGCN             ref 0.4569  diff  -14.16 [ 3.38] p=2.47e-16 n=8321
+    vs r-AdjNorm            ref 0.4590  diff  -16.15 [ 3.33] p=2.69e-21 n=8321
+    vs LightGCN-p           ref 0.4565  diff  -13.35 [ 3.30] p=2.53e-15 n=8321
+    vs QP family            ref 0.4613  diff  -18.09 [ 3.33] p=3.13e-26 n=8321
+kuairand EASE+impressions+pop: test 0.4523 +- 0.0018 (val 0.4532, 36 cfg-epochs)
+    chosen: [{'lam': 3000.0, 'g': 1.0, 'beta': 0.25}, {'lam': 3000.0, 'g': 1.0, 'beta': 0.0}, {'lam': 3000.0, 'g': 1.0, 'beta': 0.0}]
+    vs iALS                 ref 0.4528  diff   +0.11 [ 2.78] p=0.94 n=8321
+    vs LightGCN             ref 0.4569  diff   -4.94 [ 3.24] p=0.0028 n=8321
+    vs r-AdjNorm            ref 0.4590  diff   -6.93 [ 3.18] p=1.93e-05 n=8321
+    vs LightGCN-p           ref 0.4565  diff   -4.13 [ 3.20] p=0.0115 n=8321
+    vs QP family            ref 0.4613  diff   -8.87 [ 3.28] p=1.21e-07 n=8321
+kuairand EASE+author+pop: test 0.4435 +- 0.0021 (val 0.4453, 36 cfg-epochs)
+    chosen: [{'lam': 1000.0, 'c': 0.25, 'beta': 0.25}, {'lam': 3000.0, 'c': 0.5, 'beta': 0.25}, {'lam': 3000.0, 'c': 0.5, 'beta': 0.0}]
+    vs iALS                 ref 0.4528  diff   -8.86 [ 2.97] p=4.84e-09 n=8321
+    vs LightGCN             ref 0.4569  diff  -13.91 [ 3.40] p=1.13e-15 n=8321
+    vs r-AdjNorm            ref 0.4590  diff  -15.90 [ 3.35] p=1.62e-20 n=8321
+    vs LightGCN-p           ref 0.4565  diff  -13.10 [ 3.32] p=1.25e-14 n=8321
+    vs QP family            ref 0.4613  diff  -17.84 [ 3.35] p=2.69e-25 n=8321

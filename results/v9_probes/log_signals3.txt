@@ -1,0 +1,30 @@
+/home/user/causal_learning_graph_recommendation/drup/data2.py:106: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)
+  M[torch.as_tensor(g.index.get_level_values(0).values), torch.as_tensor(g.index.get_level_values(1).values)] = \
+kuairand EASE+impressions(g>=1)+pop: test 0.4524 +- 0.0013 (val 0.4549, 24 cfg-epochs)
+    chosen: [{'lam': 3000.0, 'g': 2.0, 'beta': 0.25}, {'lam': 10000.0, 'g': 4.0, 'beta': 0.0}, {'lam': 3000.0, 'g': 4.0, 'beta': 0.5}]
+    vs iALS                 ref 0.4528  diff   +0.28 [ 2.91] p=0.85 n=8321
+    vs LightGCN             ref 0.4569  diff   -4.76 [ 3.14] p=0.00291 n=8321
+    vs r-AdjNorm            ref 0.4590  diff   -6.76 [ 3.08] p=1.7e-05 n=8321
+    vs LightGCN-p           ref 0.4565  diff   -3.96 [ 3.11] p=0.0126 n=8321
+    vs QP family            ref 0.4613  diff   -8.69 [ 3.18] p=8.6e-08 n=8321
+kuairand EASE(impressions only)+pop: test 0.4525 +- 0.0019 (val 0.4526, 12 cfg-epochs)
+    chosen: [{'lam': 10000.0, 'beta': 0.0}, {'lam': 10000.0, 'beta': 0.0}, {'lam': 3000.0, 'beta': 0.25}]
+    vs iALS                 ref 0.4528  diff   +0.13 [ 3.16] p=0.936 n=8321
+    vs LightGCN             ref 0.4569  diff   -4.92 [ 3.23] p=0.00284 n=8321
+    vs r-AdjNorm            ref 0.4590  diff   -6.91 [ 3.17] p=1.92e-05 n=8321
+    vs LightGCN-p           ref 0.4565  diff   -4.11 [ 3.21] p=0.0121 n=8321
+    vs QP family            ref 0.4613  diff   -8.85 [ 3.29] p=1.35e-07 n=8321
+kuairand EASE+notclicked-channel+pop: test 0.4470 +- 0.0013 (val 0.4460, 12 cfg-epochs)
+    chosen: [{'lam': 3000.0, 'g': 0.5, 'beta': 0.25}, {'lam': 3000.0, 'g': 0.5, 'beta': 0.25}, {'lam': 3000.0, 'g': 0.5, 'beta': 0.25}]
+    vs iALS                 ref 0.4528  diff   -5.77 [ 3.10] p=0.000267 n=8321
+    vs LightGCN             ref 0.4569  diff  -10.81 [ 3.28] p=1.04e-10 n=8321
+    vs r-AdjNorm            ref 0.4590  diff  -12.80 [ 3.22] p=7.51e-15 n=8321
+    vs LightGCN-p           ref 0.4565  diff  -10.00 [ 3.21] p=1.1e-09 n=8321
+    vs QP family            ref 0.4613  diff  -14.74 [ 3.29] p=1.85e-18 n=8321
+kuairand EASE(clicks + w*notclicked)+pop: test 0.4553 +- 0.0020 (val 0.4559, 12 cfg-epochs)
+    chosen: [{'lam': 3000.0, 'w': 0.5, 'beta': 0.0}, {'lam': 3000.0, 'w': 0.5, 'beta': 0.0}, {'lam': 3000.0, 'w': 0.5, 'beta': 0.0}]
+    vs iALS                 ref 0.4528  diff   +3.20 [ 2.92] p=0.032 n=8321
+    vs LightGCN             ref 0.4569  diff   -1.85 [ 3.39] p=0.285 n=8321
+    vs r-AdjNorm            ref 0.4590  diff   -3.84 [ 3.34] p=0.0241 n=8321
+    vs LightGCN-p           ref 0.4565  diff   -1.04 [ 3.36] p=0.544 n=8321
+    vs QP family            ref 0.4613  diff   -5.78 [ 3.44] p=0.00101 n=8321

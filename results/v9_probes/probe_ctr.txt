@@ -1,0 +1,77 @@
+kuairand RM[10k]: test 0.4088 +- 0.0015 (val 0.4066, 10 cfg-epochs)
+    chosen: [{'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': False, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'beta': 0.5, 'epoch': 3}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': False, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'beta': 0.5, 'epoch': 3}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': False, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'beta': 0.5, 'epoch': 2}]
+    vs iALS                 ref 0.4528  diff  -44.58 [ 4.86] p=6.88e-71 n=8321
+    vs LightGCN             ref 0.4569  diff  -49.62 [ 4.74] p=2.2e-91 n=8321
+    vs r-AdjNorm            ref 0.4590  diff  -51.62 [ 4.70] p=6.86e-100 n=8321
+    vs LightGCN-p           ref 0.4565  diff  -48.82 [ 4.61] p=3.66e-93 n=8321
+    vs QP family            ref 0.4613  diff  -53.55 [ 4.53] p=4.58e-115 n=8321
+kuairand RM[10k]+EASE(click)+EASE(imp): test 0.4541 +- 0.0016 (val 0.4565, 60 cfg-epochs)
+    chosen: [{'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': False, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'h': 0.25, 'g': 2.0, 'beta': 0.25, 'epoch': 1}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': False, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'h': 0.25, 'g': 2.0, 'beta': 0.25, 'epoch': 4}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': False, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'h': 0.25, 'g': 2.0, 'beta': 0.25, 'epoch': 0}]
+    vs iALS                 ref 0.4528  diff   +2.12 [ 2.91] p=0.154 n=8321
+    vs LightGCN             ref 0.4569  diff   -2.93 [ 3.27] p=0.0793 n=8321
+    vs r-AdjNorm            ref 0.4590  diff   -4.92 [ 3.21] p=0.0027 n=8321
+    vs LightGCN-p           ref 0.4565  diff   -2.12 [ 3.20] p=0.195 n=8321
+    vs QP family            ref 0.4613  diff   -6.85 [ 3.25] p=3.56e-05 n=8321
+kuairand RM+side[10k]: test 0.4227 +- 0.0016 (val 0.4219, 8 cfg-epochs)
+    chosen: [{'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'beta': 0.5, 'epoch': 2}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'beta': 0.5, 'epoch': 2}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'beta': 0.5, 'epoch': 2}]
+    vs iALS                 ref 0.4528  diff  -29.98 [ 4.74] p=6.09e-35 n=8321
+    vs LightGCN             ref 0.4569  diff  -35.02 [ 4.61] p=1.89e-49 n=8321
+    vs r-AdjNorm            ref 0.4590  diff  -37.01 [ 4.58] p=1.29e-55 n=8321
+    vs LightGCN-p           ref 0.4565  diff  -34.21 [ 4.49] p=9.02e-50 n=8321
+    vs QP family            ref 0.4613  diff  -38.95 [ 4.40] p=2.98e-66 n=8321
+kuairand RM+side[10k]+EASE(click)+EASE(imp): test 0.4593 +- 0.0018 (val 0.4615, 48 cfg-epochs)
+    chosen: [{'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'h': 0.5, 'g': 2.0, 'beta': 0.0, 'epoch': 1}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'h': 0.5, 'g': 2.0, 'beta': 0.0, 'epoch': 2}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'h': 0.5, 'g': 2.0, 'beta': 0.25, 'epoch': 2}]
+    vs iALS                 ref 0.4528  diff   +7.37 [ 3.02] p=1.82e-06 n=8321
+    vs LightGCN             ref 0.4569  diff   +2.32 [ 3.37] p=0.177 n=8321
+    vs r-AdjNorm            ref 0.4590  diff   +0.33 [ 3.32] p=0.846 n=8321
+    vs LightGCN-p           ref 0.4565  diff   +3.13 [ 3.31] p=0.0637 n=8321
+    vs QP family            ref 0.4613  diff   -1.61 [ 3.34] p=0.345 n=8321
+kuairand RM+side+uf[10k]: test 0.4098 +- 0.0011 (val 0.4083, 8 cfg-epochs)
+    chosen: [{'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': True, 'tab': False, 'mt': False, 'betas': None, 'beta': 0.5, 'epoch': 1}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': True, 'tab': False, 'mt': False, 'betas': None, 'beta': 0.5, 'epoch': 1}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': True, 'tab': False, 'mt': False, 'betas': None, 'beta': 0.5, 'epoch': 1}]
+    vs iALS                 ref 0.4528  diff  -43.05 [ 4.87] p=3.2e-66 n=8321
+    vs LightGCN             ref 0.4569  diff  -48.10 [ 4.69] p=1.05e-87 n=8321
+    vs r-AdjNorm            ref 0.4590  diff  -50.09 [ 4.65] p=2.85e-96 n=8321
+    vs LightGCN-p           ref 0.4565  diff  -47.29 [ 4.59] p=9.02e-89 n=8321
+    vs QP family            ref 0.4613  diff  -52.03 [ 4.50] p=2.67e-110 n=8321
+kuairand RM+side+uf[10k]+EASE(click)+EASE(imp): test 0.4548 +- 0.0013 (val 0.4565, 48 cfg-epochs)
+    chosen: [{'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': True, 'tab': False, 'mt': False, 'betas': None, 'h': 0.25, 'g': 2.0, 'beta': 0.0, 'epoch': 1}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': True, 'tab': False, 'mt': False, 'betas': None, 'h': 0.25, 'g': 2.0, 'beta': 0.0, 'epoch': 1}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': True, 'tab': False, 'mt': False, 'betas': None, 'h': 0.25, 'g': 2.0, 'beta': 0.0, 'epoch': 0}]
+    vs iALS                 ref 0.4528  diff   +2.86 [ 3.03] p=0.0635 n=8321
+    vs LightGCN             ref 0.4569  diff   -2.18 [ 3.42] p=0.211 n=8321
+    vs r-AdjNorm            ref 0.4590  diff   -4.17 [ 3.37] p=0.0151 n=8321
+    vs LightGCN-p           ref 0.4565  diff   -1.37 [ 3.38] p=0.426 n=8321
+    vs QP family            ref 0.4613  diff   -6.11 [ 3.45] p=0.00052 n=8321
+kuairand RM+side+uf+tab[10k]: test 0.4074 +- 0.0011 (val 0.4050, 8 cfg-epochs)
+    chosen: [{'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': True, 'tab': True, 'mt': False, 'betas': None, 'beta': 0.5, 'epoch': 1}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': True, 'tab': True, 'mt': False, 'betas': None, 'beta': 0.5, 'epoch': 1}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': True, 'tab': True, 'mt': False, 'betas': None, 'beta': 0.5, 'epoch': 1}]
+    vs iALS                 ref 0.4528  diff  -45.79 [ 4.91] p=4.03e-73 n=8321
+    vs LightGCN             ref 0.4569  diff  -50.84 [ 4.74] p=9.77e-96 n=8321
+    vs r-AdjNorm            ref 0.4590  diff  -52.83 [ 4.70] p=1.49e-104 n=8321
+    vs LightGCN-p           ref 0.4565  diff  -50.03 [ 4.63] p=5.64e-97 n=8321
+    vs QP family            ref 0.4613  diff  -54.77 [ 4.55] p=1.85e-119 n=8321
+kuairand RM+side+uf+tab[10k]+EASE(click)+EASE(imp): test 0.4539 +- 0.0019 (val 0.4561, 48 cfg-epochs)
+    chosen: [{'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': True, 'tab': True, 'mt': False, 'betas': None, 'h': 0.25, 'g': 2.0, 'beta': 0.0, 'epoch': 1}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': True, 'tab': True, 'mt': False, 'betas': None, 'h': 0.25, 'g': 1.0, 'beta': 0.25, 'epoch': 0}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': True, 'tab': True, 'mt': False, 'betas': None, 'h': 0.25, 'g': 2.0, 'beta': 0.0, 'epoch': 0}]
+    vs iALS                 ref 0.4528  diff   +1.87 [ 2.94] p=0.213 n=8321
+    vs LightGCN             ref 0.4569  diff   -3.18 [ 3.33] p=0.0609 n=8321
+    vs r-AdjNorm            ref 0.4590  diff   -5.17 [ 3.27] p=0.00193 n=8321
+    vs LightGCN-p           ref 0.4565  diff   -2.37 [ 3.28] p=0.156 n=8321
+    vs QP family            ref 0.4613  diff   -7.11 [ 3.35] p=3.16e-05 n=8321
+kuairand RM+side+uf+tab+mt[10k]: test 0.3752 +- 0.0016 (val 0.3752, 8 cfg-epochs)
+    chosen: [{'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': True, 'tab': True, 'mt': True, 'betas': None, 'beta': 0.5, 'epoch': 1}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': True, 'tab': True, 'mt': True, 'betas': None, 'beta': 0.5, 'epoch': 1}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': True, 'tab': True, 'mt': True, 'betas': None, 'beta': 0.5, 'epoch': 1}]
+    vs iALS                 ref 0.4528  diff  -77.68 [ 5.12] p=1.69e-184 n=8321
+    vs LightGCN             ref 0.4569  diff  -82.73 [ 5.01] p=1.21e-216 n=8321
+    vs r-AdjNorm            ref 0.4590  diff  -84.72 [ 4.98] p=8.28e-229 n=8321
+    vs LightGCN-p           ref 0.4565  diff  -81.92 [ 4.93] p=4.59e-219 n=8321
+    vs QP family            ref 0.4613  diff  -86.66 [ 4.90] p=1.61e-246 n=8321
+kuairand RM+side+uf+tab+mt[10k]+EASE(click)+EASE(imp): test 0.4519 +- 0.0013 (val 0.4526, 48 cfg-epochs)
+    chosen: [{'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': True, 'tab': True, 'mt': True, 'betas': None, 'h': 0.25, 'g': 2.0, 'beta': 0.25, 'epoch': 1}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': True, 'tab': True, 'mt': True, 'betas': None, 'h': 0.25, 'g': 2.0, 'beta': 0.25, 'epoch': 1}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': True, 'tab': True, 'mt': True, 'betas': None, 'h': 0.25, 'g': 2.0, 'beta': 0.25, 'epoch': 1}]
+    vs iALS                 ref 0.4528  diff   -0.20 [ 3.03] p=0.895 n=8321
+    vs LightGCN             ref 0.4569  diff   -5.25 [ 3.34] p=0.00206 n=8321
+    vs r-AdjNorm            ref 0.4590  diff   -7.24 [ 3.28] p=1.53e-05 n=8321
+    vs LightGCN-p           ref 0.4565  diff   -4.44 [ 3.29] p=0.0082 n=8321
+    vs QP family            ref 0.4613  diff   -9.18 [ 3.37] p=9.31e-08 n=8321
+kuairand RM-best-of-variants[10k]: test 0.4227 +- 0.0016 (val 0.4219, 32 cfg-epochs)
+    chosen: [{'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'beta': 0.5, 'epoch': 2}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'beta': 0.5, 'epoch': 2}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': True, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'beta': 0.5, 'epoch': 2}]
+    vs iALS                 ref 0.4528  diff  -29.98 [ 4.74] p=6.09e-35 n=8321
+    vs LightGCN             ref 0.4569  diff  -35.02 [ 4.61] p=1.89e-49 n=8321
+    vs r-AdjNorm            ref 0.4590  diff  -37.01 [ 4.58] p=1.29e-55 n=8321
+    vs LightGCN-p           ref 0.4565  diff  -34.21 [ 4.49] p=9.02e-50 n=8321
+    vs QP family            ref 0.4613  diff  -38.95 [ 4.40] p=2.98e-66 n=8321

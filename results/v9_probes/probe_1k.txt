@@ -1,0 +1,9 @@
+pop: test 0.4264 +- 0.0052 (val 0.4235, 1 cfgs) chosen [{}, {}, {}, {}, {}]
+EASE+pop: test 0.4549 +- 0.0069 (val 0.4574, 12 cfgs) chosen [{'lam': 3000.0, 'beta': 0.0, 'g_tag': 0.0, 'g_auth': 0.0}, {'lam': 3000.0, 'beta': 0.5, 'g_tag': 0.0, 'g_auth': 0.0}, {'lam': 3000.0, 'beta': 0.0, 'g_tag': 0.0, 'g_auth': 0.0}, {'lam': 1000.0, 'beta': 0.25, 'g_tag': 0.0, 'g_auth': 0.0}, {'lam': 3000.0, 'beta': 0.0, 'g_tag': 0.0, 'g_auth': 0.0}]
+EASE+pop+taglift: test 0.4752 +- 0.0064 (val 0.4834, 48 cfgs) chosen [{'lam': 3000.0, 'beta': 0.0, 'g_tag': 0.5, 'g_auth': 0.0}, {'lam': 3000.0, 'beta': 0.25, 'g_tag': 1.0, 'g_auth': 0.0}, {'lam': 3000.0, 'beta': 0.0, 'g_tag': 0.5, 'g_auth': 0.0}, {'lam': 1000.0, 'beta': 0.5, 'g_tag': 1.0, 'g_auth': 0.0}, {'lam': 3000.0, 'beta': 0.0, 'g_tag': 0.25, 'g_auth': 0.0}]
+EASE+pop+taglift+authcnt: test 0.4892 +- 0.0049 (val 0.5016, 144 cfgs) chosen [{'lam': 3000.0, 'beta': 0.25, 'g_tag': 1.0, 'g_auth': 0.5}, {'lam': 3000.0, 'beta': 0.25, 'g_tag': 1.0, 'g_auth': 0.5}, {'lam': 3000.0, 'beta': 0.0, 'g_tag': 0.5, 'g_auth': 0.5}, {'lam': 1000.0, 'beta': 0.5, 'g_tag': 1.0, 'g_auth': 0.5}, {'lam': 3000.0, 'beta': 0.0, 'g_tag': 0.5, 'g_auth': 0.5}]
+pop+taglift+authcnt: test 0.4756 +- 0.0038 (val 0.4896, 48 cfgs) chosen [{'lam': 300.0, 'beta': 0.25, 'g_tag': 0.25, 'g_auth': 0.5}, {'lam': 300.0, 'beta': 0.25, 'g_tag': 0.25, 'g_auth': 0.5}, {'lam': 300.0, 'beta': 0.25, 'g_tag': 0.25, 'g_auth': 0.5}, {'lam': 300.0, 'beta': 0.25, 'g_tag': 0.25, 'g_auth': 0.5}, {'lam': 300.0, 'beta': 0.25, 'g_tag': 0.25, 'g_auth': 0.5}]
+  EASE+pop - pop: +26.73 [12.72] p=4.12e-05 n=842
+  EASE+pop+taglift - EASE+pop: +22.82 [8.74] p=3.7e-07 n=842
+  EASE+pop+taglift+authcnt - EASE+pop: +39.02 [10.56] p=9.3e-13 n=842
+  pop+taglift+authcnt - pop: +54.41 [13.63] p=1.41e-14 n=842

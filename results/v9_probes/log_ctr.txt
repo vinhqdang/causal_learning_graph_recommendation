@@ -1,0 +1,53 @@
+/home/user/causal_learning_graph_recommendation/drup/data2.py:106: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)
+  M[torch.as_tensor(g.index.get_level_values(0).values), torch.as_tensor(g.index.get_level_values(1).values)] = \
+impressions 534550, users 10000, items 7583
+{'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': False, 'uf': False, 'tab': False, 'mt': False, 'betas': (0.0, 0.5)} 0 val 0.3987
+{'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': False, 'uf': False, 'tab': False, 'mt': False, 'betas': (0.0, 0.5)} 1 val 0.4021
+{'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': False, 'uf': False, 'tab': False, 'mt': False, 'betas': (0.0, 0.5)} 2 val 0.4055
+{'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': False, 'uf': False, 'tab': False, 'mt': False, 'betas': (0.0, 0.5)} 3 val 0.4066
+{'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': False, 'uf': False, 'tab': False, 'mt': False, 'betas': (0.0, 0.5)} 4 val 0.4066
+kuairand RM[10k]: test 0.4088 +- 0.0015 (val 0.4066, 10 cfg-epochs)
+    chosen: [{'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': False, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'beta': 0.5, 'epoch': 3}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': False, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'beta': 0.5, 'epoch': 3}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': False, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'beta': 0.5, 'epoch': 2}]
+    vs iALS                 ref 0.4528  diff  -44.58 [ 4.86] p=6.88e-71 n=8321
+    vs LightGCN             ref 0.4569  diff  -49.62 [ 4.74] p=2.2e-91 n=8321
+    vs r-AdjNorm            ref 0.4590  diff  -51.62 [ 4.70] p=6.86e-100 n=8321
+    vs LightGCN-p           ref 0.4565  diff  -48.82 [ 4.61] p=3.66e-93 n=8321
+    vs QP family            ref 0.4613  diff  -53.55 [ 4.53] p=4.58e-115 n=8321
+kuairand RM[10k]+EASE(click)+EASE(imp): test 0.4541 +- 0.0016 (val 0.4565, 60 cfg-epochs)
+    chosen: [{'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': False, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'h': 0.25, 'g': 2.0, 'beta': 0.25, 'epoch': 1}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': False, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'h': 0.25, 'g': 2.0, 'beta': 0.25, 'epoch': 4}, {'dim': 32, 'lr': 0.003, 'wd': 0.0001, 'side': False, 'uf': False, 'tab': False, 'mt': False, 'betas': None, 'h': 0.25, 'g': 2.0, 'beta': 0.25, 'epoch': 0}]
+    vs iALS                 ref 0.4528  diff   +2.12 [ 2.91] p=0.154 n=8321
+    vs LightGCN             ref 0.4569  diff   -2.93 [ 3.27] p=0.0793 n=8321
+    vs r-AdjNorm            ref 0.4590  diff   -4.92 [ 3.21] p=0.0027 n=8321
+    vs LightGCN-p           ref 0.4565  diff   -2.12 [ 3.20] p=0.195 n=8321
+    vs QP family            ref 0.4613  diff   -6.85 [ 3.25] p=3.56e-05 n=8321
+Traceback (most recent call last):
+  File "/home/user/causal_learning_graph_recommendation/experiments/v9_probes/probe_ctr.py", line 161, in <module>
+    run(cfg, sel)
+  File "/home/user/causal_learning_graph_recommendation/experiments/v9_probes/probe_ctr.py", line 127, in run
+    z = model(uu[b], ii[b], t)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/causal_learning_graph_recommendation/experiments/v9_probes/probe_ctr.py", line 99, in forward
+    bi, q = self.item_parts(i)
+            ^^^^^^^^^^^^^^^^^^
+  File "/home/user/causal_learning_graph_recommendation/experiments/v9_probes/probe_ctr.py", line 87, in item_parts
+    b = b + self.ba(auth[i])[:, 0] + self.bt(tag[i])[:, 0] + self.bd(dur[i])[:, 0]
+                                     ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/sparse.py", line 189, in forward
+    return F.embedding(
+           ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/functional.py", line 2621, in embedding
+    return torch.embedding(weight, input, padding_idx, scale_grad_by_freq, sparse)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IndexError: index out of range in self

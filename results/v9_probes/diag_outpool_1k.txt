@@ -1,0 +1,15 @@
+D3 out-of-pool impressions 11658952, with features 1.000
+D3 share of out-of-pool impressions whose author also has a pool video 0.0774
+D3 random 0.3292  pop(in-pool clicks) 0.4162
+D3 tag       aff    coverage 0.982 alone 0.4063  + log pop (std) 0.4431
+D3 tag       lcount coverage 0.982 alone 0.4054  + log pop (std) 0.4365
+D3 author_id aff    coverage 0.070 alone 0.373  + log pop (std) 0.4192
+D3 author_id lcount coverage 0.070 alone 0.4014  + log pop (std) 0.4351
+D3 music_id  aff    coverage 0.062 alone 0.3403  + log pop (std) 0.4185
+D3 music_id  lcount coverage 0.062 alone 0.3415  + log pop (std) 0.418
+D3 item-level author_id ctr   coverage 0.991 spearman with uniform pool rate +0.263 (n=7239)
+D3 item-level author_id lclk  coverage 0.991 spearman with uniform pool rate +0.373 (n=7239)
+D3 item-level tag       ctr   coverage 0.987 spearman with uniform pool rate +0.071 (n=7211)
+D3 item-level tag       lclk  coverage 0.987 spearman with uniform pool rate +0.290 (n=7211)
+D3 item-level music_id  ctr   coverage 0.188 spearman with uniform pool rate +0.320 (n=1376)
+D3 item-level music_id  lclk  coverage 0.188 spearman with uniform pool rate +0.232 (n=1376)

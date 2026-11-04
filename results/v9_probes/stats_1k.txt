@@ -1,0 +1,22 @@
+/home/user/causal_learning_graph_recommendation/experiments/../drup/data2.py:106: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)
+  M[torch.as_tensor(g.index.get_level_values(0).values), torch.as_tensor(g.index.get_level_values(1).values)] = \
+== KuaiRand-1k  label=is_click  train_until=None
+users 993  items 7388  training impressions 51042  distinct exposed pairs 48860  density 0.6660%
+impressions per user: mean 51.4  median 38  repeated-pair share 0.043
+training label rates per impression: is_click 0.4623, long_view 0.3365, is_like 0.0160, is_follow 0.0009, is_comment 0.0026, is_forward 0.0010, is_hate 0.0005, is_profile_enter 0.0222, play_ratio mean 0.434
+training tab shares: {1: 0.736, 0: 0.125, 4: 0.063, 2: 0.035, 6: 0.029, 5: 0.003, 8: 0.003, 3: 0.003}
+random (test) impressions 42944  users 993  items 7388
+test label rates per impression: is_click 0.1738, long_view 0.0840, is_like 0.0056, is_follow 0.0002, is_comment 0.0003, is_forward 0.0007, is_hate 0.0008, is_profile_enter 0.0046
+test tab shares: {1: 0.991, 11: 0.007, 2: 0.002, 14: 0.0}
+test users 993  candidates/user mean 43.2  positives/user mean 7.51  users with >= 1 positive (evaluated) 842
+split 0 (by user, frac_val 0.3): validation users 298  test users 695
+user features (993, 62)  item features ['author_id', 'video_type', 'upload_type', 'video_duration', 'music_id', 'tag']  items with author 1.000
+time range train 1649478196498 1652024972738  test 1650600645720 1652025123404
+out-of-pool training impressions 11658952  videos 4363981  per user 11741
+leak checks:
+   ranked_pairs_present_in_training_log: 0
+   test_events_present_in_training_log: 0
+   test_pairs_also_impressed_in_training_log_(excluded_from_ranking): 28
+   training_uses_random_log: False
+   max_train_time_ms: 1652024972738
+   min_test_time_ms: 1650600645720

@@ -1,0 +1,2 @@
+1k random rows 43028, Pure random rows 1186059, joined 43030 (1.0000); users 1000 -> linked 1000; one-to-one: True; identical ids: 1.0000
+27k random rows 1186059, Pure random rows 1186059, joined 1186081 (1.0000); users 27285 -> linked 27285; one-to-one: False; identical ids: 0.9999
