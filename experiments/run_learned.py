@@ -21,7 +21,7 @@ import torch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from drup.data import load_coat, load_yahoo, split_test  # noqa: E402
-from drup.estimation import baseline_imputation, clip_propensity, get_propensity  # noqa: E402
+from drup.estimation import additive_params, baseline_imputation, clip_propensity, get_propensity  # noqa: E402
 from drup.learned import IALS, IALSLR, IALSP, IALSW, AdvLGN, LGNCos, MACR, MF, LightGCN, SimGCL, train, train_ials  # noqa: E402
 from drup.metrics import evaluate  # noqa: E402
 from drup.propagation import drgp_prior  # noqa: E402
@@ -66,6 +66,9 @@ METHODS = {
     "DRGP-LGN-dr": ("lgn", "drres", {"pbeta": [1.0], "init": [0.01]}),
     "DRGP-LGN-hyb": ("lgn", "bprdr", {"pbeta": [1.0], "eta": [0.3, 1.0]}),
     "iALS-wide": ("ials", None, {"alpha": [10.0, 30.0, 100.0], "reg": [10.0, 100.0, 300.0]}),
+    "iALS-p-small": ("ialsp", None, {"alpha": [10.0, 30.0], "reg": [100.0, 1000.0], "pbeta": [0.5, 1.0]}),
+    "iALS-wide2": ("ials", None, {"alpha": [30.0, 100.0, 300.0, 1000.0], "reg": [10.0, 100.0, 300.0, 1000.0]}),
+    "Prior-alone": ("prior", None, {}),
 }
 GRAPH = ("lgn", "navip", "simgcl", "lgncos", "advlgn")
 IALS_KINDS = ("ials", "drials", "drials_lr", "ialsp")
@@ -117,6 +120,39 @@ def _build(kind, m, n, d, O, Y, P, cfg, seed=0):
     if kind == "simgcl":
         return SimGCL(m, n, d, eu, ei, w, layers=cfg["layers"], r=0.5)
     return LightGCN(m, n, d, eu, ei, w, layers=cfg["layers"], r=cfg.get("r", 0.5), init_std=cfg.get("init", 0.1))
+
+
+# --prior variants that change the additive imputation (and hence the prior and Q); "pop" keeps the
+# additive imputation and replaces only the prior by the item popularity
+IMP_VARIANTS = ("add_noips", "shuf_item", "user_only")
+
+
+def additive_imputation(O, Y, P, variant):
+    """Additive imputation mu + b_u + b_i (IPS-weighted, lam 5) and its variants for --prior.
+
+    add: the default (baseline_imputation). add_noips: the same fit without inverse-propensity
+    weights (exposed pairs only). shuf_item: the item biases permuted across items (fixed seed),
+    mu and b_u kept. user_only: b_i set to 0, mu and b_u kept.
+    """
+    if variant in ("add", "pop"):
+        return baseline_imputation(O, Y, P, lam=5.0)
+    if variant == "add_noips":
+        return baseline_imputation(O, Y, P, lam=5.0, ips=False)
+    mu, bu, bi = additive_params(O, Y, P, lam=5.0)
+    if variant == "shuf_item":
+        perm = torch.randperm(bi.numel(), generator=torch.Generator().manual_seed(0)).to(bi.device)
+        bi = bi[perm]
+    elif variant == "user_only":
+        bi = torch.zeros_like(bi)
+    else:
+        raise ValueError(f"unknown imputation variant {variant!r}")
+    return (mu + bu[:, None] + bi[None, :]).clamp(0.0, 1.0)
+
+
+def pop_prior(O, Y):
+    """Standardised log(1 + positives of each item in the training log), broadcast to every user."""
+    L = torch.log1p((O * Y).sum(0))[None, :].expand(O.shape[0], O.shape[1])
+    return ((L - L.mean()) / L.std()).float()
 
 
 PRIOR_VERSION = 2   # bump whenever the construction of drgp_prior changes its output
@@ -191,8 +227,11 @@ def main():
     ap.add_argument("--n_neg", type=int, default=64)
     ap.add_argument("--seed_check", type=int, default=3,
                     help="re-train the split-0 selection with this many seeds (0: skip)")
-    ap.add_argument("--prior", default="add", choices=["add", "drgp"],
-                    help="graph-free prior: the additive imputation (add) or the DR-fitted leave-edge-out prior (drgp)")
+    ap.add_argument("--prior", default="add", choices=["add", "add_noips", "pop", "shuf_item", "user_only", "drgp"],
+                    help="graph-free prior: the additive imputation (add), its variants add_noips (no IPS weights), "
+                         "shuf_item (item biases permuted), user_only (b_i = 0), the standardised log item "
+                         "popularity (pop), or the DR-fitted leave-edge-out prior (drgp). The variants other than "
+                         "pop need --imp add.")
     ap.add_argument("--gf_alphas", type=float, nargs="+", default=[0.5, 0.7])
     ap.add_argument("--gf_buckets", type=int, default=4, help="user activity buckets of the DRGP coefficients")
     ap.add_argument("--gf_ridge", type=float, default=1.0)
@@ -227,15 +266,20 @@ def main():
     ndt = torch.float64 if m * n < 5e7 else torch.float32
     P = get_propensity(d, O.to(ndt), Y.to(ndt), a.prop).float()
     P = clip_propensity(P, a.floor)
+    if a.prior in IMP_VARIANTS and a.imp == "lr":
+        ap.error(f"--prior {a.prior} needs the additive imputation (--imp add)")
     if a.imp == "lr":
         from drup.estimation import lowrank_imputation
         Yhat = lowrank_imputation(O.to(ndt), Y.to(ndt), P.to(ndt), rank=a.rank, ridge=5.0).float().clamp(0.0, 1.0)
     else:
-        Yhat = baseline_imputation(O.to(ndt), Y.to(ndt), P.to(ndt), lam=5.0).float()
+        Yhat = additive_imputation(O.to(ndt), Y.to(ndt), P.to(ndt),
+                                   a.prior if a.prior in IMP_VARIANTS else "add").float()
     _lg = torch.logit(Yhat.clamp(1e-3, 1 - 1e-3))
     PRIOR[0] = (_lg - _lg.mean()) / _lg.std()
     PIMP[0] = Yhat.clamp(0.01, 0.99)
     QMAT[0] = (Yhat * (1.0 - P) / (1.0 - P * Yhat).clamp_min(1e-6)).clamp(0.0, 1.0)
+    if a.prior == "pop":
+        PRIOR[0] = pop_prior(O, Y)
     prior_info = None
     if a.prior == "drgp":
         lam = a.gf_lam if a.gf_lam is not None else (5.0 if a.dataset == "coat" else 20.0)
