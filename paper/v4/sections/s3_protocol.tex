@@ -1,0 +1,194 @@
+%======================================================================
+\section{Protocol}\label{sec:protocol}
+%======================================================================
+
+The protocol rests on one rule. Uniformly collected data are read only to choose among trained models
+and to measure them. They never enter a training objective, a nuisance model that a trained model uses,
+or the stopping of training. This section states the controls that enforce the rule, how the splits,
+the selection and the seeds are built, how the tests and equivalence margins are defined, and how the
+stored results were reconciled before the analysis. The methods to which the protocol is applied are
+listed in Section~\ref{sec:methods}.
+
+\subsection{Where each data source may enter}\label{sec:leakage}
+
+Table~\ref{tab:leakage} lists the stages of the pipeline and the data each stage may read. ``Log'' is the
+biased training log, which holds the exposure matrix and the outcomes of the exposed pairs.
+``Validation'' and ``test'' are the parts of the uniformly collected data that a split assigns to each role.
+
+\begin{table}[t]\centering\footnotesize
+\caption{Permitted uses of each data source. The Coat row for the propensity is the one exception to the
+rule, and it is discussed in the text.}\label{tab:leakage}
+\begin{tabular}{lccc}
+\toprule
+Stage & Log & Validation & Test \\
+\midrule
+Exposure propensity $\hat p$ (Coat: shipped, see text) & yes & no & no \\
+Additive imputation $\hat Y$, prior $z$, weights $Q$ & yes & no & no \\
+Cross-fitted nuisances of the DRGP prior & yes & no & no \\
+Training of every model & yes & no & no \\
+Choice of configuration and epoch within a split & no & yes & no \\
+Early stopping within a split & no & yes & no \\
+Reported test score of the chosen model & no & no & yes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The additive imputation is fitted on the log without cross-fitting, so the same log supplies $\hat Y$ and the
+training data. The DRGP prior of Section~\ref{sec:drgp} is cross-fitted over ten folds before its
+coefficients are fitted. Test scores are computed after every epoch and stored, but no choice reads them.
+The sensitivity analysis of the results reads them only to measure what selection on test data would
+change, and it does not report such a selection as a method.
+
+\paragraph{The Coat exception.}
+The shipped Coat propensities were estimated by the dataset authors from a uniformly collected
+sample~\citep{schnabel2016}. That sample is also the source of our validation and test data, so uniform
+data reach a training input on Coat, indirectly. Every propensity-based row on Coat uses these
+propensities: DR-LightGCN, NAVIP, DR-JL, MRDR, DR adjacency, DRUP and the prior rows. To check the effect
+on the prior rows, we refitted them with propensities estimated from the log by the logistic model of
+Section~\ref{sec:prior}. Table~\ref{tab:T10} gives the results. Relative to their no-prior backbones, the
+prior gains are $+19.44\times10^{-3}$ [18.66] for iALS-p and $+33.62\times10^{-3}$ [16.72] for LightGCN-p
+with estimated propensities. With the shipped propensities they are $+16.82\times10^{-3}$ [18.04] and
+$+31.98\times10^{-3}$ [20.65]. The paired differences between the two propensity inputs are
+$+2.63\times10^{-3}$ [5.27] for iALS-p and $+1.64\times10^{-3}$ [10.30] for LightGCN-p, with
+$p_\mathrm{Holm}=1.000$ in both cases. The values in brackets are 95\% half-widths. The stored
+no-prior runs of iALS and LightGCN serve as the reference for both settings, because neither reads the
+propensities in its loss. The estimated-propensity refit therefore does not remove the Coat prior gain. The check changes only the
+propensity input. It does not test the assumption that exposure is independent of the outcome given the
+covariates, which the closed-form posterior of the method requires.
+
+\subsection{Splits}\label{sec:splits}
+
+On Coat, the split is made within each user: 30\% of each user's candidate items go to validation and the
+rest go to test. On Yahoo!\,R3, KuaiRand-Pure and KuaiRec, the split is made over users: 30\% of the test
+users go to validation, and no user is in both parts of a split. Each split is a function of its seed.
+Coat uses ten splits (seeds 0 to 9) and the other datasets use five (seeds 0 to 4). On Yahoo!\,R3, a
+fixed random 5\% of the users (270) is excluded from validation and testing.
+
+A user is a test user of a split only if the user has a test entry in that split. A user can fall in the
+validation part of every split, so the number of test users in the files of the final method is 225,
+2{,}310, 8{,}321 and 1{,}410 on Coat, Yahoo!\,R3, KuaiRand-Pure and KuaiRec. These are slightly below the
+evaluated-user counts of Table~\ref{tab:datasets}, and equal to them on Coat.
+
+Candidates are ranked for each user within the part being scored, and users with no positive candidate in
+that part are skipped. We rank all candidates and do not sample negatives, because sampled metrics do not
+agree with the full ranking metric~\citep{krichene2020sampled}. The metric is nDCG@5 on Coat and
+Yahoo!\,R3, nDCG@10 on KuaiRand and nDCG@20 on KuaiRec. Tables report the mean over splits and the standard
+deviation over splits with $\mathrm{ddof}=0$. The ensemble stage of Section~\ref{sec:ensemble} asserts, for
+every split it reads, that validation and test users are disjoint (on Yahoo!\,R3, KuaiRand and KuaiRec) or
+that validation and test items are disjoint for each user (on Coat).
+
+\subsection{Training and per-split selection}\label{sec:selection}
+
+Each configuration is trained once on the log, and the same trained model is scored on every split. The
+splits therefore share training and differ only in selection. After each epoch, the model is scored on the
+validation and test parts of every split. Each split keeps the (configuration, epoch) pair with the highest
+validation nDCG, and the first maximum wins a tie. A split stops when its validation score has not improved
+for the patience period: five epochs on Coat and Yahoo!\,R3, and three epochs on KuaiRand and KuaiRec. The
+shared run ends when every split has stopped or the epoch limit is reached. Once a split has stopped, its
+selection is fixed. Later epochs are stored in the banks but cannot be chosen.
+
+The gradient-trained models use epoch limits of 100 (Coat), 60 (Yahoo!\,R3), 40 (KuaiRand) and 30 (KuaiRec).
+Batch sizes are 256, 1{,}024, 8{,}192 and 32{,}768. Within a dataset, all methods share the epoch limit,
+batch size and patience, except AdvInfoNCE on KuaiRec, which uses batch size 4{,}096. On KuaiRec, each
+training epoch is capped at 2{,}000{,}000 pairs.
+
+Three further quantities are computed from the same banks for the sensitivity analysis. Each is defined on the
+rows that the stopping rule of its split allows to be chosen.
+\begin{itemize}
+\item The per-split test oracle is the largest test value of a split over all configurations and epochs.
+It chooses on test data.
+\item The configuration-level oracle is the configuration whose mean test value, at its own
+validation-selected epoch, is largest. It also chooses on test data.
+\item The expected maximum of the validation-selected test value over $k$ configurations is computed as a
+function of $k$, and the share of 1{,}000 random subgrids of size $k_{\min}$ in which the sign of a primary
+comparison flips is reported. Here $k_{\min}$ is the smaller of the two grids of the comparison.
+\end{itemize}
+The first two are diagnostics. They are never reported as the result of a method.
+
+\subsection{Reconciliation of the stored results}\label{sec:reconcile}
+
+Before the analysis, the selection of each (file, method) pair was replayed from its stored bank. The replay applies the training-time rule of
+Section~\ref{sec:selection}, including the patience value recorded in the bank, and its mean test score is
+compared with the stored mean. Of the 154 (file, method) pairs in the reconciliation output
+(\path{results/v6/reconcile.txt}), 151 agree within 0.002 in nDCG. The three that do not agree are
+DR-LightGCN on KuaiRec (gap $+0.0033$), DR-LightGCN on Yahoo!\,R3 ($+0.0058$) and MACR on Yahoo!\,R3
+($+0.0060$). All three are in two unsplit legacy files, \path{results/v3/learned_kuairec_pop.json} and
+\path{results/v3/learned_yahoo_pop.json}, which the analysis does not use. Their banks do not record the
+patience value, and the stored selections are reproduced only under patience values of 3 (KuaiRec) and 5
+(Yahoo!\,R3). Every sensitivity number in the results is reported relative to the reconciled selection.
+
+\subsection{Seeds}\label{sec:seeds}
+
+Each split's selected configuration is retrained with seeds 1, 2 and 3. Each split re-selects its epoch on
+its own validation part, and the configuration is not changed. The retrained final method is compared with
+the two baselines that had the highest main-run test means in each dataset: iALS and DR-LightGCN on Coat,
+r-AdjNorm and LightGCN on Yahoo!\,R3 and KuaiRand, and DR-JL and MRDR on KuaiRec. The baselines are retrained
+in the same way. Because these two baselines were chosen on test data, the seed comparisons are descriptive,
+and the Holm correction runs over the two tests of each dataset. DRUP is deterministic and is not retrained.
+The seed-0 values in the tables are the main-run values.
+
+Seeds 1 to 3 were not run for the Coat prior rows (iALS-p and LightGCN-p). Their Coat values come from
+seed 0 only. The result files also contain re-runs of split 0 with seeds 100 to 102, which are stored
+separately. These runs are not used in any table.
+
+\subsection{Statistical tests}\label{sec:stats}
+
+Differences are computed per user. For each user, the test score is averaged over the splits in which the
+user is a test user. For a comparison $A-B$, let $d_u$ be the per-user difference for user $u$. The mean
+$\bar d$ over users is the reported difference, and a paired $t$ test over users gives the two-sided $p$-value
+and a 95\% half-width. Differences are reported as $\times10^{-3}$ with the half-width in brackets. The
+reported difference is not the difference of the two table means. The two can have opposite signs. For
+example, on Coat the difference of the table means of DR-LightGCN and LightGCN is $+4.1\times10^{-3}$, while
+the mean per-user difference is $-0.65\times10^{-3}$ [30.16]. The per-user difference is the statistic used
+throughout.
+
+A difference is called significant only when its Holm-adjusted $p$ is below 0.05. The families are as follows.
+\begin{description}
+\item[Primary family, per dataset.] Four comparisons, P1 to P4, are defined in code from the stored
+results. P1 and P4 choose their third-party debiaser and trained comparator, respectively, by mean
+validation score, and never by test score.
+  \begin{itemize}
+  \item P1: the third-party debiaser with the highest mean validation score on the dataset, against LightGCN.
+  \item P2: each simple prior against its backbone, that is iALS-p against iALS and LightGCN-p against
+  LightGCN, where both exist on the dataset.
+  \item P3: the best refinement against the simple prior of the same learner. On Coat this gives two
+  comparisons, the QP-LightGCN family against LightGCN-p and DR-iALS against iALS-p. On KuaiRec it gives the
+  QP-LightGCN family against LightGCN-p.
+  \item P4: DRUP against the trained model with the highest mean validation score. This is computed on
+  KuaiRec only.
+  \end{itemize}
+  The primary families contain five comparisons on Coat and KuaiRec and two on Yahoo!\,R3 and KuaiRand.
+\item[Walk-correction family.] DRUP against DR adjacency, one comparison per dataset.
+\item[Refinement families.] Up to three families per dataset. The first holds each refinement against the simple
+prior of the same learner. The second, on Coat only, holds DR-iALS against iALS-p. The third holds the shuffled
+and popularity controls against LightGCN, on the datasets where those controls were run.
+\item[Backbone family.] Every method against LightGCN, reported in the appendix.
+\end{description}
+
+The Nadeau and Bengio correction~\citep{nadeau2003} is applied as a second test to the split means. With $J$
+splits, split-level differences $e_j$, and $\rho=0.3$ the validation fraction, the variance is
+$\hat\sigma^2 = s_e^2\,(1/J+(1-\rho)/\rho)$, where $s_e^2$ is the sample variance of the $e_j$. The statistic
+$\bar e/\hat\sigma$ is compared with a $t$ distribution with $J-1$ degrees of freedom. Holm adjustment is
+applied to these second $p$-values within the same families.
+
+Equivalence is assessed with two one-sided tests at margin $\delta$, each at level 0.05. The two null
+hypotheses are $\bar d\le-\delta$ and $\bar d\ge\delta$. The reported TOST $p$-value is the larger of the two
+one-sided $p$-values, and equivalence within $\pm\delta$ is claimed when it is below 0.05. The margins are
+$\pm0.010$ nDCG@5 on Coat and Yahoo!\,R3, and $\pm0.003$ nDCG on KuaiRand (nDCG@10) and KuaiRec (nDCG@20).
+They were stated in the analysis plan and are provisional. The planned rationale is half of the smallest
+gain that the cited graph-debiasing papers report on these datasets. That check against the papers is not
+complete, and the margins will be revised if it changes them. A result inside a margin is stated as no difference larger than the
+margin, and never as equality.
+
+The minimum detectable effect at 80\% power and two-sided level 0.05 is
+$\mathrm{MDE}=(t_{0.975,\,n-1}+t_{0.80,\,n-1})\,s_d/\sqrt{n}$, where $n$ is the number of users, $s_d$ is the
+standard deviation of the per-user differences, and $t_{q,\nu}$ is the $q$ quantile of a $t$ distribution with
+$\nu$ degrees of freedom. For the primary comparisons in the analysis, the MDE is $11.8$ to $43.1\times10^{-3}$
+on Coat, $4.7$ to $5.6\times10^{-3}$ on Yahoo!\,R3, $1.5$ to $1.9\times10^{-3}$ on KuaiRand and $0.7$ to
+$4.9\times10^{-3}$ on KuaiRec. The Coat values are large because the Coat analysis has 225 evaluated users,
+and an MDE of this size bounds what the Coat data can show.
+
+Each user contributes one difference per comparison, which is the mean over the splits in which the user is a
+test user. The splits share users and candidates, so the paired $t$ test over overlapping splits can be
+anti-conservative~\citep{nadeau2003}. For this reason the Nadeau and Bengio column is reported beside it for the
+primary comparisons. The tests treat the training log, the fitted nuisances and the trained models as fixed.

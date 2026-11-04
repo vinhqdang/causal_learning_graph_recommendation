@@ -1,0 +1,136 @@
+\section{Related work}\label{sec:related}
+
+\subsection{Graph collaborative filtering and graph debiasing}\label{sec:related-graph}
+
+LightGCN \citep{he2020lightgcn} is the backbone used in our experiments. Other graph
+convolutional recommenders include NGCF \citep{wang2019ngcf} and UltraGCN
+\citep{mao2021ultragcn}, and contrastive graph variants include SGL \citep{wu2021sgl} and
+SimGCL \citep{yu2022simgcl}. Linear and closed-form models include EASE \citep{steck2019ease},
+GF-CF \citep{shen2021gfcf} and BSPM \citep{choi2023bspm}. Weighted matrix factorisation for
+implicit feedback, iALS \citep{hu2008ials}, is a standard baseline, and \citet{rendle2022ials}
+revisit its tuning on item recommendation benchmarks. \citet{wu2022gnnsurvey} survey graph
+neural recommenders. These models fit or propagate over the logged graph and do not model
+which pairs were exposed.
+
+Graph models have also been debiased. NAVIP \citep{kim2022navip} weights neighbour
+aggregation by inverse propensities. r-AdjNorm \citep{zhao2022radjnorm} tunes the strength of
+adjacency normalisation to trade accuracy against novelty, and \citet{chen2024gcnpop} analyse
+how graph convolutions amplify popularity bias. APDA \citep{zhou2023apda} and CAGED
+\citep{que2025caged} learn aggregation weights, and DPAA \citep{dpaa2026}, an arXiv preprint,
+re-weights message passing. AdvDrop \citep{zhang2024advdrop} learns an adversarial edge dropout
+on the interaction graph and reports IPS and DR baselines on Coat, Yahoo! R3 and KuaiRec. PPD
+\citep{islam2026ppd} removes a popularity direction from pre-trained LightGCN embeddings
+without retraining, and is evaluated on KuaiRec, Coat and Yahoo! R3. DR-GNN
+\citep{wang2024drgnn} applies distributionally robust optimisation over graph neighbourhoods;
+its ``DR'' stands for distributionally robust, not doubly robust. The popularity-debiasing
+methods MACR \citep{wei2021macr} and PDA \citep{zhang2021pda} are used as baselines in our
+study. Most of these methods act on aggregation, adjacency, embeddings or a robust objective,
+rather than on the negatives of the pairwise loss.
+
+\subsection{Propensity, doubly robust and negative-weighting methods}\label{sec:related-dr}
+
+Ratings and implicit feedback are missing not at random \citep{marlin2009collaborative}, and
+surveys organise the resulting biases and the causal methods that address them
+\citep{chen2023bias,gao2024causalsurvey}. Propensity methods re-weight the loss by inverse
+propensities or self-normalised estimators \citep{schnabel2016,swaminathan2015snips,saito2020unbiased}.
+\citet{steck2010mnar} showed that missing ratings carry information, proposed test measures
+that can be estimated without bias when ratings are missing not at random, and derived training
+objectives that account for the missing entries. Doubly robust learning adds an imputation model
+to the inverse-propensity estimator \citep{wang2019drjl}, and later variants reduce its bias or
+variance \citep{guo2021mrdr,dai2022gdr,li2023stabledr}. Information-theoretic counterfactual
+learning from missing-not-at-random feedback is studied by \citet{wang2020cvib}.
+
+Some debiasing methods use a small uniform sample for training. AutoDebias
+\citep{chen2021autodebias} learns sample weights and an imputation function by bi-level
+meta-learning on a small uniform sample. CausE \citep{bonner2018cause} embeds a small randomised
+sample alongside the logged one, and KDCRec \citep{liu2020kdcrec} distils from a model fitted on
+uniform data into a model trained on the biased log.
+
+The methods closest to our negative weighting are those for exposure and false negatives. ExpoMF
+\citep{liang2016exposure} infers an exposure posterior for unclicked items inside a matrix
+factorisation model. Rel-MF \citep{saito2020unbiased} re-weights observations by propensity, and
+unbiased pairwise learning \citep{saito2020ictir} applies the same idea to pairwise objectives.
+SRNS \citep{ding2020srns} identifies likely false negatives during sampling, and debiased
+contrastive learning \citep{chuang2020dcl} corrects negatives that are in fact positives. In
+contrastive collaborative filtering, the BC loss \citep{zhang2022bc} adds a margin that depends
+on the popularity-bias degree of each interaction, and AdvInfoNCE \citep{zhang2023advinfonce}
+assigns each negative an adversarially learned hardness weight. Correct-and-Weight
+\citep{yin2026cw}, an arXiv preprint, weights negatives against false negatives and is tested
+with graph backbones on random splits. Exposure-aware negative sampling for graph recommenders
+uses in-community popularity as a proxy for exposure \citep{chen2026icpns}, also an arXiv
+preprint. The original formulations of ExpoMF, SRNS, debiased contrastive learning and
+AdvInfoNCE do not combine a propensity with an imputation of the kind a doubly robust estimator
+provides. IPS-weighted BPR on LightGCN has been studied with simulated propensities
+\citep{raja2025ipsbpr}.
+
+The offset used by our candidate models is a fixed, standardised imputation logit added to the
+score. Adding a fixed offset is a familiar device. In long-tail classification, logit adjustment
+adds a class prior to the logits \citep{menon2021logit}. The offset used here differs in one
+respect: it is a debiased estimate of item-level preference, obtained from an
+inverse-propensity-weighted imputation, and not a class prior.
+
+\subsection{Evaluation and reproducibility}\label{sec:related-eval}
+
+Several studies have shown that comparisons between recommenders depend on the protocol.
+\citet{dacrema2019progress} re-ran recent neural recommenders against simple baselines and found
+that several did not outperform well-tuned versions of those baselines. \citet{rendle2019baselines}
+argue that baselines in published comparisons are often under-tuned, so that a reported gain
+depends on the effort spent on each method. \citet{rendle2022ials} show that iALS, when tuned
+carefully, is competitive on common item recommendation benchmarks. \citet{anelli2023myth}
+re-examine the reported gains of graph collaborative filtering against tuned baselines.
+
+Several parts of the protocol can change a conclusion. Sampled and exact metrics can disagree
+\citep{krichene2020sampled}. Tests over overlapping resamples are anti-conservative, and a
+corrected resampled t-test is needed for them \citep{nadeau2003}. Reporting the expected
+validation performance as a function of the number of configurations tried makes the tuning
+budget visible \citep{dodge2019showyourwork}. Comparisons over several methods and datasets also
+need a multiple-testing correction, for which we use the step-down procedure of
+\citet{holm1979}.
+
+\subsection{Gap and positioning}\label{sec:related-gap}
+
+The contribution of this paper is evidence rather than a new method. The graph debiasers and the
+candidate models of Section~4 are evaluated under one protocol, and the study measures how far
+each conclusion depends on evaluation choices. Table~\ref{tab:positioning} summarises how the
+related studies use uniformly collected data and which benchmarks they use. The uses differ.
+Some studies train on uniform data (AutoDebias, CausE, ConAlign), some select configurations on
+part of it (CDR, PPD, ConAlign), and some keep it out of both training and selection (DCE, BISER).
+
+\begin{table}[t]
+\centering
+\caption{Positioning of related studies by their protocol. Entries follow the published
+protocols as read in the full texts; ``not stated'' marks a point that the text does not
+settle. Uniform data are the uniformly collected or randomised samples of the benchmark.}
+\label{tab:positioning}
+\footnotesize
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{p{2.6cm}p{1.9cm}p{2.5cm}p{2.0cm}p{2.6cm}p{2.4cm}}
+\toprule
+Study & Graph backbone & Propensity or imputation & Uniform data in training & Uniform data for validation or selection & Unbiased test benchmarks \\
+\midrule
+AutoDebias \citep{chen2021autodebias} & no (matrix factorisation) & learned weights and imputation & yes, small sample & yes, small sample & Coat, Yahoo! R3 \\
+CausE \citep{bonner2018cause} & no (matrix factorisation) & none & yes, randomised sample & no, validation from logged policy & MovieLens, Netflix \\
+CDR \citep{song2023cdr} & no (matrix factorisation) & doubly robust family & no & yes, part of unbiased data & Coat, Yahoo! R3, KuaiRand \\
+DCE \citep{kweon2024dce} & no (MF or NCF) & doubly robust loss & no & no, held out from biased training data & Coat, Yahoo! R3, KuaiRec \\
+BISER \citep{lee2022biser} & no & self-inverse propensity & no & no, held out from biased training data & Coat, Yahoo! R3 \\
+ConAlign \citep{zhang2026conalign} & no (dual tower) & MF-IPS and MF-DR baselines & yes & yes & Coat, Yahoo! R3, KuaiRand-Pure \\
+NAVIP \citep{kim2022navip} & yes & inverse propensity on edges & no & pseudo-unbiased popularity sample & Yahoo! R3 and pseudo-unbiased sets \\
+AdvDrop \citep{zhang2024advdrop} & yes & IPS and DR baselines only & no, for its own method & not stated & Coat, Yahoo!, KuaiRec \\
+PPD \citep{islam2026ppd} & yes, post hoc & none & no & yes on Coat and KuaiRec; biased sample on Yahoo! R3 & Coat, Yahoo! R3, KuaiRec \\
+DPAA \citep{dpaa2026} & yes & none & no & validation present, construction not confirmed & Coat, Yahoo! R3, KuaiRec \\
+DR-GNN \citep{wang2024drgnn} & yes & none & not stated & not stated & Coat, Yahoo \\
+\midrule
+This study & yes & IPS-fitted imputation and propensity & no, except Coat shipped propensities & yes & Coat, Yahoo! R3, KuaiRand-Pure, KuaiRec \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+A search completed in October 2026 found no graph recommender that uses a posterior probability,
+built from a propensity and an imputation, to weight sampled negatives, and none that adds a
+debiased imputation to a graph model's score. It also found no graph study that uses
+KuaiRand-Pure. The search used general web sources and cannot be exhaustive. Coat, Yahoo! R3 and
+KuaiRec are already used for graph debiasing by AdvDrop, PPD and DPAA. We therefore do not claim
+that the posterior weighting or the imputation offset is new. The claim we make is narrower: we
+found no study that evaluates graph debiasers on all four benchmarks under one protocol, with
+uniform data excluded from training, and with an analysis of how the budget and the selection
+rule change the conclusions.
