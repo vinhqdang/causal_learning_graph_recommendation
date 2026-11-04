@@ -1,7 +1,7 @@
 \begin{table}[t]
 \centering
 \footnotesize
-\caption{Coat iALS with the wider grid (X4) against the stored iALS and iALS-p.}
+\caption{Coat iALS with the wider grid against the stored iALS and iALS-p.}
 \label{tab:T11}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{llrrrrrrl}
@@ -10,7 +10,7 @@ Model & Grid & Cfg & nDCG (mean $\pm$ sd) & $\Delta$ vs iALS $\times10^{3}$ [CI]
 \midrule
 iALS (stored) & alpha \{3,10,30\} x reg \{1,10,100,1000\} x dim \{32,64\} & 24 & 0.5812 $\pm$ 0.0107 & ref. & -- & -- & -- & alpha 30:10; reg 100:10 \\
 iALS-wide (v5 grid) & alpha \{10,30,100\} x reg \{10,100,300\} x dim \{32,64\} & 18 & 0.5869 $\pm$ 0.0124 & -- & -- & -- & -- & alpha 30:1, 100:9; reg 100:4, 300:6 \\
-iALS-wide2 (X4 grid) & alpha \{30,100,300,1000\} x reg \{10,100,300,1000\} x dim \{32,64\} & 32 & 0.5922 $\pm$ 0.0150 & +12.92 [8.01] & 0.003 & -3.90 [15.99] & 0.631 & alpha 30:1, 100:4, 300:1, 1000:4; reg 100:2, 300:3, 1000:5 \\
+iALS-wide2 (wider grid) & alpha \{30,100,300,1000\} x reg \{10,100,300,1000\} x dim \{32,64\} & 32 & 0.5922 $\pm$ 0.0150 & +12.92 [8.01] & 0.003 & -3.90 [15.99] & 0.631 & alpha 30:1, 100:4, 300:1, 1000:4; reg 100:2, 300:3, 1000:5 \\
 iALS-p add (stored) & alpha \{10,30,100\} x reg \{10,100,300\} x pbeta \{0.1,0.2,0.3,0.5,1\} x dim \{32,64\} & 90 & 0.5984 $\pm$ 0.0128 & -- & -- & -- & -- & alpha 30:2, 100:8; reg 100:4, 300:6 \\
 \bottomrule
 \end{tabular}}

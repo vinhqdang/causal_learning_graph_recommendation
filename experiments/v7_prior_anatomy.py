@@ -93,7 +93,7 @@ X3 = {"coat": ((V4 + "learned_coat_prior_bpr.json", "LightGCN-p"), (V3 + "learne
 # X4: Coat iALS grids (the grids of run_learned.py; the expected configuration counts are checked)
 X4 = [("iALS (stored)", V3 + "learned_coat_given.json", "iALS", "alpha {3,10,30} x reg {1,10,100,1000} x dim {32,64}", 24),
       ("iALS-wide (v5 grid)", V5 + "learned_coat_ialswide.json", "iALS-wide", "alpha {10,30,100} x reg {10,100,300} x dim {32,64}", 18),
-      ("iALS-wide2 (X4 grid)", V6 + "learned_coat_ialswide2.json", "iALS-wide2", "alpha {30,100,300,1000} x reg {10,100,300,1000} x dim {32,64}", 32),
+      ("iALS-wide2 (wider grid)", V6 + "learned_coat_ialswide2.json", "iALS-wide2", "alpha {30,100,300,1000} x reg {10,100,300,1000} x dim {32,64}", 32),
       ("iALS-p add (stored)", V5 + "learned_coat_add_ials.json", "iALS-p", "alpha {10,30,100} x reg {10,100,300} x pbeta {0.1,0.2,0.3,0.5,1} x dim {32,64}", 90)]
 
 
@@ -292,7 +292,7 @@ def x4(rep):
         st[label] = r
         if r is not None and r["n_configs"] != n_exp:
             rep.note(f"X4 {label}: {r['n_configs']} configurations stored, expected {n_exp} from the grid")
-    wide2, base, pp = st["iALS-wide2 (X4 grid)"], st["iALS (stored)"], st["iALS-p add (stored)"]
+    wide2, base, pp = st["iALS-wide2 (wider grid)"], st["iALS (stored)"], st["iALS-p add (stored)"]
     cmp_base = compare("coat", wide2, base, rep)
     cmp_pp = compare("coat", wide2, pp, rep)
     holm_family([cmp_base, cmp_pp])
@@ -412,7 +412,7 @@ def main():
         "Dataset & Learner / prior & nDCG (mean $\\pm$ sd) & $\\Delta$ vs no prior $\\times10^{3}$ [CI] & $p_\\mathrm{Holm}$ & "
         "$\\Delta$ vs add $\\times10^{3}$ [CI] & $p_\\mathrm{Holm}$",
         body9,
-        "Prior anatomy (X1). Test nDCG of iALS-p and LightGCN-p under four additive-imputation variants, and of the "
+        "Prior anatomy. Test nDCG of iALS-p and LightGCN-p under four additive-imputation variants, and of the "
         "prior alone on all four datasets.", "tab:T9",
         "$\\Delta$ = per-user paired difference (mean over splits), $\\times10^{3}$, [half-width of the 95\\% CI]. "
         "No-prior references: stored iALS and LightGCN. The add row is the IPS-fitted additive prior. "
@@ -435,7 +435,7 @@ def main():
         "Method & Propensities & nDCG (mean $\\pm$ sd) & $\\Delta$ vs no-prior $\\times10^{3}$ [CI] & $p_\\mathrm{Holm}$ & "
         "Estimated $-$ shipped $\\times10^{3}$ [CI] & $p_\\mathrm{Holm}$",
         body10,
-        "Coat with estimated propensities (X2): --prop pop versus the shipped propensities.", "tab:T10",
+        "Coat with estimated propensities versus the shipped propensities.", "tab:T10",
         "The no-prior reference of each learner is the stored run. Plain iALS and LightGCN do not read the propensities "
         "(only NAVIP does), so the shipped no-prior run is the reference for the estimated rows. "
         "LightGCN with estimated propensities was not run. $p_\\mathrm{Holm}$ over the tests of this table.")
@@ -447,7 +447,7 @@ def main():
         r = st4[label]
         if r is None:
             continue
-        if label == "iALS-wide2 (X4 grid)":
+        if label == "iALS-wide2 (wider grid)":
             d1 = f"{fmt_d(c_base)} & {fmt_p(c_base, True)} & {fmt_d(c_pp)} & {fmt_p(c_pp, True)}"
         elif label == "iALS (stored)":
             d1 = "ref. & -- & -- & --"
@@ -460,7 +460,7 @@ def main():
         "Model & Grid & Cfg & nDCG (mean $\\pm$ sd) & $\\Delta$ vs iALS $\\times10^{3}$ [CI] & $p_\\mathrm{Holm}$ & "
         "$\\Delta$ vs iALS-p $\\times10^{3}$ [CI] & $p_\\mathrm{Holm}$ & Selected values (number of splits)",
         body11,
-        "Coat iALS with the wider grid (X4) against the stored iALS and iALS-p.", "tab:T11",
+        "Coat iALS with the wider grid against the stored iALS and iALS-p.", "tab:T11",
         "$\\Delta$ = per-user paired difference (mean over the 10 splits), $\\times10^{3}$, [half-width of the 95\\% CI]. "
         "$p_\\mathrm{Holm}$ over the two comparisons of iALS-wide2. Selected values are counted over the 10 splits.")
     write_tex("T11_wider_ials_grid.tex", t11, rep)

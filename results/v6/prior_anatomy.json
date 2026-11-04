@@ -1110,7 +1110,7 @@
     "grid": "alpha {10,30,100} x reg {10,100,300} x dim {32,64}"
    },
    {
-    "model": "iALS-wide2 (X4 grid)",
+    "model": "iALS-wide2 (wider grid)",
     "n_configs": 32,
     "nDCG_mean": 0.5921678012233003,
     "nDCG_sd": 0.015035643937004208,
@@ -1125,7 +1125,7 @@
    }
   ],
   "wide2_minus_iALS": {
-   "A": "X4 iALS-wide2 (X4 grid)",
+   "A": "X4 iALS-wide2 (wider grid)",
    "B": "X4 iALS (stored)",
    "diff": 0.012918837469474802,
    "half": 0.008014776142741297,
@@ -1135,7 +1135,7 @@
    "p_holm": 0.0034024268022958175
   },
   "wide2_minus_iALS-p": {
-   "A": "X4 iALS-wide2 (X4 grid)",
+   "A": "X4 iALS-wide2 (wider grid)",
    "B": "X4 iALS-p add (stored)",
    "diff": -0.0038983307491564584,
    "half": 0.01599033157884099,

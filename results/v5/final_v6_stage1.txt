@@ -28,12 +28,12 @@ Yahoo (ndcg@5): DRGP jobs found 0/4 (file present and method done)
 
 KuaiRand (ndcg@10): DRGP jobs found 0/4 (file present and method done)
 
-KuaiRec (ndcg@20): DRGP jobs found 4/5 (file present and method done)
+KuaiRec (ndcg@20): DRGP jobs found 5/5 (file present and method done)
   final (DRGP family, per-split validation choice): mean 0.6318  chosen pbeta ['1.0', 'None']
-  DRGP family: 12 configurations in 4 job(s); selection pool per split: 4 candidate results
+  DRGP family: 57 configurations in 5 job(s); selection pool per split: 5 candidate results
   backbone prior  : mean 0.6326  (2 job file(s), 2 configurations)
+  backbone iALS-p : mean 0.6214  (1 job file(s), 45 configurations)
   backbone LGN    : mean 0.6311  (2 job file(s), 10 configurations)
-  missing: results/v5/learned_kuairec_add_ials.json [iALS-p]
   vs baseline                 mean  cfgs  diff(e-3)   +-CI  p_Holm
   DRUP                      0.6378   384      -5.58   1.90  0.0000
   DR-JL                     0.6332     6      -1.20   2.20  0.5668
@@ -46,5 +46,7 @@ KuaiRec (ndcg@20): DRGP jobs found 4/5 (file present and method done)
   r-AdjNorm                 0.6083    12     +24.03   3.14  0.0000
   AdvInfoNCE-LGN            0.5776     8     +52.68   6.59  0.0000
   QP-LightGCN (v2 final)    0.6285   120      +3.36   1.25  0.0000
+  iALS + additive prior     0.6278    45      +4.30   1.71  0.0000
   backbone prior   vs same baselines (unadjusted): DRUP -4.8e-3 p=0.000, DR-JL -0.4e-3 p=0.726, MRDR -0.2e-3 p=0.866 ...
+  backbone iALS-p  vs same baselines (unadjusted): DRUP -16.2e-3 p=0.000, DR-JL -11.8e-3 p=0.000, MRDR -11.6e-3 p=0.000 ...
   backbone LGN     vs same baselines (unadjusted): DRUP -6.3e-3 p=0.000, DR-JL -1.9e-3 p=0.084, MRDR -1.7e-3 p=0.121 ...

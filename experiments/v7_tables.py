@@ -79,8 +79,8 @@ def t4(M):
                  "Main benchmark: mean test score over splits (sd over splits, ddof 0) and configuration count per "
                  "method. Metric: nDCG@5 (Coat, Yahoo), nDCG@10 (KuaiRand), nDCG@20 (KuaiRec).",
                  "tab:T4",
-                 note="Pooled rows (QP family) pool the configurations of their jobs; a cell marked -- is not yet "
-                      "available (its inputs are not in results/ yet).")
+                 note="Pooled rows (QP family) pool the configurations of their jobs; a cell marked -- has no run "
+                      "for that method and dataset.")
 
 
 def t5(tests, sens):
@@ -99,10 +99,12 @@ def t5(tests, sens):
     return table("llllrrrrlrl", "Dataset & Fam. & Comparison ($A-B$) & Diff.\\ $\\times10^{3}$ [95\\% CI] & $p$ & "
                  "$p_\\mathrm{Holm}$ & $p_\\mathrm{NB,Holm}$ & MDE $\\times10^{3}$ & TOST at margin & Matched-$k$ diff $\\times10^{3}$ & "
                  "Seeds 1--3 diff $\\times10^{3}$",
-                 rows, "Primary comparisons P1--P4 (Section 2.3): paired per-user differences, tests, MDE, "
-                       "TOST at the margins of Section 2.3, and the matched-budget difference at $k=k_\\mathrm{min}$.",
-                 "tab:T5", note="Margins are the provisional values of Section 2.3 (TODO-L2 not yet closed). "
-                                "Seeds column: only comparisons whose baselines are in results/v4/seeds_*.json.")
+                 rows, "Primary comparisons P1--P4 (Section~\\ref{sec:protocol}): paired per-user differences, tests, "
+                       "MDE, TOST at the pre-specified margins (Section~\\ref{sec:protocol}), and the matched-budget "
+                       "difference at $k=k_\\mathrm{min}$.",
+                 "tab:T5", note="Margins are the pre-specified margins (Section~\\ref{sec:protocol}) and are provisional "
+                                "(Section~\\ref{sec:stats}). Seeds column: only comparisons whose baselines were "
+                                "retrained with seeds 1--3 (Section~\\ref{sec:seeds}) are shown.")
 
 
 def t6(tests, M):
@@ -122,7 +124,7 @@ def t6(tests, M):
                  rows, "Refinement family against the simple debiased prior of the same learner, and the shuffled and "
                        "popularity controls against the backbone (T6).", "tab:T6",
                  note="Holm within each family and dataset. Rows are missing where the simple prior has not been run "
-                      "(X1--X3).")
+                      "for that dataset.")
 
 
 def t7(tests, sens):
@@ -158,7 +160,7 @@ def t7(tests, sens):
     return table("lllllllrrlll",
                  "Dataset & Fam. & Comparison & Main (Holm) & Test oracle & Config.\\ oracle & Matched $k$ & $k_\\mathrm{min}$ & "
                  "Flip share & Seeds & NB & Alt.\\ metric",
-                 rows, "Sensitivity of the primary conclusions to evaluation choices (A1, A2). A check mark means the sign "
+                 rows, "Sensitivity of the primary conclusions to evaluation choices. A check mark means the sign "
                        "of the difference (and, for Main, significance at $p_\\mathrm{Holm}<0.05$) survives the choice; "
                        "the value is the difference $\\times10^{3}$ under that choice. Main: per-user difference. Oracle, configuration-oracle and matched-budget columns: split-mean difference, compared in sign with the split-mean validation-selected difference.",
                  "tab:T7",
@@ -170,6 +172,7 @@ def t7(tests, sens):
 def t8(tests):
     path = "results/v3/matched_config_real.txt"
     rows = []
+    kr_note = None
     if exists(path):
         cur = None
         for line in open(path):
@@ -184,12 +187,15 @@ def t8(tests):
     for ds in ["kuairec"]:
         w = next((r for r in tests.get(ds, {}).get("families", {}).get("walk", [])), None)
         if w:
-            rows.append(f"{NAME[ds]} (DRUP $-$ DR, all splits) & -- & {1000 * w['diff']:+.2f} & "
-                        f"{w['p']:.3f} & {'equiv.' if w['equivalent'] else 'not equiv.'}")
+            # the KuaiRec row has no configuration grid and no split counts: its paired-test p-value and its
+            # equivalence verdict go in the note, not into the share or split-count columns
+            rows.append(f"{NAME[ds]} (DRUP $-$ DR, all splits) & -- & {1000 * w['diff']:+.2f} & -- & --")
+            kr_note = (f"KuaiRec row: paired test $p$={w['p']:.3f}; "
+                       f"{'equivalent' if w['equivalent'] else 'not equivalent'} at the pre-specified margin "
+                       f"(Section~\\ref{{sec:protocol}}).")
     return table("llrrl", "Dataset & $\\beta$ & Mean diff.\\ $\\times10^{3}$ & Share of configs $<0$ & Splits with mean $<0$",
-                 rows, "Walk correction at matched configurations (panel C), and KuaiRec DRUP minus DR (A2).", "tab:T8",
-                 note="Panels A (Monte-Carlo bias) and B (semi-synthetic nDCG) are not regenerated by the v7 "
-                      "scripts; their source files are not in the v7 pipeline.")
+                 rows, "Walk correction at matched configurations (Coat, Yahoo), and KuaiRec DRUP minus DR.", "tab:T8",
+                 note=kr_note if kr_note else None)
 
 
 def main():
