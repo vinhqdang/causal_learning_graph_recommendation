@@ -1,0 +1,166 @@
+R0 reconciliation of stored results with bank replay (experiments/v7_reconcile.py)
+gap threshold 0.002; replay candidates for patience: [None, 1, 2, 3, 5, 10]
+
+method-level table (replayed mean vs stored mean, metric of the bank)
+file                                       method           stored   replay       gap  patience-match  cause
+results/v3/learned_coat_given.json         MF               0.4780   0.4780  +0.00000  3,5,10          
+results/v3/learned_coat_given.json         IPS-MF           0.4713   0.4713  +0.00000  5               
+results/v3/learned_coat_given.json         DR-MF            0.5237   0.5237  +0.00000  5,10            
+results/v3/learned_coat_given.json         BPR-MF           0.5174   0.5174  +0.00000  5               
+results/v3/learned_coat_given.json         PDA              0.5181   0.5181  +0.00000  5               
+results/v3/learned_coat_given.json         LightGCN         0.5683   0.5683  +0.00000  none,2,3,5,10   
+results/v3/learned_coat_given.json         LightGCN-pt      0.5389   0.5389  +0.00000  none,5,10       
+results/v3/learned_coat_given.json         r-AdjNorm        0.5722   0.5722  +0.00000  none,2,3,5,10   
+results/v3/learned_coat_given.json         NAVIP            0.5664   0.5664  +0.00000  5               
+results/v3/learned_coat_given.json         DR-LightGCN      0.5724   0.5724  +0.00000  5               
+results/v3/learned_coat_given.json         DR-JL            0.4811   0.4811  +0.00000  5               
+results/v3/learned_coat_given.json         MRDR             0.4869   0.4869  +0.00000  5               
+results/v3/learned_coat_given.json         MACR             0.5418   0.5418  +0.00000  5               
+results/v3/learned_coat_given.json         SimGCL           0.5528   0.5528  +0.00000  5               
+results/v3/learned_coat_given.json         iALS             0.5812   0.5812  +0.00000  5               
+results/v3/learned_kuairand_pop.json       LightGCN-pt      0.4061   0.4061  +0.00000  none,2,3,5,10   
+results/v3/learned_kuairand_pop.json       LightGCN         0.4569   0.4569  +0.00000  3               
+results/v3/learned_kuairand_pop.json       r-AdjNorm        0.4590   0.4590  +0.00000  3               
+results/v3/learned_kuairand_pop.json       SimGCL           0.4196   0.4196  +0.00000  3,5             
+results/v3/learned_kuairand_pop.json       iALS             0.4528   0.4528  +0.00000  2,3             
+results/v3/learned_kuairand_pop.json       MF               0.3705   0.3705  +0.00000  none,1,2,3,5,10  
+results/v3/learned_kuairand_pop.json       DR-MF            0.3608   0.3608  +0.00000  3               
+results/v3/learned_kuairand_pop.json       BPR-MF           0.4475   0.4475  +0.00000  3               
+results/v3/learned_kuairand_pop.json       NAVIP            0.4565   0.4565  +0.00000  3               
+results/v3/learned_kuairand_pop.json       DR-JL            0.3759   0.3759  +0.00000  3               
+results/v3/learned_kuairand_pop.json       MACR             0.4311   0.4311  +0.00000  none,3,5,10     
+results/v3/learned_kuairec_pop.json        LightGCN-pt      0.6271   0.6271  +0.00000  none,2,3,5,10   
+results/v3/learned_kuairec_pop.json        SimGCL           0.5637   0.5637  +0.00000  none,1,2,3,5,10  
+results/v3/learned_kuairec_pop.json        DR-JL            0.6332   0.6343  +0.00115  2,3             
+results/v3/learned_kuairec_pop.json        MRDR             0.6328   0.6328  +0.00000  none,3,5,10     
+results/v3/learned_kuairec_pop.json        MACR             0.5816   0.5820  +0.00038  3               
+results/v3/learned_kuairec_pop.json        iALS             0.6133   0.6133  +0.00000  none,1,2,3,5,10  
+results/v3/learned_kuairec_pop.json        MF               0.6221   0.6221  +0.00000  none,2,3,5,10   
+results/v3/learned_kuairec_pop.json        IPS-MF           0.6252   0.6260  +0.00080  3,5             
+results/v3/learned_kuairec_pop.json        DR-MF            0.6219   0.6219  +0.00000  none,3,5,10     
+results/v3/learned_kuairec_pop.json        LightGCN         0.6085   0.6088  +0.00026  3               
+results/v3/learned_kuairec_pop.json        r-AdjNorm        0.6083   0.6083  +0.00000  none,3,5,10     
+results/v3/learned_kuairec_pop.json        NAVIP            0.6186   0.6186  +0.00000  none,1,2,3,5,10  
+results/v3/learned_kuairec_pop.json        DR-LightGCN      0.6212   0.6246  +0.00331  3               stored selections reproduced only with patience [3] (bank records None)
+results/v3/learned_kuairec_pop.json        BPR-MF           0.5963   0.5963  +0.00000  none,1,2,3,5,10  
+results/v3/learned_kuairec_pop.json        PDA              0.5815   0.5828  +0.00128  2,3             
+results/v3/learned_kuairec_pop_A.json      LightGCN-pt      0.6271   0.6271  +0.00000  none,2,3,5,10   
+results/v3/learned_kuairec_pop_A.json      SimGCL           0.5637   0.5637  +0.00000  none,1,2,3,5,10  
+results/v3/learned_kuairec_pop_A.json      DR-JL            0.6332   0.6332  +0.00000  2,3             
+results/v3/learned_kuairec_pop_A.json      MRDR             0.6328   0.6328  +0.00000  none,3,5,10     
+results/v3/learned_kuairec_pop_A.json      MACR             0.5816   0.5816  +0.00000  3               
+results/v3/learned_kuairec_pop_A.json      iALS             0.6133   0.6133  +0.00000  none,1,2,3,5,10  
+results/v3/learned_kuairec_pop_A.json      MF               0.6221   0.6221  +0.00000  none,2,3,5,10   
+results/v3/learned_kuairec_pop_A.json      IPS-MF           0.6252   0.6252  +0.00000  3,5             
+results/v3/learned_kuairec_pop_A.json      DR-MF            0.6219   0.6219  +0.00000  none,3,5,10     
+results/v3/learned_kuairec_pop_B.json      LightGCN         0.6085   0.6085  +0.00000  3               
+results/v3/learned_kuairec_pop_B.json      r-AdjNorm        0.6083   0.6083  +0.00000  none,3,5,10     
+results/v3/learned_kuairec_pop_B.json      NAVIP            0.6186   0.6186  +0.00000  none,1,2,3,5,10  
+results/v3/learned_kuairec_pop_B.json      DR-LightGCN      0.6212   0.6212  +0.00000  3               
+results/v3/learned_kuairec_pop_B.json      BPR-MF           0.5963   0.5963  +0.00000  none,1,2,3,5,10  
+results/v3/learned_kuairec_pop_B.json      PDA              0.5815   0.5815  +0.00000  2,3             
+results/v3/learned_yahoo_pop.json          r-AdjNorm        0.6742   0.6739  -0.00031  5               
+results/v3/learned_yahoo_pop.json          LightGCN         0.6708   0.6714  +0.00064  5               
+results/v3/learned_yahoo_pop.json          SimGCL           0.6348   0.6348  +0.00000  none,5,10       
+results/v3/learned_yahoo_pop.json          NAVIP            0.6701   0.6696  -0.00050  5               
+results/v3/learned_yahoo_pop.json          LightGCN-pt      0.5947   0.5947  +0.00000  none,5,10       
+results/v3/learned_yahoo_pop.json          DR-LightGCN      0.5528   0.5586  +0.00583  5               stored selections reproduced only with patience [5] (bank records None)
+results/v3/learned_yahoo_pop.json          iALS             0.6625   0.6625  +0.00000  none,3,5,10     
+results/v3/learned_yahoo_pop.json          MF               0.5087   0.5087  +0.00000  none,1,2,3,5,10  
+results/v3/learned_yahoo_pop.json          IPS-MF           0.5125   0.5125  +0.00000  none,1,2,3,5,10  
+results/v3/learned_yahoo_pop.json          DR-MF            0.5093   0.5101  +0.00080  5               
+results/v3/learned_yahoo_pop.json          BPR-MF           0.6461   0.6474  +0.00121  5               
+results/v3/learned_yahoo_pop.json          PDA              0.6514   0.6520  +0.00059  5               
+results/v3/learned_yahoo_pop.json          DR-JL            0.5225   0.5225  +0.00000  none,3,5,10     
+results/v3/learned_yahoo_pop.json          MRDR             0.5248   0.5258  +0.00102  5               
+results/v3/learned_yahoo_pop.json          MACR             0.6221   0.6282  +0.00605  5               stored selections reproduced only with patience [5] (bank records None)
+results/v3/learned_yahoo_pop_A.json        r-AdjNorm        0.6742   0.6742  +0.00000  5               
+results/v3/learned_yahoo_pop_B.json        LightGCN         0.6708   0.6708  +0.00000  5               
+results/v3/learned_yahoo_pop_B.json        SimGCL           0.6348   0.6348  +0.00000  none,5,10       
+results/v3/learned_yahoo_pop_C.json        NAVIP            0.6701   0.6701  +0.00000  5               
+results/v3/learned_yahoo_pop_C.json        LightGCN-pt      0.5947   0.5947  +0.00000  none,5,10       
+results/v3/learned_yahoo_pop_C.json        DR-LightGCN      0.5528   0.5528  +0.00000  5               
+results/v3/learned_yahoo_pop_D.json        iALS             0.6625   0.6625  +0.00000  none,3,5,10     
+results/v3/learned_yahoo_pop_D.json        MF               0.5087   0.5087  +0.00000  none,1,2,3,5,10  
+results/v3/learned_yahoo_pop_D.json        IPS-MF           0.5125   0.5125  +0.00000  none,1,2,3,5,10  
+results/v3/learned_yahoo_pop_D.json        DR-MF            0.5093   0.5093  +0.00000  5               
+results/v3/learned_yahoo_pop_D.json        BPR-MF           0.6461   0.6461  +0.00000  5               
+results/v3/learned_yahoo_pop_D.json        PDA              0.6514   0.6514  +0.00000  5               
+results/v3/learned_yahoo_pop_D.json        DR-JL            0.5225   0.5225  +0.00000  none,3,5,10     
+results/v3/learned_yahoo_pop_D.json        MRDR             0.5248   0.5248  +0.00000  5               
+results/v3/learned_yahoo_pop_D.json        MACR             0.6221   0.6221  +0.00000  5               
+results/v4/learned_coat_abl_DR-BPR-pop.json DR-BPR-pop       0.5751   0.5751  +0.00000  5,10            
+results/v4/learned_coat_abl_DR-BPR-shuf.json DR-BPR-shuf      0.5689   0.5689  +0.00000  none,2,3,5,10   
+results/v4/learned_coat_abl_DR-BPR-yhat.json DR-BPR-yhat      0.5937   0.5937  +0.00000  none,5,10       
+results/v4/learned_coat_adv.json           AdvInfoNCE-LGN   0.5222   0.5222  +0.00000  5               
+results/v4/learned_coat_dr.json            DR-InfoNCE-LGN   0.5531   0.5531  +0.00000  5               
+results/v4/learned_coat_drbpr.json         DR-BPR-LGN       0.5912   0.5912  +0.00000  none,5,10       
+results/v4/learned_coat_driALS.json        DR-iALS          0.5871   0.5871  +0.00000  none,2,3,5,10   
+results/v4/learned_coat_lrQ.json           DR-BPR-LGN-1     0.5887   0.5887  +0.00000  5               
+results/v4/learned_coat_lrQ_prior.json     DR-BPR-LGN-p     0.5897   0.5897  +0.00000  5               
+results/v4/learned_coat_new.json           InfoNCE-LGN      0.5290   0.5290  +0.00000  5               
+results/v4/learned_coat_p2.json            DR-BPR-LGN-p2    0.6046   0.6046  +0.00000  none,5,10       
+results/v4/learned_coat_prior_bpr.json     LightGCN-p       0.6020   0.6020  +0.00000  5               
+results/v4/learned_coat_prior_dr.json      DR-BPR-LGN-p     0.6039   0.6039  +0.00000  5               
+results/v4/learned_kuairand_adv.json       AdvInfoNCE-LGN   0.4480   0.4480  +0.00000  none,1,2,3,5,10  
+results/v4/learned_kuairand_drbpr.json     DR-BPR-LGN-1     0.4623   0.4623  +0.00000  3               
+results/v4/learned_kuairand_p.json         DR-BPR-LGN-p     0.4603   0.4603  +0.00000  3               
+results/v4/learned_kuairand_p2.json        DR-BPR-LGN-p2    0.4594   0.4594  +0.00000  3               
+results/v4/learned_kuairec_DR-LightGCN-pn_lr1e-2.json DR-LightGCN-pn   0.6027   0.6027  +0.00000  none,3,5,10     
+results/v4/learned_kuairec_DR-LightGCN-pn_lr3e-3.json DR-LightGCN-pn   0.5992   0.5992  +0.00000  none,1,2,3,5,10  
+results/v4/learned_kuairec_LightGCN-pn_lr1e-2.json LightGCN-pn      0.5995   0.5995  +0.00000  2,3             
+results/v4/learned_kuairec_LightGCN-pn_lr3e-3.json LightGCN-pn      0.5992   0.5992  +0.00000  3               
+results/v4/learned_kuairec_adv.json        AdvInfoNCE-LGN   0.5776   0.5776  +0.00000  none,1,2,3,5,10  
+results/v4/learned_kuairec_drbpr_lr1e-2.json DR-BPR-LGN-1     0.6099   0.6099  +0.00000  none,1,2,3,5,10  
+results/v4/learned_kuairec_drbpr_lr3e-3.json DR-BPR-LGN-1     0.6094   0.6094  +0.00000  3               
+results/v4/learned_kuairec_offonly.json    LightGCN-p       0.6288   0.6288  +0.00000  none,1,2,3,5,10  
+results/v4/learned_kuairec_p2_lr1e-2.json  DR-BPR-LGN-p2    0.6213   0.6213  +0.00000  none,1,2,3,5,10  
+results/v4/learned_kuairec_p2_lr1e-3.json  DR-BPR-LGN-p2    0.6289   0.6289  +0.00000  none,2,3,5,10   
+results/v4/learned_kuairec_p2_lr3e-3.json  DR-BPR-LGN-p2    0.6287   0.6287  +0.00000  none,1,2,3,5,10  
+results/v4/learned_kuairec_p_lr3e-3.json   DR-BPR-LGN-p     0.6281   0.6281  +0.00000  none,1,2,3,5,10  
+results/v4/learned_yahoo_abl_DR-BPR-pop.json DR-BPR-pop       0.6550   0.6550  +0.00000  none,5,10       
+results/v4/learned_yahoo_abl_DR-BPR-shuf.json DR-BPR-shuf      0.6689   0.6689  +0.00000  3,5             
+results/v4/learned_yahoo_adv.json          AdvInfoNCE-LGN   0.6477   0.6477  +0.00000  none,1,2,3,5,10  
+results/v4/learned_yahoo_drbpr_lr1e-2.json DR-BPR-LGN-1     0.6720   0.6720  +0.00000  none,2,3,5,10   
+results/v4/learned_yahoo_drbpr_lr1e-3.json DR-BPR-LGN-1     0.6844   0.6844  +0.00000  5               
+results/v4/learned_yahoo_drbpr_lr3e-3.json DR-BPR-LGN-1     0.6829   0.6829  +0.00000  5               
+results/v4/learned_yahoo_p2_lr3e-3.json    DR-BPR-LGN-p2    0.6868   0.6868  +0.00000  none,5,10       
+results/v4/learned_yahoo_p_lr3e-3.json     DR-BPR-LGN-p     0.6868   0.6868  +0.00000  none,5,10       
+results/v5/learned_coat_add_ials.json      iALS-p           0.5984   0.5984  +0.00000  none,3,5,10     
+results/v5/learned_coat_drgp_f0.05_b1.json DRGP             0.5665   0.5665  +0.00000  none,1,2,3,5,10  
+results/v5/learned_coat_drgp_f0.05_b2.json DRGP             0.5665   0.5665  +0.00000  none,1,2,3,5,10  
+results/v5/learned_coat_drgp_f0.1_b1.json  DRGP             0.5588   0.5588  +0.00000  none,1,2,3,5,10  
+results/v5/learned_coat_drgp_f0.1_b2.json  DRGP             0.5588   0.5588  +0.00000  none,1,2,3,5,10  
+results/v5/learned_coat_drgp_f0.2_b1.json  DRGP             0.5533   0.5533  +0.00000  none,1,2,3,5,10  
+results/v5/learned_coat_drgp_f0.2_b2.json  DRGP             0.5533   0.5533  +0.00000  none,1,2,3,5,10  
+results/v5/learned_coat_drgp_ials.json     iALS-p           0.5954   0.5954  +0.00000  3,5             
+results/v5/learned_coat_drgp_lgn.json      DRGP-LGN-bpr     0.5933   0.5933  +0.00000  5               
+results/v5/learned_coat_drgp_lgn.json      DRGP-LGN-dr      0.5642   0.5642  +0.00000  5               
+results/v5/learned_coat_drgp_lgn.json      DRGP-LGN-hyb     0.6014   0.6014  +0.00000  5               
+results/v5/learned_coat_ialswide.json      iALS-wide        0.5869   0.5869  +0.00000  5               
+results/v5/learned_kuairec_drgp_f0.1.json  DRGP             0.6327   0.6327  +0.00000  none,1,2,3,5,10  
+results/v5/learned_kuairec_drgp_f0.2.json  DRGP             0.6321   0.6321  +0.00000  none,1,2,3,5,10  
+results/v5/learned_kuairec_drgp_ials.json  iALS-p           0.6214   0.6214  +0.00000  none,1,2,3,5,10  
+results/v5/learned_kuairec_drgp_lgn.json   DRGP-LGN-dr      0.6313   0.6313  +0.00000  none,1,2,3,5,10  
+results/v5/learned_kuairec_drgp_lgn.json   DRGP-LGN-bpr     0.6316   0.6316  +0.00000  none,1,2,3,5,10  
+results/v2/filters_coat_given.json         Obs              0.5571   0.5571  +0.00000  none            
+results/v2/filters_coat_given.json         EASE             0.5401   0.5401  +0.00000  none            
+results/v2/filters_coat_given.json         GF-CF            0.5512   0.5513  +0.00009  none            
+results/v2/filters_coat_given.json         IPS              0.5510   0.5510  +0.00000  none            
+results/v2/filters_coat_given.json         DR               0.5459   0.5459  +0.00000  none            
+results/v2/filters_coat_given.json         DRUP             0.5467   0.5467  +0.00000  none            
+results/v2/filters_coat_given.json         EASE-DR          0.5564   0.5564  +0.00000  none            
+results/v2/filters_coat_given.json         GF-CF-DR         0.5598   0.5599  +0.00013  none            
+results/v2/filters_kuairec_pop.json        Obs              0.6036   0.6036  +0.00000  none            
+results/v2/filters_kuairec_pop.json        DRUP             0.6378   0.6378  +0.00000  none            
+results/v2/filters_yahoo_pop.json          Obs              0.6585   0.6585  +0.00000  none            
+results/v2/filters_yahoo_pop.json          DR               0.6567   0.6567  +0.00000  none            
+results/v2/filters_yahoo_pop.json          DRUP             0.6567   0.6567  +0.00000  none            
+
+replayed methods: 153; within 0.002: 150; above 0.002: 3
+result files of v3 with training-free results but no bank (not reconciled): 4 files
+
+GAPS above threshold
+  results/v3/learned_kuairec_pop.json :: DR-LightGCN: stored 0.6212, replay 0.6246 (gap +0.0033); cause: stored selections reproduced only with patience [3] (bank records None); seed_check mean 0.6127242372091017
+  results/v3/learned_yahoo_pop.json :: DR-LightGCN: stored 0.5528, replay 0.5586 (gap +0.0058); cause: stored selections reproduced only with patience [5] (bank records None); seed_check mean 0.5548592985546247
+  results/v3/learned_yahoo_pop.json :: MACR: stored 0.6221, replay 0.6282 (gap +0.0060); cause: stored selections reproduced only with patience [5] (bank records None); seed_check mean 0.6231481558777151

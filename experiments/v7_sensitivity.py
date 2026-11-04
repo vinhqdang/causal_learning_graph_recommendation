@@ -108,7 +108,7 @@ def main():
             rep(f"{name:24s} {m.role:12s} {N:5d} {stored:8.4f} {valsel:8.4f} {orc:8.4f} {orc - valsel:+7.4f} "
                 f"{cfg_orc:8.4f} {cfg_orc - valsel:+7.4f} {e8:8.4f} {eN:8.4f}")
             ds_out["methods"][name] = {"role": m.role, "n_configs": N, "stored_mean": stored,
-                                       "val_selected_replay": valsel, "test_oracle_split": orc,
+                                       "val_selected_replay": valsel, "test_oracle_split": orc, "test_oracle_all_rows": orc_all,
                                        "inflation_oracle": orc - valsel, "config_oracle": cfg_orc,
                                        "inflation_config_oracle": cfg_orc - valsel,
                                        "expected_max": {str(k): v for k, v in cur.items()}}

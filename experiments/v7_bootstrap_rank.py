@@ -107,7 +107,8 @@ def main():
     if not panels:
         return
     ncol = len(panels)
-    fig, axes = plt.subplots(1, ncol, figsize=(2.0 * ncol + 2.2, 0.42 * TOP + 1.4), squeeze=False)
+    fig, axes = plt.subplots(1, ncol, figsize=(4.6 * ncol + 1.0, 0.42 * TOP + 1.6), squeeze=False)
+    fig.subplots_adjust(wspace=1.1)
     ink = "#1f2328"
     for ax, (ds, names, P) in zip(axes[0], panels):
         im = ax.imshow(P, cmap="Blues", vmin=0, vmax=1, aspect="auto")
@@ -115,7 +116,7 @@ def main():
         ax.set_xticks(range(P.shape[1]))
         ax.set_xticklabels([str(r) for r in range(1, P.shape[1] + 1)], fontsize=7, color=ink)
         ax.set_yticks(range(len(names)))
-        ax.set_yticklabels(names if ds == panels[0][0] else [""] * len(names), fontsize=7, color=ink)
+        ax.set_yticklabels(names, fontsize=6.5, color=ink)
         for i in range(P.shape[0]):
             for j in range(P.shape[1]):
                 v = P[i, j]

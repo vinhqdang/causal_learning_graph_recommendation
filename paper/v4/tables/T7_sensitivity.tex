@@ -1,0 +1,25 @@
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Sensitivity of the primary conclusions to evaluation choices (A1, A2). A check mark means the sign of the difference (and, for Main, significance at $p_\mathrm{Holm}<0.05$) survives the choice; the value is the difference $\times10^{3}$ under that choice. Main: per-user difference. Oracle, configuration-oracle and matched-budget columns: split-mean difference, compared in sign with the split-mean validation-selected difference.}
+\label{tab:T7}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lllllllrrlll}
+\toprule
+Dataset & Fam. & Comparison & Main (Holm) & Test oracle & Config.\ oracle & Matched $k$ & $k_\mathrm{min}$ & Flip share & Seeds & NB & Alt.\ metric \\
+\midrule
+Coat & P1 & DR-LightGCN -- LightGCN & $\times$ -0.65 & $\checkmark$ +1.23 & $\times$ -6.63 & $\checkmark$ +4.11 & 54 & 0.0\% & n/a & $\times$ & $\times$ \\
+Coat & P2 & iALS-p (add prior) -- iALS & $\times$ +16.82 & $\checkmark$ +31.66 & $\checkmark$ +21.23 & $\checkmark$ +16.12 & 24 & 0.0\% & n/a & $\times$ & $\checkmark$ \\
+Coat & P2 & LightGCN-p (add prior) -- LightGCN & $\checkmark$ +31.98 & $\checkmark$ +27.74 & $\checkmark$ +28.27 & $\checkmark$ +34.12 & 54 & 0.0\% & n/a & $\times$ & $\checkmark$ \\
+Coat & P3 & QP family (pooled) -- LightGCN-p (add prior) & $\times$ +0.05 & $\times$ +2.17 & $\times$ +1.42 & $\checkmark$ -0.36 & 108 & 35.3\% & n/a & $\times$ & $\times$ \\
+Coat & P3 & DR-iALS -- iALS-p (add prior) & $\times$ -10.22 & $\checkmark$ -24.87 & $\checkmark$ -13.87 & $\checkmark$ -11.21 & 48 & 0.0\% & n/a & $\times$ & $\checkmark$ \\
+Yahoo & P1 & r-AdjNorm -- LightGCN & $\checkmark$ +4.10 & $\checkmark$ +2.35 & $\checkmark$ +0.57 & $\checkmark$ +2.87 & 36 & 2.4\% & $\checkmark$ & $\times$ & $\checkmark$ \\
+KuaiRand & P1 & r-AdjNorm -- LightGCN & $\checkmark$ +1.99 & $\checkmark$ +1.76 & $\checkmark$ +1.80 & $\checkmark$ +1.23 & 6 & 9.4\% & $\checkmark$ & $\times$ & $\checkmark$ \\
+KuaiRec & P1 & DR-LightGCN -- LightGCN & $\checkmark$ +13.17 & $\checkmark$ +14.69 & $\checkmark$ +12.44 & $\checkmark$ +12.97 & 6 & 0.0\% & n/a & $\times$ & $\times$ \\
+KuaiRec & P2 & LightGCN-p (add prior) -- LightGCN & $\checkmark$ +21.22 & $\checkmark$ +20.02 & $\checkmark$ +20.00 & $\checkmark$ +20.25 & 24 & 0.0\% & n/a & $\checkmark$ & $\checkmark$ \\
+KuaiRec & P3 & QP family (pooled) -- LightGCN-p (add prior) & $\times$ -0.32 & $\times$ +0.32 & $\times$ +0.46 & $\checkmark$ -0.12 & 24 & 30.9\% & n/a & $\times$ & $\checkmark$ \\
+KuaiRec & P4 & DRUP -- DR-JL & $\checkmark$ +4.38 & $\checkmark$ +5.48 & $\checkmark$ +5.45 & $\times$ -14.90 & 6 & 78.4\% & n/a & $\times$ & $\checkmark$ \\
+\bottomrule
+\end{tabular}}
+\par\smallskip\raggedright\footnotesize Flip share: fraction of 1,000 random subgrids of $k_\mathrm{min}$ configurations per method whose sign differs from the full grid. Alt.\ metric: nDCG@10 (Coat, Yahoo), nDCG@20 (KuaiRand), nDCG@50 (KuaiRec), on the stored selections.
+\end{table}

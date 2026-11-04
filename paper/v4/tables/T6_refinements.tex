@@ -1,0 +1,25 @@
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Refinement family against the simple debiased prior of the same learner, and the shuffled and popularity controls against the backbone (T6).}
+\label{tab:T6}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lllrrlrrl}
+\toprule
+Dataset & Family & Method & Mean & Cfg & Versus & Diff.\ $\times10^{3}$ [95\% CI] & $p_\mathrm{Holm}$ & TOST equiv. \\
+\midrule
+Coat & refinement vs simple prior & DR-BPR-LGN & 0.5912 & 108 & LightGCN-p (add prior) & -8.02 [18.85] & 1.000 & no \\
+Coat & refinement vs simple prior & DR-BPR-LGN-1 (Q, lrQ) & 0.5887 & 54 & LightGCN-p (add prior) & -10.79 [19.26] & 1.000 & no \\
+Coat & refinement vs simple prior & DR-BPR-LGN-p & 0.6039 & 108 & LightGCN-p (add prior) & +2.09 [6.48] & 1.000 & yes \\
+Coat & refinement vs simple prior & DR-BPR-LGN-p2 & 0.6046 & 108 & LightGCN-p (add prior) & +3.27 [6.94] & 1.000 & yes \\
+Coat & refinement vs simple prior & QP family (pooled) & 0.6015 & 324 & LightGCN-p (add prior) & +0.05 [8.29] & 1.000 & yes \\
+Coat & refinement vs simple prior (iALS) & DR-iALS & 0.5871 & 48 & iALS-p (add prior) & -10.22 [15.96] & 0.208 & no \\
+Coat & controls vs backbone & control: shuffled Q & 0.5689 & 54 & LightGCN & +0.97 [5.50] & 0.730 & yes \\
+Coat & controls vs backbone & control: popularity Q & 0.5751 & 54 & LightGCN & +6.91 [6.04] & 0.050 & no \\
+Yahoo & controls vs backbone & control: shuffled Q & 0.6689 & 12 & LightGCN & -1.01 [3.20] & 0.534 & yes \\
+Yahoo & controls vs backbone & control: popularity Q & 0.6550 & 12 & LightGCN & -15.91 [6.06] & 0.000 & no \\
+KuaiRec & refinement vs simple prior & QP family (pooled) & 0.6285 & 120 & LightGCN-p (add prior) & -0.32 [0.50] & 0.211 & yes \\
+\bottomrule
+\end{tabular}}
+\par\smallskip\raggedright\footnotesize Holm within each family and dataset. Rows are missing where the simple prior has not been run (X1--X3).
+\end{table}
