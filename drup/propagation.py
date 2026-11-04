@@ -177,16 +177,25 @@ def _standardise(x):
 
 
 def _user_buckets(O, n_buckets):
-    """User activity buckets: quantiles of the number of exposures per user."""
+    """User activity buckets: quantiles of the number of exposures per user.
+
+    Repeated quantile edges (for example, every user with the same count) are collapsed, so the
+    buckets are the distinct intervals of the count. Buckets are relabelled 0..B-1 with no empty
+    label. If fewer than two buckets are non-empty, all users share one bucket.
+    """
     cnt = O.sum(1)
     if n_buckets <= 1:
         return torch.zeros(O.shape[0], dtype=torch.long)
     qs = torch.linspace(0.0, 1.0, n_buckets + 1, dtype=torch.float64)[1:-1]
-    edges = torch.quantile(cnt.double(), qs).to(cnt.dtype)
-    return torch.bucketize(cnt, edges, right=True)
+    edges = torch.unique(torch.quantile(cnt.double(), qs).to(cnt.dtype))
+    b = torch.bucketize(cnt, edges, right=True)
+    labels, inverse = torch.unique(b, return_inverse=True)
+    if len(labels) < 2:
+        return torch.zeros(O.shape[0], dtype=torch.long)
+    return inverse.long()
 
 
-def gf_features(O, Y, P, Yhat, alphas=(0.5, 0.7), obs=True, Yhat_lr=None, loo=True):
+def gf_features(O, Y, P, Yhat, alphas=(0.5, 0.7), obs=True, Yhat_lr=None, loo=True, standardise=True):
     """Features of the DR-fitted prior, each standardised over the whole matrix.
 
     loo=True (default): logit of the additive imputation, the leave-edge-out DR 3-hop at each
@@ -194,13 +203,15 @@ def gf_features(O, Y, P, Yhat, alphas=(0.5, 0.7), obs=True, Yhat_lr=None, loo=Tr
     if given. Every term is independent of the pair's own exposure and outcome.
     loo=False (ablation): the 1-hop term is the raw DR edge estimate W, and the 3-hop terms are
     the plain corrected 3-hops, which contain the pair's own W_ui.
+    standardise=False returns the raw terms (the property checks use these, because the global
+    standardisation couples every entry to every other one through the mean and the scale).
     Returns (list of dense tensors, names).
     """
     W = edge_estimate(O, Y, P, Yhat)
     feats, names = [], []
 
     def add(name, x):
-        feats.append(_standardise(x))
+        feats.append(_standardise(x) if standardise else x)
         names.append(name)
 
     if loo:
@@ -267,7 +278,14 @@ def drgp_prior(d, O, Y, prop, floor, lam, alphas=(0.5, 0.7), n_buckets=4, ridge=
     Uses only the training log (O, Y) and the propensities of the nuisance model, cross-fitted
     over K folds (pipeline.Nuisance). The dataset dict is read only for a shipped propensity
     (d["P_given"]). Returns (pi, z, theta): pi on the probability scale, z the standardised logit
-    of pi (the convention of the additive prior), theta (n_buckets, K).
+    of pi (the convention of the additive prior), theta (B, K) with B the number of non-empty
+    user buckets.
+
+    Note on prop="given" (Coat): the shipped propensities were estimated by the dataset authors
+    from MAR data (a uniformly sampled set of ratings), not from the training log. The prior
+    construction uses the training log only, but the propensity input on Coat does not satisfy
+    that condition, so the claim "training log only" holds for the construction and not for
+    that input.
     """
     from .pipeline import Nuisance
     nz = Nuisance(d, O, Y, prop, K=K)

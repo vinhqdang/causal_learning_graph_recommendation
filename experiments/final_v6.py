@@ -16,13 +16,25 @@ ld = lambda f: json.load(open(f))
 V5, V4, V3 = "results/v5/", "results/v4/", "results/v3/"
 
 
+def has(f, n):
+    """True if the job file exists and already holds the named method (a running job writes a
+    method's result only when that method has finished)."""
+    return os.path.exists(f) and n in ld(f).get("results", {})
+
+
 def combine(jobs, key):
-    rs = [ld(f)["results"][n] for f, n in jobs if os.path.exists(f)]
+    """Per-split choice among the jobs (file, method) that hold their method. Returns None if no job
+    holds its method yet. n_jobs is the selection pool (candidate results per split); n_configs is
+    the number of configurations searched by those jobs."""
+    rs = [ld(f)["results"][n] for f, n in jobs if has(f, n)]
+    if not rs:
+        return None
     pu, ps, ch = [], [], []
     for s in range(len(rs[0]["per_split"])):
         j = int(np.argmax([r["val_best"][s] for r in rs]))
         pu.append(rs[j]["per_user"][s]); ps.append(rs[j]["per_split"][s][key]); ch.append(rs[j]["chosen"][s])
-    return {"per_user": pu, "per_split": ps, "chosen": ch, "n_jobs": len(rs)}
+    return {"per_user": pu, "per_split": ps, "chosen": ch, "n_jobs": len(rs),
+            "n_configs": int(sum(r.get("n_configs", 0) for r in rs))}
 
 
 def peru(r):
@@ -112,21 +124,28 @@ for ds in ("coat", "yahoo", "kuairand", "kuairec"):
     key = KEY[ds]
     fam = family(ds)
     jobs = [j for f in fam.values() for j in f]
-    present = [j for j in jobs if os.path.exists(j[0])]
-    print(f"\n{NAME[ds]} ({key}): DRGP jobs found {len(present)}/{len(jobs)}")
+    present = [j for j in jobs if has(*j)]
+    print(f"\n{NAME[ds]} ({key}): DRGP jobs found {len(present)}/{len(jobs)} (file present and method done)")
     if not present:
         continue
     mine = combine(present, key)
     print(f"  final (DRGP family, per-split validation choice): mean {mean_of(mine, key):.4f}  "
           f"chosen pbeta {sorted(set(str(c.get('pbeta')) for c in mine['chosen']))}")
+    print(f"  DRGP family: {mine['n_configs']} configurations in {len(present)} job(s); "
+          f"selection pool per split: {mine['n_jobs']} candidate results")
     for name, jl in fam.items():
-        jl = [j for j in jl if os.path.exists(j[0])]
+        jl = [j for j in jl if has(*j)]
         if jl:
             r = combine(jl, key)
-            print(f"  backbone {name:7s}: mean {mean_of(r, key):.4f}  ({len(jl)} job file(s))")
+            print(f"  backbone {name:7s}: mean {mean_of(r, key):.4f}  ({len(jl)} job file(s), "
+                  f"{r['n_configs']} configurations)")
     base = stored(BASE[ds][0], BASE[ds][1])
     base_rows = [(n, base[n]) for n in BASE[ds][1] if n in base]
-    base_rows.append(("QP-LightGCN (v2 final)", v2_final(ds, key)))
+    v2 = v2_final(ds, key)
+    if v2 is not None:
+        base_rows.append(("QP-LightGCN (v2 final)", v2))
+    else:
+        print("  missing: QP-LightGCN (v2 final) jobs")
     for f, n, label in MATCHED.get(ds, []):
         if os.path.exists(f) and n in ld(f)["results"]:
             base_rows.append((label, ld(f)["results"][n]))
@@ -141,7 +160,7 @@ for ds in ("coat", "yahoo", "kuairand", "kuairec"):
     for r, a in zip(rows, adj):
         print(f"  {r[0]:24s} {r[1]:7.4f} {r[2]:5d}  {r[3]:+9.2f} {r[4]:6.2f}  {a:.4f}")
     for name, jl in fam.items():
-        jl = [j for j in jl if os.path.exists(j[0])]
+        jl = [j for j in jl if has(*j)]
         if not jl:
             continue
         r = combine(jl, key)

@@ -81,10 +81,15 @@ class PriorScores:
         return PRIOR[0][rows]
 
 
-def build(kind, m, n, d, O, Y, P, cfg, seed=0):
+def build(kind, m, n, d, O, Y, P, cfg, seed=0, loss=None):
     model = _build(kind, m, n, d, O, Y, P, cfg, seed)
     if kind != "ialsp" and cfg.get("pbeta", 0.0):
-        model.prior, model.pbeta = PRIOR[0], cfg["pbeta"]
+        if loss in ("drres", "bprdr"):
+            # self-imputing losses: unstandardised logit of the imputation with offset 1, so that the
+            # score equals logit(pimp) at initialisation and the imputed term vanishes (DESIGN.md, B2)
+            model.prior, model.pbeta = torch.logit(PIMP[0].clamp(0.01, 0.99)), 1.0
+        else:
+            model.prior, model.pbeta = PRIOR[0], cfg["pbeta"]
     return model
 
 
@@ -114,18 +119,33 @@ def _build(kind, m, n, d, O, Y, P, cfg, seed=0):
     return LightGCN(m, n, d, eu, ei, w, layers=cfg["layers"], r=cfg.get("r", 0.5), init_std=cfg.get("init", 0.1))
 
 
+PRIOR_VERSION = 2   # bump whenever the construction of drgp_prior changes its output
+# version 1 caches (no version or fingerprint stored) are never matched: the key changed
+
+
 def drgp_cached(a, d, O, Y, ndt, lam):
-    """drgp_prior with a disk cache keyed by every argument that changes the prior. The file is
-    written under a .tmp name and renamed, so an interrupted run leaves no partial cache."""
+    """drgp_prior with a disk cache keyed by every argument that changes the prior, the prior
+    version and a fingerprint of the training log (shape, sum of O, sum of Y). A cache file is used
+    only if its stored version, fingerprint and arguments all match; otherwise the prior is rebuilt
+    and the file replaced. The file is written under a .tmp name and renamed, so an interrupted run
+    leaves no partial cache."""
+    fp = {"shape": list(O.shape), "O_sum": float(O.double().sum()), "Y_sum": float(Y.double().sum())}
     key = {"dataset": a.dataset, "prop": a.prop, "floor": a.floor, "lam": lam, "imp": a.imp,
            "alphas": a.gf_alphas, "buckets": a.gf_buckets, "ridge": a.gf_ridge, "xfit": a.gf_xfit,
-           "obs": a.gf_obs, "loo": a.gf_loo}
+           "obs": a.gf_obs, "loo": a.gf_loo, "prior_version": PRIOR_VERSION, "fingerprint": fp}
     h = hashlib.md5(json.dumps(key, sort_keys=True).encode()).hexdigest()
     path = os.path.join(a.prior_cache, f"drgp_{a.dataset}_{h}.pt")
     if os.path.exists(path):
-        c = torch.load(path, weights_only=False)
-        print(f"  DRGP prior loaded from {path}", flush=True)
-        return c["pi"], c["z"], c["theta"]
+        try:
+            c = torch.load(path, weights_only=False)
+            ok = (c.get("version") == PRIOR_VERSION and c.get("fingerprint") == fp and c.get("args") == key)
+        except Exception as err:          # unreadable file: rebuild
+            print(f"  DRGP cache {path} unreadable ({err}); rebuilding", flush=True)
+            ok = False
+        if ok:
+            print(f"  DRGP prior loaded from {path}", flush=True)
+            return c["pi"], c["z"], c["theta"]
+        print(f"  DRGP cache {path} does not match the current key or data; rebuilding", flush=True)
     t0 = time.time()
     pi, z, theta = drgp_prior(d, O.to(ndt), Y.to(ndt), a.prop, a.floor, lam, alphas=tuple(a.gf_alphas),
                               n_buckets=a.gf_buckets, ridge=a.gf_ridge, K=a.gf_xfit, imp=a.imp,
@@ -133,7 +153,8 @@ def drgp_cached(a, d, O, Y, ndt, lam):
     pi, z, theta = pi.float(), z.float(), theta.float()
     print(f"  DRGP prior built [{time.time() - t0:.0f}s]", flush=True)
     os.makedirs(a.prior_cache, exist_ok=True)
-    torch.save({"pi": pi, "z": z, "theta": theta, "args": key}, path + ".tmp")
+    torch.save({"pi": pi, "z": z, "theta": theta, "args": key, "version": PRIOR_VERSION, "fingerprint": fp},
+               path + ".tmp")
     os.replace(path + ".tmp", path)
     return pi, z, theta
 
@@ -238,7 +259,7 @@ def main():
         ``patience`` epochs without improvement and then keeps its selection,
         so no split's selection depends on another split's data."""
         torch.manual_seed(seed)
-        model = build(kind, m, n, cfg["dim"], O, Y, P, cfg, seed=seed)
+        model = build(kind, m, n, cfg["dim"], O, Y, P, cfg, seed=seed, loss=loss)
 
         def on_epoch(mod, ep):
             with torch.no_grad():

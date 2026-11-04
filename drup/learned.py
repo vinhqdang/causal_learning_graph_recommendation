@@ -324,6 +324,8 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
     if loss_type in ("drres", "bprdr"):
         if pimp is None:
             raise ValueError(f"loss {loss_type} needs the imputation pimp")
+        if model.prior is None or model.pbeta != 1.0:
+            raise ValueError(f"loss {loss_type} needs the offset logit(pimp) with pbeta 1 on the model")
         pim = pimp.float()
         xo_u, xo_i = torch.nonzero(O > 0, as_tuple=True)      # exposed pairs
         w_exp = len(xo_u) / (m * n)                           # N_e / N
@@ -371,7 +373,10 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
 
     def _drres_loss(emb, s, e):
         """Self-imputing DR loss on batch s:e: mean over uniform pairs of BCE(s, pimp) plus
-        (N_e / N) times the mean over uniform exposed pairs of (BCE(s, Y) - BCE(s, pimp)) / p."""
+        (N_e / N) times the mean over uniform exposed pairs of (BCE(s, Y) - BCE(s, pimp)) / p.
+        The score s is the model logit, which carries the offset logit(pimp) (unstandardised,
+        pbeta 1, set by the caller), so at initialisation sigma(s) = pimp and the imputed term
+        vanishes; the offset of these two losses is not the standardised z used by bpr and ialsp."""
         a, b = au[s:e], ai[s:e]
         loss_all = F.binary_cross_entropy_with_logits(model(a, b, emb), pim[a, b], reduction="none").mean()
         x, y = ea[s:e], eb[s:e]
