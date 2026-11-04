@@ -1,0 +1,15 @@
+  DRGP prior loaded from results/v5/cache/drgp_kuairec_e476494aea64d619bed28ec90e054061.pt
+/home/user/causal_learning_graph_recommendation/experiments/../drup/learned.py:54: UserWarning: Sparse invariant checks are implicitly disabled. Memory errors (e.g. SEGFAULT) will occur when operating on a sparse tensor which violates the invariants, but checks incur performance overhead. To silence this warning, explicitly opt in or out. See `torch.sparse.check_sparse_tensor_invariants.__doc__` for guidance.  (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/Context.cpp:848.)
+  self.A = torch.sparse_coo_tensor(idx, torch.cat([v_ui, v_iu]), (m + n, m + n)).coalesce()
+  DRGP-LGN-dr {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'pbeta': 1.0, 'init': 0.01} done [143s] best split0 val 0.6329
+  DRGP-LGN-dr {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'pbeta': 1.0, 'init': 0.01} done [212s] best split0 val 0.6332
+DRGP-LGN-dr  ndcg@10=0.6754±0.0028  ndcg@20=0.6313±0.0019  ndcg@50=0.5146±0.0018  recall@10=0.1113±0.0009  recall@20=0.1928±0.0022  recall@50=0.2696±0.0021  auc=0.8060±0.0008   [355s, 2 cfgs] seeds 0.0000±0.0000
+  DRGP-LGN-bpr {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'pbeta': 0.1} done [70s] best split0 val 0.6107
+  DRGP-LGN-bpr {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'pbeta': 0.2} done [74s] best split0 val 0.6166
+  DRGP-LGN-bpr {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'pbeta': 0.5} done [73s] best split0 val 0.6189
+  DRGP-LGN-bpr {'lr': 0.003, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'pbeta': 1.0} done [73s] best split0 val 0.6274
+  DRGP-LGN-bpr {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'pbeta': 0.1} done [91s] best split0 val 0.6274
+  DRGP-LGN-bpr {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'pbeta': 0.2} done [70s] best split0 val 0.6274
+  DRGP-LGN-bpr {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'pbeta': 0.5} done [79s] best split0 val 0.6353
+  DRGP-LGN-bpr {'lr': 0.001, 'wd': 1e-05, 'dim': 64, 'layers': 2, 'pbeta': 1.0} done [80s] best split0 val 0.6362
+DRGP-LGN-bpr ndcg@10=0.6719±0.0022  ndcg@20=0.6316±0.0020  ndcg@50=0.5173±0.0016  recall@10=0.1105±0.0008  recall@20=0.1936±0.0021  recall@50=0.2715±0.0023  auc=0.8065±0.0009   [611s, 8 cfgs] seeds 0.0000±0.0000

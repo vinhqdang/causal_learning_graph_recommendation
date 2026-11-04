@@ -1,0 +1,50 @@
+
+Coat (ndcg@5): DRGP jobs found 10/10 (file present and method done)
+  final (DRGP family, per-split validation choice): mean 0.5992  chosen pbeta ['0.1', '0.2', '1.0']
+  DRGP family: 222 configurations in 10 job(s); selection pool per split: 10 candidate results
+  backbone prior  : mean 0.5647  (6 job file(s), 6 configurations)
+  backbone iALS-p : mean 0.5954  (1 job file(s), 90 configurations)
+  backbone LGN    : mean 0.5955  (3 job file(s), 126 configurations)
+  vs baseline                 mean  cfgs  diff(e-3)   +-CI  p_Holm
+  iALS                      0.5812    24     +19.89  17.37  0.1001
+  LightGCN                  0.5683    54     +31.90  18.21  0.0067
+  DR-LightGCN               0.5724    54     +32.55  24.98  0.0653
+  r-AdjNorm                 0.5722   108     +28.14  19.08  0.0281
+  NAVIP                     0.5664    54     +33.49  19.17  0.0067
+  SimGCL                    0.5528   108     +49.39  21.62  0.0001
+  MACR                      0.5418    36     +61.33  27.52  0.0002
+  AdvInfoNCE-LGN            0.5222   216     +78.37  28.60  0.0000
+  DRUP                      0.5467  1440     +57.12  25.53  0.0002
+  BSPM                      0.5727    12     +27.61  22.44  0.0806
+  GF-CF                     0.5513     4     +50.15  29.30  0.0070
+  QP-LightGCN (v2 final)    0.6015   324      -0.13  15.11  1.0000
+  iALS + additive prior     0.5984    90      +3.08  12.20  1.0000
+  iALS-wide                 0.5869    18     +12.51  16.19  0.3880
+  backbone prior   vs same baselines (unadjusted): iALS -19.1e-3 p=0.254, LightGCN -7.0e-3 p=0.664, DR-LightGCN -6.4e-3 p=0.638 ...
+  backbone iALS-p  vs same baselines (unadjusted): iALS +15.5e-3 p=0.084, LightGCN +27.5e-3 p=0.009, DR-LightGCN +28.2e-3 p=0.027 ...
+  backbone LGN     vs same baselines (unadjusted): iALS +16.7e-3 p=0.098, LightGCN +28.7e-3 p=0.001, DR-LightGCN +29.3e-3 p=0.025 ...
+
+Yahoo (ndcg@5): DRGP jobs found 0/4 (file present and method done)
+
+KuaiRand (ndcg@10): DRGP jobs found 0/4 (file present and method done)
+
+KuaiRec (ndcg@20): DRGP jobs found 4/5 (file present and method done)
+  final (DRGP family, per-split validation choice): mean 0.6318  chosen pbeta ['1.0', 'None']
+  DRGP family: 12 configurations in 4 job(s); selection pool per split: 4 candidate results
+  backbone prior  : mean 0.6326  (2 job file(s), 2 configurations)
+  backbone LGN    : mean 0.6311  (2 job file(s), 10 configurations)
+  missing: results/v5/learned_kuairec_add_ials.json [iALS-p]
+  vs baseline                 mean  cfgs  diff(e-3)   +-CI  p_Holm
+  DRUP                      0.6378   384      -5.58   1.90  0.0000
+  DR-JL                     0.6332     6      -1.20   2.20  0.5668
+  MRDR                      0.6328     6      -0.98   2.19  0.5668
+  LightGCN-pt               0.6271    36      +4.67   3.10  0.0095
+  DR-LightGCN               0.6212     6     +11.09   2.10  0.0000
+  NAVIP                     0.6186     6     +13.84   2.77  0.0000
+  iALS                      0.6133    12     +19.28   3.38  0.0000
+  LightGCN                  0.6085    36     +24.25   3.25  0.0000
+  r-AdjNorm                 0.6083    12     +24.03   3.14  0.0000
+  AdvInfoNCE-LGN            0.5776     8     +52.68   6.59  0.0000
+  QP-LightGCN (v2 final)    0.6285   120      +3.36   1.25  0.0000
+  backbone prior   vs same baselines (unadjusted): DRUP -4.8e-3 p=0.000, DR-JL -0.4e-3 p=0.726, MRDR -0.2e-3 p=0.866 ...
+  backbone LGN     vs same baselines (unadjusted): DRUP -6.3e-3 p=0.000, DR-JL -1.9e-3 p=0.084, MRDR -1.7e-3 p=0.121 ...
