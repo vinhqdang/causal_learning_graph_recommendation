@@ -1180,6 +1180,25 @@
      "16": 0.647727295216051
     }
    },
+   "LightGCN-p (add prior)": {
+    "role": "prior",
+    "n_configs": 24,
+    "stored_mean": 0.668952205576832,
+    "val_selected_replay": 0.668952205576832,
+    "test_oracle_split": 0.6749792759719316,
+    "test_oracle_all_rows": 0.6749792759719316,
+    "inflation_oracle": 0.006027070395099643,
+    "config_oracle": 0.672382729924035,
+    "inflation_config_oracle": 0.0034305243472030345,
+    "expected_max": {
+     "1": 0.6672477448869374,
+     "2": 0.6687723601774189,
+     "4": 0.6692564623751871,
+     "8": 0.6691416536526719,
+     "16": 0.6688854678466621,
+     "24": 0.668952205576832
+    }
+   },
    "DR-BPR-LGN-1 (Q)": {
     "role": "refinement",
     "n_configs": 36,
@@ -1351,6 +1370,32 @@
     "alt_same_sign": true
    },
    {
+    "family": "P2",
+    "A": "LightGCN-p (add prior)",
+    "B": "LightGCN",
+    "valsel_diff": -0.0018297982634356558,
+    "oracle_diff": -7.345242659235751e-05,
+    "oracle_all_diff": -0.000566760013942047,
+    "config_oracle_diff": -0.0011124925288373833,
+    "expected_diff_by_k": {
+     "1": 0.002247743426547988,
+     "2": 0.000890180998325274,
+     "4": -0.00046974616609707365,
+     "8": -0.0017990790310505878,
+     "16": -0.002408222880092903,
+     "24": -0.0021634883508391267
+    },
+    "expected_diff_kmin": -0.0021634883508391267,
+    "kmin": 24,
+    "sign_changes_k": [
+     4
+    ],
+    "flip_share": 0.0,
+    "stored_diff": -0.0018297982634356558,
+    "alt_diff": -0.0008986600605027873,
+    "alt_same_sign": true
+   },
+   {
     "family": "W",
     "A": "DRUP",
     "B": "DR",
@@ -1383,7 +1428,7 @@
    }
   ],
   "alt_metric": "ndcg@10",
-  "inflation_trained_mean": 0.004275437880260152,
+  "inflation_trained_mean": 0.004358848952395366,
   "inflation_trained_range": [
    0.001495971090028747,
    0.00881460624381536
@@ -1599,6 +1644,24 @@
      "8": 0.44801377125552555
     }
    },
+   "LightGCN-p (add prior)": {
+    "role": "prior",
+    "n_configs": 12,
+    "stored_mean": 0.4564541609090254,
+    "val_selected_replay": 0.4564541609090254,
+    "test_oracle_split": 0.4579158835740532,
+    "test_oracle_all_rows": 0.4589573623912645,
+    "inflation_oracle": 0.0014617226650278092,
+    "config_oracle": 0.4559925834886247,
+    "inflation_config_oracle": -0.00046157742040070504,
+    "expected_max": {
+     "1": 0.4535550393665037,
+     "2": 0.45499721199955634,
+     "4": 0.45583115796921864,
+     "8": 0.45627163581517205,
+     "12": 0.4564541609090254
+    }
+   },
    "QP family (pooled)": {
     "role": "final",
     "n_configs": 30,
@@ -1643,10 +1706,32 @@
     "stored_diff": 0.0020833710133239315,
     "alt_diff": 0.00155815136648505,
     "alt_same_sign": true
+   },
+   {
+    "family": "P2",
+    "A": "LightGCN-p (add prior)",
+    "B": "LightGCN",
+    "valsel_diff": -0.0004471427714459075,
+    "oracle_diff": -2.782448576569285e-05,
+    "oracle_all_diff": 0.0006376740314707474,
+    "config_oracle_diff": -0.0008422925996582897,
+    "expected_diff_by_k": {
+     "1": -0.00048360029774546787,
+     "2": -0.0005023342528733821,
+     "4": -0.000647981221232663,
+     "6": -0.0007912275563195514
+    },
+    "expected_diff_kmin": -0.0007912275563195514,
+    "kmin": 6,
+    "sign_changes_k": [],
+    "flip_share": 0.071,
+    "stored_diff": -0.0004471427714459075,
+    "alt_diff": -0.00019569369735106257,
+    "alt_same_sign": true
    }
   ],
   "alt_metric": "ndcg@20",
-  "inflation_trained_mean": 0.0012066592722359036,
+  "inflation_trained_mean": 0.001224878086006754,
   "inflation_trained_range": [
    0.0004765865984183715,
    0.0022131408433706534
@@ -1940,6 +2025,23 @@
    },
    "iALS-p (add prior)": {
     "role": "prior",
+    "n_configs": 8,
+    "stored_mean": 0.6272749126009571,
+    "val_selected_replay": 0.6272749126009571,
+    "test_oracle_split": 0.6272749126009571,
+    "test_oracle_all_rows": 0.6272749126009571,
+    "inflation_oracle": 0.0,
+    "config_oracle": 0.6272749126009571,
+    "inflation_config_oracle": 0.0,
+    "expected_max": {
+     "1": 0.6129017116100313,
+     "2": 0.6197441721131781,
+     "4": 0.6235705197571296,
+     "8": 0.6272749126009571
+    }
+   },
+   "iALS-p (add, DRGP grid)": {
+    "role": "alternate",
     "n_configs": 45,
     "stored_mean": 0.6277618183940387,
     "val_selected_replay": 0.6277618183940387,
@@ -2069,6 +2171,28 @@
     "alt_same_sign": true
    },
    {
+    "family": "P2",
+    "A": "iALS-p (add prior)",
+    "B": "iALS",
+    "valsel_diff": 0.014002622587866309,
+    "oracle_diff": 0.014002622587866309,
+    "oracle_all_diff": 0.014002622587866309,
+    "config_oracle_diff": 0.014002622587866331,
+    "expected_diff_by_k": {
+     "1": 0.1451893832715368,
+     "2": 0.08964162946311904,
+     "4": 0.03948988774427742,
+     "8": 0.016888941111744438
+    },
+    "expected_diff_kmin": 0.016888941111744438,
+    "kmin": 8,
+    "sign_changes_k": [],
+    "flip_share": 0.0,
+    "stored_diff": 0.014002622587866309,
+    "alt_diff": 0.007355733191640135,
+    "alt_same_sign": true
+   },
+   {
     "family": "P3",
     "A": "QP family (pooled)",
     "B": "LightGCN-p (add prior)",
@@ -2128,7 +2252,7 @@
    }
   ],
   "alt_metric": "ndcg@50",
-  "inflation_trained_mean": 0.0009174664365489723,
+  "inflation_trained_mean": 0.0008691787293621843,
   "inflation_trained_range": [
    0.0,
    0.0028288040487199906

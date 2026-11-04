@@ -1,0 +1,1151 @@
+{
+ "metric": {
+  "coat": "ndcg@5",
+  "yahoo": "ndcg@5",
+  "kuairand": "ndcg@10",
+  "kuairec": "ndcg@20"
+ },
+ "X1": [
+  {
+   "dataset": "coat",
+   "group": "iALS (no prior)",
+   "prior": "--",
+   "nDCG_mean": 0.58117625538433,
+   "nDCG_sd": 0.010680824757954984,
+   "S": 10,
+   "n_configs": 24,
+   "vs_no_prior": null,
+   "vs_add": null,
+   "source": "results/v3/learned_coat_given.json",
+   "method": "iALS"
+  },
+  {
+   "dataset": "coat",
+   "group": "iALS-p",
+   "prior": "add",
+   "nDCG_mean": 0.5983895374152224,
+   "nDCG_sd": 0.01275934663857331,
+   "S": 10,
+   "n_configs": 90,
+   "vs_no_prior": {
+    "A": "Coat iALS-p add",
+    "B": "Coat iALS (no prior)",
+    "diff": 0.016817168218631263,
+    "half": 0.018040872526834784,
+    "p": 0.067542892329092,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 0.810514707949104
+   },
+   "vs_add": null,
+   "source": "results/v5/learned_coat_add_ials.json",
+   "method": "iALS-p"
+  },
+  {
+   "dataset": "coat",
+   "group": "iALS-p",
+   "prior": "add_noips",
+   "nDCG_mean": 0.6044108417724677,
+   "nDCG_sd": 0.011477019963514705,
+   "S": 10,
+   "n_configs": 90,
+   "vs_no_prior": {
+    "A": "Coat iALS-p add_noips",
+    "B": "Coat iALS (no prior)",
+    "diff": 0.0230822625310116,
+    "half": 0.01823947265330996,
+    "p": 0.01336021521870016,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 0.18704301306180224
+   },
+   "vs_add": {
+    "A": "Coat iALS-p add_noips",
+    "B": "Coat iALS-p add",
+    "diff": 0.0062650943123803435,
+    "half": 0.006968036244453237,
+    "p": 0.07778494868247933,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 0.8556344355072726
+   },
+   "source": "results/v6/learned_coat_add_noips_ials.json",
+   "method": "iALS-p"
+  },
+  {
+   "dataset": "coat",
+   "group": "iALS-p",
+   "prior": "pop",
+   "nDCG_mean": 0.5832210246822757,
+   "nDCG_sd": 0.023799706869885324,
+   "S": 10,
+   "n_configs": 90,
+   "vs_no_prior": {
+    "A": "Coat iALS-p pop",
+    "B": "Coat iALS (no prior)",
+    "diff": 0.0016715918857771802,
+    "half": 0.016109407738683527,
+    "p": 0.8381638183001253,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 1.0
+   },
+   "vs_add": {
+    "A": "Coat iALS-p pop",
+    "B": "Coat iALS-p add",
+    "diff": -0.015145576332854077,
+    "half": 0.015387930721350135,
+    "p": 0.05368707884661435,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 0.6979320250059865
+   },
+   "source": "results/v6/learned_coat_pop_ials.json",
+   "method": "iALS-p"
+  },
+  {
+   "dataset": "coat",
+   "group": "iALS-p",
+   "prior": "shuf_item",
+   "nDCG_mean": 0.5683343264432181,
+   "nDCG_sd": 0.017526037363247367,
+   "S": 10,
+   "n_configs": 90,
+   "vs_no_prior": {
+    "A": "Coat iALS-p shuf_item",
+    "B": "Coat iALS (no prior)",
+    "diff": -0.014057822448015034,
+    "half": 0.01853033675814162,
+    "p": 0.13632686846491315,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 1.0
+   },
+   "vs_add": {
+    "A": "Coat iALS-p shuf_item",
+    "B": "Coat iALS-p add",
+    "diff": -0.030874990666646295,
+    "half": 0.022746539150628603,
+    "p": 0.008028768078514584,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 0.12043152117771876
+   },
+   "source": "results/v6/learned_coat_shuf_item_ials.json",
+   "method": "iALS-p"
+  },
+  {
+   "dataset": "coat",
+   "group": "LightGCN (no prior)",
+   "prior": "--",
+   "nDCG_mean": 0.5683265125695837,
+   "nDCG_sd": 0.013901470111655627,
+   "S": 10,
+   "n_configs": 54,
+   "vs_no_prior": null,
+   "vs_add": null,
+   "source": "results/v3/learned_coat_given.json",
+   "method": "LightGCN"
+  },
+  {
+   "dataset": "coat",
+   "group": "LightGCN-p",
+   "prior": "add",
+   "nDCG_mean": 0.6020297216780077,
+   "nDCG_sd": 0.015556600635816917,
+   "S": 10,
+   "n_configs": 108,
+   "vs_no_prior": {
+    "A": "Coat LightGCN-p add",
+    "B": "Coat LightGCN (no prior)",
+    "diff": 0.031984395547851124,
+    "half": 0.020648086194959194,
+    "p": 0.002543502728721509,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 0.04578304911698716
+   },
+   "vs_add": null,
+   "source": "results/v4/learned_coat_prior_bpr.json",
+   "method": "LightGCN-p"
+  },
+  {
+   "dataset": "coat",
+   "group": "LightGCN-p",
+   "prior": "add_noips",
+   "nDCG_mean": 0.6052395454240785,
+   "nDCG_sd": 0.014524349651244656,
+   "S": 10,
+   "n_configs": 108,
+   "vs_no_prior": {
+    "A": "Coat LightGCN-p add_noips",
+    "B": "Coat LightGCN (no prior)",
+    "diff": 0.035996789941387546,
+    "half": 0.01688026197201428,
+    "p": 3.8175689855542014e-05,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 0.0007253381072552982
+   },
+   "vs_add": {
+    "A": "Coat LightGCN-p add_noips",
+    "B": "Coat LightGCN-p add",
+    "diff": 0.004012394393536418,
+    "half": 0.01001427206812936,
+    "p": 0.4306197589303421,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 1.0
+   },
+   "source": "results/v6/learned_coat_add_noips_lgn.json",
+   "method": "LightGCN-p"
+  },
+  {
+   "dataset": "coat",
+   "group": "LightGCN-p",
+   "prior": "pop",
+   "nDCG_mean": 0.58349449875873,
+   "nDCG_sd": 0.023291254889310862,
+   "S": 10,
+   "n_configs": 108,
+   "vs_no_prior": {
+    "A": "Coat LightGCN-p pop",
+    "B": "Coat LightGCN (no prior)",
+    "diff": 0.015626091414182836,
+    "half": 0.010684093580667128,
+    "p": 0.004334161505274157,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 0.06934658408438651
+   },
+   "vs_add": {
+    "A": "Coat LightGCN-p pop",
+    "B": "Coat LightGCN-p add",
+    "diff": -0.016358304133668296,
+    "half": 0.019520525590510696,
+    "p": 0.10006169958022428,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 1.0
+   },
+   "source": "results/v6/learned_coat_pop_lgn.json",
+   "method": "LightGCN-p"
+  },
+  {
+   "dataset": "coat",
+   "group": "LightGCN-p",
+   "prior": "shuf_item",
+   "nDCG_mean": 0.5527105211365224,
+   "nDCG_sd": 0.009502812760589986,
+   "S": 10,
+   "n_configs": 108,
+   "vs_no_prior": {
+    "A": "Coat LightGCN-p shuf_item",
+    "B": "Coat LightGCN (no prior)",
+    "diff": -0.012946494394699144,
+    "half": 0.02417846660990835,
+    "p": 0.2924822299184544,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 1.0
+   },
+   "vs_add": {
+    "A": "Coat LightGCN-p shuf_item",
+    "B": "Coat LightGCN-p add",
+    "diff": -0.044930889942550276,
+    "half": 0.02952820899078821,
+    "p": 0.003019171791449287,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 0.05132592045463788
+   },
+   "source": "results/v6/learned_coat_shuf_item_lgn.json",
+   "method": "LightGCN-p"
+  },
+  {
+   "dataset": "kuairec",
+   "group": "iALS (no prior)",
+   "prior": "--",
+   "nDCG_mean": 0.6132722900130908,
+   "nDCG_sd": 0.002974010205345381,
+   "S": 5,
+   "n_configs": 12,
+   "vs_no_prior": null,
+   "vs_add": null,
+   "source": "results/v3/learned_kuairec_pop_A.json",
+   "method": "iALS"
+  },
+  {
+   "dataset": "kuairec",
+   "group": "iALS-p",
+   "prior": "add",
+   "nDCG_mean": 0.6272749126009571,
+   "nDCG_sd": 0.0017884465056170033,
+   "S": 5,
+   "n_configs": 8,
+   "vs_no_prior": {
+    "A": "KuaiRec iALS-p add",
+    "B": "KuaiRec iALS (no prior)",
+    "diff": 0.014743547563800538,
+    "half": 0.0034316468234802102,
+    "p": 8.573216659350188e-17,
+    "n_users": 1410,
+    "identical": false,
+    "p_holm": 2.057571998244045e-15
+   },
+   "vs_add": null,
+   "source": "results/v6/learned_kuairec_add_ials_small.json",
+   "method": "iALS-p-small"
+  },
+  {
+   "dataset": "kuairec",
+   "group": "iALS-p",
+   "prior": "add_noips",
+   "nDCG_mean": 0.6350221150549806,
+   "nDCG_sd": 0.0020800909789837284,
+   "S": 5,
+   "n_configs": 8,
+   "vs_no_prior": {
+    "A": "KuaiRec iALS-p add_noips",
+    "B": "KuaiRec iALS (no prior)",
+    "diff": 0.02279396483434439,
+    "half": 0.004038964994799967,
+    "p": 2.2572730980059436e-27,
+    "n_users": 1410,
+    "identical": false,
+    "p_holm": 5.643182745014859e-26
+   },
+   "vs_add": {
+    "A": "KuaiRec iALS-p add_noips",
+    "B": "KuaiRec iALS-p add",
+    "diff": 0.00805041727054385,
+    "half": 0.002060660802801529,
+    "p": 3.346494427196531e-14,
+    "n_users": 1410,
+    "identical": false,
+    "p_holm": 7.027638297112715e-13
+   },
+   "source": "results/v6/learned_kuairec_add_noips_ials_small.json",
+   "method": "iALS-p-small"
+  },
+  {
+   "dataset": "kuairec",
+   "group": "iALS-p",
+   "prior": "pop",
+   "nDCG_mean": 0.6143896406197709,
+   "nDCG_sd": 0.002835210398894281,
+   "S": 5,
+   "n_configs": 8,
+   "vs_no_prior": {
+    "A": "KuaiRec iALS-p pop",
+    "B": "KuaiRec iALS (no prior)",
+    "diff": 0.0010627985697106825,
+    "half": 0.0024646090983491643,
+    "p": 0.39774650885365875,
+    "n_users": 1410,
+    "identical": false,
+    "p_holm": 1.0
+   },
+   "vs_add": {
+    "A": "KuaiRec iALS-p pop",
+    "B": "KuaiRec iALS-p add",
+    "diff": -0.013680748994089857,
+    "half": 0.0033137550876618208,
+    "p": 1.1921537421375249e-15,
+    "n_users": 1410,
+    "identical": false,
+    "p_holm": 2.7419536069163074e-14
+   },
+   "source": "results/v6/learned_kuairec_pop_ials_small.json",
+   "method": "iALS-p-small"
+  },
+  {
+   "dataset": "kuairec",
+   "group": "iALS-p",
+   "prior": "shuf_item",
+   "nDCG_mean": 0.49926874092643025,
+   "nDCG_sd": 0.003241106550453774,
+   "S": 5,
+   "n_configs": 8,
+   "vs_no_prior": {
+    "A": "KuaiRec iALS-p shuf_item",
+    "B": "KuaiRec iALS (no prior)",
+    "diff": -0.11207330045387362,
+    "half": 0.009387202756818036,
+    "p": 1.0166945521388518e-102,
+    "n_users": 1410,
+    "identical": false,
+    "p_holm": 3.5584309324859814e-101
+   },
+   "vs_add": {
+    "A": "KuaiRec iALS-p shuf_item",
+    "B": "KuaiRec iALS-p add",
+    "diff": -0.12681684801767418,
+    "half": 0.009289097717529643,
+    "p": 4.691318463816667e-128,
+    "n_users": 1410,
+    "identical": false,
+    "p_holm": 1.688874646974e-126
+   },
+   "source": "results/v6/learned_kuairec_shuf_item_ials_small.json",
+   "method": "iALS-p-small"
+  },
+  {
+   "dataset": "kuairec",
+   "group": "LightGCN (no prior)",
+   "prior": "--",
+   "nDCG_mean": 0.6084973936738879,
+   "nDCG_sd": 0.0031143345143556577,
+   "S": 5,
+   "n_configs": 36,
+   "vs_no_prior": null,
+   "vs_add": null,
+   "source": "results/v3/learned_kuairec_pop_B.json",
+   "method": "LightGCN"
+  },
+  {
+   "dataset": "kuairec",
+   "group": "LightGCN-p",
+   "prior": "add",
+   "nDCG_mean": 0.6287508717707933,
+   "nDCG_sd": 0.002256024931558426,
+   "S": 5,
+   "n_configs": 24,
+   "vs_no_prior": {
+    "A": "KuaiRec LightGCN-p add",
+    "B": "KuaiRec LightGCN (no prior)",
+    "diff": 0.021220589323687245,
+    "half": 0.002864002456280665,
+    "p": 1.0561639411581296e-44,
+    "n_users": 1410,
+    "identical": false,
+    "p_holm": 2.9572590352427628e-43
+   },
+   "vs_add": null,
+   "source": "results/v4/learned_kuairec_offonly.json",
+   "method": "LightGCN-p"
+  },
+  {
+   "dataset": "coat",
+   "group": "prior alone",
+   "prior": "add",
+   "nDCG_mean": 0.5584840420282517,
+   "nDCG_sd": 0.010527669146945515,
+   "S": 10,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": null,
+   "source": "results/v6/learned_coat_alone_add.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "coat",
+   "group": "prior alone",
+   "prior": "add_noips",
+   "nDCG_mean": 0.5573763928766844,
+   "nDCG_sd": 0.010683469937517535,
+   "S": 10,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": {
+    "A": "Coat prior alone add_noips",
+    "B": "Coat prior alone add",
+    "diff": -0.002088050965993323,
+    "half": 0.008463436296114244,
+    "p": 0.6273162842235208,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 1.0
+   },
+   "source": "results/v6/learned_coat_alone_add_noips.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "coat",
+   "group": "prior alone",
+   "prior": "pop",
+   "nDCG_mean": 0.5367371222295401,
+   "nDCG_sd": 0.00997438175956186,
+   "S": 10,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": {
+    "A": "Coat prior alone pop",
+    "B": "Coat prior alone add",
+    "diff": -0.019401365655224566,
+    "half": 0.027787634037172944,
+    "p": 0.1702318391750995,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 1.0
+   },
+   "source": "results/v6/learned_coat_alone_pop.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "coat",
+   "group": "prior alone",
+   "prior": "shuf_item",
+   "nDCG_mean": 0.35719901885713023,
+   "nDCG_sd": 0.012480926048188186,
+   "S": 10,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": {
+    "A": "Coat prior alone shuf_item",
+    "B": "Coat prior alone add",
+    "diff": -0.20361684359790766,
+    "half": 0.051901532432270345,
+    "p": 3.577036501497267e-13,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 7.154073002994533e-12
+   },
+   "source": "results/v6/learned_coat_alone_shuf_item.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "coat",
+   "group": "prior alone",
+   "prior": "user_only",
+   "nDCG_mean": 0.3496920249262684,
+   "nDCG_sd": 0.015156805408488348,
+   "S": 10,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": {
+    "A": "Coat prior alone user_only",
+    "B": "Coat prior alone add",
+    "diff": -0.20714641420376836,
+    "half": 0.049907955146594546,
+    "p": 2.128109033117872e-14,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 4.681839872859318e-13
+   },
+   "source": "results/v6/learned_coat_alone_user_only.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "yahoo",
+   "group": "prior alone",
+   "prior": "add",
+   "nDCG_mean": 0.5243321139553321,
+   "nDCG_sd": 0.004963900690299255,
+   "S": 5,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": null,
+   "source": "results/v6/learned_yahoo_alone_add.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "yahoo",
+   "group": "prior alone",
+   "prior": "add_noips",
+   "nDCG_mean": 0.5237466729824151,
+   "nDCG_sd": 0.005502261997857602,
+   "S": 5,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": {
+    "A": "Yahoo prior alone add_noips",
+    "B": "Yahoo prior alone add",
+    "diff": -0.0010878540876992553,
+    "half": 0.003975693648685773,
+    "p": 0.5916102585604238,
+    "n_users": 2310,
+    "identical": false,
+    "p_holm": 1.0
+   },
+   "source": "results/v6/learned_yahoo_alone_add_noips.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "yahoo",
+   "group": "prior alone",
+   "prior": "pop",
+   "nDCG_mean": 0.5330639750007216,
+   "nDCG_sd": 0.006546139761009704,
+   "S": 5,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": {
+    "A": "Yahoo prior alone pop",
+    "B": "Yahoo prior alone add",
+    "diff": 0.00889551861458305,
+    "half": 0.014933101641951625,
+    "p": 0.2428685538473515,
+    "n_users": 2310,
+    "identical": false,
+    "p_holm": 1.0
+   },
+   "source": "results/v6/learned_yahoo_alone_pop.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "yahoo",
+   "group": "prior alone",
+   "prior": "shuf_item",
+   "nDCG_mean": 0.34463891606429353,
+   "nDCG_sd": 0.005617811004137685,
+   "S": 5,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": {
+    "A": "Yahoo prior alone shuf_item",
+    "B": "Yahoo prior alone add",
+    "diff": -0.1779843379473616,
+    "half": 0.01736886609637051,
+    "p": 6.66536539297583e-83,
+    "n_users": 2310,
+    "identical": false,
+    "p_holm": 2.132916925752266e-81
+   },
+   "source": "results/v6/learned_yahoo_alone_shuf_item.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "yahoo",
+   "group": "prior alone",
+   "prior": "user_only",
+   "nDCG_mean": 0.3766528475307223,
+   "nDCG_sd": 0.005092315051989135,
+   "S": 5,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": {
+    "A": "Yahoo prior alone user_only",
+    "B": "Yahoo prior alone add",
+    "diff": -0.1447382360891923,
+    "half": 0.01737741623881868,
+    "p": 7.769066966585704e-57,
+    "n_users": 2310,
+    "identical": false,
+    "p_holm": 2.3307200899757114e-55
+   },
+   "source": "results/v6/learned_yahoo_alone_user_only.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "kuairand",
+   "group": "prior alone",
+   "prior": "add",
+   "nDCG_mean": 0.3637267653430751,
+   "nDCG_sd": 0.0013285804225827407,
+   "S": 5,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": null,
+   "source": "results/v6/learned_kuairand_alone_add.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "kuairand",
+   "group": "prior alone",
+   "prior": "add_noips",
+   "nDCG_mean": 0.3837136036137651,
+   "nDCG_sd": 0.0023096352513034615,
+   "S": 5,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": {
+    "A": "KuaiRand prior alone add_noips",
+    "B": "KuaiRand prior alone add",
+    "diff": 0.019903938974156807,
+    "half": 0.0024522484026227843,
+    "p": 3.5867206924839507e-56,
+    "n_users": 8321,
+    "identical": false,
+    "p_holm": 1.0401490008203457e-54
+   },
+   "source": "results/v6/learned_kuairand_alone_add_noips.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "kuairand",
+   "group": "prior alone",
+   "prior": "pop",
+   "nDCG_mean": 0.4204247657879773,
+   "nDCG_sd": 0.002146071074151658,
+   "S": 5,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": {
+    "A": "KuaiRand prior alone pop",
+    "B": "KuaiRand prior alone add",
+    "diff": 0.05640565631666148,
+    "half": 0.0051923888186963625,
+    "p": 5.099326023020586e-98,
+    "n_users": 8321,
+    "identical": false,
+    "p_holm": 1.7337708478269993e-96
+   },
+   "source": "results/v6/learned_kuairand_alone_pop.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "kuairand",
+   "group": "prior alone",
+   "prior": "shuf_item",
+   "nDCG_mean": 0.32565293400646456,
+   "nDCG_sd": 0.0017897170003903747,
+   "S": 5,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": {
+    "A": "KuaiRand prior alone shuf_item",
+    "B": "KuaiRand prior alone add",
+    "diff": -0.03912271574984205,
+    "half": 0.00564396702918937,
+    "p": 1.3087211280222296e-41,
+    "n_users": 8321,
+    "identical": false,
+    "p_holm": 3.402674932857797e-40
+   },
+   "source": "results/v6/learned_kuairand_alone_shuf_item.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "kuairand",
+   "group": "prior alone",
+   "prior": "user_only",
+   "nDCG_mean": 0.32594668287189005,
+   "nDCG_sd": 0.0010964811134737582,
+   "S": 5,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": {
+    "A": "KuaiRand prior alone user_only",
+    "B": "KuaiRand prior alone add",
+    "diff": -0.038838978396138535,
+    "half": 0.005532364874229529,
+    "p": 1.2686973101355196e-42,
+    "n_users": 8321,
+    "identical": false,
+    "p_holm": 3.425482737365903e-41
+   },
+   "source": "results/v6/learned_kuairand_alone_user_only.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "kuairec",
+   "group": "prior alone",
+   "prior": "add",
+   "nDCG_mean": 0.6215617437955584,
+   "nDCG_sd": 0.0016064088925552315,
+   "S": 5,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": null,
+   "source": "results/v6/learned_kuairec_alone_add.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "kuairec",
+   "group": "prior alone",
+   "prior": "add_noips",
+   "nDCG_mean": 0.6367287796720302,
+   "nDCG_sd": 0.0021616885125340627,
+   "S": 5,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": {
+    "A": "KuaiRec prior alone add_noips",
+    "B": "KuaiRec prior alone add",
+    "diff": 0.015163019523025352,
+    "half": 0.0016766594335816262,
+    "p": 1.0287413989427596e-63,
+    "n_users": 1410,
+    "identical": false,
+    "p_holm": 3.1890983367225546e-62
+   },
+   "source": "results/v6/learned_kuairec_alone_add_noips.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "kuairec",
+   "group": "prior alone",
+   "prior": "pop",
+   "nDCG_mean": 0.5765655224236483,
+   "nDCG_sd": 0.002592978081700165,
+   "S": 5,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": {
+    "A": "KuaiRec prior alone pop",
+    "B": "KuaiRec prior alone add",
+    "diff": -0.04569906776189757,
+    "half": 0.004251791148736928,
+    "p": 5.450686621146195e-86,
+    "n_users": 1410,
+    "identical": false,
+    "p_holm": 1.7987265849782444e-84
+   },
+   "source": "results/v6/learned_kuairec_alone_pop.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "kuairec",
+   "group": "prior alone",
+   "prior": "shuf_item",
+   "nDCG_mean": 0.03975544715245943,
+   "nDCG_sd": 0.00073481716230542,
+   "S": 5,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": {
+    "A": "KuaiRec prior alone shuf_item",
+    "B": "KuaiRec prior alone add",
+    "diff": -0.5820124332300343,
+    "half": 0.010185133776840464,
+    "p": 0.0,
+    "n_users": 1410,
+    "identical": false,
+    "p_holm": 0.0
+   },
+   "source": "results/v6/learned_kuairec_alone_shuf_item.json",
+   "method": "Prior-alone"
+  },
+  {
+   "dataset": "kuairec",
+   "group": "prior alone",
+   "prior": "user_only",
+   "nDCG_mean": 0.06861104457977066,
+   "nDCG_sd": 0.001004329025355244,
+   "S": 5,
+   "n_configs": 1,
+   "vs_no_prior": null,
+   "vs_add": {
+    "A": "KuaiRec prior alone user_only",
+    "B": "KuaiRec prior alone add",
+    "diff": -0.5540074617832955,
+    "half": 0.010155605011551608,
+    "p": 0.0,
+    "n_users": 1410,
+    "identical": false,
+    "p_holm": 0.0
+   },
+   "source": "results/v6/learned_kuairec_alone_user_only.json",
+   "method": "Prior-alone"
+  }
+ ],
+ "X1_drgp_grid_reference": {
+  "stat_mean": 0.6277618183940387,
+  "vs_x1_grid_add": {
+   "A": "KuaiRec iALS-p add, DRGP grid",
+   "B": "KuaiRec iALS-p add, X1 grid",
+   "diff": 0.00023805039528463587,
+   "half": 0.00168157360286209,
+   "p": 0.7812841558685463,
+   "n_users": 1410,
+   "identical": false,
+   "p_holm": null
+  },
+  "vs_iALS": {
+   "A": "KuaiRec iALS-p add, DRGP grid",
+   "B": "KuaiRec iALS (no prior)",
+   "diff": 0.014981597959085173,
+   "half": 0.002849179840509027,
+   "p": 4.242873617085999e-24,
+   "n_users": 1410,
+   "identical": false,
+   "p_holm": null
+  }
+ },
+ "X2": [
+  {
+   "method": "iALS-p",
+   "propensity": "shipped",
+   "nDCG_mean": 0.5983895374152224,
+   "nDCG_sd": 0.01275934663857331,
+   "vs_no_prior": {
+    "A": "Coat iALS-p (shipped)",
+    "B": "Coat iALS (shipped)",
+    "diff": 0.016817168218631263,
+    "half": 0.018040872526834784,
+    "p": 0.067542892329092,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 0.37964320854519323
+   },
+   "est_minus_shipped": null,
+   "no_prior_reference": "iALS"
+  },
+  {
+   "method": "iALS-p",
+   "propensity": "estimated",
+   "nDCG_mean": 0.6008846660420736,
+   "nDCG_sd": 0.011999446008124115,
+   "vs_no_prior": {
+    "A": "Coat iALS-p (estimated)",
+    "B": "Coat iALS (shipped)",
+    "diff": 0.019444565187343343,
+    "half": 0.018660576922818035,
+    "p": 0.041195156953119816,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 0.3295612556249585
+   },
+   "est_minus_shipped": {
+    "A": "Coat iALS-p (estimated)",
+    "B": "Coat iALS-p (shipped)",
+    "diff": 0.0026273969687120855,
+    "half": 0.005272604898827127,
+    "p": 0.3271705466460849,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 1.0
+   },
+   "no_prior_reference": "iALS"
+  },
+  {
+   "method": "LightGCN-p",
+   "propensity": "shipped",
+   "nDCG_mean": 0.6020297216780077,
+   "nDCG_sd": 0.015556600635816917,
+   "vs_no_prior": {
+    "A": "Coat LightGCN-p (shipped)",
+    "B": "Coat LightGCN (shipped)",
+    "diff": 0.031984395547851124,
+    "half": 0.020648086194959194,
+    "p": 0.002543502728721509,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 0.02289152455849358
+   },
+   "est_minus_shipped": null,
+   "no_prior_reference": "LightGCN"
+  },
+  {
+   "method": "LightGCN-p",
+   "propensity": "estimated",
+   "nDCG_mean": 0.6025172707153044,
+   "nDCG_sd": 0.01542562626113,
+   "vs_no_prior": {
+    "A": "Coat LightGCN-p (estimated)",
+    "B": "Coat LightGCN (shipped)",
+    "diff": 0.03362214684036926,
+    "half": 0.016717310080507766,
+    "p": 9.940296723515661e-05,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 0.0009940296723515661
+   },
+   "est_minus_shipped": {
+    "A": "Coat LightGCN-p (estimated)",
+    "B": "Coat LightGCN-p (shipped)",
+    "diff": 0.0016377512925181328,
+    "half": 0.01029934349949165,
+    "p": 0.7543010879872913,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 1.0
+   },
+   "no_prior_reference": "LightGCN"
+  },
+  {
+   "method": "iALS-wide",
+   "propensity": "shipped",
+   "nDCG_mean": 0.5869360938980506,
+   "nDCG_sd": 0.012400811108971607,
+   "vs_no_prior": {
+    "A": "Coat iALS-wide (shipped)",
+    "B": "Coat iALS (shipped)",
+    "diff": 0.007386096947385618,
+    "half": 0.0075215665217501495,
+    "p": 0.05423474407788475,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 0.37964320854519323
+   },
+   "est_minus_shipped": null,
+   "no_prior_reference": "iALS"
+  },
+  {
+   "method": "iALS-wide",
+   "propensity": "estimated",
+   "nDCG_mean": 0.5869360938980506,
+   "nDCG_sd": 0.012400811108971607,
+   "vs_no_prior": {
+    "A": "Coat iALS-wide (estimated)",
+    "B": "Coat iALS (shipped)",
+    "diff": 0.007386096947385618,
+    "half": 0.0075215665217501495,
+    "p": 0.05423474407788475,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 0.37964320854519323
+   },
+   "est_minus_shipped": {
+    "A": "Coat iALS-wide (estimated)",
+    "B": "Coat iALS-wide (shipped)",
+    "diff": 0.0,
+    "half": 0.0,
+    "p": 1.0,
+    "n_users": 225,
+    "identical": true,
+    "p_holm": 1.0
+   },
+   "no_prior_reference": "iALS"
+  },
+  {
+   "method": "imputation alone (add)",
+   "propensity": "shipped",
+   "nDCG_mean": 0.5584840420282517,
+   "nDCG_sd": 0.010527669146945515,
+   "vs_no_prior": null,
+   "est_minus_shipped": null,
+   "no_prior_reference": null
+  },
+  {
+   "method": "imputation alone (add)",
+   "propensity": "estimated",
+   "nDCG_mean": 0.557310953140293,
+   "nDCG_sd": 0.009732983634921678,
+   "vs_no_prior": null,
+   "est_minus_shipped": {
+    "A": "Coat imputation alone (add) (estimated)",
+    "B": "Coat imputation alone (add) (shipped)",
+    "diff": -0.0011399925515776835,
+    "half": 0.007256455906516735,
+    "p": 0.7571652074453512,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 1.0
+   },
+   "no_prior_reference": null
+  },
+  {
+   "method": "iALS (no prior)",
+   "propensity": "shipped",
+   "nDCG_mean": 0.58117625538433,
+   "nDCG_sd": 0.010680824757954984,
+   "vs_no_prior": null,
+   "est_minus_shipped": null,
+   "no_prior_reference": null
+  },
+  {
+   "method": "LightGCN (no prior)",
+   "propensity": "shipped",
+   "nDCG_mean": 0.5683265125695837,
+   "nDCG_sd": 0.013901470111655627,
+   "vs_no_prior": null,
+   "est_minus_shipped": null,
+   "no_prior_reference": null
+  }
+ ],
+ "X3": {
+  "coat": {
+   "LightGCN-p_mean": 0.6020297216780077,
+   "LightGCN_mean": 0.5683265125695837,
+   "LightGCN-p_minus_LightGCN": {
+    "A": "X3 Coat LightGCN-p (add)",
+    "B": "X3 Coat LightGCN",
+    "diff": 0.031984395547851124,
+    "half": 0.020648086194959194,
+    "p": 0.002543502728721509,
+    "n_users": 225,
+    "identical": false,
+    "p_holm": 0.007630508186164527
+   }
+  },
+  "yahoo": {
+   "LightGCN-p_mean": 0.668952205576832,
+   "LightGCN_mean": 0.6707820038402676,
+   "LightGCN-p_minus_LightGCN": {
+    "A": "X3 Yahoo LightGCN-p (add)",
+    "B": "X3 Yahoo LightGCN",
+    "diff": -0.0014331835110525742,
+    "half": 0.003930230219930853,
+    "p": 0.474626835472976,
+    "n_users": 2310,
+    "identical": false,
+    "p_holm": 0.474626835472976
+   }
+  },
+  "kuairand": {
+   "LightGCN-p_mean": 0.4564541609090254,
+   "LightGCN_mean": 0.4569013036804713,
+   "LightGCN-p_minus_LightGCN": {
+    "A": "X3 KuaiRand LightGCN-p (add)",
+    "B": "X3 KuaiRand LightGCN",
+    "diff": -0.0008074802037897054,
+    "half": 0.0013298716623316956,
+    "p": 0.23398723554957213,
+    "n_users": 8321,
+    "identical": false,
+    "p_holm": 0.46797447109914425
+   }
+  },
+  "kuairec": {
+   "LightGCN-p_mean": 0.6287508717707933,
+   "LightGCN_mean": 0.6084973936738879,
+   "LightGCN-p_minus_LightGCN": {
+    "A": "X3 KuaiRec LightGCN-p (add)",
+    "B": "X3 KuaiRec LightGCN",
+    "diff": 0.021220589323687245,
+    "half": 0.002864002456280665,
+    "p": 1.0561639411581296e-44,
+    "n_users": 1410,
+    "identical": false,
+    "p_holm": 4.224655764632518e-44
+   }
+  }
+ },
+ "X4": {
+  "rows": [
+   {
+    "model": "iALS (stored)",
+    "n_configs": 24,
+    "nDCG_mean": 0.58117625538433,
+    "nDCG_sd": 0.010680824757954984,
+    "grid": "alpha {3,10,30} x reg {1,10,100,1000} x dim {32,64}"
+   },
+   {
+    "model": "iALS-wide (v5 grid)",
+    "n_configs": 18,
+    "nDCG_mean": 0.5869360938980506,
+    "nDCG_sd": 0.012400811108971607,
+    "grid": "alpha {10,30,100} x reg {10,100,300} x dim {32,64}"
+   },
+   {
+    "model": "iALS-wide2 (X4 grid)",
+    "n_configs": 32,
+    "nDCG_mean": 0.5921678012233003,
+    "nDCG_sd": 0.015035643937004208,
+    "grid": "alpha {30,100,300,1000} x reg {10,100,300,1000} x dim {32,64}"
+   },
+   {
+    "model": "iALS-p add (stored)",
+    "n_configs": 90,
+    "nDCG_mean": 0.5983895374152224,
+    "nDCG_sd": 0.01275934663857331,
+    "grid": "alpha {10,30,100} x reg {10,100,300} x pbeta {0.1,0.2,0.3,0.5,1} x dim {32,64}"
+   }
+  ],
+  "wide2_minus_iALS": {
+   "A": "X4 iALS-wide2 (X4 grid)",
+   "B": "X4 iALS (stored)",
+   "diff": 0.012918837469474802,
+   "half": 0.008014776142741297,
+   "p": 0.0017012134011479088,
+   "n_users": 225,
+   "identical": false,
+   "p_holm": 0.0034024268022958175
+  },
+  "wide2_minus_iALS-p": {
+   "A": "X4 iALS-wide2 (X4 grid)",
+   "B": "X4 iALS-p add (stored)",
+   "diff": -0.0038983307491564584,
+   "half": 0.01599033157884099,
+   "p": 0.6313968107584361,
+   "n_users": 225,
+   "identical": false,
+   "p_holm": 0.6313968107584361
+  }
+ },
+ "notes": [
+  "NOTE: Coat LightGCN (estimated propensities): no prop=pop plain-LightGCN run in results/v6 (design X2 lists 54 configurations); row not computed"
+ ]
+}

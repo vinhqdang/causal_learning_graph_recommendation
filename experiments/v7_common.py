@@ -22,7 +22,7 @@ from scipy import stats
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
 
 OUT = "results/v6"
-V2, V3, V4, V5 = "results/v2/", "results/v3/", "results/v4/", "results/v5/"
+V2, V3, V4, V5, V6 = "results/v2/", "results/v3/", "results/v4/", "results/v5/", "results/v6/"
 
 KEY = {"coat": "ndcg@5", "yahoo": "ndcg@5", "kuairand": "ndcg@10", "kuairec": "ndcg@20"}
 NAME = {"coat": "Coat", "yahoo": "Yahoo", "kuairand": "KuaiRand", "kuairec": "KuaiRec"}
@@ -278,7 +278,7 @@ def registry(ds):
         for n in TRAINED_BASE:
             R.append(_m(n, role_of(n), (src.get(n, V3 + "learned_yahoo_pop_D.json"), n)))
         R += [_m("AdvInfoNCE-LGN", "debiaser", (V4 + "learned_yahoo_adv.json", "AdvInfoNCE-LGN")),
-              _m("LightGCN-p (add prior)", "prior", (V4 + "learned_yahoo_offonly.json", "LightGCN-p")),
+              _m("LightGCN-p (add prior)", "prior", (V6 + "learned_yahoo_offonly.json", "LightGCN-p")),
               _m("DR-BPR-LGN-1 (Q)", "refinement", *_family_jobs("yahoo")[:3]),
               _m("QP family (pooled)", "final", *_family_jobs("yahoo")),
               _m("control: shuffled Q", "control", (V4 + "learned_yahoo_abl_DR-BPR-shuf.json", "DR-BPR-shuf")),
@@ -287,7 +287,7 @@ def registry(ds):
         R += [_m(n, role_of(n), (V3 + "learned_kuairand_pop.json", n))
               for n in ["MF", "DR-MF", "BPR-MF", "LightGCN", "LightGCN-pt", "r-AdjNorm", "NAVIP", "DR-JL", "MACR", "SimGCL", "iALS"]]
         R += [_m("AdvInfoNCE-LGN", "debiaser", (V4 + "learned_kuairand_adv.json", "AdvInfoNCE-LGN")),
-              _m("LightGCN-p (add prior)", "prior", (V4 + "learned_kuairand_offonly.json", "LightGCN-p")),
+              _m("LightGCN-p (add prior)", "prior", (V6 + "learned_kuairand_offonly.json", "LightGCN-p")),
               _m("QP family (pooled)", "final", *_family_jobs("kuairand"))]
     else:
         src = {"LightGCN-pt": V3 + "learned_kuairec_pop_A.json", "SimGCL": V3 + "learned_kuairec_pop_A.json",
@@ -299,7 +299,10 @@ def registry(ds):
             R.append(_m(n, role_of(n), (src.get(n, V3 + "learned_kuairec_pop_B.json"), n)))
         R += [_m("AdvInfoNCE-LGN", "debiaser", (V4 + "learned_kuairec_adv.json", "AdvInfoNCE-LGN")),
               _m("LightGCN-p (add prior)", "prior", (V4 + "learned_kuairec_offonly.json", "LightGCN-p")),
-              _m("iALS-p (add prior)", "prior", (V5 + "learned_kuairec_add_ials.json", "iALS-p")),
+              # X1 run (8 configurations, same prior settings as the stored Coat add prior: floor 0.2, IPS fit)
+              _m("iALS-p (add prior)", "prior", (V6 + "learned_kuairec_add_ials_small.json", "iALS-p-small")),
+              # matched-grid additive row of the DRGP queue (45 configurations); reported as an alternative only
+              _m("iALS-p (add, DRGP grid)", "alternate", (V5 + "learned_kuairec_add_ials.json", "iALS-p")),
               _m("QP family (pooled)", "final", *_family_jobs("kuairec"))]
     return R
 
@@ -454,7 +457,7 @@ def primary_pairs(ds, M):
     if ds in ("yahoo", "kuairand", "kuairec"):
         pairs += [("P2", "LightGCN-p (add prior)", "LightGCN")]
     if ds == "kuairec":
-        pairs += [("P3", "QP family (pooled)", "LightGCN-p (add prior)")]
+        pairs += [("P2", "iALS-p (add prior)", "iALS"), ("P3", "QP family (pooled)", "LightGCN-p (add prior)")]
         trained = [m for m in M.values() if m.role in ("backbone", "baseline", "debiaser")]
         if trained and "DRUP" in M:
             pairs.append(("P4", "DRUP", max(trained, key=val_mean).name))

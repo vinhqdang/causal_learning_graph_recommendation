@@ -1,0 +1,51 @@
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Prior anatomy (X1). Test nDCG of iALS-p and LightGCN-p under four additive-imputation variants, and of the prior alone on all four datasets.}
+\label{tab:T9}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrrr}
+\toprule
+Dataset & Learner / prior & nDCG (mean $\pm$ sd) & $\Delta$ vs no prior $\times10^{3}$ [CI] & $p_\mathrm{Holm}$ & $\Delta$ vs add $\times10^{3}$ [CI] & $p_\mathrm{Holm}$ \\
+\midrule
+Coat & iALS (no prior) & 0.5812 $\pm$ 0.0107 & -- & -- & -- & -- \\
+Coat & iALS-p, add (IPS-fitted) & 0.5984 $\pm$ 0.0128 & +16.82 [18.04] & 0.811 & -- & -- \\
+Coat & iALS-p, add, no IPS & 0.6044 $\pm$ 0.0115 & +23.08 [18.24] & 0.187 & +6.27 [6.97] & 0.856 \\
+Coat & iALS-p, pop & 0.5832 $\pm$ 0.0238 & +1.67 [16.11] & 1.000 & -15.15 [15.39] & 0.698 \\
+Coat & iALS-p, shuffled item bias & 0.5683 $\pm$ 0.0175 & -14.06 [18.53] & 1.000 & -30.87 [22.75] & 0.120 \\
+Coat & LightGCN (no prior) & 0.5683 $\pm$ 0.0139 & -- & -- & -- & -- \\
+Coat & LightGCN-p, add (IPS-fitted) & 0.6020 $\pm$ 0.0156 & +31.98 [20.65] & 0.046 & -- & -- \\
+Coat & LightGCN-p, add, no IPS & 0.6052 $\pm$ 0.0145 & +36.00 [16.88] & $<$0.001 & +4.01 [10.01] & 1.000 \\
+Coat & LightGCN-p, pop & 0.5835 $\pm$ 0.0233 & +15.63 [10.68] & 0.069 & -16.36 [19.52] & 1.000 \\
+Coat & LightGCN-p, shuffled item bias & 0.5527 $\pm$ 0.0095 & -12.95 [24.18] & 1.000 & -44.93 [29.53] & 0.051 \\
+KuaiRec & iALS (no prior) & 0.6133 $\pm$ 0.0030 & -- & -- & -- & -- \\
+KuaiRec & iALS-p, add (IPS-fitted) & 0.6273 $\pm$ 0.0018 & +14.74 [3.43] & $<$0.001 & -- & -- \\
+KuaiRec & iALS-p, add, no IPS & 0.6350 $\pm$ 0.0021 & +22.79 [4.04] & $<$0.001 & +8.05 [2.06] & $<$0.001 \\
+KuaiRec & iALS-p, pop & 0.6144 $\pm$ 0.0028 & +1.06 [2.46] & 1.000 & -13.68 [3.31] & $<$0.001 \\
+KuaiRec & iALS-p, shuffled item bias & 0.4993 $\pm$ 0.0032 & -112.07 [9.39] & $<$0.001 & -126.82 [9.29] & $<$0.001 \\
+KuaiRec & LightGCN (no prior) & 0.6085 $\pm$ 0.0031 & -- & -- & -- & -- \\
+KuaiRec & LightGCN-p, add (IPS-fitted) & 0.6288 $\pm$ 0.0023 & +21.22 [2.86] & $<$0.001 & -- & -- \\
+Coat & prior alone, add (IPS-fitted) & 0.5585 $\pm$ 0.0105 & -- & -- & -- & -- \\
+Coat & prior alone, add, no IPS & 0.5574 $\pm$ 0.0107 & -- & -- & -2.09 [8.46] & 1.000 \\
+Coat & prior alone, pop & 0.5367 $\pm$ 0.0100 & -- & -- & -19.40 [27.79] & 1.000 \\
+Coat & prior alone, shuffled item bias & 0.3572 $\pm$ 0.0125 & -- & -- & -203.62 [51.90] & $<$0.001 \\
+Coat & prior alone, user only (b\_i = 0) & 0.3497 $\pm$ 0.0152 & -- & -- & -207.15 [49.91] & $<$0.001 \\
+Yahoo & prior alone, add (IPS-fitted) & 0.5243 $\pm$ 0.0050 & -- & -- & -- & -- \\
+Yahoo & prior alone, add, no IPS & 0.5237 $\pm$ 0.0055 & -- & -- & -1.09 [3.98] & 1.000 \\
+Yahoo & prior alone, pop & 0.5331 $\pm$ 0.0065 & -- & -- & +8.90 [14.93] & 1.000 \\
+Yahoo & prior alone, shuffled item bias & 0.3446 $\pm$ 0.0056 & -- & -- & -177.98 [17.37] & $<$0.001 \\
+Yahoo & prior alone, user only (b\_i = 0) & 0.3767 $\pm$ 0.0051 & -- & -- & -144.74 [17.38] & $<$0.001 \\
+KuaiRand & prior alone, add (IPS-fitted) & 0.3637 $\pm$ 0.0013 & -- & -- & -- & -- \\
+KuaiRand & prior alone, add, no IPS & 0.3837 $\pm$ 0.0023 & -- & -- & +19.90 [2.45] & $<$0.001 \\
+KuaiRand & prior alone, pop & 0.4204 $\pm$ 0.0021 & -- & -- & +56.41 [5.19] & $<$0.001 \\
+KuaiRand & prior alone, shuffled item bias & 0.3257 $\pm$ 0.0018 & -- & -- & -39.12 [5.64] & $<$0.001 \\
+KuaiRand & prior alone, user only (b\_i = 0) & 0.3259 $\pm$ 0.0011 & -- & -- & -38.84 [5.53] & $<$0.001 \\
+KuaiRec & prior alone, add (IPS-fitted) & 0.6216 $\pm$ 0.0016 & -- & -- & -- & -- \\
+KuaiRec & prior alone, add, no IPS & 0.6367 $\pm$ 0.0022 & -- & -- & +15.16 [1.68] & $<$0.001 \\
+KuaiRec & prior alone, pop & 0.5766 $\pm$ 0.0026 & -- & -- & -45.70 [4.25] & $<$0.001 \\
+KuaiRec & prior alone, shuffled item bias & 0.0398 $\pm$ 0.0007 & -- & -- & -582.01 [10.19] & $<$0.001 \\
+KuaiRec & prior alone, user only (b\_i = 0) & 0.0686 $\pm$ 0.0010 & -- & -- & -554.01 [10.16] & $<$0.001 \\
+\bottomrule
+\end{tabular}}
+\par\smallskip\raggedright\footnotesize $\Delta$ = per-user paired difference (mean over splits), $\times10^{3}$, [half-width of the 95\% CI]. No-prior references: stored iALS and LightGCN. The add row is the IPS-fitted additive prior. $p_\mathrm{Holm}$ over all paired tests of this table. user only (b\_i = 0) gives the same score to every item for a given user, so its ranking is decided by tie-breaking. Coat LightGCN-p and iALS-p use 10 splits, KuaiRec 5. Rows absent from the table were not run (only the prior-alone rows exist for those priors).
+\end{table}
