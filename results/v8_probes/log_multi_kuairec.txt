@@ -1,0 +1,35 @@
+kuairec single_pos: test 0.6367 +- 0.0019 (val 0.6372, 24 cfg-epochs)
+    chosen: [{'lam': 300.0, 'g': 0.0}, {'lam': 300.0, 'g': 0.0}, {'lam': 300.0, 'g': 0.0}]
+    vs iALS                 ref 0.6133  diff  +24.48 [ 3.95] p=2.17e-32 n=1410
+    vs iALS+prior(noIPS)    ref 0.6350  diff   +1.69 [ 0.80] p=3.7e-05 n=1410
+    vs prior alone(noIPS)   ref 0.6367  diff   +0.00 [ 0.00] p=nan n=1410
+    vs DR-JL                ref 0.6332  diff   +4.00 [ 2.22] p=0.000414 n=1410
+    vs MRDR                 ref 0.6328  diff   +4.22 [ 2.14] p=0.000116 n=1410
+    vs DRUP                 ref 0.6378  diff   -0.38 [ 2.18] p=0.73 n=1410
+  channel pos lam 3000.0 [81s]
+kuairec single_exp: test 0.6367 +- 0.0019 (val 0.6372, 24 cfg-epochs)
+    chosen: [{'lam': 300.0, 'g': 0.0}, {'lam': 300.0, 'g': 0.0}, {'lam': 300.0, 'g': 0.0}]
+    vs iALS                 ref 0.6133  diff  +24.48 [ 3.95] p=2.17e-32 n=1410
+    vs iALS+prior(noIPS)    ref 0.6350  diff   +1.69 [ 0.80] p=3.7e-05 n=1410
+    vs prior alone(noIPS)   ref 0.6367  diff   +0.00 [ 0.00] p=nan n=1410
+    vs DR-JL                ref 0.6332  diff   +4.00 [ 2.22] p=0.000414 n=1410
+    vs MRDR                 ref 0.6328  diff   +4.22 [ 2.14] p=0.000116 n=1410
+    vs DRUP                 ref 0.6378  diff   -0.38 [ 2.18] p=0.73 n=1410
+  channel exp lam 30000.0 [83s]
+kuairec single_resid: test 0.6367 +- 0.0019 (val 0.6372, 24 cfg-epochs)
+    chosen: [{'lam': 300.0, 'g': 0.0}, {'lam': 300.0, 'g': 0.0}, {'lam': 300.0, 'g': 0.0}]
+    vs iALS                 ref 0.6133  diff  +24.48 [ 3.95] p=2.17e-32 n=1410
+    vs iALS+prior(noIPS)    ref 0.6350  diff   +1.69 [ 0.80] p=3.7e-05 n=1410
+    vs prior alone(noIPS)   ref 0.6367  diff   +0.00 [ 0.00] p=nan n=1410
+    vs DR-JL                ref 0.6332  diff   +4.00 [ 2.22] p=0.000414 n=1410
+    vs MRDR                 ref 0.6328  diff   +4.22 [ 2.14] p=0.000116 n=1410
+    vs DRUP                 ref 0.6378  diff   -0.38 [ 2.18] p=0.73 n=1410
+  channel resid lam 30000.0 [80s]
+kuairec multi: test 0.6367 +- 0.0019 (val 0.6372, 125 cfg-epochs)
+    chosen: [{'gp': 0.0, 'ge': 0.0, 'gr': 0.0}, {'gp': 0.0, 'ge': 0.0, 'gr': 0.0}, {'gp': 0.0, 'ge': 0.0, 'gr': 0.0}]
+    vs iALS                 ref 0.6133  diff  +24.48 [ 3.95] p=2.17e-32 n=1410
+    vs iALS+prior(noIPS)    ref 0.6350  diff   +1.69 [ 0.80] p=3.7e-05 n=1410
+    vs prior alone(noIPS)   ref 0.6367  diff   +0.00 [ 0.00] p=nan n=1410
+    vs DR-JL                ref 0.6332  diff   +4.00 [ 2.22] p=0.000414 n=1410
+    vs MRDR                 ref 0.6328  diff   +4.22 [ 2.14] p=0.000116 n=1410
+    vs DRUP                 ref 0.6378  diff   -0.38 [ 2.18] p=0.73 n=1410

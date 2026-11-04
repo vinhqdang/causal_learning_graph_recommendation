@@ -1,0 +1,18 @@
+coat softlabel: test 0.5989 +- 0.0144 (val 0.7974, 163 cfg-epochs)
+    chosen: [{'dim': 64, 'alpha': 30.0, 'reg': 100.0, 'kappa': 0.5, 'epoch': 4}, {'dim': 64, 'alpha': 300.0, 'reg': 100.0, 'kappa': 1.0, 'epoch': 4}, {'dim': 64, 'alpha': 300.0, 'reg': 100.0, 'kappa': 2.0, 'epoch': 3}]
+    vs iALS                 ref 0.5812  diff  +16.66 [17.28] p=0.0586 n=225
+    vs iALS-wide2           ref 0.5922  diff   +3.74 [14.25] p=0.605 n=225
+    vs iALS+prior(IPS)      ref 0.5984  diff   -0.15 [12.57] p=0.981 n=225
+    vs iALS+prior(noIPS)    ref 0.6044  diff   -6.42 [11.49] p=0.272 n=225
+    vs LGN+prior(noIPS)     ref 0.6052  diff   -7.32 [15.45] p=0.351 n=225
+    vs prior alone(noIPS)   ref 0.5574  diff  +46.03 [25.96] p=0.000573 n=225
+    vs DR-JL                ref 0.4811  diff +119.67 [33.16] p=1.53e-11 n=225
+coat iALS_same_grid_soft: test 0.5882 +- 0.0101 (val 0.7841, 47 cfg-epochs)
+    chosen: [{'dim': 64, 'alpha': 100.0, 'reg': 300.0, 'kappa': 0.0, 'epoch': 6}, {'dim': 64, 'alpha': 30.0, 'reg': 100.0, 'kappa': 0.0, 'epoch': 3}, {'dim': 64, 'alpha': 100.0, 'reg': 300.0, 'kappa': 0.0, 'epoch': 4}]
+    vs iALS                 ref 0.5812  diff   +8.73 [ 8.10] p=0.035 n=225
+    vs iALS-wide2           ref 0.5922  diff   -4.19 [ 6.15] p=0.18 n=225
+    vs iALS+prior(IPS)      ref 0.5984  diff   -8.09 [17.34] p=0.359 n=225
+    vs iALS+prior(noIPS)    ref 0.6044  diff  -14.36 [16.60] p=0.0896 n=225
+    vs LGN+prior(noIPS)     ref 0.6052  diff  -15.26 [18.66] p=0.108 n=225
+    vs prior alone(noIPS)   ref 0.5574  diff  +38.10 [35.25] p=0.0343 n=225
+    vs DR-JL                ref 0.4811  diff +111.73 [37.98] p=2.27e-08 n=225

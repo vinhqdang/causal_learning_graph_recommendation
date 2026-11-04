@@ -1,0 +1,24 @@
+  {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 1.0, 'taun': 0.0} ep9 val 0.4530 [393s]
+  {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 4.0, 'taun': 0.0} ep8 val 0.4512 [241s]
+  {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 16.0, 'taun': 0.0} ep8 val 0.4439 [232s]
+kuairand tsials_{'alpha':[10.0],'reg: test 0.4533 +- 0.0018 (val 0.4532, 28 cfg-epochs)
+    chosen: [{'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 1.0, 'taun': 0.0, 'epoch': 8}, {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 1.0, 'taun': 0.0, 'epoch': 2}, {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 1.0, 'taun': 0.0, 'epoch': 7}]
+    vs iALS                 ref 0.4528  diff   +0.52 [ 0.61] p=0.0908 n=8321
+    vs LightGCN             ref 0.4569  diff   -4.52 [ 3.23] p=0.00602 n=8321
+    vs r-AdjNorm            ref 0.4590  diff   -6.51 [ 3.17] p=5.7e-05 n=8321
+    vs LightGCN-p           ref 0.4565  diff   -3.71 [ 3.16] p=0.0211 n=8321
+    vs QP family            ref 0.4613  diff   -8.45 [ 3.30] p=5.23e-07 n=8321
+kuairand iALSsame_grid: test 0.4533 +- 0.0018 (val 0.4532, 10 cfg-epochs)
+    chosen: [{'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 1.0, 'taun': 0.0, 'epoch': 8}, {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 1.0, 'taun': 0.0, 'epoch': 2}, {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 1.0, 'taun': 0.0, 'epoch': 7}]
+    vs iALS                 ref 0.4528  diff   +0.52 [ 0.61] p=0.0908 n=8321
+    vs LightGCN             ref 0.4569  diff   -4.52 [ 3.23] p=0.00602 n=8321
+    vs r-AdjNorm            ref 0.4590  diff   -6.51 [ 3.17] p=5.7e-05 n=8321
+    vs LightGCN-p           ref 0.4565  diff   -3.71 [ 3.16] p=0.0211 n=8321
+    vs QP family            ref 0.4613  diff   -8.45 [ 3.30] p=5.23e-07 n=8321
+kuairand iALS+priorsame_grid: test 0.4533 +- 0.0018 (val 0.4532, 10 cfg-epochs)
+    chosen: [{'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 1.0, 'taun': 0.0, 'epoch': 8}, {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 1.0, 'taun': 0.0, 'epoch': 2}, {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 1.0, 'taun': 0.0, 'epoch': 7}]
+    vs iALS                 ref 0.4528  diff   +0.52 [ 0.61] p=0.0908 n=8321
+    vs LightGCN             ref 0.4569  diff   -4.52 [ 3.23] p=0.00602 n=8321
+    vs r-AdjNorm            ref 0.4590  diff   -6.51 [ 3.17] p=5.7e-05 n=8321
+    vs LightGCN-p           ref 0.4565  diff   -3.71 [ 3.16] p=0.0211 n=8321
+    vs QP family            ref 0.4613  diff   -8.45 [ 3.30] p=5.23e-07 n=8321

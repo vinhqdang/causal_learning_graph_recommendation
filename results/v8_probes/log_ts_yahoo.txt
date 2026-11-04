@@ -1,0 +1,31 @@
+/home/user/causal_learning_graph_recommendation/drup/data.py:89: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)
+  O[tr.u.values, tr.i.values] = 1.0
+  {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 0.25, 'taun': 0.0} ep8 val 0.6662 [76s]
+  {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 1.0, 'taun': 0.0} ep8 val 0.6650 [80s]
+  {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 4.0, 'taun': 0.0} ep10 val 0.6619 [64s]
+  {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 16.0, 'taun': 0.0} ep9 val 0.6478 [57s]
+  {'dim': 64, 'alpha': 30.0, 'reg': 100.0, 'beta': 0.0, 'wn': 0.25, 'taun': 0.0} ep10 val 0.6398 [58s]
+  {'dim': 64, 'alpha': 30.0, 'reg': 100.0, 'beta': 0.0, 'wn': 1.0, 'taun': 0.0} ep9 val 0.6380 [64s]
+  {'dim': 64, 'alpha': 30.0, 'reg': 100.0, 'beta': 0.0, 'wn': 4.0, 'taun': 0.0} ep10 val 0.6315 [62s]
+  {'dim': 64, 'alpha': 30.0, 'reg': 100.0, 'beta': 0.0, 'wn': 16.0, 'taun': 0.0} ep10 val 0.6129 [63s]
+yahoo tsials_{'dim':[64],'alpha':: test 0.6646 +- 0.0042 (val 0.6671, 82 cfg-epochs)
+    chosen: [{'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 0.25, 'taun': 0.0, 'epoch': 5}, {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 0.25, 'taun': 0.0, 'epoch': 5}, {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 0.25, 'taun': 0.0, 'epoch': 4}]
+    vs iALS                 ref 0.6625  diff   +1.73 [ 1.56] p=0.0295 n=2310
+    vs LightGCN             ref 0.6708  diff   -6.38 [ 7.91] p=0.114 n=2310
+    vs r-AdjNorm            ref 0.6742  diff  -10.48 [ 7.89] p=0.00926 n=2310
+    vs LightGCN-p           ref 0.6690  diff   -4.94 [ 8.15] p=0.234 n=2310
+    vs QP family            ref 0.6866  diff  -23.14 [ 8.70] p=1.96e-07 n=2310
+yahoo iALSsame_grid: test 0.6629 +- 0.0044 (val 0.6655, 19 cfg-epochs)
+    chosen: [{'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 1.0, 'taun': 0.0, 'epoch': 5}, {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 1.0, 'taun': 0.0, 'epoch': 5}, {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 1.0, 'taun': 0.0, 'epoch': 4}]
+    vs iALS                 ref 0.6625  diff   +0.27 [ 0.71] p=0.461 n=2310
+    vs LightGCN             ref 0.6708  diff   -7.84 [ 8.01] p=0.055 n=2310
+    vs r-AdjNorm            ref 0.6742  diff  -11.94 [ 8.00] p=0.00344 n=2310
+    vs LightGCN-p           ref 0.6690  diff   -6.41 [ 8.25] p=0.128 n=2310
+    vs QP family            ref 0.6866  diff  -24.61 [ 8.80] p=4.54e-08 n=2310
+yahoo iALS+priorsame_grid: test 0.6629 +- 0.0044 (val 0.6655, 19 cfg-epochs)
+    chosen: [{'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 1.0, 'taun': 0.0, 'epoch': 5}, {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 1.0, 'taun': 0.0, 'epoch': 5}, {'dim': 64, 'alpha': 10.0, 'reg': 100.0, 'beta': 0.0, 'wn': 1.0, 'taun': 0.0, 'epoch': 4}]
+    vs iALS                 ref 0.6625  diff   +0.27 [ 0.71] p=0.461 n=2310
+    vs LightGCN             ref 0.6708  diff   -7.84 [ 8.01] p=0.055 n=2310
+    vs r-AdjNorm            ref 0.6742  diff  -11.94 [ 8.00] p=0.00344 n=2310
+    vs LightGCN-p           ref 0.6690  diff   -6.41 [ 8.25] p=0.128 n=2310
+    vs QP family            ref 0.6866  diff  -24.61 [ 8.80] p=4.54e-08 n=2310

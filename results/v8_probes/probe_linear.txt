@@ -1,0 +1,62 @@
+coat prior_only: test 0.5574 +- 0.0101 (val 0.7631, 1 cfg-epochs)
+    chosen: [{'prior': 1}, {'prior': 1}, {'prior': 1}]
+    vs iALS                 ref 0.5812  diff  -29.37 [36.11] p=0.11 n=225
+    vs iALS-wide2           ref 0.5922  diff  -42.29 [34.15] p=0.0155 n=225
+    vs iALS+prior(IPS)      ref 0.5984  diff  -46.19 [24.20] p=0.000216 n=225
+    vs iALS+prior(noIPS)    ref 0.6044  diff  -52.45 [24.12] p=2.71e-05 n=225
+    vs LGN+prior(noIPS)     ref 0.6052  diff  -53.36 [25.14] p=4.15e-05 n=225
+    vs prior alone(noIPS)   ref 0.5574  diff   +0.00 [ 0.00] p=nan n=225
+    vs DR-JL                ref 0.4811  diff  +73.64 [29.13] p=1.26e-06 n=225
+coat lin_pos: test 0.5922 +- 0.0125 (val 0.7902, 40 cfg-epochs)
+    chosen: [{'enc': 'pos', 'lam': 300.0, 'gamma': 1.0}, {'enc': 'pos', 'lam': 100.0, 'gamma': 0.5}, {'enc': 'pos', 'lam': 300.0, 'gamma': 2.0}]
+    vs iALS                 ref 0.5812  diff   +8.22 [25.28] p=0.522 n=225
+    vs iALS-wide2           ref 0.5922  diff   -4.70 [24.53] p=0.706 n=225
+    vs iALS+prior(IPS)      ref 0.5984  diff   -8.60 [17.17] p=0.325 n=225
+    vs iALS+prior(noIPS)    ref 0.6044  diff  -14.86 [16.82] p=0.0829 n=225
+    vs LGN+prior(noIPS)     ref 0.6052  diff  -15.77 [18.79] p=0.0996 n=225
+    vs prior alone(noIPS)   ref 0.5574  diff  +37.59 [23.62] p=0.00194 n=225
+    vs DR-JL                ref 0.4811  diff +111.23 [31.85] p=5.89e-11 n=225
+coat lin_resid: test 0.5478 +- 0.0115 (val 0.7690, 40 cfg-epochs)
+    chosen: [{'enc': 'resid', 'lam': 30.0, 'gamma': 0.3}, {'enc': 'resid', 'lam': 100.0, 'gamma': 0.3}, {'enc': 'resid', 'lam': 300.0, 'gamma': 0.2}]
+    vs iALS                 ref 0.5812  diff  -36.83 [35.16] p=0.0402 n=225
+    vs iALS-wide2           ref 0.5922  diff  -49.75 [33.59] p=0.00388 n=225
+    vs iALS+prior(IPS)      ref 0.5984  diff  -53.65 [25.05] p=3.54e-05 n=225
+    vs iALS+prior(noIPS)    ref 0.6044  diff  -59.91 [25.22] p=4.93e-06 n=225
+    vs LGN+prior(noIPS)     ref 0.6052  diff  -60.81 [25.57] p=4.8e-06 n=225
+    vs prior alone(noIPS)   ref 0.5574  diff   -7.46 [16.49] p=0.374 n=225
+    vs DR-JL                ref 0.4811  diff  +66.18 [27.60] p=4.05e-06 n=225
+coat lin_signed0.1: test 0.5825 +- 0.0141 (val 0.7860, 40 cfg-epochs)
+    chosen: [{'enc': 'signed0.1', 'lam': 300.0, 'gamma': 0.5}, {'enc': 'signed0.1', 'lam': 1000.0, 'gamma': 0.5}, {'enc': 'signed0.1', 'lam': 1000.0, 'gamma': 2.0}]
+    vs iALS                 ref 0.5812  diff   -1.61 [27.99] p=0.91 n=225
+    vs iALS-wide2           ref 0.5922  diff  -14.53 [27.11] p=0.292 n=225
+    vs iALS+prior(IPS)      ref 0.5984  diff  -18.43 [19.14] p=0.0591 n=225
+    vs iALS+prior(noIPS)    ref 0.6044  diff  -24.69 [19.13] p=0.0117 n=225
+    vs LGN+prior(noIPS)     ref 0.6052  diff  -25.60 [20.46] p=0.0144 n=225
+    vs prior alone(noIPS)   ref 0.5574  diff  +27.76 [22.22] p=0.0146 n=225
+    vs DR-JL                ref 0.4811  diff +101.40 [30.28] p=2.95e-10 n=225
+coat lin_signed0.3: test 0.5626 +- 0.0149 (val 0.7797, 40 cfg-epochs)
+    chosen: [{'enc': 'signed0.3', 'lam': 1000.0, 'gamma': 0.3}, {'enc': 'signed0.3', 'lam': 30.0, 'gamma': 0.2}, {'enc': 'signed0.3', 'lam': 300.0, 'gamma': 0.3}]
+    vs iALS                 ref 0.5812  diff  -22.66 [33.51] p=0.184 n=225
+    vs iALS-wide2           ref 0.5922  diff  -35.58 [32.26] p=0.0308 n=225
+    vs iALS+prior(IPS)      ref 0.5984  diff  -39.47 [23.17] p=0.000924 n=225
+    vs iALS+prior(noIPS)    ref 0.6044  diff  -45.74 [23.23] p=0.000137 n=225
+    vs LGN+prior(noIPS)     ref 0.6052  diff  -46.64 [23.67] p=0.000135 n=225
+    vs prior alone(noIPS)   ref 0.5574  diff   +6.71 [18.31] p=0.471 n=225
+    vs DR-JL                ref 0.4811  diff  +80.35 [29.06] p=1.33e-07 n=225
+coat lin_signed1.0: test 0.5541 +- 0.0110 (val 0.7693, 40 cfg-epochs)
+    chosen: [{'enc': 'signed1.0', 'lam': 30.0, 'gamma': 0.1}, {'enc': 'signed1.0', 'lam': 30.0, 'gamma': 0.1}, {'enc': 'signed1.0', 'lam': 10.0, 'gamma': 0.0}]
+    vs iALS                 ref 0.5812  diff  -31.91 [35.80] p=0.0804 n=225
+    vs iALS-wide2           ref 0.5922  diff  -44.83 [33.86] p=0.00969 n=225
+    vs iALS+prior(IPS)      ref 0.5984  diff  -48.73 [23.89] p=7.98e-05 n=225
+    vs iALS+prior(noIPS)    ref 0.6044  diff  -54.99 [23.92] p=9.59e-06 n=225
+    vs LGN+prior(noIPS)     ref 0.6052  diff  -55.90 [24.89] p=1.51e-05 n=225
+    vs prior alone(noIPS)   ref 0.5574  diff   -2.54 [ 7.19] p=0.487 n=225
+    vs DR-JL                ref 0.4811  diff  +71.10 [27.68] p=8.65e-07 n=225
+kuairec prior_only: test 0.6367 +- 0.0019 (val 0.6372, 1 cfg-epochs)
+    chosen: [{'prior': 1}, {'prior': 1}, {'prior': 1}]
+    vs iALS                 ref 0.6133  diff  +24.48 [ 3.95] p=2.17e-32 n=1410
+    vs iALS+prior(noIPS)    ref 0.6350  diff   +1.69 [ 0.80] p=3.7e-05 n=1410
+    vs prior alone(noIPS)   ref 0.6367  diff   +0.00 [ 0.00] p=nan n=1410
+    vs DR-JL                ref 0.6332  diff   +4.00 [ 2.22] p=0.000414 n=1410
+    vs MRDR                 ref 0.6328  diff   +4.22 [ 2.14] p=0.000116 n=1410
+    vs DRUP                 ref 0.6378  diff   -0.38 [ 2.18] p=0.73 n=1410
