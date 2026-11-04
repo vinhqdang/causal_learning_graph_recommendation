@@ -26,7 +26,7 @@ V2, V3, V4, V5, V6 = "results/v2/", "results/v3/", "results/v4/", "results/v5/",
 
 KEY = {"coat": "ndcg@5", "yahoo": "ndcg@5", "kuairand": "ndcg@10", "kuairec": "ndcg@20"}
 NAME = {"coat": "Coat", "yahoo": "Yahoo", "kuairand": "KuaiRand", "kuairec": "KuaiRec"}
-# equivalence margins of DESIGN.md Section 2.3 (provisional until TODO-L2 is closed)
+# sensitivity thresholds for the TOST analysis (chosen before the analysis; not derived from the literature)
 MARGIN = {"coat": 0.010, "yahoo": 0.010, "kuairand": 0.003, "kuairec": 0.003}
 # run_learned.py default; used only where a bank records no patience (never for the registry below)
 PATIENCE_DEFAULT = 5

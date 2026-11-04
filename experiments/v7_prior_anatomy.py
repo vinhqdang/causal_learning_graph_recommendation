@@ -95,6 +95,8 @@ X4 = [("iALS (stored)", V3 + "learned_coat_given.json", "iALS", "alpha {3,10,30}
       ("iALS-wide (v5 grid)", V5 + "learned_coat_ialswide.json", "iALS-wide", "alpha {10,30,100} x reg {10,100,300} x dim {32,64}", 18),
       ("iALS-wide2 (wider grid)", V6 + "learned_coat_ialswide2.json", "iALS-wide2", "alpha {30,100,300,1000} x reg {10,100,300,1000} x dim {32,64}", 32),
       ("iALS-p add (stored)", V5 + "learned_coat_add_ials.json", "iALS-p", "alpha {10,30,100} x reg {10,100,300} x pbeta {0.1,0.2,0.3,0.5,1} x dim {32,64}", 90)]
+X4_NAMES = {"iALS (stored)": "iALS (grid A, stored)", "iALS-wide (v5 grid)": "iALS (grid B)",
+            "iALS-wide2 (wider grid)": "iALS (grid C)", "iALS-p add (stored)": "iALS-p (add, stored grid)"}
 
 
 # ---------------------------------------------------------------------------------------------
@@ -423,8 +425,9 @@ def main():
 
     # ---------------- LaTeX: T10
     body10 = []
+    t10_names = {"iALS-wide": "iALS (grid B), sanity check"}
     for r in rows10:
-        label = esc(r["method"])
+        label = esc(t10_names.get(r["method"], r["method"]))
         if r["stat"] is None:
             body10.append(f"{label} & {r['prop']} & not run & -- & -- & -- & --")
             continue
@@ -438,7 +441,9 @@ def main():
         "Coat with estimated propensities versus the shipped propensities.", "tab:T10",
         "The no-prior reference of each learner is the stored run. Plain iALS and LightGCN do not read the propensities "
         "(only NAVIP does), so the shipped no-prior run is the reference for the estimated rows. "
-        "LightGCN with estimated propensities was not run. $p_\\mathrm{Holm}$ over the tests of this table.")
+        "LightGCN with estimated propensities was not run. The iALS (grid B) row is a sanity check: plain iALS does not "
+        "read the propensities, so its difference is zero by construction. Only the prior rows and the imputation alone "
+        "were refitted. $p_\\mathrm{Holm}$ over the tests of this table.")
     write_tex("T10_estimated_propensity.tex", t10, rep)
 
     # ---------------- LaTeX: T11
@@ -454,7 +459,7 @@ def main():
         else:
             d1 = "-- & -- & -- & --"
         sel = f"alpha {sel_counts(r['chosen'], 'alpha')}; reg {sel_counts(r['chosen'], 'reg')}"
-        body11.append(f"{esc(label)} & {tex_grid(grid)} & {r['n_configs']} & {fmt_m(r, True)} & {d1} & {sel}")
+        body11.append(f"{esc(X4_NAMES.get(label, label))} & {tex_grid(grid)} & {r['n_configs']} & {fmt_m(r, True)} & {d1} & {sel}")
     t11 = tex_table(
         "llrrrrrrl",
         "Model & Grid & Cfg & nDCG (mean $\\pm$ sd) & $\\Delta$ vs iALS $\\times10^{3}$ [CI] & $p_\\mathrm{Holm}$ & "
@@ -462,7 +467,8 @@ def main():
         body11,
         "Coat iALS with the wider grid against the stored iALS and iALS-p.", "tab:T11",
         "$\\Delta$ = per-user paired difference (mean over the 10 splits), $\\times10^{3}$, [half-width of the 95\\% CI]. "
-        "$p_\\mathrm{Holm}$ over the two comparisons of iALS-wide2. Selected values are counted over the 10 splits.")
+        "$p_\\mathrm{Holm}$ over the two comparisons of grid C. Selected values are counted over the 10 splits. "
+        "Grid C was widened after grid B and is not exhausted (alpha 1000 is chosen in 4 splits).")
     write_tex("T11_wider_ials_grid.tex", t11, rep)
 
     rep.save("prior_anatomy.txt")

@@ -153,7 +153,9 @@ def main():
             s = (f"  {r['family'][:9]:9s} {r['A'][:26]:26s} - {r['B'][:22]:22s} n={r['n_users']:5d} "
                  f"{1000 * r['diff']:+8.2f} [{1000 * r['half']:6.2f}] p={r['p']:.3g} pHolm={r['p_holm']:.3g} "
                  f"NB={r['nb_p']:.3g} NBHolm={r['nb_holm']:.3g} MDE={1000 * r['mde']:6.2f} "
-                 f"TOST(+-{r['tost_margin']:.3f}) p={r['tost_p']:.3g}{' equiv' if r['equivalent'] else ''}")
+                 f"TOST(+-{r['tost_margin']:.3f}) p={r['tost_p']:.3g}"
+                 + ((' excludes |d|>margin' if r['equivalent'] else ' does not exclude |d|>margin') if ds == 'coat'
+                    else (' equiv' if r['equivalent'] else '')))
             if r.get("seed"):
                 s += f" seeds1-3 {1000 * r['seed']['diff']:+.2f} p={r['seed']['p']:.3g}"
             rep(s + tag)

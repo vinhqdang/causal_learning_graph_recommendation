@@ -1,0 +1,156 @@
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Appendix: every method against LightGCN on Coat (backbone family, nDCG@5). Holm is taken over this family.}
+\label{tab:T12-coat}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrr}
+\toprule
+Method & Diff.\ $\times10^{3}$ [95\% CI] & $p$ & $p_\mathrm{Holm}$ & $p_\mathrm{NB,Holm}$ & MDE $\times10^{3}$ \\
+\midrule
+MF & -93.59 [33.10] & $<$0.001 & $<$0.001 & 0.413 & 47.26 \\
+IPS-MF & -98.45 [33.78] & $<$0.001 & $<$0.001 & 0.196 & 48.23 \\
+DR-MF & -47.85 [32.93] & 0.005 & 0.106 & 0.196 & 47.02 \\
+BPR-MF & -53.28 [21.08] & $<$0.001 & $<$0.001 & 1.000 & 30.10 \\
+PDA & -50.81 [20.12] & $<$0.001 & $<$0.001 & 1.000 & 28.73 \\
+LightGCN-pt & -32.48 [32.29] & 0.049 & 0.779 & 1.000 & 46.11 \\
+r-AdjNorm & +3.76 [5.74] & 0.198 & 1.000 & 1.000 & 8.20 \\
+NAVIP & -1.59 [10.13] & 0.758 & 1.000 & 1.000 & 14.47 \\
+DR-LightGCN & -0.65 [30.16] & 0.966 & 1.000 & 1.000 & 43.07 \\
+DR-JL & -91.00 [35.14] & $<$0.001 & $<$0.001 & 0.203 & 50.18 \\
+MRDR & -85.16 [36.17] & $<$0.001 & $<$0.001 & 0.734 & 51.65 \\
+MACR & -29.43 [24.60] & 0.019 & 0.405 & 1.000 & 35.13 \\
+SimGCL & -17.49 [23.88] & 0.150 & 1.000 & 1.000 & 34.09 \\
+iALS & +12.01 [16.12] & 0.143 & 1.000 & 1.000 & 23.01 \\
+AdvInfoNCE-LGN & -46.47 [25.16] & $<$0.001 & 0.009 & 1.000 & 35.93 \\
+iALS (grid B) & +19.40 [16.48] & 0.021 & 0.425 & 1.000 & 23.53 \\
+iALS-p (add prior) & +28.83 [20.48] & 0.006 & 0.132 & 1.000 & 29.25 \\
+LightGCN-p (add prior) & +31.98 [20.65] & 0.003 & 0.061 & 1.000 & 29.48 \\
+DR-BPR-LGN & +23.96 [8.67] & $<$0.001 & $<$0.001 & 1.000 & 12.38 \\
+DR-BPR-LGN-1 (Q-only) & +21.20 [9.26] & $<$0.001 & $<$0.001 & 1.000 & 13.22 \\
+DR-BPR-LGN-p & +34.07 [20.11] & $<$0.001 & 0.025 & 1.000 & 28.72 \\
+DR-BPR-LGN-p2 & +35.26 [20.51] & $<$0.001 & 0.022 & 1.000 & 29.28 \\
+DR-iALS & +18.61 [16.31] & 0.026 & 0.480 & 1.000 & 23.28 \\
+QP family (pooled) & +32.03 [17.27] & $<$0.001 & 0.009 & 1.000 & 24.65 \\
+control: shuffled Q & +0.97 [5.50] & 0.730 & 1.000 & 1.000 & 7.86 \\
+control: popularity Q & +6.91 [6.04] & 0.025 & 0.480 & 1.000 & 8.63 \\
+Obs & -12.94 [30.72] & 0.408 & 1.000 & 1.000 & 43.87 \\
+EASE & -28.72 [32.13] & 0.080 & 1.000 & 1.000 & 45.88 \\
+GF-CF & -18.32 [30.12] & 0.232 & 1.000 & 1.000 & 43.01 \\
+IPS & -18.36 [31.48] & 0.252 & 1.000 & 1.000 & 44.96 \\
+DR & -26.62 [32.00] & 0.103 & 1.000 & 1.000 & 45.69 \\
+DRUP & -25.21 [32.81] & 0.131 & 1.000 & 1.000 & 46.85 \\
+EASE-DR & -15.27 [33.69] & 0.373 & 1.000 & 1.000 & 48.10 \\
+GF-CF-DR & -12.33 [32.46] & 0.455 & 1.000 & 1.000 & 46.35 \\
+Pop & -34.67 [31.12] & 0.029 & 0.495 & 1.000 & 44.43 \\
+Impute & -16.97 [34.67] & 0.336 & 1.000 & 1.000 & 49.50 \\
+\bottomrule
+\end{tabular}}
+\par\smallskip\raggedright\footnotesize Per-user paired differences over the test users; the Nadeau-Bengio column is the heuristic correction of Section~\ref{sec:stats}.
+\end{table}
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Appendix: every method against LightGCN on Yahoo (backbone family, nDCG@5). Holm is taken over this family.}
+\label{tab:T12-yahoo}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrr}
+\toprule
+Method & Diff.\ $\times10^{3}$ [95\% CI] & $p$ & $p_\mathrm{Holm}$ & $p_\mathrm{NB,Holm}$ & MDE $\times10^{3}$ \\
+\midrule
+MF & -162.69 [15.25] & $<$0.001 & $<$0.001 & 0.021 & 21.80 \\
+IPS-MF & -159.11 [15.20] & $<$0.001 & $<$0.001 & 0.012 & 21.72 \\
+DR-MF & -162.10 [16.02] & $<$0.001 & $<$0.001 & 0.012 & 22.89 \\
+BPR-MF & -26.53 [8.17] & $<$0.001 & $<$0.001 & 0.218 & 11.68 \\
+PDA & -20.36 [7.73] & $<$0.001 & $<$0.001 & 0.021 & 11.05 \\
+LightGCN-pt & -76.19 [13.05] & $<$0.001 & $<$0.001 & 0.061 & 18.65 \\
+r-AdjNorm & +4.10 [3.29] & 0.015 & 0.073 & 1.000 & 4.70 \\
+NAVIP & -0.74 [3.11] & 0.642 & 1.000 & 1.000 & 4.45 \\
+DR-LightGCN & -117.88 [14.56] & $<$0.001 & $<$0.001 & 0.019 & 20.81 \\
+DR-JL & -149.61 [14.97] & $<$0.001 & $<$0.001 & 0.016 & 21.39 \\
+MRDR & -146.84 [14.97] & $<$0.001 & $<$0.001 & 0.006 & 21.40 \\
+MACR & -48.31 [9.71] & $<$0.001 & $<$0.001 & 0.021 & 13.87 \\
+SimGCL & -36.49 [9.61] & $<$0.001 & $<$0.001 & 0.042 & 13.74 \\
+iALS & -8.11 [7.99] & 0.047 & 0.187 & 1.000 & 11.42 \\
+AdvInfoNCE-LGN & -21.08 [7.78] & $<$0.001 & $<$0.001 & 0.135 & 11.12 \\
+LightGCN-p (add prior) & -1.43 [3.93] & 0.475 & 1.000 & 1.000 & 5.62 \\
+DR-BPR-LGN-1 (Q-only) & +13.72 [5.27] & $<$0.001 & $<$0.001 & 0.291 & 7.54 \\
+QP family (pooled) & +16.77 [5.82] & $<$0.001 & $<$0.001 & 0.434 & 8.31 \\
+control: shuffled Q & -1.01 [3.20] & 0.534 & 1.000 & 1.000 & 4.57 \\
+control: popularity Q & -15.91 [6.06] & $<$0.001 & $<$0.001 & 1.000 & 8.66 \\
+Obs & -12.40 [8.49] & 0.004 & 0.025 & 1.000 & 12.13 \\
+DR & -14.58 [8.51] & $<$0.001 & 0.006 & 0.511 & 12.16 \\
+DRUP & -14.58 [8.51] & $<$0.001 & 0.006 & 0.511 & 12.16 \\
+Pop & -138.65 [13.06] & $<$0.001 & $<$0.001 & $<$0.001 & 18.67 \\
+Impute & -155.70 [16.32] & $<$0.001 & $<$0.001 & 0.016 & 23.32 \\
+\bottomrule
+\end{tabular}}
+\par\smallskip\raggedright\footnotesize Per-user paired differences over the test users; the Nadeau-Bengio column is the heuristic correction of Section~\ref{sec:stats}.
+\end{table}
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Appendix: every method against LightGCN on KuaiRand (backbone family, nDCG@10). Holm is taken over this family.}
+\label{tab:T12-kuairand}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrr}
+\toprule
+Method & Diff.\ $\times10^{3}$ [95\% CI] & $p$ & $p_\mathrm{Holm}$ & $p_\mathrm{NB,Holm}$ & MDE $\times10^{3}$ \\
+\midrule
+MF & -87.35 [5.38] & $<$0.001 & $<$0.001 & $<$0.001 & 7.69 \\
+DR-MF & -96.98 [5.32] & $<$0.001 & $<$0.001 & 0.010 & 7.61 \\
+BPR-MF & -10.06 [2.62] & $<$0.001 & $<$0.001 & 0.574 & 3.74 \\
+LightGCN-pt & -52.46 [4.85] & $<$0.001 & $<$0.001 & 0.001 & 6.93 \\
+r-AdjNorm & +1.99 [1.02] & $<$0.001 & $<$0.001 & 1.000 & 1.46 \\
+NAVIP & -0.43 [1.14] & 0.461 & 0.468 & 1.000 & 1.63 \\
+DR-JL & -82.06 [4.90] & $<$0.001 & $<$0.001 & $<$0.001 & 7.01 \\
+MACR & -26.46 [3.58] & $<$0.001 & $<$0.001 & 0.012 & 5.12 \\
+SimGCL & -38.27 [4.12] & $<$0.001 & $<$0.001 & 0.005 & 5.89 \\
+iALS & -5.05 [3.16] & 0.002 & 0.005 & 1.000 & 4.51 \\
+AdvInfoNCE-LGN & -8.86 [2.50] & $<$0.001 & $<$0.001 & 0.120 & 3.57 \\
+LightGCN-p (add prior) & -0.81 [1.33] & 0.234 & 0.468 & 1.000 & 1.90 \\
+QP family (pooled) & +3.93 [1.53] & $<$0.001 & $<$0.001 & 1.000 & 2.19 \\
+\bottomrule
+\end{tabular}}
+\par\smallskip\raggedright\footnotesize Per-user paired differences over the test users; the Nadeau-Bengio column is the heuristic correction of Section~\ref{sec:stats}.
+\end{table}
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Appendix: every method against LightGCN on KuaiRec (backbone family, nDCG@20). Holm is taken over this family.}
+\label{tab:T12-kuairec}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrr}
+\toprule
+Method & Diff.\ $\times10^{3}$ [95\% CI] & $p$ & $p_\mathrm{Holm}$ & $p_\mathrm{NB,Holm}$ & MDE $\times10^{3}$ \\
+\midrule
+LightGCN-pt & +19.59 [4.55] & $<$0.001 & $<$0.001 & 0.030 & 6.51 \\
+r-AdjNorm & +0.22 [0.80] & 0.585 & 0.585 & 0.877 & 1.14 \\
+NAVIP & +10.41 [1.82] & $<$0.001 & $<$0.001 & 0.034 & 2.60 \\
+DR-LightGCN & +13.17 [3.31] & $<$0.001 & $<$0.001 & 0.787 & 4.74 \\
+BPR-MF & -11.73 [3.27] & $<$0.001 & $<$0.001 & 0.057 & 4.68 \\
+SimGCL & -44.34 [4.11] & $<$0.001 & $<$0.001 & $<$0.001 & 5.88 \\
+DR-JL & +25.46 [3.66] & $<$0.001 & $<$0.001 & 0.057 & 5.22 \\
+MRDR & +25.24 [3.53] & $<$0.001 & $<$0.001 & 0.031 & 5.05 \\
+MACR & -25.84 [4.57] & $<$0.001 & $<$0.001 & 0.018 & 6.53 \\
+iALS & +4.98 [2.38] & $<$0.001 & $<$0.001 & 0.107 & 3.41 \\
+MF & +14.63 [3.96] & $<$0.001 & $<$0.001 & 0.353 & 5.65 \\
+IPS-MF & +17.69 [3.53] & $<$0.001 & $<$0.001 & 0.089 & 5.04 \\
+DR-MF & +14.47 [4.20] & $<$0.001 & $<$0.001 & 0.124 & 6.00 \\
+AdvInfoNCE-LGN & -28.42 [6.46] & $<$0.001 & $<$0.001 & 0.034 & 9.23 \\
+LightGCN-p (add prior) & +21.22 [2.86] & $<$0.001 & $<$0.001 & 0.030 & 4.09 \\
+iALS-p (add prior) & +19.72 [3.32] & $<$0.001 & $<$0.001 & 0.058 & 4.74 \\
+iALS-p (add, DRGP grid) & +19.96 [2.71] & $<$0.001 & $<$0.001 & 0.016 & 3.87 \\
+QP family (pooled) & +20.90 [2.88] & $<$0.001 & $<$0.001 & 0.089 & 4.11 \\
+Obs & -4.80 [3.11] & 0.002 & 0.005 & 0.094 & 4.44 \\
+DRUP & +29.84 [3.51] & $<$0.001 & $<$0.001 & 0.011 & 5.01 \\
+DR & +29.96 [3.51] & $<$0.001 & $<$0.001 & 0.011 & 5.01 \\
+Pop & -31.41 [3.25] & $<$0.001 & $<$0.001 & $<$0.001 & 4.64 \\
+Impute & +11.89 [3.93] & $<$0.001 & $<$0.001 & 0.301 & 5.62 \\
+\bottomrule
+\end{tabular}}
+\par\smallskip\raggedright\footnotesize Per-user paired differences over the test users; the Nadeau-Bengio column is the heuristic correction of Section~\ref{sec:stats}.
+\end{table}

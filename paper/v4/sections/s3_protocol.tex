@@ -5,7 +5,7 @@
 The protocol rests on one rule. Uniformly collected data are read only to choose among trained models
 and to measure them. They never enter a training objective, a nuisance model that a trained model uses,
 or the stopping of training. This section states the controls that enforce the rule, how the splits,
-the selection and the seeds are built, how the tests and equivalence margins are defined, and how the
+the selection and the seeds are built, how the tests and sensitivity margins are defined, and how the
 stored results were reconciled before the analysis. The methods to which the protocol is applied are
 listed in Section~\ref{sec:methods}.
 
@@ -52,9 +52,13 @@ $+31.98\times10^{-3}$ [20.65]. The paired differences between the two propensity
 $+2.63\times10^{-3}$ [5.27] for iALS-p and $+1.64\times10^{-3}$ [10.30] for LightGCN-p, with
 $p_\mathrm{Holm}=1.000$ in both cases. The values in brackets are 95\% half-widths. The stored
 no-prior runs of iALS and LightGCN serve as the reference for both settings, because neither reads the
-propensities in its loss. The estimated-propensity refit therefore does not remove the Coat prior gain. The check changes only the
-propensity input. It does not test the assumption that exposure is independent of the outcome given the
-covariates, which the closed-form posterior of the method requires.
+propensities in its loss. The check changes only the propensity input of the prior rows. For LightGCN-p the
+gain with estimated propensities is not removed. For iALS-p the estimated-propensity gain is not significant
+($p_\mathrm{Holm}=0.33$), so the statement that the gain remains is a point estimate only. The check does not
+test the assumption that exposure is independent of the outcome given the covariates, which the closed-form
+posterior of the method requires. It also does not cover the other propensity-based rows of Coat: DR-LightGCN,
+NAVIP, DR-JL, MRDR, DR, DRUP and the QP-LightGCN family were not refitted, so their dependence on the shipped
+propensities is not checked.
 
 \subsection{Splits}\label{sec:splits}
 
@@ -100,22 +104,24 @@ It chooses on test data.
 \item The configuration-level oracle is the configuration whose mean test value, at its own
 validation-selected epoch, is largest. It also chooses on test data.
 \item The expected maximum of the validation-selected test value over $k$ configurations is computed as a
-function of $k$, and the share of 1{,}000 random subgrids of size $k_{\min}$ in which the sign of a primary
-comparison flips is reported. Here $k_{\min}$ is the smaller of the two grids of the comparison.
+function of $k$~\citep{dodge2019showyourwork}, and the share of 1{,}000 random subgrids of size $k_{\min}$ in
+which the sign of a primary comparison flips is reported. Here $k_{\min}$ is the smaller of the two grids of
+the comparison.
 \end{itemize}
 The first two are diagnostics. They are never reported as the result of a method.
 
 \subsection{Reconciliation of the stored results}\label{sec:reconcile}
 
-Before the analysis, the selection of each (file, method) pair was replayed from its stored bank. The replay applies the training-time rule of
-Section~\ref{sec:selection}, including the patience value recorded in the bank, and its mean test score is
-compared with the stored mean. Of the 154 (file, method) pairs in the reconciliation output
-(\path{results/v6/reconcile.txt}), 151 agree within 0.002 in nDCG. The three that do not agree are
-DR-LightGCN on KuaiRec (gap $+0.0033$), DR-LightGCN on Yahoo!\,R3 ($+0.0058$) and MACR on Yahoo!\,R3
-($+0.0060$). All three are in two unsplit legacy files, \path{results/v3/learned_kuairec_pop.json} and
-\path{results/v3/learned_yahoo_pop.json}, which the analysis does not use. Their banks do not record the
-patience value, and the stored selections are reproduced only under patience values of 3 (KuaiRec) and 5
-(Yahoo!\,R3). Every sensitivity number in the results is reported relative to the reconciled selection.
+Before the analysis, the selection of each (file, method) pair was replayed from its stored bank. The replay
+applies the training-time rule of Section~\ref{sec:selection}, including the patience value recorded in the bank,
+and its mean test score is compared with the stored mean. Of the 154 (file, method) pairs in the reconciliation,
+151 agree within 0.002 in nDCG. The three that do not agree are DR-LightGCN on KuaiRec (replayed mean higher by
+$0.0033$), DR-LightGCN on Yahoo!\,R3 (higher by $0.0058$) and MACR on Yahoo!\,R3 (higher by $0.0060$). All three
+come from two unsplit legacy result files that do not record the patience value, and the stored selections are
+reproduced only under patience values of 3 (KuaiRec) and 5 (Yahoo!\,R3). These three stored values are used in the
+tables: the KuaiRec DR-LightGCN value enters the P1 comparison of Table~\ref{tab:T5}, and the Yahoo!\,R3 DR-LightGCN
+and MACR values appear in Table~\ref{tab:T4}. Their selections cannot be reproduced from the banks, so we report the
+stored values. Every sensitivity number in the results is reported relative to the reconciled selection.
 
 \subsection{Seeds}\label{sec:seeds}
 
@@ -124,7 +130,8 @@ its own validation part, and the configuration is not changed. The retrained fin
 the two baselines that had the highest main-run test means in each dataset: iALS and DR-LightGCN on Coat,
 r-AdjNorm and LightGCN on Yahoo!\,R3 and KuaiRand, and DR-JL and MRDR on KuaiRec. The baselines are retrained
 in the same way. Because these two baselines were chosen on test data, the seed comparisons are descriptive,
-and the Holm correction runs over the two tests of each dataset. DRUP is deterministic and is not retrained.
+and they are reported without a significance claim beyond the Holm-adjusted values given in the text; the
+Holm correction runs over the two tests of each dataset. DRUP is deterministic and is not retrained.
 The seed-0 values in the tables are the main-run values.
 
 Seeds 1 to 3 were not run for the Coat prior rows (iALS-p and LightGCN-p). Their Coat values come from
@@ -162,28 +169,35 @@ validation score, and never by test score.
 \item[Refinement families.] Up to three families per dataset. The first holds each refinement against the simple
 prior of the same learner. The second, on Coat only, holds DR-iALS against iALS-p. The third holds the shuffled
 and popularity controls against LightGCN, on the datasets where those controls were run.
-\item[Backbone family.] Every method against LightGCN, reported in the appendix.
+\item[Backbone family.] Every method against LightGCN, reported in Table~\ref{tab:T12-coat} to
+Table~\ref{tab:T12-kuairec} in the appendix.
 \end{description}
 
-The Nadeau and Bengio correction~\citep{nadeau2003} is applied as a second test to the split means. With $J$
-splits, split-level differences $e_j$, and $\rho=0.3$ the validation fraction, the variance is
-$\hat\sigma^2 = s_e^2\,(1/J+(1-\rho)/\rho)$, where $s_e^2$ is the sample variance of the $e_j$. The statistic
-$\bar e/\hat\sigma$ is compared with a $t$ distribution with $J-1$ degrees of freedom. Holm adjustment is
-applied to these second $p$-values within the same families.
+The Nadeau and Bengio correction~\citep{nadeau2003} is applied as a second test to the split means, and we
+describe the variant we use. With $J$ splits, split-level differences $e_j$ and $\rho=0.3$ the validation
+fraction, the variance is $\hat\sigma^2 = s_e^2\,(1/J+(1-\rho)/\rho)$, where $s_e^2$ is the sample variance of the
+$e_j$. The statistic $\bar e/\hat\sigma$ is compared with a $t$ distribution with $J-1$ degrees of freedom, and
+Holm adjustment is applied to these second $p$-values within the same families. This is a heuristic correction,
+and it is not the standard form. The standard form uses the ratio of test to training size, $n_2/n_1$, and here
+the ratio is $(1-\rho)/\rho=n_1/n_2$. The models are trained once and only the selection and test splits vary,
+so the standard derivation does not apply directly. With $J=5$ the variance factor is $1/5+7/3\approx2.53$, against
+$1/5+3/7\approx0.63$ under the standard ratio, so the correction is conservative for these splits. We report its
+values beside the standard paired test and do not treat either as exact.
 
-Equivalence is assessed with two one-sided tests at margin $\delta$, each at level 0.05. The two null
-hypotheses are $\bar d\le-\delta$ and $\bar d\ge\delta$. The reported TOST $p$-value is the larger of the two
-one-sided $p$-values, and equivalence within $\pm\delta$ is claimed when it is below 0.05. The margins are
-$\pm0.010$ nDCG@5 on Coat and Yahoo!\,R3, and $\pm0.003$ nDCG on KuaiRand (nDCG@10) and KuaiRec (nDCG@20).
-They were stated in the analysis plan and are provisional. The planned rationale is half of the smallest
-gain that the cited graph-debiasing papers report on these datasets. That check against the papers is not
-complete, and the margins will be revised if it changes them. A result inside a margin is stated as no difference larger than the
-margin, and never as equality.
+Equivalence is assessed with two one-sided tests~\citep{schuirmann1987} at margin $\delta$, each at level 0.05. The
+two null hypotheses are $\bar d\le-\delta$ and $\bar d\ge\delta$. The reported TOST $p$-value is the larger of the two
+one-sided $p$-values. The margins are $\pm0.010$ nDCG@5 on Coat and Yahoo!\,R3, and $\pm0.003$ nDCG on KuaiRand
+(nDCG@10) and KuaiRec (nDCG@20). They are sensitivity thresholds, chosen before the analysis and not derived from
+the literature, and TOST is presented as a sensitivity analysis of these thresholds. On Yahoo!\,R3, KuaiRand and
+KuaiRec, a TOST result below 0.05 is stated as equivalence within the margin. On Coat, the same result is stated
+only as the exclusion of differences larger than the margin in absolute value, and equivalence is not claimed. A
+result inside a margin is never stated as equality.
 
 The minimum detectable effect at 80\% power and two-sided level 0.05 is
 $\mathrm{MDE}=(t_{0.975,\,n-1}+t_{0.80,\,n-1})\,s_d/\sqrt{n}$, where $n$ is the number of users, $s_d$ is the
 standard deviation of the per-user differences, and $t_{q,\nu}$ is the $q$ quantile of a $t$ distribution with
-$\nu$ degrees of freedom. For the primary comparisons in the analysis, the MDE is $11.8$ to $43.1\times10^{-3}$
+$\nu$ degrees of freedom. The MDE uses only the user-level standard deviation and ignores the dependence between
+splits, so it is optimistic. For the primary comparisons in the analysis, the MDE is $11.8$ to $43.1\times10^{-3}$
 on Coat, $4.7$ to $5.6\times10^{-3}$ on Yahoo!\,R3, $1.5$ to $1.9\times10^{-3}$ on KuaiRand and $0.7$ to
 $4.9\times10^{-3}$ on KuaiRec. The Coat values are large because the Coat analysis has 225 evaluated users,
 and an MDE of this size bounds what the Coat data can show.

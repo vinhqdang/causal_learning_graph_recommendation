@@ -5,8 +5,7 @@
 Every method is run by us on the splits and the data preparation of Section~\ref{sec:protocol}. No number in
 this study is taken from the literature. Configuration counts are the numbers stored in the result files.
 Each count is the product of the grid values listed below, and those values are the arguments of the run
-commands in the repository (\path{experiments/queue_v3_learned.sh} and \path{experiments/queue_v5.sh}
-to \path{experiments/queue_v7.sh}). Table~\ref{tab:T4} lists the counts of every method in the main comparison.
+scripts of the repository. Table~\ref{tab:T4} lists the counts of every method in the main comparison.
 
 Four refinements of the additive prior (Sections~\ref{sec:qweight} to \ref{sec:drgp}) were developed by us in
 earlier versions of this work, as candidate methods. Here they are reported as one family, with every
@@ -22,7 +21,9 @@ sizes, which were checked against the data loaders of the repository.
 \begin{table}[t]\centering\footnotesize
 \caption{Datasets. ``Log'': the biased training data, with its density. ``Test'': the unbiased data.
 ``Candidates'': the unbiased test items per user that are ranked, which are the items never logged for that
-user. ``Evaluated users'': users with at least one positive candidate in the full test set.}\label{tab:datasets}
+user. ``Evaluated users'': users with at least one positive candidate in the full test set. The analysis uses
+225, 2{,}310, 8{,}321 and 1{,}410 users (Coat, Yahoo!\,R3, KuaiRand-Pure, KuaiRec), which differ from the evaluated
+users of 225, 2{,}315, 8{,}347 and 1{,}411 as explained in Section~\ref{sec:splits}.}\label{tab:datasets}
 \begin{adjustbox}{max width=\textwidth}
 \input{tables/T1_datasets.tex}
 \end{adjustbox}
@@ -94,7 +95,7 @@ over $\{1,2,3\}$. Epochs are limited to 100, the batch size is 256 and the patie
 54, LightGCN-pt 54, NAVIP 54, DR-LightGCN 54, r-AdjNorm 108 (with $r\in\{0.3,0.7\}$), SimGCL 108 (with weight
 $\lambda_{\mathrm{cl}}\in\{0.1,0.5\}$), MACR 36 (with $c\in\{0.1,0.3\}$), PDA 36 (with $\gamma\in\{0.1,0.2\}$),
 MF, IPS-MF, DR-MF, BPR-MF, DR-JL and MRDR 18 each, iALS 24 (with $\alpha\in\{3,10,30\}$, regularisation in
-$\{1,10,100,1000\}$ and width in $\{32,64\}$) and iALS-wide 18 (with $\alpha\in\{10,30,100\}$ and regularisation
+$\{1,10,100,1000\}$ and width in $\{32,64\}$) and iALS grid B 18 (with $\alpha\in\{10,30,100\}$ and regularisation
 in $\{10,100,300\}$). The iALS runs of the prior family use an epoch limit of 30 on Coat, and the stored iALS run
 uses 100. The epoch limits are therefore not the same across the iALS rows.
 
@@ -169,8 +170,7 @@ LightGCN-p and QP-LightGCN run on all four datasets. The exceptions are the foll
 DRGP-iALS use 0.1, the prior alone uses 0.1, and the DRGP-LGN learners use 0.1. On Yahoo!\,R3, the prior alone
 uses 0.1. On KuaiRand, the prior alone uses 0.02. On KuaiRec, iALS-p, the prior alone and the DRGP-LGN learners
 use 0.2. The DRGP prior alone was run at floors 0.05, 0.1 and 0.2 on Coat and at 0.1 and 0.2 on KuaiRec. The
-result files do not record a rule for these values, and they differ from the single value of 0.05 used in
-earlier drafts. The floors of the training-free operators are part of their grids: Coat 0.01 to 0.2, Yahoo!\,R3
+result files do not record a rule for these values, The floors of the training-free operators are part of their grids: Coat 0.01 to 0.2, Yahoo!\,R3
 0.1 and 0.2, and KuaiRec 0.05 to 0.2.
 
 \paragraph{Additive imputation.}
@@ -301,7 +301,8 @@ carry the configuration counts.
 
 \subsection{DRGP: a leave-edge-out DR graph prior}\label{sec:drgp}
 
-DRGP has two stages. It was run on Coat and KuaiRec only, and its runs have not been replicated over seeds.
+DRGP has two stages. It was run on Coat and KuaiRec only, and its runs have not been replicated over seeds. On KuaiRec, 5 of 5
+jobs completed, with 57 configurations in total, in a single run without seed repeats.
 
 \paragraph{Stage A: the prior.}
 For each pair, define the leave-edge-out 3-hop term of the DR graph. Let $C$ be the degree weights defined above, with the degrees taken from $\hat Y$. Let $\mathrm{sq}=C\circ C\circ W$ and

@@ -1,0 +1,7 @@
+# Provenance notes for results/v6
+
+- Name collision, `pop`: in the result files `args.prior == "pop"` (the popularity offset, see paper/v4 Section 4, prior variants) and `args.prop == "pop"` (estimated propensities, the logistic model of Section 4) are different settings that share a name. `learned_coat_pop_lgn.json` has `prop = given`, `prior = pop`; `learned_coat_pop_lgn_p.json` has `prop = pop`, `prior = add`. Tables T9 and T10 use the second for the estimated-propensity LightGCN-p rows.
+- `learned_coat_pop_lgn.json` also contains an orphan key `LightGCN` written by a second run (X2) that targeted the same output path. This key is not read by any table or test. The key read is `(learned_coat_pop_lgn.json, "LightGCN-p")`.
+- The T10 row "iALS (grid B), sanity check" compares the iALS run with shipped and estimated propensities. Plain iALS does not read the propensities, so the difference is zero by construction; the row is a sanity check only.
+- `DR-BPR-LGN-1 (Q-only)` (manuscript label) is the run `results/v4/learned_coat_lrQ.json` on Coat (args `prop = given`, floor 0.05, learning rates 0.01, 0.003, 0.001). The suffix `lrQ` in the internal name refers to the file name only.
+- The KuaiRec `Impute` row (`results/v2/filters_kuairec_pop.json`, method `Impute`) is computed in `experiments/run_filters.py` with the imputation fitted at a constant propensity floor 0.05. The `prior alone` rows (`results/v6/learned_kuairec_alone_add.json`) use floor 0.2 and penalty 5. The two rows differ in floor and penalty and are not separate fits of the same model.

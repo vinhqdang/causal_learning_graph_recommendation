@@ -47,7 +47,9 @@ on the random seed. Our own runs illustrate the third point. In the main run, QP
 above iALS on Coat by $+20.02\times10^{-3}$ [19.74], which is significant after Holm
 correction over the eight baseline comparisons ($p_\mathrm{Holm}=0.047$). When the selected
 configurations are retrained with seeds 1 to 3, the difference is $+3.39\times10^{-3}$
-[20.70], with $p_\mathrm{Holm}=0.75$ over the two baseline comparisons of that check.
+[20.70], with $p_\mathrm{Holm}=0.75$ over the two baseline comparisons of that check. These
+seed comparisons are descriptive, because the two baselines of each dataset were chosen on
+test data.
 
 This study asks four research questions.
 \begin{description}
@@ -61,47 +63,55 @@ multiple-comparison family.
 
 Our reading of the evidence is as follows. On Coat, Yahoo! R3 and KuaiRand-Pure, once
 uniform data are kept out of training and configurations are selected on validation data,
-the graph-specific corrections change the nDCG of an equally tuned LightGCN by at most a few
-thousandths. On Yahoo! R3 the inflation that selecting on the test split adds to LightGCN
-(about 0.004 nDCG@5) is as large as the gain of the best of these corrections
-($+4.10\times10^{-3}$ [3.29]). The largest effects come from two simple ingredients. The
-first is a fixed, inverse-propensity-fitted additive imputation added to the score. It raises
-LightGCN on Coat ($+31.98\times10^{-3}$ [20.65]) and on KuaiRec ($+21.22\times10^{-3}$
+the third-party graph-specific corrections change the nDCG of an equally tuned LightGCN by
+point-estimate amounts of at most $+4.10\times10^{-3}$ (a few thousandths; $+5.26\times10^{-3}$
+in the seed 1 to 3 re-runs). On Yahoo! R3 the inflation that selecting on the test split adds
+to LightGCN (about 0.004 nDCG@5) is as large as the gain of the best of these corrections
+($+4.10\times10^{-3}$ [3.29]). On Yahoo! R3 and KuaiRand-Pure our own QP-LightGCN family adds $+16.77\times10^{-3}$ [5.82] over LightGCN on Yahoo! R3 and
+$+3.93\times10^{-3}$ [1.53] on KuaiRand-Pure, but neither difference survives the correction for
+overlapping splits. The largest point-estimate effects in our runs come from two simple
+ingredients. The first is a fixed, inverse-propensity-fitted additive imputation added to the
+score, which we call the prior. It raises LightGCN on Coat ($+31.98\times10^{-3}$ [20.65]; this
+gain is not robust to the correction for overlapping splits) and on KuaiRec ($+21.22\times10^{-3}$
 [2.86]), but not on Yahoo! R3 ($-1.43\times10^{-3}$ [3.93]) or KuaiRand-Pure
 ($-0.81\times10^{-3}$ [1.33]). Its inverse-propensity weights do not appear to be what matters
 in our runs: on KuaiRec, the iALS model with the same imputation without those weights scores
-$+8.05\times10^{-3}$ [2.06] above the one with them. The second ingredient is a training-free
-doubly robust propagation of the log, which is the best of the methods we ran on the fully
-observed KuaiRec. Making that propagation exactly unbiased does not change ranking accuracy
-on the real logs. On KuaiRec the graph debiasers lie above the BPR backbone (DR-LightGCN
-$+13.17\times10^{-3}$ [3.31]), but the same backbone trained pointwise, without any
-debiasing, lies higher still ($+19.59\times10^{-3}$ [4.55]).
+$+8.05\times10^{-3}$ [2.06] above the one with them. The second is a training-free doubly robust
+propagation of the log, which has the highest mean of the methods we ran on the fully observed
+KuaiRec. Making that propagation exactly unbiased does not change ranking accuracy on the three
+real logs on which it was run (Coat, Yahoo! R3 and KuaiRec). On KuaiRec, DR-LightGCN lies
+$+13.17\times10^{-3}$ [3.31] above the BPR backbone, and the same backbone trained pointwise,
+without any debiasing, lies $+19.59\times10^{-3}$ [4.55] above it. The pointwise difference is
+larger, but the two differences are not compared by a paired test, so this is a difference of means.
 
 The paper makes four contributions. None of them is a new estimator.
 \begin{enumerate}
-\item \emph{A controlled benchmark and its sensitivity.} Four public benchmarks with unbiased
+\item \emph{A controlled protocol and its sensitivity (RQ1).} Four public benchmarks with unbiased
 test data (Coat, Yahoo! R3, KuaiRand-Pure and KuaiRec), uniform data used only for validation
 and testing, per-split selection on validation data, per-user paired tests with Holm
 correction, retraining with seeds 1 to 3, and configuration counts for every method. The new
 part is the sensitivity analysis. Selecting on the test split instead of on validation raises
 the score of the trained methods on Coat by 0.021 nDCG@5 on average (range 0.010 to 0.030).
-\item \emph{Graph-specific debiasing adds little over an equally tuned backbone.} On Coat,
+\item \emph{Graph-specific debiasing adds little over an equally tuned backbone (RQ2).} On Coat,
 Yahoo! R3 and KuaiRand-Pure, the third-party graph debiasers change the paired score of
 LightGCN by at most $+4.10\times10^{-3}$ [3.29], for r-AdjNorm on Yahoo! R3
-($p_\mathrm{Holm}=0.029$ in the primary family of that dataset).
-\item \emph{A family of refinements, reported with controls.} The refinements built on the
-prior are all reported with their configuration counts, together with shuffled and popularity
-controls. The largest paired difference of a refinement over the simple prior in the same
-learner on Coat is $+3.27\times10^{-3}$ [6.94] (DR-BPR-LGN-p2 against LightGCN-p,
-$p_\mathrm{Holm}=1.000$).
-\item \emph{A negative result on walk correction (secondary).} The walk correction of DRUP
+($p_\mathrm{Holm}=0.029$ in the primary family of that dataset, and not significant under the
+correction for overlapping splits). The bound applies to these third-party debiasers only. The
+refinements of the prior that we built are reported as members of the evaluated family, with
+their configuration counts, and the QP-LightGCN family is the largest of them.
+\item \emph{Prior anatomy (RQ3).} The gains over the backbone that the prior provides are
+examined with controls. Removing the inverse-propensity weights does not reduce them, a shuffled
+item term removes the KuaiRec gain, and popularity does not reproduce it. The shuffled and
+popularity weightings of the refinements are reported as controls. The mechanism is not
+identified.
+\item \emph{A negative result on walk correction (RQ4, secondary).} The walk correction of DRUP
 removes the repeated-edge bias of multi-hop DR propagation. On KuaiRec, DRUP minus DR is
 $-0.12\times10^{-3}$ [0.15], which is not significant ($p_\mathrm{Holm}=0.113$). On Coat, at
 matched configurations, the correction lowers the mean nDCG@5 for every value tested.
 \end{enumerate}
 
-We do not propose a new estimator, and the refinements in Section~4 are members of an
-evaluated family, not contributions in their own right. We do not claim that debiasing is
+We do not propose a new estimator, and the refinements in Section~\ref{sec:methods} are members
+of an evaluated family, not contributions in their own right. We do not claim that debiasing is
 useless in general. The scope is four public benchmarks, offline evaluation, top-$K$ nDCG at
 the cut-off used for each dataset (5 for Coat and Yahoo! R3, 10 for KuaiRand-Pure, 20 for
 KuaiRec), and implicit-feedback learners trained on the biased log. Coat has 225 evaluated
@@ -110,11 +120,13 @@ do not report equality. We do not claim that AdvInfoNCE, NAVIP, r-AdjNorm, SimGC
 in general. Our implementations, tuned with the stated budgets under this protocol, do not beat
 the backbone by more than the amounts reported. Propagation with DR weights is not generally
 the best method either: on Yahoo! R3 its mean score is below that of trained LightGCN. We do
-not give a mechanism for why the prior helps beyond the controls reported in Section~5. The
-reading that the prior acts as a debiased item-quality score is a hypothesis.
+not give a mechanism for why the prior helps beyond the controls reported in
+Section~\ref{sec:res-ingredient}. The reading that the prior acts as a debiased item-quality
+score is a hypothesis.
 
-Section~2 reviews related work and positions the study. Section~3 describes the protocol:
-datasets, leakage controls, selection, seeds and statistical tests. Section~4 describes the
-evaluated methods, including the prior family. Section~5 reports the results for RQ1 to RQ4.
-Section~6 discusses why the effects are small, gives recommendations for evaluating debiasing
-methods and states the limitations. Section~7 concludes.
+Section~\ref{sec:related} reviews related work and positions the study. Section~\ref{sec:protocol}
+describes the protocol: datasets, leakage controls, selection, seeds and statistical tests.
+Section~\ref{sec:methods} describes the evaluated methods, including the prior family. Section~\ref{sec:results}
+reports the results for RQ1 to RQ4. Section~\ref{sec:discussion} discusses why the effects are
+small, gives recommendations for evaluating debiasing methods and states the limitations.
+Section~\ref{sec:conclusion} concludes.

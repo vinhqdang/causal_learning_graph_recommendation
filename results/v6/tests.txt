@@ -3,59 +3,59 @@ Per-user differences averaged over the test splits of each user. Holm within eac
 
 === Coat (ndcg@5; TOST margin +-0.010) ===
  primary family (Holm over P1-P4 of this dataset):
-  P1        DR-LightGCN                - LightGCN               n=  225    -0.65 [ 30.16] p=0.966 pHolm=1 NB=0.919 NBHolm=1 MDE= 43.07 TOST(+-0.010) p=0.271
-  P2        iALS-p (add prior)         - iALS                   n=  225   +16.82 [ 18.04] p=0.0675 pHolm=0.27 NB=0.422 NBHolm=1 MDE= 25.76 TOST(+-0.010) p=0.771
-  P2        LightGCN-p (add prior)     - LightGCN               n=  225   +31.98 [ 20.65] p=0.00254 pHolm=0.0127 NB=0.26 NBHolm=1 MDE= 29.48 TOST(+-0.010) p=0.981
-  P3        QP family (pooled)         - LightGCN-p (add prior) n=  225    +0.05 [  8.29] p=0.991 pHolm=1 NB=0.983 NBHolm=1 MDE= 11.83 TOST(+-0.010) p=0.00939 equiv
-  P3        DR-iALS                    - iALS-p (add prior)     n=  225   -10.22 [ 15.96] p=0.208 pHolm=0.625 NB=0.576 NBHolm=1 MDE= 22.79 TOST(+-0.010) p=0.511
+  P1        DR-LightGCN                - LightGCN               n=  225    -0.65 [ 30.16] p=0.966 pHolm=1 NB=0.919 NBHolm=1 MDE= 43.07 TOST(+-0.010) p=0.271 does not exclude |d|>margin
+  P2        iALS-p (add prior)         - iALS                   n=  225   +16.82 [ 18.04] p=0.0675 pHolm=0.27 NB=0.422 NBHolm=1 MDE= 25.76 TOST(+-0.010) p=0.771 does not exclude |d|>margin
+  P2        LightGCN-p (add prior)     - LightGCN               n=  225   +31.98 [ 20.65] p=0.00254 pHolm=0.0127 NB=0.26 NBHolm=1 MDE= 29.48 TOST(+-0.010) p=0.981 does not exclude |d|>margin
+  P3        QP family (pooled)         - LightGCN-p (add prior) n=  225    +0.05 [  8.29] p=0.991 pHolm=1 NB=0.983 NBHolm=1 MDE= 11.83 TOST(+-0.010) p=0.00939 excludes |d|>margin
+  P3        DR-iALS                    - iALS-p (add prior)     n=  225   -10.22 [ 15.96] p=0.208 pHolm=0.625 NB=0.576 NBHolm=1 MDE= 22.79 TOST(+-0.010) p=0.511 does not exclude |d|>margin
  walk correction (DRUP - DR):
-  W         DRUP                       - DR                     n=  225    +1.40 [  3.86] p=0.475 pHolm=0.475 NB=0.917 NBHolm=0.917 MDE=  5.52 TOST(+-0.010) p=8.9e-06 equiv
+  W         DRUP                       - DR                     n=  225    +1.40 [  3.86] p=0.475 pHolm=0.475 NB=0.917 NBHolm=0.917 MDE=  5.52 TOST(+-0.010) p=8.9e-06 excludes |d|>margin
  T6 refinement family:
-  T6 refine DR-BPR-LGN                 - LightGCN-p (add prior) n=  225    -8.02 [ 18.85] p=0.403 pHolm=1 NB=0.663 NBHolm=1 MDE= 26.92 TOST(+-0.010) p=0.418
-  T6 refine DR-BPR-LGN-1 (Q, lrQ)      - LightGCN-p (add prior) n=  225   -10.79 [ 19.26] p=0.271 pHolm=1 NB=0.673 NBHolm=1 MDE= 27.50 TOST(+-0.010) p=0.532
-  T6 refine DR-BPR-LGN-p               - LightGCN-p (add prior) n=  225    +2.09 [  6.48] p=0.526 pHolm=1 NB=0.934 NBHolm=1 MDE=  9.25 TOST(+-0.010) p=0.00844 equiv
-  T6 refine DR-BPR-LGN-p2              - LightGCN-p (add prior) n=  225    +3.27 [  6.94] p=0.354 pHolm=1 NB=0.911 NBHolm=1 MDE=  9.91 TOST(+-0.010) p=0.0286 equiv
-  T6 refine QP family (pooled)         - LightGCN-p (add prior) n=  225    +0.05 [  8.29] p=0.991 pHolm=1 NB=0.983 NBHolm=1 MDE= 11.83 TOST(+-0.010) p=0.00939 equiv
-  T6 refine DR-iALS                    - iALS-p (add prior)     n=  225   -10.22 [ 15.96] p=0.208 pHolm=0.208 NB=0.576 NBHolm=0.576 MDE= 22.79 TOST(+-0.010) p=0.511
-  T6 contro control: shuffled Q        - LightGCN               n=  225    +0.97 [  5.50] p=0.73 pHolm=0.73 NB=0.955 NBHolm=1 MDE=  7.86 TOST(+-0.010) p=0.0007 equiv
-  T6 contro control: popularity Q      - LightGCN               n=  225    +6.91 [  6.04] p=0.0252 pHolm=0.0505 NB=0.727 NBHolm=1 MDE=  8.63 TOST(+-0.010) p=0.157
+  T6 refine DR-BPR-LGN                 - LightGCN-p (add prior) n=  225    -8.02 [ 18.85] p=0.403 pHolm=1 NB=0.663 NBHolm=1 MDE= 26.92 TOST(+-0.010) p=0.418 does not exclude |d|>margin
+  T6 refine DR-BPR-LGN-1 (Q, lrQ)      - LightGCN-p (add prior) n=  225   -10.79 [ 19.26] p=0.271 pHolm=1 NB=0.673 NBHolm=1 MDE= 27.50 TOST(+-0.010) p=0.532 does not exclude |d|>margin
+  T6 refine DR-BPR-LGN-p               - LightGCN-p (add prior) n=  225    +2.09 [  6.48] p=0.526 pHolm=1 NB=0.934 NBHolm=1 MDE=  9.25 TOST(+-0.010) p=0.00844 excludes |d|>margin
+  T6 refine DR-BPR-LGN-p2              - LightGCN-p (add prior) n=  225    +3.27 [  6.94] p=0.354 pHolm=1 NB=0.911 NBHolm=1 MDE=  9.91 TOST(+-0.010) p=0.0286 excludes |d|>margin
+  T6 refine QP family (pooled)         - LightGCN-p (add prior) n=  225    +0.05 [  8.29] p=0.991 pHolm=1 NB=0.983 NBHolm=1 MDE= 11.83 TOST(+-0.010) p=0.00939 excludes |d|>margin
+  T6 refine DR-iALS                    - iALS-p (add prior)     n=  225   -10.22 [ 15.96] p=0.208 pHolm=0.208 NB=0.576 NBHolm=0.576 MDE= 22.79 TOST(+-0.010) p=0.511 does not exclude |d|>margin
+  T6 contro control: shuffled Q        - LightGCN               n=  225    +0.97 [  5.50] p=0.73 pHolm=0.73 NB=0.955 NBHolm=1 MDE=  7.86 TOST(+-0.010) p=0.0007 excludes |d|>margin
+  T6 contro control: popularity Q      - LightGCN               n=  225    +6.91 [  6.04] p=0.0252 pHolm=0.0505 NB=0.727 NBHolm=1 MDE=  8.63 TOST(+-0.010) p=0.157 does not exclude |d|>margin
  every method against LightGCN (appendix):
-  all vs ba MF                         - LightGCN               n=  225   -93.59 [ 33.10] p=7.19e-08 pHolm=2.51e-06 NB=0.0125 NBHolm=0.413 MDE= 47.26 TOST(+-0.010) p=1
-  all vs ba IPS-MF                     - LightGCN               n=  225   -98.45 [ 33.78] p=3e-08 pHolm=1.08e-06 NB=0.00546 NBHolm=0.196 MDE= 48.23 TOST(+-0.010) p=1
-  all vs ba DR-MF                      - LightGCN               n=  225   -47.85 [ 32.93] p=0.00459 pHolm=0.106 NB=0.00549 NBHolm=0.196 MDE= 47.02 TOST(+-0.010) p=0.988
-  all vs ba BPR-MF                     - LightGCN               n=  225   -53.28 [ 21.08] p=1.26e-06 pHolm=4.04e-05 NB=0.14 NBHolm=1 MDE= 30.10 TOST(+-0.010) p=1
-  all vs ba PDA                        - LightGCN               n=  225   -50.81 [ 20.12] p=1.29e-06 pHolm=4.04e-05 NB=0.0852 NBHolm=1 MDE= 28.73 TOST(+-0.010) p=1
-  all vs ba LightGCN-pt                - LightGCN               n=  225   -32.48 [ 32.29] p=0.0487 pHolm=0.779 NB=0.3 NBHolm=1 MDE= 46.11 TOST(+-0.010) p=0.914
-  all vs ba r-AdjNorm                  - LightGCN               n=  225    +3.76 [  5.74] p=0.198 pHolm=1 NB=0.812 NBHolm=1 MDE=  8.20 TOST(+-0.010) p=0.0167 equiv
-  all vs ba NAVIP                      - LightGCN               n=  225    -1.59 [ 10.13] p=0.758 pHolm=1 NB=0.936 NBHolm=1 MDE= 14.47 TOST(+-0.010) p=0.0515
-  all vs ba DR-LightGCN                - LightGCN               n=  225    -0.65 [ 30.16] p=0.966 pHolm=1 NB=0.919 NBHolm=1 MDE= 43.07 TOST(+-0.010) p=0.271
-  all vs ba DR-JL                      - LightGCN               n=  225   -91.00 [ 35.14] p=7.13e-07 pHolm=2.35e-05 NB=0.00596 NBHolm=0.203 MDE= 50.18 TOST(+-0.010) p=1
-  all vs ba MRDR                       - LightGCN               n=  225   -85.16 [ 36.17] p=5.94e-06 pHolm=0.000178 NB=0.0229 NBHolm=0.734 MDE= 51.65 TOST(+-0.010) p=1
-  all vs ba MACR                       - LightGCN               n=  225   -29.43 [ 24.60] p=0.0193 pHolm=0.405 NB=0.335 NBHolm=1 MDE= 35.13 TOST(+-0.010) p=0.939
-  all vs ba SimGCL                     - LightGCN               n=  225   -17.49 [ 23.88] p=0.15 pHolm=1 NB=0.57 NBHolm=1 MDE= 34.09 TOST(+-0.010) p=0.731
-  all vs ba iALS                       - LightGCN               n=  225   +12.01 [ 16.12] p=0.143 pHolm=1 NB=0.544 NBHolm=1 MDE= 23.01 TOST(+-0.010) p=0.597
-  all vs ba AdvInfoNCE-LGN             - LightGCN               n=  225   -46.47 [ 25.16] p=0.00034 pHolm=0.00917 NB=0.281 NBHolm=1 MDE= 35.93 TOST(+-0.010) p=0.998
-  all vs ba iALS-wide                  - LightGCN               n=  225   +19.40 [ 16.48] p=0.0213 pHolm=0.425 NB=0.435 NBHolm=1 MDE= 23.53 TOST(+-0.010) p=0.869
-  all vs ba iALS-p (add prior)         - LightGCN               n=  225   +28.83 [ 20.48] p=0.00602 pHolm=0.132 NB=0.158 NBHolm=1 MDE= 29.25 TOST(+-0.010) p=0.964
-  all vs ba LightGCN-p (add prior)     - LightGCN               n=  225   +31.98 [ 20.65] p=0.00254 pHolm=0.061 NB=0.26 NBHolm=1 MDE= 29.48 TOST(+-0.010) p=0.981
-  all vs ba DR-BPR-LGN                 - LightGCN               n=  225   +23.96 [  8.67] p=1.36e-07 pHolm=4.62e-06 NB=0.25 NBHolm=1 MDE= 12.38 TOST(+-0.010) p=0.999
-  all vs ba DR-BPR-LGN-1 (Q, lrQ)      - LightGCN               n=  225   +21.20 [  9.26] p=1.04e-05 pHolm=0.000302 NB=0.418 NBHolm=1 MDE= 13.22 TOST(+-0.010) p=0.991
-  all vs ba DR-BPR-LGN-p               - LightGCN               n=  225   +34.07 [ 20.11] p=0.000987 pHolm=0.0247 NB=0.197 NBHolm=1 MDE= 28.72 TOST(+-0.010) p=0.99
-  all vs ba DR-BPR-LGN-p2              - LightGCN               n=  225   +35.26 [ 20.51] p=0.000833 pHolm=0.0217 NB=0.225 NBHolm=1 MDE= 29.28 TOST(+-0.010) p=0.992
-  all vs ba DR-iALS                    - LightGCN               n=  225   +18.61 [ 16.31] p=0.0255 pHolm=0.48 NB=0.513 NBHolm=1 MDE= 23.28 TOST(+-0.010) p=0.85
-  all vs ba QP family (pooled)         - LightGCN               n=  225   +32.03 [ 17.27] p=0.000319 pHolm=0.00894 NB=0.264 NBHolm=1 MDE= 24.65 TOST(+-0.010) p=0.994
-  all vs ba control: shuffled Q        - LightGCN               n=  225    +0.97 [  5.50] p=0.73 pHolm=1 NB=0.955 NBHolm=1 MDE=  7.86 TOST(+-0.010) p=0.0007 equiv
-  all vs ba control: popularity Q      - LightGCN               n=  225    +6.91 [  6.04] p=0.0252 pHolm=0.48 NB=0.727 NBHolm=1 MDE=  8.63 TOST(+-0.010) p=0.157
-  all vs ba Obs                        - LightGCN               n=  225   -12.94 [ 30.72] p=0.408 pHolm=1 NB=0.662 NBHolm=1 MDE= 43.87 TOST(+-0.010) p=0.575
-  all vs ba EASE                       - LightGCN               n=  225   -28.72 [ 32.13] p=0.0795 pHolm=1 NB=0.397 NBHolm=1 MDE= 45.88 TOST(+-0.010) p=0.874
-  all vs ba GF-CF                      - LightGCN               n=  225   -18.32 [ 30.12] p=0.232 pHolm=1 NB=0.57 NBHolm=1 MDE= 43.01 TOST(+-0.010) p=0.707
-  all vs ba IPS                        - LightGCN               n=  225   -18.36 [ 31.48] p=0.252 pHolm=1 NB=0.667 NBHolm=1 MDE= 44.96 TOST(+-0.010) p=0.699
-  all vs ba DR                         - LightGCN               n=  225   -26.62 [ 32.00] p=0.103 pHolm=1 NB=0.687 NBHolm=1 MDE= 45.69 TOST(+-0.010) p=0.846
-  all vs ba DRUP                       - LightGCN               n=  225   -25.21 [ 32.81] p=0.131 pHolm=1 NB=0.689 NBHolm=1 MDE= 46.85 TOST(+-0.010) p=0.819
-  all vs ba EASE-DR                    - LightGCN               n=  225   -15.27 [ 33.69] p=0.373 pHolm=1 NB=0.679 NBHolm=1 MDE= 48.10 TOST(+-0.010) p=0.621
-  all vs ba GF-CF-DR                   - LightGCN               n=  225   -12.33 [ 32.46] p=0.455 pHolm=1 NB=0.767 NBHolm=1 MDE= 46.35 TOST(+-0.010) p=0.556
-  all vs ba Pop                        - LightGCN               n=  225   -34.67 [ 31.12] p=0.0291 pHolm=0.495 NB=0.182 NBHolm=1 MDE= 44.43 TOST(+-0.010) p=0.94
-  all vs ba Impute                     - LightGCN               n=  225   -16.97 [ 34.67] p=0.336 pHolm=1 NB=0.518 NBHolm=1 MDE= 49.50 TOST(+-0.010) p=0.654
+  all vs ba MF                         - LightGCN               n=  225   -93.59 [ 33.10] p=7.19e-08 pHolm=2.51e-06 NB=0.0125 NBHolm=0.413 MDE= 47.26 TOST(+-0.010) p=1 does not exclude |d|>margin
+  all vs ba IPS-MF                     - LightGCN               n=  225   -98.45 [ 33.78] p=3e-08 pHolm=1.08e-06 NB=0.00546 NBHolm=0.196 MDE= 48.23 TOST(+-0.010) p=1 does not exclude |d|>margin
+  all vs ba DR-MF                      - LightGCN               n=  225   -47.85 [ 32.93] p=0.00459 pHolm=0.106 NB=0.00549 NBHolm=0.196 MDE= 47.02 TOST(+-0.010) p=0.988 does not exclude |d|>margin
+  all vs ba BPR-MF                     - LightGCN               n=  225   -53.28 [ 21.08] p=1.26e-06 pHolm=4.04e-05 NB=0.14 NBHolm=1 MDE= 30.10 TOST(+-0.010) p=1 does not exclude |d|>margin
+  all vs ba PDA                        - LightGCN               n=  225   -50.81 [ 20.12] p=1.29e-06 pHolm=4.04e-05 NB=0.0852 NBHolm=1 MDE= 28.73 TOST(+-0.010) p=1 does not exclude |d|>margin
+  all vs ba LightGCN-pt                - LightGCN               n=  225   -32.48 [ 32.29] p=0.0487 pHolm=0.779 NB=0.3 NBHolm=1 MDE= 46.11 TOST(+-0.010) p=0.914 does not exclude |d|>margin
+  all vs ba r-AdjNorm                  - LightGCN               n=  225    +3.76 [  5.74] p=0.198 pHolm=1 NB=0.812 NBHolm=1 MDE=  8.20 TOST(+-0.010) p=0.0167 excludes |d|>margin
+  all vs ba NAVIP                      - LightGCN               n=  225    -1.59 [ 10.13] p=0.758 pHolm=1 NB=0.936 NBHolm=1 MDE= 14.47 TOST(+-0.010) p=0.0515 does not exclude |d|>margin
+  all vs ba DR-LightGCN                - LightGCN               n=  225    -0.65 [ 30.16] p=0.966 pHolm=1 NB=0.919 NBHolm=1 MDE= 43.07 TOST(+-0.010) p=0.271 does not exclude |d|>margin
+  all vs ba DR-JL                      - LightGCN               n=  225   -91.00 [ 35.14] p=7.13e-07 pHolm=2.35e-05 NB=0.00596 NBHolm=0.203 MDE= 50.18 TOST(+-0.010) p=1 does not exclude |d|>margin
+  all vs ba MRDR                       - LightGCN               n=  225   -85.16 [ 36.17] p=5.94e-06 pHolm=0.000178 NB=0.0229 NBHolm=0.734 MDE= 51.65 TOST(+-0.010) p=1 does not exclude |d|>margin
+  all vs ba MACR                       - LightGCN               n=  225   -29.43 [ 24.60] p=0.0193 pHolm=0.405 NB=0.335 NBHolm=1 MDE= 35.13 TOST(+-0.010) p=0.939 does not exclude |d|>margin
+  all vs ba SimGCL                     - LightGCN               n=  225   -17.49 [ 23.88] p=0.15 pHolm=1 NB=0.57 NBHolm=1 MDE= 34.09 TOST(+-0.010) p=0.731 does not exclude |d|>margin
+  all vs ba iALS                       - LightGCN               n=  225   +12.01 [ 16.12] p=0.143 pHolm=1 NB=0.544 NBHolm=1 MDE= 23.01 TOST(+-0.010) p=0.597 does not exclude |d|>margin
+  all vs ba AdvInfoNCE-LGN             - LightGCN               n=  225   -46.47 [ 25.16] p=0.00034 pHolm=0.00917 NB=0.281 NBHolm=1 MDE= 35.93 TOST(+-0.010) p=0.998 does not exclude |d|>margin
+  all vs ba iALS-wide                  - LightGCN               n=  225   +19.40 [ 16.48] p=0.0213 pHolm=0.425 NB=0.435 NBHolm=1 MDE= 23.53 TOST(+-0.010) p=0.869 does not exclude |d|>margin
+  all vs ba iALS-p (add prior)         - LightGCN               n=  225   +28.83 [ 20.48] p=0.00602 pHolm=0.132 NB=0.158 NBHolm=1 MDE= 29.25 TOST(+-0.010) p=0.964 does not exclude |d|>margin
+  all vs ba LightGCN-p (add prior)     - LightGCN               n=  225   +31.98 [ 20.65] p=0.00254 pHolm=0.061 NB=0.26 NBHolm=1 MDE= 29.48 TOST(+-0.010) p=0.981 does not exclude |d|>margin
+  all vs ba DR-BPR-LGN                 - LightGCN               n=  225   +23.96 [  8.67] p=1.36e-07 pHolm=4.62e-06 NB=0.25 NBHolm=1 MDE= 12.38 TOST(+-0.010) p=0.999 does not exclude |d|>margin
+  all vs ba DR-BPR-LGN-1 (Q, lrQ)      - LightGCN               n=  225   +21.20 [  9.26] p=1.04e-05 pHolm=0.000302 NB=0.418 NBHolm=1 MDE= 13.22 TOST(+-0.010) p=0.991 does not exclude |d|>margin
+  all vs ba DR-BPR-LGN-p               - LightGCN               n=  225   +34.07 [ 20.11] p=0.000987 pHolm=0.0247 NB=0.197 NBHolm=1 MDE= 28.72 TOST(+-0.010) p=0.99 does not exclude |d|>margin
+  all vs ba DR-BPR-LGN-p2              - LightGCN               n=  225   +35.26 [ 20.51] p=0.000833 pHolm=0.0217 NB=0.225 NBHolm=1 MDE= 29.28 TOST(+-0.010) p=0.992 does not exclude |d|>margin
+  all vs ba DR-iALS                    - LightGCN               n=  225   +18.61 [ 16.31] p=0.0255 pHolm=0.48 NB=0.513 NBHolm=1 MDE= 23.28 TOST(+-0.010) p=0.85 does not exclude |d|>margin
+  all vs ba QP family (pooled)         - LightGCN               n=  225   +32.03 [ 17.27] p=0.000319 pHolm=0.00894 NB=0.264 NBHolm=1 MDE= 24.65 TOST(+-0.010) p=0.994 does not exclude |d|>margin
+  all vs ba control: shuffled Q        - LightGCN               n=  225    +0.97 [  5.50] p=0.73 pHolm=1 NB=0.955 NBHolm=1 MDE=  7.86 TOST(+-0.010) p=0.0007 excludes |d|>margin
+  all vs ba control: popularity Q      - LightGCN               n=  225    +6.91 [  6.04] p=0.0252 pHolm=0.48 NB=0.727 NBHolm=1 MDE=  8.63 TOST(+-0.010) p=0.157 does not exclude |d|>margin
+  all vs ba Obs                        - LightGCN               n=  225   -12.94 [ 30.72] p=0.408 pHolm=1 NB=0.662 NBHolm=1 MDE= 43.87 TOST(+-0.010) p=0.575 does not exclude |d|>margin
+  all vs ba EASE                       - LightGCN               n=  225   -28.72 [ 32.13] p=0.0795 pHolm=1 NB=0.397 NBHolm=1 MDE= 45.88 TOST(+-0.010) p=0.874 does not exclude |d|>margin
+  all vs ba GF-CF                      - LightGCN               n=  225   -18.32 [ 30.12] p=0.232 pHolm=1 NB=0.57 NBHolm=1 MDE= 43.01 TOST(+-0.010) p=0.707 does not exclude |d|>margin
+  all vs ba IPS                        - LightGCN               n=  225   -18.36 [ 31.48] p=0.252 pHolm=1 NB=0.667 NBHolm=1 MDE= 44.96 TOST(+-0.010) p=0.699 does not exclude |d|>margin
+  all vs ba DR                         - LightGCN               n=  225   -26.62 [ 32.00] p=0.103 pHolm=1 NB=0.687 NBHolm=1 MDE= 45.69 TOST(+-0.010) p=0.846 does not exclude |d|>margin
+  all vs ba DRUP                       - LightGCN               n=  225   -25.21 [ 32.81] p=0.131 pHolm=1 NB=0.689 NBHolm=1 MDE= 46.85 TOST(+-0.010) p=0.819 does not exclude |d|>margin
+  all vs ba EASE-DR                    - LightGCN               n=  225   -15.27 [ 33.69] p=0.373 pHolm=1 NB=0.679 NBHolm=1 MDE= 48.10 TOST(+-0.010) p=0.621 does not exclude |d|>margin
+  all vs ba GF-CF-DR                   - LightGCN               n=  225   -12.33 [ 32.46] p=0.455 pHolm=1 NB=0.767 NBHolm=1 MDE= 46.35 TOST(+-0.010) p=0.556 does not exclude |d|>margin
+  all vs ba Pop                        - LightGCN               n=  225   -34.67 [ 31.12] p=0.0291 pHolm=0.495 NB=0.182 NBHolm=1 MDE= 44.43 TOST(+-0.010) p=0.94 does not exclude |d|>margin
+  all vs ba Impute                     - LightGCN               n=  225   -16.97 [ 34.67] p=0.336 pHolm=1 NB=0.518 NBHolm=1 MDE= 49.50 TOST(+-0.010) p=0.654 does not exclude |d|>margin
 
 === Yahoo (ndcg@5; TOST margin +-0.010) ===
  primary family (Holm over P1-P4 of this dataset):

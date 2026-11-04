@@ -28,6 +28,14 @@ T4_ROWS = ["Obs", "Pop", "Impute", "IPS", "DR", "DRUP", "EASE", "GF-CF", "EASE-D
            "DR-BPR-LGN-p", "DR-BPR-LGN-p2", "QP family (pooled)", "control: shuffled Q", "control: popularity Q"]
 
 
+DISPLAY = {"iALS-wide": "iALS (grid B)", "DR-BPR-LGN-1 (Q, lrQ)": "DR-BPR-LGN-1 (Q-only)",
+           "DR-BPR-LGN-1 (Q)": "DR-BPR-LGN-1 (Q-only)"}
+
+
+def pfmt(p):
+    return "$<$0.001" if p < 0.001 else f"{p:.3f}"
+
+
 def esc(s):
     return s.replace("&", r"\&").replace("%", r"\%").replace("_", r"\_").replace("#", r"\#")
 
@@ -63,7 +71,7 @@ def t4(M):
     head += "\n" + " & " + " & ".join("mean (sd) & cfg" for _ in DS)
     rows = []
     for name in T4_ROWS:
-        cells = [esc(name)]
+        cells = [esc(DISPLAY.get(name, name))]
         anyv = False
         for d in DS:
             m = M[d].get(name)
@@ -91,20 +99,26 @@ def t5(tests, sens):
                        if p["family"] == r["family"] and p["A"] == r["A"] and p["B"] == r["B"]), None)
             kmin = f"{1000 * sp['expected_diff_kmin']:+.2f}" if sp and sp.get("expected_diff_kmin") is not None else "--"
             seed = r.get("seed")
-            seedtxt = f"{1000 * seed['diff']:+.2f} ($p$={seed['p']:.3f})" if seed else "--"
-            tost = f"{'yes' if r['equivalent'] else 'no'} ($p$={r['tost_p']:.3f})"
+            seedtxt = f"{1000 * seed['diff']:+.2f} ($p$={pfmt(seed['p'])})" if seed else "--"
+            if ds == "coat":
+                # Coat: no equivalence claim; the column states which differences the data exclude
+                tost = (f"excludes $\\lvert d\\rvert>0.010$ ($p$={pfmt(r['tost_p'])})" if r['equivalent']
+                        else f"does not exclude $\\lvert d\\rvert>0.010$ ($p$={pfmt(r['tost_p'])})")
+            else:
+                tost = f"{'yes' if r['equivalent'] else 'no'} ($p$={pfmt(r['tost_p'])})"
             rows.append(f"{NAME[ds]} & {r['family']} & {esc(r['A'])} -- {esc(r['B'])} & "
-                        f"{1000 * r['diff']:+.2f} [{1000 * r['half']:.2f}] & {r['p']:.3f} & {r['p_holm']:.3f} & "
-                        f"{r['nb_holm']:.3f} & {1000 * r['mde']:.2f} & {tost} & {kmin} & {seedtxt}")
+                        f"{1000 * r['diff']:+.2f} [{1000 * r['half']:.2f}] & {pfmt(r['p'])} & {pfmt(r['p_holm'])} & "
+                        f"{pfmt(r['nb_holm'])} & {1000 * r['mde']:.2f} & {tost} & {kmin} & {seedtxt}")
     return table("llllrrrrlrl", "Dataset & Fam. & Comparison ($A-B$) & Diff.\\ $\\times10^{3}$ [95\\% CI] & $p$ & "
                  "$p_\\mathrm{Holm}$ & $p_\\mathrm{NB,Holm}$ & MDE $\\times10^{3}$ & TOST at margin & Matched-$k$ diff $\\times10^{3}$ & "
                  "Seeds 1--3 diff $\\times10^{3}$",
                  rows, "Primary comparisons P1--P4 (Section~\\ref{sec:protocol}): paired per-user differences, tests, "
-                       "MDE, TOST at the pre-specified margins (Section~\\ref{sec:protocol}), and the matched-budget "
+                       "MDE, TOST at the sensitivity margins (Section~\\ref{sec:stats}), and the matched-budget "
                        "difference at $k=k_\\mathrm{min}$.",
-                 "tab:T5", note="Margins are the pre-specified margins (Section~\\ref{sec:protocol}) and are provisional "
-                                "(Section~\\ref{sec:stats}). Seeds column: only comparisons whose baselines were "
-                                "retrained with seeds 1--3 (Section~\\ref{sec:seeds}) are shown.")
+                 "tab:T5", note="Margins are sensitivity thresholds chosen before the analysis and not derived from the "
+                                "literature (Section~\\ref{sec:stats}). On Coat the TOST column states the differences "
+                                "the data exclude; equivalence is not claimed there. Seeds column: only comparisons "
+                                "whose baselines were retrained with seeds 1--3 (Section~\\ref{sec:seeds}) are shown.")
 
 
 def t6(tests, M):
@@ -115,14 +129,17 @@ def t6(tests, M):
             mb = M[ds].get(r["B"])
             mean = f"{ma.stored_mean(KEY[ds]):.4f}" if ma else "--"
             cfg = str(ma.n_configs) if ma else "--"
-            tost = f"{'yes' if r['equivalent'] else 'no'}"
-            rows.append(f"{NAME[ds]} & {r['family'].replace('T6 ', '')} & {esc(r['A'])} & {mean} & {cfg} & "
+            if ds == "coat":
+                tost = "excludes $\\lvert d\\rvert>0.010$" if r['equivalent'] else "does not exclude"
+            else:
+                tost = f"{'yes' if r['equivalent'] else 'no'}"
+            rows.append(f"{NAME[ds]} & {r['family'].replace('T6 ', '')} & {esc(DISPLAY.get(r['A'], r['A']))} & {mean} & {cfg} & "
                         f"{esc(r['B']) if mb else '--'} & {1000 * r['diff']:+.2f} [{1000 * r['half']:.2f}] & "
-                        f"{r['p_holm']:.3f} & {tost}")
+                        f"{pfmt(r['p_holm'])} & {tost}")
     return table("lllrrlrrl", "Dataset & Family & Method & Mean & Cfg & Versus & Diff.\\ $\\times10^{3}$ [95\\% CI] & "
-                 "$p_\\mathrm{Holm}$ & TOST equiv.",
+                 "$p_\\mathrm{Holm}$ & TOST (Coat: exclusion, not equivalence)",
                  rows, "Refinement family against the simple debiased prior of the same learner, and the shuffled and "
-                       "popularity controls against the backbone (T6).", "tab:T6",
+                       "popularity controls against the backbone.", "tab:T6",
                  note="Holm within each family and dataset. Rows are missing where the simple prior has not been run "
                       "for that dataset.")
 
@@ -190,12 +207,31 @@ def t8(tests):
             # the KuaiRec row has no configuration grid and no split counts: its paired-test p-value and its
             # equivalence verdict go in the note, not into the share or split-count columns
             rows.append(f"{NAME[ds]} (DRUP $-$ DR, all splits) & -- & {1000 * w['diff']:+.2f} & -- & --")
-            kr_note = (f"KuaiRec row: paired test $p$={w['p']:.3f}; "
-                       f"{'equivalent' if w['equivalent'] else 'not equivalent'} at the pre-specified margin "
-                       f"(Section~\\ref{{sec:protocol}}).")
+            kr_note = (f"KuaiRec row: paired test $p$={pfmt(w['p'])}; "
+                       f"{'within' if w['equivalent'] else 'not within'} the sensitivity margin $\\pm0.003$ "
+                       f"(Section~\\ref{{sec:stats}}).")
     return table("llrrl", "Dataset & $\\beta$ & Mean diff.\\ $\\times10^{3}$ & Share of configs $<0$ & Splits with mean $<0$",
                  rows, "Walk correction at matched configurations (Coat, Yahoo), and KuaiRec DRUP minus DR.", "tab:T8",
                  note=kr_note if kr_note else None)
+
+
+def t12(tests):
+    """Appendix: every method against LightGCN (the backbone family), one table per dataset."""
+    out = []
+    for ds in DS:
+        rows = []
+        for r in tests.get(ds, {}).get("families", {}).get("all_vs_backbone", []):
+            if r["A"] == "LightGCN":
+                continue
+            rows.append(f"{esc(DISPLAY.get(r['A'], r['A']))} & {1000 * r['diff']:+.2f} [{1000 * r['half']:.2f}] & "
+                        f"{pfmt(r['p'])} & {pfmt(r['p_holm'])} & {pfmt(r['nb_holm'])} & {1000 * r['mde']:.2f}")
+        cap = (f"Appendix: every method against LightGCN on {NAME[ds]} (backbone family, nDCG@{KEY[ds].split('@')[1]}). "
+               f"Holm is taken over this family.")
+        out.append(table("lrrrrr", "Method & Diff.\\ $\\times10^{3}$ [95\\% CI] & $p$ & $p_\\mathrm{Holm}$ & "
+                         "$p_\\mathrm{NB,Holm}$ & MDE $\\times10^{3}$", rows, cap, f"tab:T12-{ds}",
+                         note="Per-user paired differences over the test users; the Nadeau-Bengio column is the "
+                              "heuristic correction of Section~\\ref{sec:stats}."))
+    return "\n".join(out)
 
 
 def main():
@@ -211,6 +247,7 @@ def main():
     write("T6_refinements.tex", t6(tests, M))
     write("T7_sensitivity.tex", t7(tests, sens))
     write("T8_walk.tex", t8(tests))
+    write("T12_backbone.tex", t12(tests))
     rep("written: " + ", ".join(f"{TDIR}/{n}" for n in ["T4_main.tex", "T5_effects.tex", "T6_refinements.tex",
                                                        "T7_sensitivity.tex", "T8_walk.tex"]))
     rep.save("tables.txt")

@@ -14,8 +14,8 @@ which pairs were exposed.
 
 Graph models have also been debiased. NAVIP \citep{kim2022navip} weights neighbour
 aggregation by inverse propensities. r-AdjNorm \citep{zhao2022radjnorm} tunes the strength of
-adjacency normalisation to trade accuracy against novelty, and \citet{chen2024gcnpop} analyse
-how graph convolutions amplify popularity bias. APDA \citep{zhou2023apda} and CAGED
+adjacency normalisation to trade accuracy against novelty, and \citet{chen2024gcnpop} study
+how graph convolutions can amplify popularity bias. APDA \citep{zhou2023apda} and CAGED
 \citep{que2025caged} learn aggregation weights, and DPAA \citep{dpaa2026}, an arXiv preprint,
 re-weights message passing. AdvDrop \citep{zhang2024advdrop} learns an adversarial edge dropout
 on the interaction graph and reports IPS and DR baselines on Coat, Yahoo! R3 and KuaiRec. PPD
@@ -36,8 +36,8 @@ propensities or self-normalised estimators \citep{schnabel2016,swaminathan2015sn
 \citet{steck2010mnar} showed that missing ratings carry information, proposed test measures
 that can be estimated without bias when ratings are missing not at random, and derived training
 objectives that account for the missing entries. Doubly robust learning adds an imputation model
-to the inverse-propensity estimator \citep{wang2019drjl}, and later variants reduce its bias or
-variance \citep{guo2021mrdr,dai2022gdr,li2023stabledr}. Information-theoretic counterfactual
+to the inverse-propensity estimator \citep{wang2019drjl}, and later doubly robust variants
+address related debiasing problems \citep{guo2021mrdr,dai2022gdr,li2023stabledr}. Information-theoretic counterfactual
 learning from missing-not-at-random feedback is studied by \citet{wang2020cvib}.
 
 Some debiasing methods use a small uniform sample for training. AutoDebias
@@ -77,11 +77,11 @@ that several did not outperform well-tuned versions of those baselines. \citet{r
 argue that baselines in published comparisons are often under-tuned, so that a reported gain
 depends on the effort spent on each method. \citet{rendle2022ials} show that iALS, when tuned
 carefully, is competitive on common item recommendation benchmarks. \citet{anelli2023myth}
-re-examine the reported gains of graph collaborative filtering against tuned baselines.
+question the reported advances of graph collaborative filtering.
 
 Several parts of the protocol can change a conclusion. Sampled and exact metrics can disagree
-\citep{krichene2020sampled}. Tests over overlapping resamples are anti-conservative, and a
-corrected resampled t-test is needed for them \citep{nadeau2003}. Reporting the expected
+\citep{krichene2020sampled}. \citet{nadeau2003} propose a corrected resampled t-test for the generalisation error, for
+resamples that overlap. Reporting the expected
 validation performance as a function of the number of configurations tried makes the tuning
 budget visible \citep{dodge2019showyourwork}. Comparisons over several methods and datasets also
 need a multiple-testing correction, for which we use the step-down procedure of
@@ -90,7 +90,7 @@ need a multiple-testing correction, for which we use the step-down procedure of
 \subsection{Gap and positioning}\label{sec:related-gap}
 
 The contribution of this paper is evidence rather than a new method. The graph debiasers and the
-candidate models of Section~4 are evaluated under one protocol, and the study measures how far
+candidate models of Section~\ref{sec:methods} are evaluated under one protocol, and the study measures how far
 each conclusion depends on evaluation choices. Table~\ref{tab:positioning} summarises how the
 related studies use uniformly collected data and which benchmarks they use. The uses differ.
 Some studies train on uniform data (AutoDebias, CausE, ConAlign), some select configurations on
@@ -98,8 +98,8 @@ part of it (CDR, PPD, ConAlign), and some keep it out of both training and selec
 
 \begin{table}[t]
 \centering
-\caption{Positioning of related studies by their protocol. Entries follow the published
-protocols as read in the full texts; ``not stated'' marks a point that the text does not
+\caption{Positioning of related studies by their protocol. Entries follow the protocols as
+described in the cited papers; ``not stated'' marks a point that the description does not
 settle. Uniform data are the uniformly collected or randomised samples of the benchmark.}
 \label{tab:positioning}
 \footnotesize
@@ -125,7 +125,7 @@ This study & yes & IPS-fitted imputation and propensity & no, except Coat shippe
 \end{tabular}}
 \end{table}
 
-A search completed in October 2026 found no graph recommender that uses a posterior probability,
+A web search in October 2026 found no graph recommender that uses a posterior probability,
 built from a propensity and an imputation, to weight sampled negatives, and none that adds a
 debiased imputation to a graph model's score. It also found no graph study that uses
 KuaiRand-Pure. The search used general web sources and cannot be exhaustive. Coat, Yahoo! R3 and
