@@ -1938,6 +1938,26 @@
      "24": 0.6287508717707933
     }
    },
+   "iALS-p (add prior)": {
+    "role": "prior",
+    "n_configs": 45,
+    "stored_mean": 0.6277618183940387,
+    "val_selected_replay": 0.6277618183940387,
+    "test_oracle_split": 0.6279560567755388,
+    "test_oracle_all_rows": 0.6279560567755388,
+    "inflation_oracle": 0.00019423838150012251,
+    "config_oracle": 0.6278746154008324,
+    "inflation_config_oracle": 0.00011279700679378557,
+    "expected_max": {
+     "1": 0.5616770722710295,
+     "2": 0.5963418518389829,
+     "4": 0.6137303035605719,
+     "8": 0.621499402803821,
+     "16": 0.6255311895605578,
+     "32": 0.6276161997573274,
+     "45": 0.6277618183940387
+    }
+   },
    "QP family (pooled)": {
     "role": "final",
     "n_configs": 120,
@@ -2108,7 +2128,7 @@
    }
   ],
   "alt_metric": "ndcg@50",
-  "inflation_trained_mean": 0.0009600092633165518,
+  "inflation_trained_mean": 0.0009174664365489723,
   "inflation_trained_range": [
    0.0,
    0.0028288040487199906

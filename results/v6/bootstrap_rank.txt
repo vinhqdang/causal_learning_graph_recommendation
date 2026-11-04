@@ -42,7 +42,6 @@ NOTE: LightGCN-p (add prior): missing results/v4/learned_kuairand_offonly.json; 
   MACR                      0.4325  0.4312   0.000  0.000  0.000  0.000  0.000  0.000  0.000  1.000
   leader by validation: QP family (pooled); P(rank 1) = 0.998
 
-NOTE: iALS-p (add prior): missing results/v5/learned_kuairec_add_ials.json; method skipped
 === KuaiRec (ndcg@20) ===
   users 1410, splits 5, resample splits: False
   method                       val    mean      r1     r2     r3     r4     r5     r6     r7     r8

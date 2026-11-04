@@ -117,7 +117,6 @@ NOTE: LightGCN-p (add prior): missing results/v4/learned_kuairand_offonly.json; 
   all vs ba QP family (pooled)         - LightGCN               n= 8321    +3.93 [  1.53] p=4.95e-07 pHolm=1.98e-06 NB=0.347 NBHolm=1 MDE=  2.19 TOST(+-0.003) p=0.883 seeds1-3 +4.87 p=2.37e-17
 
 === KuaiRec (ndcg@20; TOST margin +-0.003) ===
-NOTE: iALS-p (add prior): missing results/v5/learned_kuairec_add_ials.json; method skipped
  primary family (Holm over P1-P4 of this dataset):
   P1        DR-LightGCN                - LightGCN               n= 1410   +13.17 [  3.31] p=1.25e-14 pHolm=3.76e-14 NB=0.394 NBHolm=0.787 MDE=  4.74 TOST(+-0.003) p=1
   P2        LightGCN-p (add prior)     - LightGCN               n= 1410   +21.22 [  2.86] p=1.06e-44 pHolm=4.22e-44 NB=0.00187 NBHolm=0.00747 MDE=  4.09 TOST(+-0.003) p=1
@@ -133,7 +132,7 @@ NOTE: iALS-p (add prior): missing results/v5/learned_kuairec_add_ials.json; meth
   all vs ba NAVIP                      - LightGCN               n= 1410   +10.41 [  1.82] p=3.64e-28 pHolm=4.73e-27 NB=0.00246 NBHolm=0.0319 MDE=  2.60 TOST(+-0.003) p=1
   all vs ba DR-LightGCN                - LightGCN               n= 1410   +13.17 [  3.31] p=1.25e-14 pHolm=1e-13 NB=0.394 NBHolm=0.787 MDE=  4.74 TOST(+-0.003) p=1
   all vs ba BPR-MF                     - LightGCN               n= 1410   -11.73 [  3.27] p=3.17e-12 pHolm=1.9e-11 NB=0.0052 NBHolm=0.0526 MDE=  4.68 TOST(+-0.003) p=1
-  all vs ba SimGCL                     - LightGCN               n= 1410   -44.34 [  4.11] p=2.25e-86 pHolm=4.72e-85 NB=3.85e-05 NBHolm=0.000771 MDE=  5.88 TOST(+-0.003) p=1
+  all vs ba SimGCL                     - LightGCN               n= 1410   -44.34 [  4.11] p=2.25e-86 pHolm=4.94e-85 NB=3.85e-05 NBHolm=0.000809 MDE=  5.88 TOST(+-0.003) p=1
   all vs ba DR-JL                      - LightGCN               n= 1410   +25.46 [  3.66] p=5.35e-40 pHolm=7.49e-39 NB=0.00478 NBHolm=0.0526 MDE=  5.22 TOST(+-0.003) p=1
   all vs ba MRDR                       - LightGCN               n= 1410   +25.24 [  3.53] p=7.25e-42 pHolm=1.09e-40 NB=0.00205 NBHolm=0.0287 MDE=  5.05 TOST(+-0.003) p=1
   all vs ba MACR                       - LightGCN               n= 1410   -25.84 [  4.57] p=1.71e-27 pHolm=2.05e-26 NB=0.00102 NBHolm=0.0173 MDE=  6.53 TOST(+-0.003) p=1
@@ -142,11 +141,12 @@ NOTE: iALS-p (add prior): missing results/v5/learned_kuairec_add_ials.json; meth
   all vs ba IPS-MF                     - LightGCN               n= 1410   +17.69 [  3.53] p=3.7e-22 pHolm=4.07e-21 NB=0.00987 NBHolm=0.0889 MDE=  5.04 TOST(+-0.003) p=1
   all vs ba DR-MF                      - LightGCN               n= 1410   +14.47 [  4.20] p=1.98e-11 pHolm=9.91e-11 NB=0.0248 NBHolm=0.124 MDE=  6.00 TOST(+-0.003) p=1
   all vs ba AdvInfoNCE-LGN             - LightGCN               n= 1410   -28.42 [  6.46] p=1.55e-17 pHolm=1.55e-16 NB=0.00255 NBHolm=0.0319 MDE=  9.23 TOST(+-0.003) p=1
-  all vs ba LightGCN-p (add prior)     - LightGCN               n= 1410   +21.22 [  2.86] p=1.06e-44 pHolm=1.8e-43 NB=0.00187 NBHolm=0.0283 MDE=  4.09 TOST(+-0.003) p=1
+  all vs ba LightGCN-p (add prior)     - LightGCN               n= 1410   +21.22 [  2.86] p=1.06e-44 pHolm=1.9e-43 NB=0.00187 NBHolm=0.0283 MDE=  4.09 TOST(+-0.003) p=1
+  all vs ba iALS-p (add prior)         - LightGCN               n= 1410   +19.96 [  2.71] p=2.36e-44 pHolm=4.01e-43 NB=0.000841 NBHolm=0.0151 MDE=  3.87 TOST(+-0.003) p=1
   all vs ba QP family (pooled)         - LightGCN               n= 1410   +20.90 [  2.88] p=3.39e-43 pHolm=5.42e-42 NB=0.0102 NBHolm=0.0889 MDE=  4.11 TOST(+-0.003) p=1
   all vs ba Obs                        - LightGCN               n= 1410    -4.80 [  3.11] p=0.00248 pHolm=0.00495 NB=0.0134 NBHolm=0.0937 MDE=  4.44 TOST(+-0.003) p=0.872
-  all vs ba DRUP                       - LightGCN               n= 1410   +29.84 [  3.51] p=3.03e-57 pHolm=5.46e-56 NB=0.000537 NBHolm=0.00968 MDE=  5.01 TOST(+-0.003) p=1
-  all vs ba DR                         - LightGCN               n= 1410   +29.96 [  3.51] p=1.19e-57 pHolm=2.26e-56 NB=0.000509 NBHolm=0.00968 MDE=  5.01 TOST(+-0.003) p=1
-  all vs ba Pop                        - LightGCN               n= 1410   -31.41 [  3.25] p=1.28e-71 pHolm=2.56e-70 NB=1.97e-05 NBHolm=0.000413 MDE=  4.64 TOST(+-0.003) p=1
+  all vs ba DRUP                       - LightGCN               n= 1410   +29.84 [  3.51] p=3.03e-57 pHolm=5.76e-56 NB=0.000537 NBHolm=0.0102 MDE=  5.01 TOST(+-0.003) p=1
+  all vs ba DR                         - LightGCN               n= 1410   +29.96 [  3.51] p=1.19e-57 pHolm=2.38e-56 NB=0.000509 NBHolm=0.0102 MDE=  5.01 TOST(+-0.003) p=1
+  all vs ba Pop                        - LightGCN               n= 1410   -31.41 [  3.25] p=1.28e-71 pHolm=2.69e-70 NB=1.97e-05 NBHolm=0.000433 MDE=  4.64 TOST(+-0.003) p=1
   all vs ba Impute                     - LightGCN               n= 1410   +11.89 [  3.93] p=3.71e-09 pHolm=1.49e-08 NB=0.0752 NBHolm=0.301 MDE=  5.62 TOST(+-0.003) p=1
 

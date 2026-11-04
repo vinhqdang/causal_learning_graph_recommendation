@@ -1,5 +1,4 @@
 A4 tables (experiments/v7_tables.py)
 NOTE: LightGCN-p (add prior): missing results/v4/learned_yahoo_offonly.json; method skipped
 NOTE: LightGCN-p (add prior): missing results/v4/learned_kuairand_offonly.json; method skipped
-NOTE: iALS-p (add prior): missing results/v5/learned_kuairec_add_ials.json; method skipped
 written: paper/v4/tables/T4_main.tex, paper/v4/tables/T5_effects.tex, paper/v4/tables/T6_refinements.tex, paper/v4/tables/T7_sensitivity.tex, paper/v4/tables/T8_walk.tex

@@ -2962,6 +2962,31 @@
    "cause": "match"
   },
   {
+   "file": "results/v5/learned_kuairec_add_ials.json",
+   "method": "iALS-p",
+   "status": "replayed",
+   "metric": "ndcg@20",
+   "stored_mean": 0.6277618183940387,
+   "replay_mean": 0.6277618183940387,
+   "gap": 0.0,
+   "recorded_patience": 3,
+   "match_patience": [
+    null,
+    1,
+    2,
+    3,
+    5,
+    10
+   ],
+   "chosen_in_bank": true,
+   "n_configs_stored": 45,
+   "n_configs_bank": 45,
+   "val_max_abs_diff": 0.0,
+   "test_max_abs_diff": 0.0,
+   "seed_check_mean": null,
+   "cause": "match"
+  },
+  {
    "file": "results/v5/learned_kuairec_drgp_f0.1.json",
    "method": "DRGP",
    "status": "replayed",

@@ -138,6 +138,7 @@ results/v5/learned_coat_drgp_lgn.json      DRGP-LGN-bpr     0.5933   0.5933  +0.
 results/v5/learned_coat_drgp_lgn.json      DRGP-LGN-dr      0.5642   0.5642  +0.00000  5               
 results/v5/learned_coat_drgp_lgn.json      DRGP-LGN-hyb     0.6014   0.6014  +0.00000  5               
 results/v5/learned_coat_ialswide.json      iALS-wide        0.5869   0.5869  +0.00000  5               
+results/v5/learned_kuairec_add_ials.json   iALS-p           0.6278   0.6278  +0.00000  none,1,2,3,5,10  
 results/v5/learned_kuairec_drgp_f0.1.json  DRGP             0.6327   0.6327  +0.00000  none,1,2,3,5,10  
 results/v5/learned_kuairec_drgp_f0.2.json  DRGP             0.6321   0.6321  +0.00000  none,1,2,3,5,10  
 results/v5/learned_kuairec_drgp_ials.json  iALS-p           0.6214   0.6214  +0.00000  none,1,2,3,5,10  
@@ -157,7 +158,7 @@ results/v2/filters_yahoo_pop.json          Obs              0.6585   0.6585  +0.
 results/v2/filters_yahoo_pop.json          DR               0.6567   0.6567  +0.00000  none            
 results/v2/filters_yahoo_pop.json          DRUP             0.6567   0.6567  +0.00000  none            
 
-replayed methods: 153; within 0.002: 150; above 0.002: 3
+replayed methods: 154; within 0.002: 151; above 0.002: 3
 result files of v3 with training-free results but no bank (not reconciled): 4 files
 
 GAPS above threshold

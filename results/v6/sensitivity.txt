@@ -110,7 +110,6 @@ QP family (pooled)       final           30   0.4613   0.4613   0.4631 +0.0018  
 
 
 === KuaiRec (ndcg@20) ===
-NOTE: iALS-p (add prior): missing results/v5/learned_kuairec_add_ials.json; method skipped
 method                   role          cfgs   stored   valsel   oracle    infl    cfgOr   inflC   E[k=8]     E[N]
 LightGCN                 backbone        36   0.6085   0.6085   0.6094 +0.0009   0.6092 +0.0007   0.6083   0.6085
 LightGCN-pt              baseline        36   0.6271   0.6271   0.6291 +0.0020   0.6288 +0.0018   0.6262   0.6271
@@ -128,10 +127,11 @@ IPS-MF                   baseline         6   0.6252   0.6252   0.6264 +0.0012  
 DR-MF                    baseline         6   0.6219   0.6219   0.6227 +0.0008   0.6219 +0.0000   0.6219   0.6219
 AdvInfoNCE-LGN           debiaser         8   0.5776   0.5776   0.5776 +0.0000   0.5776 +0.0000   0.5776   0.5776
 LightGCN-p (add prior)   prior           24   0.6288   0.6288   0.6294 +0.0006   0.6292 +0.0005   0.6284   0.6288
+iALS-p (add prior)       prior           45   0.6278   0.6278   0.6280 +0.0002   0.6279 +0.0001   0.6215   0.6278
 QP family (pooled)       final          120   0.6285   0.6285   0.6297 +0.0013   0.6297 +0.0012   0.6286   0.6285
 Obs                      training-free    16   0.6036   0.6036   0.6036 +0.0000   0.6036 +0.0000   0.6034   0.6036
 DRUP                     training-free   384   0.6378   0.6378   0.6391 +0.0013   0.6386 +0.0008   0.6249   0.6378
-  inflation (oracle - validation-selected), trained methods: mean +0.0010, range +0.0000 to +0.0028
+  inflation (oracle - validation-selected), trained methods: mean +0.0009, range +0.0000 to +0.0028
 
   primary comparisons (A minus B; valsel = validation-selected test; oracle = per-split test oracle)
   fam  A                        B                       valsel    oracle     cfgOr    E@kmin  kmin  flip%       alt  altSign      signchg k
