@@ -1,0 +1,63 @@
+Stage 1 (v10): LEAF on the temporal all-user KuaiRand-27K setting, nDCG@10
+Inputs read: leaf_lgn.json, leaf_tied.json, leaf_tied_ablate.json, learned_kuairand_t_base.json
+Inputs missing or not used:
+  - results/v10/learned_kuairand_t_base.json has no method iALS-p
+  - no result for iALS-p
+  - missing: results/v10/learned_kuairand_t_base_pop.json
+  - no result for LightGCN-p
+  - missing: results/v10/learned_kuairand_t_qp*.json
+  - no result for QP family
+  - partial, not used: results/v10/learned_kuairand_t_base.json.iALS-p.partial.json (iALS-p is taken from the final file only)
+  - missing: results/v10/leaf_lgn_ablate.json
+
+1. Methods: mean +- sd over the 5 splits of nDCG@10 (sd with ddof=1)
+  method             mean    +- sd  n_configs  jobs  files
+  LEAF-LGN         0.4728   0.0011        197     1  leaf_lgn.json
+  LEAF-tied        0.4691   0.0012       3456     1  leaf_tied.json
+  LightGCN         0.4576   0.0031          4     1  learned_kuairand_t_base.json
+  r-AdjNorm        0.4620   0.0008          8     1  learned_kuairand_t_base.json
+  iALS             0.4490   0.0007         12     1  learned_kuairand_t_base.json
+  n_configs = configurations searched per split (pooled over the jobs of the method).
+
+2. Users: 22612 users are common to all methods in section 1 (per-user keys are dataset row ids; each paired comparison intersects its own two methods).
+
+3. Primary family: per-user paired difference A - B, x1e-3 nDCG@10 [95% CI half-width], two-sided t p, Holm within this family (all LEAF variants x all baselines), Nadeau-Bengio p over split means and its Holm value in the same family
+  LEAF-LGN - LightGCN                      n= 22612    +15.46 [ 1.53]  p=3.56e-86  p_Holm=1.78e-85  NB p=1.01e-02  NB p_Holm=3.14e-02
+  LEAF-LGN - r-AdjNorm                     n= 22612    +11.10 [ 1.71]  p=3.98e-37  p_Holm=1.19e-36  NB p=7.85e-03  NB p_Holm=3.14e-02
+  LEAF-LGN - iALS                          n= 22612    +24.04 [ 2.14]  p=1.20e-106  p_Holm=7.21e-106  NB p=4.06e-05  NB p_Holm=2.43e-04
+  LEAF-tied - LightGCN                     n= 22612    +11.42 [ 2.44]  p=5.51e-20  p_Holm=1.10e-19  NB p=1.12e-01  NB p_Holm=1.12e-01
+  LEAF-tied - r-AdjNorm                    n= 22612     +7.07 [ 2.50]  p=2.92e-08  p_Holm=2.92e-08  NB p=9.81e-03  NB p_Holm=3.14e-02
+  LEAF-tied - iALS                         n= 22612    +20.00 [ 2.47]  p=1.43e-56  p_Holm=5.71e-56  NB p=4.72e-04  NB p_Holm=2.36e-03
+
+4. Gate (LEAF-LGN must beat the strongest tuned baseline by >= 10e-3 nDCG@10, p_Holm < 0.05)
+  strongest tuned baseline: r-AdjNorm (mean nDCG@10 0.4620); LEAF-LGN mean 0.4728
+  LEAF-LGN - r-AdjNorm                     n= 22612    +11.10 [ 1.71]  p=3.98e-37  p_Holm=1.19e-36  NB p=7.85e-03  NB p_Holm=3.14e-02
+  GATE: PASS  (diff +11.10e-3 vs required >= 10e-3; p_Holm 1.19e-36 vs required < 0.05)
+  reading 'beats each baseline' (design section 7), same thresholds:
+    vs LightGCN       +15.46e-3  p_Holm 1.78e-85  PASS
+    vs r-AdjNorm      +11.10e-3  p_Holm 1.19e-36  PASS
+    vs iALS           +24.04e-3  p_Holm 7.21e-106  PASS
+  info: LEAF-tied - r-AdjNorm: +7.07e-3, p_Holm 2.92e-08
+
+5. Ablations: full minus ablated arm, x1e-3 nDCG@10 [95% CI half-width] (positive = the component helps)
+  arm                                      n_configs  mean    full-arm diff (x1e-3)
+  [LEAF-tied] shuffle_users                     3456  0.4499
+  LEAF-tied - LEAF-tied[shuffle_users]     n= 22612    +18.90 [ 1.99]  p=6.13e-77  p_Holm=4.90e-76  NB p=7.66e-04  NB p_Holm=4.60e-03
+  [LEAF-tied] no_tag                            1152  0.4594
+  LEAF-tied - LEAF-tied[no_tag]            n= 22612     +9.38 [ 1.63]  p=2.34e-29  p_Holm=1.17e-28  NB p=2.16e-03  NB p_Holm=6.48e-03
+  [LEAF-tied] no_author                          432  0.4628
+  LEAF-tied - LEAF-tied[no_author]         n= 22612     +6.45 [ 1.17]  p=5.26e-27  p_Holm=2.10e-26  NB p=6.32e-04  NB p_Holm=4.42e-03
+  [LEAF-tied] no_lifelong                         72  0.4512
+  LEAF-tied - LEAF-tied[no_lifelong]       n= 22612    +17.88 [ 2.04]  p=1.37e-65  p_Holm=9.61e-65  NB p=3.14e-04  NB p_Holm=2.51e-03
+  [LEAF-tied] no_policy                          864  0.4643
+  LEAF-tied - LEAF-tied[no_policy]         n= 22612     +5.01 [ 1.20]  p=3.46e-16  p_Holm=6.91e-16  NB p=6.62e-02  NB p_Holm=1.32e-01
+  [LEAF-tied] lift_only                          432  0.4634
+  LEAF-tied - LEAF-tied[lift_only]         n= 22612     +5.78 [ 1.11]  p=2.03e-24  p_Holm=6.10e-24  NB p=7.95e-04  NB p_Holm=4.60e-03
+  [LEAF-tied] familiarity_only                   576  0.4585
+  LEAF-tied - LEAF-tied[familiarity_only]  n= 22612    +10.26 [ 1.66]  p=6.78e-34  p_Holm=4.07e-33  NB p=8.73e-04  NB p_Holm=4.60e-03
+  [LEAF-tied] no_music                          1728  0.4691
+  LEAF-tied - LEAF-tied[no_music]          identical rankings in every split (diff 0, p = 1)
+  Holm within this ablation family. Two-sided t p, NB p over split means.
+  LEAF-LGN ablations: not available yet (leaf_lgn_ablate.json missing), so the design check LEAF-LGN - LEAF-LGN(no lifelong) >= 8e-3 is not evaluable.
+  design check (LEAF-tied shuffle_users vs no_lifelong, must be within +-2e-3): -1.02e-3 -> PASS
+
