@@ -241,3 +241,4 @@ results/v3/*.partial.json
 
 results/v4/cache/
 results/v5/cache/
+results/v10/.slots/
