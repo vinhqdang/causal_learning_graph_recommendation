@@ -20,7 +20,7 @@ import torch
 from scipy import stats
 
 from common import REPO, ease, rowstd, std
-from common import FastSelector as Selector
+from common import BucketSelector as Selector
 from drup.data import split_test
 from drup.data2 import load_kuairand_rich
 
@@ -34,14 +34,32 @@ O, Y = d["O"], d["Y"]
 m, n = O.shape
 users_raw = d["users_raw"]
 test = d["test"]
-rows_users = sorted({u for u, _, _ in test})
-D = dict(ds="kuairand", ks=(5, 10, 20), key="ndcg@10", by="user", S=5, rows=torch.tensor(rows_users),
-         row_of={u: k for k, u in enumerate(rows_users)})
-D["splits"] = [split_test(test, 0.3, s, by="user") for s in range(5)]
-rows = D["rows"]
+# Compact representation (memory): row k = k-th test user, column j = j-th candidate of that user.
+# Scores are computed on full item rows in chunks and gathered to (U, Lmax); metrics are unchanged.
+rows_users = [u for u, _, _ in test]
+U = len(test)
+Lmax = max(len(it) for _, it, _ in test)
+cand = torch.zeros(U, Lmax, dtype=torch.long)
+for k, (_, it, _) in enumerate(test):
+    cand[k, :len(it)] = torch.as_tensor(it)
+ctest = [(k, np.arange(len(it)), rel) for k, (_, it, rel) in enumerate(test)]
+D = dict(ds="kuairand", ks=(5, 10, 20), key="ndcg@10", by="user", S=5, rows=torch.arange(U), row_of=None)
+D["splits"] = [split_test(ctest, 0.3, s, by="user") for s in range(5)]
+D["row_of"] = {k: k for k in range(U)}
+rows = torch.tensor(rows_users)
+print(f"compact candidates: {U} x {Lmax}", flush=True)
+
+
+def gather_rows(F):
+    """F(rows_chunk) -> (len, n) full scores; returns compact (U, Lmax) row-standardised over all items."""
+    out_ = torch.zeros(U, Lmax)
+    for a0 in range(0, U, 2048):
+        S = rowstd(F(rows[a0:a0 + 2048]))
+        out_[a0:a0 + 2048] = torch.gather(S, 1, cand[a0:a0 + 2048])
+    return out_
 print(f"users {m} items {n} test users {len(test)} window {WIN}", flush=True)
 X = O * Y
-pop = std(torch.log1p(X.sum(0)))[None, :].expand(len(rows), -1)
+pop = std(torch.log1p(X.sum(0)))[cand]
 NC = O - X
 
 NPZ = sys.argv[sys.argv.index("--npz") + 1] if "--npz" in sys.argv else f"{REPO}/data/raw/lifelong_27k.npz"
@@ -57,6 +75,8 @@ def keystr(col, k):
 
 tu = np.concatenate([np.full(len(it), u) for u, it, _ in test])
 ti = np.concatenate([it for _, it, _ in test])
+t_pos = np.concatenate([np.arange(len(it)) for _, it, _ in test])
+t_row = np.concatenate([np.full(len(it), k) for k, (_, it, _) in enumerate(test)])
 tot = pd.DataFrame(L[f"tot_{WIN}"], index=L[f"tot_{WIN}_user"], columns=["n", "c", "l"])
 base = (tot.c + 1.0) / (tot.n + 2.0)
 print(f"users with lifelong history: {np.isin(users_raw, tot.index).mean():.3f}", flush=True)
@@ -70,14 +90,17 @@ for k in ("tag", "author_id", "music_id"):
     b = df.u_raw.map(base).fillna(base.mean()).values
     df["lift"] = (df.c + 5 * b) / (df.n + 5) - b
     df["cnt"] = np.log1p(df.n)
-    q = pd.DataFrame({"u": tu, "i": ti, "u_raw": users_raw[tu], "k": code_i[ti]})
+    ur_ = users_raw[tu]
+    if "--shuffle" in sys.argv:          # negative control: lifelong tables of a random other user
+        perm = dict(zip(users_raw, np.random.default_rng(0).permutation(users_raw)))
+        ur_ = np.array([perm[x] for x in ur_])
+    q = pd.DataFrame({"u": tu, "i": ti, "u_raw": ur_, "k": code_i[ti], "row": t_row, "pos": t_pos})
     q = q.merge(df[["u_raw", "k", "lift", "cnt"]], on=["u_raw", "k"], how="left")
     for what in ("lift", "cnt"):
         if f"{k}_{what}" not in NEED:
             continue
-        S = torch.zeros(m, n)
-        S[torch.as_tensor(q.u.values), torch.as_tensor(q.i.values)] = torch.as_tensor(q[what].fillna(0.0).values.astype(np.float32))
-        S = S[rows]
+        S = torch.zeros(U, Lmax)
+        S[torch.as_tensor(q.row.values), torch.as_tensor(q.pos.values)] = torch.as_tensor(q[what].fillna(0.0).values.astype(np.float32))
         nz = S[S != 0]
         chan[f"{k}_{what}"] = S / (nz.std().clamp_min(1e-9) if len(nz) else 1.0)
         print(f"channel {k}_{what}: coverage of test candidates {q[what].notna().mean():.3f}", flush=True)
@@ -122,8 +145,9 @@ write("pop", res["pop"])
 base_s = {}
 for lam, w in itertools.product((3000.0, 10000.0), (0.0, 0.5)):
     Z = X + w * NC
-    base_s[(lam, w)] = rowstd(Z[rows] @ ease(Z, lam))
-    del Z
+    B = ease(Z, lam)
+    base_s[(lam, w)] = gather_rows(lambda r: Z[r] @ B)
+    del Z, B
 del X, NC, O, Y, d
 for name, wset, chs in [("EASE(click)+pop", (0.0,), []),
                         ("EASE(click+0.5shown)+pop", (0.5,), []),
@@ -138,7 +162,9 @@ for name, wset, chs in [("EASE(click)+pop", (0.0,), []),
         if wset is not None and w not in wset:
             continue
         S0 = base_s[(lam, w)] if wset is not None else 0 * pop
-        for gs in itertools.product(*[(0.0, 0.5, 1.0)] * len(chs)):
+        wgrid = {"tag_lift": (0.0, 0.5, 1.0), "author_id_cnt": (0.0, 0.5, 1.0), "author_id_lift": (0.0, 0.5),
+                 "music_id_cnt": (0.0, 0.5)}
+        for gs in itertools.product(*[wgrid[c] for c in chs]):
             S = S0 + bta * pop
             for c, g in zip(chs, gs):
                 if g:

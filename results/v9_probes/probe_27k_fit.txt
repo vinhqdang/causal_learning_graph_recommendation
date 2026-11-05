@@ -1,0 +1,2 @@
+policy only (cf, pop): test 0.4231 +- 0.0009; coefficients {'cf': 0.0152, 'pop': 0.3707}
+LEAF-fit (cf, pop, lifelong): test 0.4398 +- 0.0009; coefficients {'cf': 0.0108, 'pop': 0.3638, 'tag_lift': 0.3093, 'author_id_cnt': 0.0494, 'author_id_lift': 0.1953, 'music_id_cnt': -0.1276}

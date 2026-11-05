@@ -1,0 +1,3 @@
+LightGCN[t] alone: test 0.4594 +- 0.0004 chosen [{'epoch': 15}, {'epoch': 14}, {'epoch': 16}, {'epoch': 12}, {'epoch': 12}]
+LightGCN[t] + LEAF channels: test 0.4744 +- 0.0006 chosen [{'epoch': 11, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5}, {'epoch': 17, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 0.5, 'author_id_lift': 0.5}, {'epoch': 15, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 0.5, 'author_id_lift': 0.5}, {'epoch': 18, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 0.5, 'author_id_lift': 0.5}, {'epoch': 12, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5}]
+  plus - alone: +15.10 [1.56] p=2.25e-79 n=22612

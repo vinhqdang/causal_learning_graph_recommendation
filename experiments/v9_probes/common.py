@@ -75,3 +75,40 @@ class FastSelector:
                 "chosen": [b[1] for b in self.best],
                 "per_user": [{str(u): v for u, v in b[3].items()} for b in self.best],
                 "n_configs": self.n}
+
+
+class BucketSelector(FastSelector):
+    """FastSelector with users bucketed by candidate-list length (less padding; same values)."""
+
+    EDGES = (32, 64, 128, 256, 100000)
+
+    def __init__(self, D, name):
+        from drup.metrics import UserMetrics
+        self.D, self.name, self.n = D, name, 0
+
+        def buckets(lst):
+            out, lo = [], 0
+            for hi in self.EDGES:
+                part = [t for t in lst if lo < len(t[1]) <= hi]
+                if any(len(it) > 0 and r.sum() > 0 for _, it, r in part):
+                    out.append(UserMetrics(part, D["ks"], D["row_of"], "cpu"))
+                lo = hi
+            return out
+        self.um = [(buckets(v), buckets(t)) for v, t in D["splits"]]
+        self.best = [(-1.0, None, None, None) for _ in D["splits"]]
+
+    def add(self, S, cfg):
+        self.n += 1
+        vals = []
+        key = self.D["key"]
+        for s, (bv, bt) in enumerate(self.um):
+            tot = sum(float(u.compute(S)[key].sum()) for u in bv)
+            v = tot / sum(len(u.users) for u in bv)
+            vals.append(v)
+            if v > self.best[s][0]:
+                pu, us = [], []
+                for u in bt:
+                    pu += u.compute(S)[key].tolist()
+                    us += u.users
+                self.best[s] = (v, dict(cfg), float(np.mean(pu)), dict(zip(us, pu)))
+        return float(np.mean(vals))

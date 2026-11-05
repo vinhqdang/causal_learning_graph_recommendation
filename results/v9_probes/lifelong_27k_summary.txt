@@ -1,0 +1,9 @@
+rows streamed 322278385 cut 1650556800000
+pre users 26904 out-of-pool impressions 135219168 clicks 51394408 per user median 3453.0
+   tag (user,value) pairs 1051027 impressions 135136864 values in pool 44
+   author_id (user,value) pairs 5840241 impressions 11075986 values in pool 6510
+   music_id (user,value) pairs 2894336 impressions 10739177 values in pool 7202
+all users 27285 out-of-pool impressions 320841792 clicks 121392208 per user median 8548.0
+   tag (user,value) pairs 1123950 impressions 320689088 values in pool 44
+   author_id (user,value) pairs 10412529 impressions 25212496 values in pool 6510
+   music_id (user,value) pairs 4757259 impressions 24378448 values in pool 7202

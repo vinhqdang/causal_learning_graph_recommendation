@@ -36,27 +36,38 @@ Number provenance:
      p = 7e-17 (stored setting); the plain impression channel holds under the temporal protocol
      (+8.97e-3 [2.19]). This lifts a closed-form model to the level of tuned LightGCN (-1.85e-3 [3.39],
      p = 0.29) but not above the QP family (-5.78e-3 [3.44]).
-   - **Lifelong channel (the new signal).** KuaiRand-1K ships each user's ~11.7K impressions on 4.4M videos
-     *outside* the random pool. Exposure-conditional tag lift and author familiarity computed from that
-     history add **+24.04e-3 [9.18]**, p = 3e-7 (842 users, temporal protocol: all training data before
-     the random period), on top of a tuned in-pool EASE + popularity model; selected with non-zero weight
-     in 5/5 splits. Under the concurrent protocol the same gain is +39.02e-3: about 40% of it is a
-     feedback-loop leak of the logging policy (later impressions caused by the random exposure), which the
-     temporal protocol removes.
-3. **Recommended method (Section 5): LEAF - lifelong exposure-conditional affinity transfer**, a
-   closed-form collective linear autoencoder that predicts in-pool clicks from three inputs - in-pool
-   clicks, in-pool impressions (policy channel) and the user's lifelong exposure-conditional affinities on
-   shared content keys (tag, author, music) - trained only on data before the random-exposure period and
-   evaluated on the uniformly inserted videos. It is not a prior and does not re-weight negatives: it adds
-   an information source that no stored method sees.
+   - **Lifelong channel (the new signal).** KuaiRand-1K / -27K ship each user's lifelong impressions on
+     millions of videos *outside* the random pool. Exposure-conditional tag lift and author familiarity
+     computed from that history (temporal protocol: every training signal before the random period) add
+     **+16.04e-3 [1.92]**, p = 5e-60, on all 22,612 paired Pure users on top of the policy-channel model,
+     and +22.45e-3 [2.20] over EASE(click) + popularity (Section 4.4; KuaiRand-1K: +24.04e-3 [9.18], 842
+     users). A shuffled-user control removes the gain (-0.93e-3 [0.45]). The concurrent protocol inflates it
+     (+22.17e-3 on 27K, +39.02e-3 on 1K), so the temporal protocol is required.
+3. **Recommended method (Section 5): LEAF - lifelong exposure-conditional affinity transfer.** A user's
+   lifelong exposure-conditional affinities on content keys shared with the pool (tag lift, author
+   familiarity and lift, music), computed only from out-of-pool impressions before the random period, enter
+   the score of a collaborative backbone as learned per-key channels, together with the policy channel
+   (impressions without a click as fractional positives). Main instantiation: **LEAF-LGN** (LightGCN
+   backbone, channel weights trained jointly in the BPR objective; Section 5.2b); light instantiation:
+   **LEAF-EASE** (closed-form collective autoencoder; Section 5.2). Pilot on all 22,612 paired users,
+   temporal protocol: LightGCN 0.4594; LightGCN + LEAF channels **0.4744 (+15.10e-3 [1.56], p = 2e-79)**;
+   closed-form LEAF 0.4674 (+7.89e-3 [2.47] over LightGCN). In the pilot the channel weights (at most 4
+   scalars plus the popularity offset) were selected on validation like any hyperparameter; fitting them on
+   the training log with the click-given-shown target fails (probe F1), and the jointly trained BPR form is
+   untested (first job of Stage 1). It is not a prior and does not re-weight negatives: it adds an
+   information source that no stored method sees.
 4. **Novelty is moderate** (closest: SIM, arXiv 2006.05639, and TWIN, arXiv 2302.02352, for lifelong
    behaviour; EASE side-information extensions, Jeunen et al. RecSys 2020; impression-aware
    recommendation, arXiv 2308.07857). The defensible contribution is the mechanism (exposure-conditional
-   transfer across disjoint item sets via content keys, closed form) plus the first evidence on randomised
-   exposures, with a leakage-safe temporal protocol, that it carries real gains.
-5. **Honest probability** of a publishable method paper with real gains: **about 30%** (Section 8). The
-   main risks are (i) the 27K-scale replication (pending in Section 4.4), and (ii) a reviewer-requested
-   lifelong-aware deep baseline (SIM/DIN-style CTR model fed the same history), which LEAF must match.
+   transfer across disjoint item sets via content keys) plus evidence on randomised exposures, with a
+   leakage-safe temporal protocol, that it carries real gains; we found no prior work that evaluates
+   lifelong-history transfer on randomly exposed items.
+5. **Honest probability** of a publishable method paper with real gains: **about 35-40%** (Section 8).
+   Stage 0 (scale-up, leak and shuffle controls) has passed. The main remaining risks are (i) the re-run
+   strong baselines (LightGCN, QP family, iALS + prior) on the temporal all-user setting, which must be
+   beaten by >= 10e-3 (LightGCN with one configuration is already beaten by +15.10e-3), (ii) a
+   lifelong-aware deep baseline (SIM/DIN-style model fed the same history), which LEAF must match, and
+   (iii) whether the channel weights can be trained rather than validation-selected.
 
 ---
 
@@ -98,11 +109,13 @@ features but is saturated (v5 H1/H2); only a non-inferiority dataset. 4. Open Ba
 OPE testbed but no user ids and 80 items; it only fits a contextual-bandit method, not this line of work.
 Everything else fails (a).
 
-**Chosen.** Primary: **KuaiRand (Pure)**, loader `drup/data2.py`, stored 10K-user setting for paired
-comparison with every stored KuaiRand row, all-user setting (`n_users=None`) for the paper. Secondary:
-**KuaiRand-1K** (out-of-pool histories; linked to the same random pool) and **KuaiRec** (non-inferiority
-with its side features). KuaiRand-27K is the scale-up if the 1K probe shows that out-of-pool history
-carries signal.
+**Chosen.** Primary: **KuaiRand with lifelong histories** - the KuaiRand-Pure random-exposure test on
+all users (`drup/data2.py`, `n_users=None`, temporal protocol) plus each user's out-of-pool history from
+the KuaiRand-27K archive (user ids are the Pure ids), aggregated by `experiments/v9_build_lifelong.py`. The
+stored 10K-user setting is kept for paired comparison with every stored KuaiRand row. Secondary:
+**KuaiRand-1K** (the same construction on 1,000 users, where the lifelong signal was found; replication)
+and **KuaiRec** (has item/user features but no out-of-pool history; non-inferiority only, since it is
+saturated). The Open Bandit Dataset is downloaded and documented but not used: it has no user ids.
 
 ---
 
@@ -158,8 +171,10 @@ All "diagnostic" (test labels used; never a method).
 - **D2 personal headroom.** (i) Uniform-data low rank (v5 H2 design; 50/50 split of each user's random
   candidates): item means 0.5850; + rank 4/16/64 SVD of residuals: 0.5851 at best (+0.1e-3). (ii) Item
   oracle + a log-trained personal EASE score (weight 0.5): **0.4962** vs oracle alone 0.4889
-  (**+7.3e-3**, all 5 test splits, no selection). Personal signal exists but is small relative to item
-  appeal.
+  (**+7.3e-3**, all 5 test splits, no selection). With the in-pool log alone, personal signal is small
+  relative to item appeal. (i) is weak evidence (about 22 random items per user in each half), and Section 4
+  shows that new information about the user (lifelong out-of-pool behaviour) unlocks +24e-3 of personal
+  gain, so D2 bounds in-pool personalisation, not personalisation in general.
 - **D3 temporal context (`diag_context.py`).** Ranking a user's random impressions by the user's state in
   the standard log just before the impression (cumulative click rate; minutes since last impression):
   0.3353 / 0.3203 vs random 0.3317. Click rate rises from 0.061 (random video within 1 min of a standard
@@ -195,7 +210,7 @@ cost on 4 CPU cores. "Probe" gives the outcome of Section 4.2.
 | I7 | Pool all users' logs for item estimates (data scale) | - | none | small | low | low | **no gain**: popularity 0.4212 vs 0.4204; EASE+pop 0.4437 vs 0.4440 |
 | I8 | Author-affinity channel built from in-pool clicks | side-information CF; add-EASE / cEASE (Jeunen et al., RecSys 2020, DOI 10.1145/3383313.3418480) | L | small | medium | low | **fails**: +0.25 [0.50] |
 | I9 | **Policy channel**: impressions (shown, not clicked) as a fractional positive input of a closed-form item-item model | impression-aware recommenders survey (Pérez Maurera et al., ACM TORS 2025, 2308.07857); ExpoMF (1510.07025); ranking distillation (Tang and Wang, KDD 2018, 1809.07428) | L-M | +9 to +12e-3 vs own backbone; ~0 vs LightGCN | low | low | **passes vs own backbone**: +12.31 [2.89]; temporal +8.97 [2.19] |
-| I10 | **Lifelong channel**: exposure-conditional affinities on shared content keys from the users' out-of-pool history | SIM (Pi et al., CIKM 2020, 2006.05639); TWIN (Chang et al., KDD 2023, 2302.02352) | M | +20 to +40e-3 | medium | medium (27K archive, 9.9 GB) | **passes on 1K**: +24.04 [9.18] temporal, +39.02 [10.56] concurrent |
+| I10 | **Lifelong channel**: exposure-conditional affinities on shared content keys from the users' out-of-pool history | SIM (Pi et al., CIKM 2020, 2006.05639); TWIN (Chang et al., KDD 2023, 2302.02352) | M | +20 to +40e-3 | medium | medium (27K archive, 9.9 GB) | **passes**: 1K +24.04 [9.18]; **27K +16.04 [1.92]** over the policy-channel model (temporal); shuffled users -0.93 |
 | I11 | **LEAF** = I9 + I10 in one closed-form collective autoencoder with the click target | as I9, I10, cEASE | M | +25 to +35e-3 vs LightGCN / QP | medium | low-medium | components pass; joint fit is Stage 1 |
 
 ### 4.2 Probe results (KuaiRand, nDCG@10, validation-selected; paired x1e-3 [95% half-width])
@@ -252,7 +267,46 @@ rate (log in-pool clicks: 0.448). Lifelong history therefore carries mainly *per
 
 ### 4.4 Scale-up probe on the full KuaiRand-27K histories
 
-L27-PLACEHOLDER
+`experiments/v9_build_lifelong.py` streamed all 322,278,385 standard impressions of KuaiRand-27K
+(38 min, no extraction) into `data/raw/lifelong_27k.npz`; user ids are the Pure ids
+(`experiments/v9_link_users.py`). `experiments/v9_probes/probe_27k.py`: all Pure users, temporal protocol
+(every training signal, in-pool and lifelong, strictly before 2022-04-22 00:00 UTC+8; max training time
+1650556797718 < cut-off < min test time 1650595332831), 27,077 users, 22,612 paired evaluated users;
+LEAF-tied form (Section 5.2) with channel weights chosen on validation (grid: lam {3000, 10000}, w {0, 0.5},
+beta {0, 0.25, 0.5}, tag lift {0, 0.5, 1}, author familiarity {0, 0.5, 1}, author lift {0, 0.5}, music
+familiarity {0, 0.5}; 216 configurations per arm). Lifelong history exists for 98.7% of users (median
+3,453 out-of-pool impressions before the cut-off); the tag channel covers 97.0% of test candidates, the
+author channel 3.8%, music 4.9%.
+
+| Row | Model (all users, temporal) | Test nDCG@10 | Paired difference x1e-3 [95% hw], n = 22,612 |
+|---|---|---|---|
+| M0 | popularity | 0.4197 | - |
+| M1 | EASE(click) + popularity | 0.4448 | - |
+| M2 | EASE(click + 0.5 shown) + popularity (policy channel) | 0.4514 | M2 - M1 **+6.41 [1.49]**, p=3e-17 |
+| M3 | **M2 + lifelong channels (LEAF-tied)** | **0.4674** | M3 - M2 **+16.04 [1.92]**, p=5e-60; M3 - M1 +22.45 [2.20], p=3e-88 |
+| M4 | M1 + lifelong channels | 0.4631 | M4 - M1 +18.25 [1.92], p=9e-77 |
+| M5 | popularity + lifelong channels (no in-pool CF) | 0.4466 | M5 - M0 +26.87 [2.42] |
+| X1 | M3 with **shuffled users** (each user gets another user's lifelong tables) | 0.4506 | X1 - M2 **-0.93 [0.45]**: the gain vanishes (negative control passes) |
+| X2 | M3, concurrent protocol (all training data incl. the test weeks; 2.4x more history) | 0.4839 | vs its M2 (0.4619): +22.17 [2.17] |
+| X3 | **LightGCN** (unchanged `run_learned` code via `learned_ctx.train_cfg`; stored best configuration lr 1e-2, wd 1e-4, dim 64, 2 layers, BPR; epoch on validation), same temporal all-user data | **0.4594** | M2 - X3 -8.15 [2.02]; **M3 - X3 +7.89 [2.47]**, p=4e-10 |
+| F1 | M2 / M3 with weights **fitted on the training log** (logistic regression of click on the in-pool training impressions, i.e. the click-given-shown target; no validation selection; `probe_27k_fit.py`) | 0.4231 / 0.4398 | F1(M3) - F1(M2) about +17e-3 (lifelong still adds), but both far below the validation-selected M2 / M3 (0.4514 / 0.4674): fitted on impressions, the CF score gets almost no weight (0.011 vs popularity 0.364) |
+| X4 | **LightGCN + LEAF lifelong channels** (channel weights, popularity offset and epoch on validation) | **0.4744** | **X4 - X3 +15.10 [1.56]**, p=2e-79; X4 - M3 +7.21 [1.81] |
+
+Selected lifelong weights (5 splits): tag lift 0.5 (5/5), author familiarity 1.0 (4/5, grid edge) or 0.5,
+author lift 0.5 (4/5), music familiarity 0 (5/5); lam 3000 (4/5), w 0.5 (5/5), beta 0.25 (5/5).
+
+**Stage 0 verdict: GO.** The 1K finding replicates at full scale with a 5x tighter interval (+16.04e-3
+[1.92] over the policy-channel model, p = 5e-60), the shuffled-user control removes it, and the concurrent
+protocol inflates it (+22.17e-3, partly because it sees 2.4x more history, so the difference is an upper
+bound on the feedback leak). Two caveats: the author familiarity weight sits at the grid edge (extend the
+grid in Stage 1). Rows X3/X4 add the first strong baseline: on this setting LightGCN is 8e-3 above the
+closed-form policy-channel model, so the closed-form LEAF (M3) beats LightGCN by only +7.89e-3, while the
+same lifelong channels on top of LightGCN add +15.10e-3 [1.56]. The lifelong signal is therefore
+backbone-independent and adds about the same amount to both backbones (+16.0 on EASE, +15.1 on
+LightGCN); the recommended instantiation is the graph backbone (Section 5.2b). Logs:
+`probe_27k.txt`, `probe_27k_shuffled.txt`, `probe_27k_concurrent.txt`, `probe_lgn_leaf.txt`
+(`learned_kuairand_t_lgn.json.LightGCN.partial.json` holds the first configuration of the full
+`run_learned` grid, stopped to free the CPU; its validation curve is reproduced exactly by X3).
 
 ---
 
@@ -303,6 +357,28 @@ Two variants:
   values and to values with >= 20 lifelong impressions among training users| (about 4-10K), one inverse of
   size |I| + p (<= 18K; ~10 min on 4 cores, float32 4 GB peak).
 
+### 5.2b Main instantiation: LEAF-LGN (lifelong channels inside a graph backbone)
+
+On the temporal all-user setting LightGCN is 8e-3 above the closed-form policy-channel model (Section
+4.4, X3), so the paper's main model puts the LEAF channels on LightGCN:
+
+    s_ui = <e_u, e_i>_LightGCN + beta * pi_i + sum_k [ gamma_k * l~^k_{u,kappa_k(i)} + eta_k * f~^k_{u,kappa_k(i)} ]
+
+where l~, f~ are the lift and familiarity tables standardised as in `probe_27k.py` (divided by the
+standard deviation of their non-zero entries) and stored densely per user x key value (tag 27K x 44; author
+27K x 6,510; music 27K x 7,202; float32, under 2 GB), so any (u, i) pair is a gather. The policy channel
+enters the BPR sampler: shown-not-clicked pairs are sampled as positives with probability proportional to
+w (w = 0 is plain LightGCN). gamma, eta (6 scalars) and beta are trained jointly with the embeddings by BPR
+on the in-pool training log (lr of the scalars = lr of the embeddings, no weight decay on them); lr, wd, w
+and the epoch are selected on validation. Ablation "post-hoc": the probe's form (LightGCN trained alone,
+channel weights selected on validation; +15.10e-3) must be matched by the jointly trained form within
+3e-3, otherwise the paper reports the post-hoc form and states that the 6 channel weights are
+validation-selected hyperparameters. Probe F1 shows why the weights cannot simply be fitted on the
+in-pool click-given-shown target: among impressed pool videos the policy has already done the
+collaborative ranking, so that fit drops the CF score (0.4398 vs 0.4674 with validation-selected weights).
+The BPR target of LEAF-LGN (click vs unobserved) does not have this problem, but it is untested; it is the
+first job of Stage 1.
+
 Optional item-content block (from probe C2'): append the pool items' own key indicators (author, tag,
 duration decile) as extra input columns, as in add-EASE (Jeunen et al. 2020); it is an ablation row, not
 part of the claim.
@@ -329,7 +405,7 @@ Hyperparameters (validation): lam, lam_Phi, w, s, beta.
   exposure-conditional statistics (impressions without a click in the denominator) and familiarity, transfers
   from out-of-pool videos to a disjoint randomised pool through content keys only, is closed-form, and is
   evaluated on randomised insertions under a temporal protocol that we show is necessary (the concurrent
-  protocol inflates the lifelong gain from +24 to +39e-3 on 1K).
+  protocol inflates the lifelong gain from +16 to +22e-3 on 27K and from +24 to +39e-3 on 1K).
 - vs **add-EASE / cEASE** (Jeunen, Van Balen, Goethals, RecSys 2020): they append *item* side information
   to the item-item model; LEAF appends *user-side* behaviour on other items plus an exposure channel, with a
   target different from the input (requires the generalised zero-diagonal closed form of 5.2).
@@ -349,19 +425,23 @@ Hyperparameters (validation): lam, lam_Phi, w, s, beta.
 
 New code only; existing functions are not changed except the two one-line dataset branches named in 3.
 
-1. **Lifelong tables** - `experiments/v9_build_lifelong.py` (exists, tested on the 1K archive: 11.7M rows
-   in 114 s). Streams each standard-log member of the tar.gz (no extraction), keeps out-of-pool videos,
-   aggregates (user, key value) impressions / clicks / long views for the windows "pre" (< T0) and "all",
-   writes `data/raw/lifelong_27k.npz`. Expected 27K run: 322M rows, about 1 h. Unit checks in
+1. **Lifelong tables** - `experiments/v9_build_lifelong.py` (exists and has been run: 1K archive 11.7M rows
+   in 114 s; 27K archive 322M rows in 38 min). Streams each standard-log member of the tar.gz (no
+   extraction), keeps out-of-pool videos, aggregates (user, key value) impressions / clicks / long views for
+   the windows "pre" (< T0) and "all", writes `data/raw/lifelong_{1k,27k}.npz`. To add, as unit checks in
    `tests/test_lifelong.py`: no pool video id in any table; all "pre" rows have time < T0 (re-read a 1M-row
-   sample); totals equal a direct pandas aggregation on the 1K archive.
-2. **User linkage** - `experiments/v9_link_users.py`: join the 27K random log to the Pure random log on
-   (time_ms, video_id); require a one-to-one user mapping on >= 99.9% of rows (on 1K vs Pure: 43,075 time
-   matches, 99.9% same video). Save `data/raw/user_map_27k_pure.npy`. If the ids are identical, assert it.
+   sample); totals equal a direct pandas aggregation of `data/raw/KuaiRand-1K/data/` for the 1K tables.
+2. **User linkage** - `experiments/v9_link_users.py` (exists and has been run): ids are identical in Pure,
+   1K and 27K (1K: 1,000/1,000 users one-to-one; 27K: 99.99% of joined random events, the rest are
+   same-millisecond collisions). Code may therefore use Pure user ids directly; keep the check as an
+   assertion in `drup/leaf.py`.
 3. **Data cache for baselines** - `experiments/v9_make_cache.py --train_until 1650556800000 --n_users 0
-   --out data/raw/kuairand_t.pt` (dict O, Y, test in the `drup/data.py` format, from
-   `drup.data2.load_kuairand_rich`, float32). Add a `kuairand_t` branch next to `kuairand` in
-   `experiments/run_learned.py::main` and `experiments/learned_ctx.py::prepare` (same `ks`, `key`, `by`).
+   --out data/raw/kuairand_t.pt` (exists; dict O, Y, test in the `drup/data.py` format, from
+   `drup.data2.load_kuairand_rich`, float32). Until a `kuairand_t` branch is added to
+   `experiments/run_learned.py::main` and `experiments/learned_ctx.py::prepare`, run the unchanged
+   `run_learned.py` through `experiments/v9_probes/run_learned_t.py` with `V9_DATA=data/raw/kuairand_t.pt`
+   and `--dataset kuairand` (it only redirects the cache path). Per-user keys of `run_learned` are user
+   row ids; those of `probe_27k.py` are positions in the test list - map with `test[k][0]` before pairing.
 4. **`drup/leaf.py`**:
    - `lifelong_features(npz, users_raw, item_feat, window="pre", s=5.0, min_imp=20) -> (Phi: torch sparse
      (m, p), cols: list, tied: dict[name -> (m, n) sparse on candidate pairs])`;
@@ -369,18 +449,34 @@ New code only; existing functions are not changed except the two one-line datase
      4,096 rows for Z'Z);
    - `fit_tied(X, ZB, tied, ridge) -> gamma` (least squares of X - ZB on the tied channels over training
      users' exposed and unexposed pairs, subsampled to 5M pairs);
-   - `class LEAF(variant, lam, lam_phi, w, s, beta)` with `fit(O, Y, Phi)` and `scores(rows)`.
+   - `class LEAF(variant, lam, lam_phi, w, s, beta)` with `fit(O, Y, Phi)` and `scores(rows)`;
+   - `class LeafChannels(npz, users_raw, item_feat, window, s)`: dense standardised (user x key value)
+     lift / familiarity tables and `__call__(u, i) -> (len, 6)` by gather (used for training pairs and for
+     full score matrices in chunks);
+   - `class LEAFLGN(torch.nn.Module)`: wraps the LightGCN model built by `run_learned.build("lgn", ...)`,
+     adds parameters gamma, eta (6) and beta; `embeddings()` delegates to LightGCN, `forward(u, i, emb)`
+     returns the LightGCN pair score plus beta * pi_i plus the channel term, `full_scores(rows)` the same for
+     whole rows. `drup.learned.train` (loss "bpr") only calls `model.embeddings()` and `model(u, i, emb)`
+     (`drup/learned.py` lines 431-470), so the wrapper is transparent; BPR differences cancel beta * pi_i
+     only when both items share it, so pi stays in the score. Policy channel: positives are sampled from
+     X + w N instead of X (a new optional argument of a copied sampler in `drup/leaf.py`, not a change to
+     `train`).
    Unit test: with w = 0 and Phi empty, `collective_ease` equals `experiments/v9_probes/common.ease` to
    1e-5; LEAF-tied with the probe's fixed gammas reproduces `probe_27k.py` row "EASE(click+0.5shown)+pop+
    lifelong" for split 0 to 1e-4.
 5. **`experiments/run_leaf.py`** - CLI like `run_learned.py` (`--dataset kuairand_t|kuairand1k|kuairec`,
    `--window pre|all`, `--variant tied|full`, `--ablate ...`, `--seeds 5`, `--out`). Per-split validation
-   selection over the whole grid with the vectorised `FastSelector` of `experiments/v9_probes/common.py`;
+   selection over the whole grid with the vectorised, length-bucketed `BucketSelector` of
+   `experiments/v9_probes/common.py` (identical values to `drup.metrics.evaluate`, checked; about 20x faster
+   than padding every user to the longest candidate list) and the compact (user x candidate) score layout of
+   `probe_27k.py` (keeps peak memory near 7 GB for 27K users);
    output JSON in the `run_learned` format (`results[method] = {per_split, per_user, val_best, chosen}`) so
    that `experiments/v7_common.py` paired tests and Holm apply unchanged.
    Grids: lam {1000, 3000, 10000}; w {0, 0.25, 0.5, 1}; beta {0, 0.25, 0.5}; s {5, 20}; tied: gamma fitted
    (ridge {0, 10}) or validation grid {0, 0.5, 1} per channel; full: lam_Phi {1e2, 1e3, 1e4}, families
    {tag}, {tag, author}, {tag, author, music}.
+   `--variant lgn` trains LEAF-LGN (grid: lr {1e-2, 3e-3}, wd {1e-4, 1e-5}, dim 64, 2 layers, w {0, 0.25,
+   0.5}, epochs 40, patience 3, batch 8192; plus the "post-hoc" arm of 5.2b).
    Ablations (`--ablate`): `no_lifelong`, `no_policy` (w = 0), `lift_only`, `familiarity_only`,
    `shuffle_users` (rows of Phi permuted across users: the gain must vanish), `concurrent` (window "all"
    and no `train_until`: measures the leak), `label_long_view`.
@@ -391,7 +487,7 @@ New code only; existing functions are not changed except the two one-line datase
      LightGCN (lr {1e-2, 3e-3}, wd {1e-4}, dim 64, 2 layers, 40 epochs, patience 3).
    - `din_l`: target-attention CTR model over each user's top-64 lifelong (key value, l, f) tokens plus the
      in-pool click history, trained with BCE on in-pool impressions before T0, scored at tab 1.
-   - `lgn_plus_leafchannels`: stored-type LightGCN score + LEAF lifelong channels (weights on validation).
+   - the post-hoc form of LEAF-LGN (`probe_lgn_leaf.py`) is not a baseline but an ablation (5.2b).
 7. **Analysis** - `experiments/v9_tests.py`: per-user paired t-tests, Holm within the primary family
    (Section 7), TOST for non-inferiority rows, MDE, and tables.
 
@@ -408,10 +504,12 @@ case "$1" in
   probe27k)       OMP_NUM_THREADS=3 python3 experiments/v9_probes/probe_27k.py results/v9_probes/probe_27k.txt ;;
   leaf_tied)      OMP_NUM_THREADS=3 python3 experiments/run_leaf.py --dataset kuairand_t --window pre --variant tied --seeds 5 --out results/v9/leaf_tied.json ;;
   leaf_full)      OMP_NUM_THREADS=4 python3 experiments/run_leaf.py --dataset kuairand_t --window pre --variant full --seeds 5 --out results/v9/leaf_full.json ;;
+  leaf_lgn)       OMP_NUM_THREADS=3 python3 experiments/run_leaf.py --dataset kuairand_t --window pre --variant lgn --seeds 5 --out results/v9/leaf_lgn.json ;;
+  leaf_lgn_post)  OMP_NUM_THREADS=3 python3 experiments/v9_probes/probe_lgn_leaf.py results/v9/leaf_lgn_posthoc.txt ;;
   leaf_ablate)    OMP_NUM_THREADS=3 python3 experiments/run_leaf.py --dataset kuairand_t --window pre --variant tied --seeds 5 --ablate no_lifelong no_policy lift_only familiarity_only shuffle_users label_long_view --out results/v9/leaf_ablate.json ;;
   leaf_concurrent) OMP_NUM_THREADS=3 python3 experiments/run_leaf.py --dataset kuairand_all --window all --variant tied --seeds 5 --out results/v9/leaf_concurrent.json ;;
-  base_t)         OMP_NUM_THREADS=2 python3 experiments/run_learned.py --dataset kuairand_t --prop pop --prior add_noips --seeds 5 --threads 2 --epochs 40 --patience 3 --batch 8192 --lrs 1e-2 3e-3 --wds 1e-5 1e-4 --dims 64 --layers 2 --seed_check 0 --methods LightGCN LightGCN-p iALS iALS-p BPR-MF r-AdjNorm --out results/v9/learned_kuairand_t.json ;;
-  qp_t)           OMP_NUM_THREADS=2 python3 experiments/run_learned.py --dataset kuairand_t --prop pop --seeds 5 --threads 2 --epochs 40 --patience 3 --batch 8192 --lrs 1e-2 3e-3 --wds 1e-4 --dims 64 --layers 2 --seed_check 0 --methods DR-BPR-LGN-1 DR-BPR-LGN-p2 DR-BPR-LGN-p --out results/v9/learned_kuairand_t_qp.json ;;
+  base_t)         OMP_NUM_THREADS=2 V9_DATA=data/raw/kuairand_t.pt python3 experiments/v9_probes/run_learned_t.py --dataset kuairand --prop pop --prior add_noips --seeds 5 --threads 2 --epochs 40 --patience 3 --batch 8192 --lrs 1e-2 3e-3 --wds 1e-5 1e-4 --dims 64 --layers 2 --seed_check 0 --methods LightGCN LightGCN-p iALS iALS-p BPR-MF r-AdjNorm --out results/v9/learned_kuairand_t.json ;;
+  qp_t)           OMP_NUM_THREADS=2 V9_DATA=data/raw/kuairand_t.pt python3 experiments/v9_probes/run_learned_t.py --dataset kuairand --prop pop --seeds 5 --threads 2 --epochs 40 --patience 3 --batch 8192 --lrs 1e-2 3e-3 --wds 1e-4 --dims 64 --layers 2 --seed_check 0 --methods DR-BPR-LGN-1 DR-BPR-LGN-p2 DR-BPR-LGN-p --out results/v9/learned_kuairand_t_qp.json ;;
   lgnL_t)         OMP_NUM_THREADS=2 python3 experiments/run_leaf_baselines.py --model lightgcn_l --dataset kuairand_t --seeds 5 --out results/v9/lgnL_t.json ;;
   dinL_t)         OMP_NUM_THREADS=2 python3 experiments/run_leaf_baselines.py --model din_l --dataset kuairand_t --seeds 5 --out results/v9/dinL_t.json ;;
   leaf_1k)        OMP_NUM_THREADS=2 python3 experiments/run_leaf.py --dataset kuairand1k --window pre --variant tied --seeds 5 --out results/v9/leaf_1k.json ;;
@@ -433,7 +531,7 @@ within the primary family {LEAF - LightGCN, LEAF - QP family, LEAF - iALS-p, LEA
 seeds 1-3 for every trained baseline in the final table. Effect sizes x1e-3 nDCG@10.
 
 **Stage 0 - data and scale-up probe (about 3 h; mostly the archive pass).** build_lifelong, link_users,
-probe27k (Section 4.4).
+probe27k (Section 4.4). **Status: done, GO** (all three conditions met).
 - GO if (a) user linkage >= 99.9% one-to-one; (b) leak checks pass (no pool video in the tables; every
   "pre" row before T0); (c) lifelong channels add **>= +10e-3 with p < 0.001** over
   EASE(click + 0.5 shown) + popularity on all Pure users under the temporal protocol.
@@ -442,13 +540,14 @@ probe27k (Section 4.4).
 
 **Stage 1 - LEAF against re-run baselines on the temporal all-user setting (about 8 h).** cache_t,
 base_t, qp_t, leaf_tied, leaf_full, leaf_ablate.
-- GO if LEAF (the variant better on validation) beats **each** of LightGCN, QP family and iALS-p by
-  **>= +10e-3 with p_Holm < 0.05**, and LEAF - LEAF(no lifelong) >= +8e-3 with p_Holm < 0.05, and the
-  shuffled-users control returns to LEAF(no lifelong) within +-2e-3.
-- If LEAF beats its own ablations but not LightGCN/QP: try `lgn_plus_leafchannels`; if that passes, the
-  method becomes "LightGCN + LEAF channels" (weaker novelty; proceed only if the gain over LightGCN is
-  >= +10e-3).
-- NO-GO otherwise.
+- Pilot already in hand (Section 4.4): LightGCN + LEAF channels (post-hoc) +15.10e-3 [1.56] over LightGCN
+  with one LightGCN configuration.
+- GO if LEAF-LGN (jointly trained or post-hoc, whichever is better on validation) beats **each** of the
+  fully tuned LightGCN, QP family, r-AdjNorm and iALS-p by **>= +10e-3 with p_Holm < 0.05**, LEAF-LGN -
+  LEAF-LGN(no lifelong) >= +8e-3 with p_Holm < 0.05, and the shuffled-users control returns to LEAF-LGN(no
+  lifelong) within +-2e-3.
+- NO-GO otherwise (most likely failure: the QP family gains on this setting more than the +4e-3 it gains
+  in the stored setting; then report LEAF channels on the QP backbone if they add >= +10e-3 there).
 
 **Stage 2 - robustness and the lifelong-aware baselines (about 6 h).** lgnL_t, dinL_t, leaf_concurrent,
 leaf_1k, leaf_kuairec, seeds.
@@ -464,16 +563,17 @@ leaf_1k, leaf_kuairec, seeds.
 
 ## 8. Probability of success
 
-- Stage 0 passes: **PROB0** (1K: +24.04e-3 [9.18] under the temporal protocol, chosen in 5/5 splits; the
-  signal is per user, so it should not depend on the number of users, but 842 users give a wide interval
-  and the 27K archive pass is untested at full size).
-- Stage 1 passes given Stage 0: about 60% (the re-run LightGCN / QP family are ~5-10e-3 above the EASE
-  backbone used in the probes; the lifelong information is orthogonal to what they see, so the gain should
-  mostly add, but the linear fusion may lose part of it).
+- Stage 0: **passed** (Section 4.4: +16.04e-3 [1.92] on 22,612 users, shuffled control -0.93e-3).
+- Stage 1 passes given Stage 0: about 70% (the lifelong channels already add +15.10e-3 [1.56] to LightGCN;
+  the fully tuned LightGCN grid and the QP family can absorb a few thousandths, and the margin to the
+  +10e-3 gate is about 5e-3, i.e. three half-widths).
 - Stage 2 (lifelong-aware deep baselines do not beat LEAF by more than the margin): about 60%.
 - Accepted as novel at a good venue given clear gains: about 60%.
-- Overall: **about 25-30%** for a method paper with real gains; about 45% for a publishable paper with
-  real gains if the reframing of Stage 2 is needed. The probability that any method that uses only the
+- Overall: **about 35-40%** for a method paper with real gains and accepted novelty (0.7 x 0.6 x 0.6 = 0.25
+  on the strict path, plus partial credit from the reframing of Stage 2); about 55% for a publishable paper
+  with real, controlled gains if a reviewer rejects the method novelty but accepts the empirical
+  contribution (lifelong exposure-conditional transfer to randomised exposure, the leakage analysis, the
+  headroom diagnostics). The probability that any method that uses only the
   in-pool KuaiRand log beats the QP family by a paired margin >= 10e-3 is low (< 10%): every in-pool idea
   probed here stays below it.
 
@@ -481,9 +581,21 @@ leaf_1k, leaf_kuairec, seeds.
 
 ## 9. Reproducibility
 
-- Data: `data/raw/KuaiRand-Pure/` (existing), `data/raw/KuaiRand-1K/` (extracted from
-  `data/raw/dl_kr1k/KuaiRand-1K.tar.gz`, `https://zenodo.org/api/records/10439422/files/KuaiRand-1K.tar.gz/content`),
-  `data/raw/dl_obd/open_bandit_dataset.zip` (`https://research.zozo.com/data_release/open_bandit_dataset.zip`).
-- Loader `drup/data2.py`; statistics `python3 experiments/v9_dataset_stats.py --version pure --check_v1`
-  and `--version 1k --n_users 0`.
-- Probes and diagnostics: `experiments/v9_probes/` (see its `README.txt`), outputs `results/v9_probes/`.
+- Raw data (git-ignored `data/raw/`):
+  - `KuaiRand-Pure/` (existing);
+  - `dl_kr1k/KuaiRand-1K.tar.gz` (`https://zenodo.org/api/records/10439422/files/KuaiRand-1K.tar.gz/content`,
+    1.14 GB), logs extracted to `KuaiRand-1K/`;
+  - `dl_kr27k/KuaiRand-27K.tar.gz` (`https://zenodo.org/api/records/10439422/files/KuaiRand-27K.tar.gz/content`,
+    9.9 GB; member list in `results/v9_probes/kr27k_members.txt`; never extracted; may be deleted once
+    `lifelong_27k.npz` exists);
+  - `dl_obd/open_bandit_dataset.zip` (`https://research.zozo.com/data_release/open_bandit_dataset.zip`, 413 MB);
+  - derived: `lifelong_1k.npz`, `lifelong_27k.npz` (`experiments/v9_build_lifelong.py`; 27K: 322,278,385
+    standard rows streamed in 38 min; "pre" window 135.2M out-of-pool impressions of 26,904 users, median
+    3,453 per user; 44 tag, 6,510 author and 7,202 music values that occur on pool videos;
+    `results/v9_probes/lifelong_27k_summary.txt`), `user_map_{1k,27k}_pure.csv`
+    (`experiments/v9_link_users.py`; 27K: 1,186,059 random events joined, ids identical for 99.99% of
+    joined events, the rest are 22 same-millisecond collisions).
+- Loader `drup/data2.py`; statistics `python3 experiments/v9_dataset_stats.py --version pure --check_v1` and
+  `--version 1k --n_users 0` (`results/v9_probes/stats_*.txt`).
+- Probes and diagnostics: `experiments/v9_probes/` (see `README.txt`); outputs and per-user JSONs in
+  `results/v9_probes/`; paired differences of any two JSONs: `python3 experiments/v9_probes/pair.py A B`.

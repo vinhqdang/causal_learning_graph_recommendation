@@ -1,0 +1,20 @@
+/home/user/causal_learning_graph_recommendation/drup/data2.py:106: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)
+  M[torch.as_tensor(g.index.get_level_values(0).values), torch.as_tensor(g.index.get_level_values(1).values)] = \
+compact candidates: 27077 x 1580
+users 27077 items 7583 test users 27077 window all
+users with lifelong history: 1.000
+channel tag_lift: coverage of test candidates 0.995
+channel author_id_lift: coverage of test candidates 0.068
+channel author_id_cnt: coverage of test candidates 0.068
+channel music_id_cnt: coverage of test candidates 0.062
+pop: test 0.4222 +- 0.0008 (val 0.4234, 1 cfgs) chosen [{}, {}, {}, {}, {}]
+EASE(click)+pop: test 0.4531 +- 0.0009 (val 0.4525, 6 cfgs) chosen [{'lam': 10000.0, 'w': 0.0, 'beta': 0.0}, {'lam': 10000.0, 'w': 0.0, 'beta': 0.0}, {'lam': 10000.0, 'w': 0.0, 'beta': 0.0}, {'lam': 10000.0, 'w': 0.0, 'beta': 0.0}, {'lam': 10000.0, 'w': 0.0, 'beta': 0.0}]
+EASE(click+0.5shown)+pop: test 0.4619 +- 0.0009 (val 0.4612, 6 cfgs) chosen [{'lam': 10000.0, 'w': 0.5, 'beta': 0.0}, {'lam': 10000.0, 'w': 0.5, 'beta': 0.0}, {'lam': 10000.0, 'w': 0.5, 'beta': 0.0}, {'lam': 10000.0, 'w': 0.5, 'beta': 0.0}, {'lam': 10000.0, 'w': 0.5, 'beta': 0.0}]
+EASE(click+0.5shown)+pop+lifelong: test 0.4839 +- 0.0009 (val 0.4841, 216 cfgs) chosen [{'lam': 10000.0, 'w': 0.5, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5, 'music_id_cnt': 0.0}, {'lam': 10000.0, 'w': 0.5, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5, 'music_id_cnt': 0.0}, {'lam': 3000.0, 'w': 0.5, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5, 'music_id_cnt': 0.0}, {'lam': 3000.0, 'w': 0.5, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5, 'music_id_cnt': 0.0}, {'lam': 3000.0, 'w': 0.5, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5, 'music_id_cnt': 0.0}]
+EASE(click)+pop+lifelong: test 0.4799 +- 0.0009 (val 0.4801, 216 cfgs) chosen [{'lam': 3000.0, 'w': 0.0, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5, 'music_id_cnt': 0.0}, {'lam': 3000.0, 'w': 0.0, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5, 'music_id_cnt': 0.0}, {'lam': 3000.0, 'w': 0.0, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5, 'music_id_cnt': 0.0}, {'lam': 3000.0, 'w': 0.0, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5, 'music_id_cnt': 0.0}, {'lam': 3000.0, 'w': 0.0, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5, 'music_id_cnt': 0.0}]
+pop+lifelong: test 0.4654 +- 0.0010 (val 0.4663, 108 cfgs) chosen [{'lam': None, 'w': None, 'beta': 0.5, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5, 'music_id_cnt': 0.0}, {'lam': None, 'w': None, 'beta': 0.5, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5, 'music_id_cnt': 0.0}, {'lam': None, 'w': None, 'beta': 0.5, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5, 'music_id_cnt': 0.0}, {'lam': None, 'w': None, 'beta': 0.5, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5, 'music_id_cnt': 0.0}, {'lam': None, 'w': None, 'beta': 0.5, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5, 'music_id_cnt': 0.0}]
+  policy channel: EASE(click+0.5shown) - EASE(click): +8.78 [1.62] p=1.92e-26 n=22611
+  lifelong channels on top: +22.17 [2.17] p=1.5e-88 n=22611
+  lifelong channels on EASE(click): +27.13 [2.29] p=4.89e-118 n=22611
+  full - EASE(click): +30.95 [2.38] p=9.9e-142 n=22611
+  pop+lifelong - pop: +43.19 [2.61] p=6.18e-225 n=22611

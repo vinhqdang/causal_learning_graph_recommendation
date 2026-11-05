@@ -1,0 +1,24 @@
+/home/user/causal_learning_graph_recommendation/experiments/../drup/learned.py:54: UserWarning: Sparse invariant checks are implicitly disabled. Memory errors (e.g. SEGFAULT) will occur when operating on a sparse tensor which violates the invariants, but checks incur performance overhead. To silence this warning, explicitly opt in or out. See `torch.sparse.check_sparse_tensor_invariants.__doc__` for guidance.  (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/Context.cpp:848.)
+  self.A = torch.sparse_coo_tensor(idx, torch.cat([v_ui, v_iu]), (m + n, m + n)).coalesce()
+epoch 0 val(LightGCN) 0.4373 best plus val 0.4602
+epoch 1 val(LightGCN) 0.4517 best plus val 0.4691
+epoch 2 val(LightGCN) 0.4541 best plus val 0.4708
+epoch 3 val(LightGCN) 0.4551 best plus val 0.4717
+epoch 4 val(LightGCN) 0.4557 best plus val 0.4723
+epoch 5 val(LightGCN) 0.4556 best plus val 0.4724
+epoch 6 val(LightGCN) 0.4560 best plus val 0.4726
+epoch 7 val(LightGCN) 0.4561 best plus val 0.4730
+epoch 8 val(LightGCN) 0.4570 best plus val 0.4737
+epoch 9 val(LightGCN) 0.4568 best plus val 0.4739
+epoch 10 val(LightGCN) 0.4583 best plus val 0.4745
+epoch 11 val(LightGCN) 0.4586 best plus val 0.4747
+epoch 12 val(LightGCN) 0.4593 best plus val 0.4748
+epoch 13 val(LightGCN) 0.4587 best plus val 0.4749
+epoch 14 val(LightGCN) 0.4591 best plus val 0.4749
+epoch 15 val(LightGCN) 0.4594 best plus val 0.4750
+epoch 16 val(LightGCN) 0.4592 best plus val 0.4750
+epoch 17 val(LightGCN) 0.4588 best plus val 0.4752
+epoch 18 val(LightGCN) 0.4587 best plus val 0.4752
+LightGCN[t] alone: test 0.4594 +- 0.0004 chosen [{'epoch': 15}, {'epoch': 14}, {'epoch': 16}, {'epoch': 12}, {'epoch': 12}]
+LightGCN[t] + LEAF channels: test 0.4744 +- 0.0006 chosen [{'epoch': 11, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5}, {'epoch': 17, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 0.5, 'author_id_lift': 0.5}, {'epoch': 15, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 0.5, 'author_id_lift': 0.5}, {'epoch': 18, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 0.5, 'author_id_lift': 0.5}, {'epoch': 12, 'beta': 0.25, 'tag_lift': 0.5, 'author_id_cnt': 1.0, 'author_id_lift': 0.5}]
+  plus - alone: +15.10 [1.56] p=2.25e-79 n=22612
