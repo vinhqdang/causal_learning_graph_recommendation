@@ -5,7 +5,6 @@ Pieces used by experiments/run_leaf.py:
                       music_id, from the tables of experiments/v9_build_lifelong.py (out-of-pool history only)
   collective_gram /   closed-form collective linear autoencoder (5.2): Gram accumulation over user chunks and the
   collective_solve    zero-diagonal solution; collective_ease is the dense form used by the tests
-  fit_tied            least squares of the closed-form residual on the tied channels (5.2, option "fit")
   LEAFLGN             LightGCN with the channel weights and the popularity offset (5.2b)
   fit_bpr_policy      BPR loop with the policy channel (copy of the bpr branch of drup.learned.train)
   Layout, BucketSelector   candidate layout bucketed by list length, and per-split validation selection on it
@@ -22,7 +21,6 @@ import torch.nn.functional as F
 
 from drup.data import split_test
 from drup.learned import LightGCN
-from drup.metrics import UserMetrics
 
 KEYS = ("tag", "author_id", "music_id")
 # channel c = 2 * key index + type; type 0 = exposure-conditional lift, type 1 = familiarity log(1 + n)
@@ -30,10 +28,15 @@ CHANNELS = ("tag_lift", "tag_fam", "author_id_lift", "author_id_fam", "music_id_
 CUT_MS = 1650556800000          # 2022-04-22 00:00 UTC+8, first day of the random exposure period
 
 
+NA_KEY = "<NA>"                 # key value of a missing tag, author or music id: no lifelong row, so a zero channel
+MISSING_KEYS = (NA_KEY, "nan")  # "nan" is what an earlier build stored for missing tags; no pool item maps to it
+
+
 def key_strings(col, key):
-    """Key value of every pool item, as the strings stored in the lifelong tables (same as the builder)."""
+    """Key value of every pool item, as the strings stored in the lifelong tables (same as the builder). A pool item
+    without a key value (missing tag, author or music id) maps to NA_KEY and gets a zero channel (see LifelongTables)."""
     if key == "tag":
-        return col.astype(str).str.split(",").str[0]
+        return col.where(col.notna(), NA_KEY).astype(str).str.split(",").str[0]
     return pd.to_numeric(col, errors="coerce").astype("Int64").astype(str)
 
 
@@ -69,9 +72,10 @@ class LifelongTables:
         base = base_all.reindex(users_raw).fillna(base_all.mean()).values
         urow = pd.Index(users_raw)
         perm = cyclic_perm(m, seed) if shuffle else None
-        self.tab, self.ci, self.count, self.scale = {}, {}, {}, {}
+        self.tab, self.ci, self.count, self.scale, self.vals = {}, {}, {}, {}, {}
         for k in KEYS:
             vals = pd.Index(np.asarray(npz[f"{k}_values"]).astype(str))
+            self.vals[k] = vals.values
             V = len(vals)
             code = vals.get_indexer(key_strings(item_feat[k], k))
             self.ci[k] = torch.as_tensor(np.where(code < 0, V, code), dtype=torch.long)
@@ -135,7 +139,8 @@ class PhiFull:
 
     def __init__(self, tabs, families, min_imp=20):
         self.tabs = tabs
-        self.idx = {k: torch.as_tensor(np.flatnonzero(tabs.count[k] >= min_imp), dtype=torch.long) for k in families}
+        self.idx = {k: torch.as_tensor(np.flatnonzero((tabs.count[k] >= min_imp) & ~np.isin(tabs.vals[k], MISSING_KEYS)),
+                                       dtype=torch.long) for k in families}
         self.p = 2 * sum(len(v) for v in self.idx.values())
 
     def chunk(self, rows):
@@ -172,7 +177,10 @@ def collective_gram(O, Y, w, phi=None, chunk=2048):
 def collective_solve(G, C, n, lam, lam_phi=0.0):
     """Minimiser of ||X - Z B - Phi W||^2 + lam ||B||^2 + lam_phi ||W||^2 with diag(B) = 0 (DESIGN 5.2):
     Theta = Theta_hat - P[:, :n] diag(mu), P = (G + Lambda)^-1, Theta_hat = P C, mu_j = Theta_hat_jj / P_jj.
-    G is restored before returning. Returns B (n x n) and W (p x n, or None when there is no Phi block)."""
+    G is restored before returning. Returns B (n x n) and W (p x n, or None when there is no Phi block).
+    Precision: G, C, the Cholesky factor, P and Theta are float32, the dtype of the inputs. A float64 solve needs
+    twice the memory; at d = n + p of the free-W variant (about 22K) that is about 4 dense d x d copies, more than
+    the RAM left beside the running jobs, and the tied and LEAF-LGN results (computed in float32) must not change."""
     d = G.shape[0]
     reg = torch.full((d,), float(lam_phi), dtype=G.dtype)
     reg[:n] = float(lam)
@@ -207,33 +215,6 @@ def compact_base(O, Y, w, B, rows, cand, phi=None, W=None, chunk=2048):
             S = S + phi.chunk(rr).to(B.dtype) @ W
         out[r0:r0 + len(rr)] = torch.gather(rowstd(S), 1, cand[r0:r0 + len(rr)])
     return out
-
-
-def fit_tied(O, Y, B, w, tabs, ridge=0.0, n_pairs=5_000_000, seed=0, mask=None, chunk=2048):
-    """Least squares of the closed-form residual X - Z B on the six tied channels, over n_pairs (user, item) pairs
-    drawn uniformly from all training cells (exposed and unexposed). Returns gamma (6,)."""
-    m, n = O.shape
-    g = torch.Generator().manual_seed(seed)
-    flat = torch.randint(0, m * n, (n_pairs,), generator=g)
-    u, i = flat // n, flat % n
-    order = torch.argsort(u)
-    u, i = u[order], i[order]
-    edges = torch.arange(0, m + chunk, chunk).clamp(max=m)
-    bounds = torch.searchsorted(u, edges)
-    zb = torch.zeros(len(u))
-    for c, r0 in enumerate(range(0, m, chunk)):
-        lo, hi = int(bounds[c]), int(bounds[c + 1])
-        if hi == lo:
-            continue
-        z, _ = _inputs(O, Y, w, r0, min(m, r0 + chunk))
-        zb[lo:hi] = (z @ B)[u[lo:hi] - r0, i[lo:hi]]
-    resid = (O[u, i] * Y[u, i]).double() - zb.double()
-    F_ = tabs.pairs(u, i).double()
-    if mask is not None:
-        F_ = F_ * torch.as_tensor(mask, dtype=torch.float64)[None, :]
-    A = F_.T @ F_ + ridge * torch.eye(F_.shape[1], dtype=torch.float64)
-    gamma = torch.linalg.solve(A, F_.T @ resid)
-    return gamma.float()
 
 
 class LEAFLGN(torch.nn.Module):
@@ -343,7 +324,7 @@ class BucketSelector:
 
     def __init__(self, layout, splits, ks, key, row_ids):
         from drup.metrics import UserMetrics
-        self.layout, self.key, self.row_ids, self.n = layout, key, np.asarray(row_ids), 0
+        self.layout, self.key, self.row_ids, self.n, self.nc = layout, key, np.asarray(row_ids), 0, 0
         nb = len(layout.buckets)
 
         def parts(lst):
@@ -355,9 +336,11 @@ class BucketSelector:
         self.parts = [(parts(v), parts(t)) for v, t in splits]
         self.best = [{"val": -1.0, "cfg": None, "test": None, "per_user": None} for _ in splits]
 
-    def add(self, S, cfg, active=None):
-        """Adds one (configuration, epoch); returns the validation value of every split (None if not active)."""
+    def add(self, S, cfg, active=None, new_config=True):
+        """Adds one evaluation (a configuration, or one epoch of it); returns the validation value of every split
+        (None if not active). new_config is False for the later epochs of a configuration already counted in nc."""
         self.n += 1
+        self.nc += int(new_config)
         vals = []
         for s, (vp, tp) in enumerate(self.parts):
             if active is not None and not active[s]:
@@ -389,15 +372,18 @@ class BucketSelector:
                 "per_split": [{self.key: b["test"]} for b in self.best],
                 "val_best": [b["val"] for b in self.best],
                 "per_user": [{str(int(self.row_ids[k])): v for k, v in b["per_user"].items()} for b in self.best],
-                "n_configs": self.n}
+                "n_evals": self.n, "n_configs": self.nc}
 
     def state(self):
-        return {"n": self.n, "best": [{"val": b["val"], "cfg": b["cfg"], "test": b["test"],
+        return {"n": self.n, "nc": self.nc, "best": [{"val": b["val"], "cfg": b["cfg"], "test": b["test"],
                                        "per_user": None if b["per_user"] is None else
                                        [[int(k), v] for k, v in b["per_user"].items()]} for b in self.best]}
 
     def load_state(self, st):
         self.n = st["n"]
+        # partial files written before nc existed count evaluations only: exact for the tied variant (one evaluation
+        # per configuration), an upper bound for LEAF-LGN (epochs)
+        self.nc = st.get("nc", st["n"])
         self.best = [{"val": b["val"], "cfg": b["cfg"], "test": b["test"],
                       "per_user": None if b["per_user"] is None else {k: v for k, v in b["per_user"]}}
                      for b in st["best"]]
@@ -405,13 +391,10 @@ class BucketSelector:
 
 def protocol_split(test, seed, frac_val=0.3):
     """Validation / test split of the random-exposure users, as in every stored KuaiRand row (split_test by user).
-    The two parts share no user and no (user, item) candidate."""
+    The two parts share no user, so every user's candidate list lands in exactly one part."""
     val, tst = split_test(test, frac_val, seed, by="user")
     uv, ut = {u for u, _, _ in val}, {u for u, _, _ in tst}
-    pv = {(u, int(i)) for u, it, _ in val for i in it}
-    pt = {(u, int(i)) for u, it, _ in tst for i in it}
-    assert not (uv & ut) and len(uv) + len(ut) == len(test), "validation and test users overlap"
-    assert not (pv & pt), "validation and test candidates overlap"
+    assert not (uv & ut) and len(uv) + len(ut) == len(test), "validation and test users overlap or are missing"
     return val, tst
 
 

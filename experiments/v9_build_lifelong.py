@@ -27,8 +27,8 @@ KEYS = ("tag", "author_id", "music_id")
 
 
 def keystr(col, k):
-    if k == "tag":
-        return col.astype(str).str.split(",").str[0]
+    if k == "tag":   # a missing tag maps to "<NA>" (NA_KEY of drup/leaf.py): no key value, as for author and music
+        return col.where(col.notna(), "<NA>").astype(str).str.split(",").str[0]
     return pd.to_numeric(col, errors="coerce").astype("Int64").astype(str)
 
 

@@ -10,9 +10,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from drup.data2 import load_kuairand_rich  # noqa: E402
-from drup.leaf import (CUT_MS, LEAFLGN, LifelongTables, check_temporal_protocol,  # noqa: E402
+from drup.leaf import (CUT_MS, LEAFLGN, BucketSelector, LifelongTables, Layout, check_temporal_protocol,  # noqa: E402
                        collective_ease, collective_gram, collective_solve, fit_bpr_policy, make_lightgcn,
                        protocol_split)
+from drup.metrics import evaluate  # noqa: E402
 from leaf_synth import world  # noqa: E402
 
 
@@ -125,6 +126,52 @@ def test_protocol_split_is_reproducible_and_disjoint():
     ut = {u for u, _, _ in t1}
     assert not uv & ut and len(uv) + len(ut) == len(test)
     assert len(uv) == round(0.3 * len(test))
+
+
+def test_compact_equals_pairs_and_dense_rows():
+    d = world(seed=8, m=30)
+    n = d["O"].shape[1]
+    tabs = LifelongTables(d["npz"], d["users_raw"], d["item_feat"], window="pre", s=5.0)
+    rng = np.random.default_rng(0)
+    rows = torch.tensor([0, 3, 7, 12])
+    cand = torch.as_tensor(rng.integers(0, n, (4, 9)))
+    C = tabs.compact(rows, cand)                                 # (4, 9, 6)
+    assert torch.equal(C, tabs.pairs(rows[:, None], cand))
+    w = torch.as_tensor(rng.normal(size=6), dtype=torch.float32)
+    S = tabs.dense_rows(rows, w)                                 # (4, n)
+    assert torch.allclose(torch.gather(S, 1, cand), C @ w, atol=1e-5, rtol=1e-5)
+
+
+def test_bucket_selector_matches_drup_evaluate():
+    rng = np.random.default_rng(0)
+    m, n = 40, 300
+    test = []
+    for u in range(m):
+        L = int(rng.integers(3, 150))                            # spans the candidate buckets 32 / 64 / 128 / 256
+        it = rng.choice(n, L, replace=False)
+        rel = (rng.random(L) < 0.1).astype(np.float64)
+        if rel.sum() == 0:
+            rel[0] = 1.0
+        test.append((u, it, rel))
+    S = np.round(rng.normal(size=(m, n)), 1)                     # rounded: ties are exercised too
+    # as in run_leaf: the candidate lists are positions in the user's list, the layout holds the item ids
+    ctest = [(u, np.arange(len(it)), rel) for u, it, rel in test]
+    Lmax = max(len(it) for _, it, _ in test)
+    Sp = np.zeros((m, Lmax))                                     # S in position coordinates, for drup.metrics.evaluate
+    for u, it, _ in test:
+        Sp[u, :len(it)] = S[u, it]
+    layout = Layout(test)
+    splits = [protocol_split(ctest, seed=s, frac_val=0.3) for s in range(3)]
+    sel = BucketSelector(layout, splits, (10,), "ndcg@10", np.arange(m))
+    scores = [torch.tensor(S[bk["rows"].numpy()[:, None], bk["cand"].numpy()]) for bk in layout.buckets]
+    vals = sel.add(scores, {"cfg": 1})
+    res = sel.result()
+    assert res["n_configs"] == 1 and res["n_evals"] == 1
+    for s, (val, tst) in enumerate(splits):
+        ref_val = evaluate(torch.tensor(Sp), val, (10,))["ndcg@10"]
+        ref_tst = evaluate(torch.tensor(Sp), tst, (10,))["ndcg@10"]
+        assert abs(vals[s] - ref_val) < 1e-9, (s, vals[s], ref_val)
+        assert abs(res["per_split"][s]["ndcg@10"] - ref_tst) < 1e-9, s
 
 
 PURE = os.path.join(ROOT, "data", "raw", "KuaiRand-Pure", "data", "log_standard_4_08_to_4_21_pure.csv")

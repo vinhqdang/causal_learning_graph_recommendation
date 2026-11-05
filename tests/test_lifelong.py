@@ -21,7 +21,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from drup.leaf import (CUT_MS, LifelongTables, collective_gram, collective_solve, compact_base,  # noqa: E402
-                       fit_tied, key_strings)
+                       key_strings, protocol_split)
 from leaf_synth import ndcg10, world  # noqa: E402
 
 CUT = CUT_MS
@@ -152,24 +152,33 @@ def test_lift_and_familiarity_match_the_formula():
 
 def test_labels_of_test_and_validation_never_enter_the_channels():
     forbidden = {"test", "tst", "val", "valid", "validation", "rel", "labels_test", "uniform"}
-    for fn in (LifelongTables.__init__, collective_gram, collective_solve, fit_tied, compact_base):
+    for fn in (LifelongTables.__init__, collective_gram, collective_solve, compact_base):
         assert not forbidden & set(inspect.signature(fn).parameters), fn.__name__
     d = world(seed=5, m=60)
-    d2 = dict(d)
-    d2["test"] = [(u, it, 1.0 - rel) for u, it, rel in d["test"]]     # every test label flipped
+    m, n = d["O"].shape
+    val, tst = protocol_split(d["test"], seed=0)
 
-    def pipeline(dd):
-        tabs = LifelongTables(dd["npz"], dd["users_raw"], dd["item_feat"], window="pre", s=5.0)
-        G, C = collective_gram(dd["O"], dd["Y"], 0.5)
-        B, _ = collective_solve(G, C, dd["O"].shape[1], 1000.0)
-        rows = torch.arange(dd["O"].shape[0])
-        return tabs.dense_rows(rows, torch.tensor([1.0, 0, 0, 0, 0, 0])), B
+    def flip(lst):
+        return [(u, it, 1.0 - rel) for u, it, rel in lst]
 
-    S1, B1 = pipeline(d)
-    S2, B2 = pipeline(d2)
+    # perturbed copy: every validation and test label flipped; the builders below read only the other keys
+    dd = dict(d)
+    dd["test"], dd["val"], dd["tst"] = flip(d["test"]), flip(val), flip(tst)
+
+    def build(data):
+        tabs = LifelongTables(data["npz"], data["users_raw"], data["item_feat"], window="pre", s=5.0)
+        G, C = collective_gram(data["O"], data["Y"], 0.5)
+        B, _ = collective_solve(G, C, n, 1000.0)
+        S = tabs.dense_rows(torch.arange(m), torch.tensor([1.0, 0, 0, 0, 0, 0]))
+        return tabs, S, B
+
+    t1, S1, B1 = build(d)
+    t2, S2, B2 = build(dd)
+    for k in ("tag", "author_id", "music_id"):
+        assert torch.equal(t1.tab[k], t2.tab[k]), k
     assert torch.equal(S1, S2) and torch.equal(B1, B2)
-    # a changed label of a test candidate changes the metric, never the model
-    assert ndcg10(S1, d["test"]) != ndcg10(S1, d2["test"])
+    # the perturbation does reach the metric: the flipped test labels change nDCG
+    assert ndcg10(S1, d["test"]) != ndcg10(S1, dd["test"])
 
 
 def test_shuffled_users_remove_the_lifelong_gain():

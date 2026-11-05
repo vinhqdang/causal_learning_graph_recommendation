@@ -1,15 +1,17 @@
 """LEAF on KuaiRand (paper/v6/DESIGN.md, Sections 5 and 6, item 5).
 
 Variants (--variant):
-  tied  closed-form collective autoencoder with the tied lifelong channels. --gamma grid: channel weights chosen on
-        validation as in the probes (tag lift, author familiarity, author lift, music familiarity); --gamma fit:
-        weights of all six channels fitted by least squares on the closed-form residual (ridge grid --ridge).
-  full  closed-form collective autoencoder with free lifelong-key weights W (--families, --lam_phi).
+  tied  closed-form collective autoencoder with the tied lifelong channels; the channel weights are chosen on
+        validation over a grid (the fit option was removed; --ridge is unused and kept for the run signature).
+  full  closed-form collective autoencoder with free lifelong-key weights W (--families, --lam_phi). --ablate takes
+        full and shuffle_users (the control arm: every user takes the lifelong tables of another user).
   lgn   LEAF-LGN: LightGCN trained jointly with the six channel weights, the popularity offset and the policy channel.
 --ablate lists arms, each run as its own method: full, no_lifelong, no_policy, lift_only, familiarity_only, no_tag,
 no_author, no_music, shuffle_users (the channel tables of other users).
-Output: the run_learned result format, results[name] = {test, per_split, val_best, chosen, per_user, n_configs};
+Output: the run_learned result format, results[name] = {test, per_split, val_best, chosen, per_user, n_configs,
+n_evals}: n_configs counts configurations, n_evals the validation evaluations (configuration x epoch; equal for tied).
 per_split holds the ndcg@10 of each split only. Resumable: OUT.partial.json is written after every block.
+--variant full without --lam takes the most frequent lam chosen by LEAF-tied in --lam_json.
 
 python3 experiments/run_leaf.py --dataset kuairand_t --variant tied --seeds 5 --out results/v10/leaf_tied.json
 (the lifelong window follows the dataset: kuairand_t -> "pre" (before the cut-off), kuairand_all -> "all".)
@@ -18,6 +20,7 @@ python3 experiments/run_leaf.py --dataset kuairand_t --variant tied --seeds 5 --
 import argparse
 import itertools
 import json
+from collections import Counter
 import os
 import resource
 import sys
@@ -30,9 +33,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from drup.data2 import load_kuairand_rich  # noqa: E402
 from drup.leaf import (CHANNELS, CUT_MS, LEAFLGN, BucketSelector, LifelongTables, Layout, PhiFull,  # noqa: E402
                        check_temporal_protocol, collective_gram, collective_solve, compact_base, fit_bpr_policy,
-                       fit_tied, make_lightgcn, protocol_split)
+                       make_lightgcn, protocol_split)
 
-LIFELONG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "raw", "lifelong_27k.npz")
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+LIFELONG = os.path.join(ROOT, "data", "raw", "lifelong_27k.npz")
+CACHE = os.path.join(ROOT, "data", "raw", "kuairand_t.pt")      # run_learned's input of the same temporal protocol
+SIG_EXCLUDE = ("out", "threads", "lam_json", "min_coverage")   # options outside the run signature
 CH_GRID = {0: (0.0, 0.5, 1.0), 3: (0.0, 0.5, 1.0, 2.0), 2: (0.0, 0.5), 5: (0.0, 0.5)}   # channel index -> grid
 KEY = "ndcg@10"
 
@@ -129,57 +135,47 @@ def run_tied(ctx, a, arms, sels, state, path, sig, O, Y, layout, pop, n):
             for w in arm_ws(arm, a.w):
                 for lam in a.lam:
                     base = bases[(w, lam)]
-                    if a.gamma == "fit":
-                        G, C = collective_gram(O, Y, w)
-                        B, _ = collective_solve(G, C, n, lam)
-                        del G, C
-                        for ridge in a.ridge:
-                            gamma = fit_tied(O, Y, B, w, tabs, ridge=ridge, mask=arm["mask"])
-                            for beta in a.beta:
-                                Sc = [bs + ch @ gamma + beta * pb for bs, ch, pb in zip(base, chan, pop_b)]
-                                sel.add(Sc, dict(lam=lam, w=w, s=s, beta=beta, ridge=ridge,
-                                                 gamma=[round(float(x), 4) for x in gamma]))
-                        del B
-                    else:
-                        gc = list(CH_GRID)
-                        vals_per = [CH_GRID[c] if arm["mask"][c] else (0.0,) for c in gc]
-                        for beta in a.beta:
-                            for combo in itertools.product(*vals_per):
-                                gw = torch.zeros(6)
-                                for c, g in zip(gc, combo):
-                                    gw[c] = g
-                                Sc = [bs + ch @ gw + beta * pb for bs, ch, pb in zip(base, chan, pop_b)]
-                                sel.add(Sc, dict(lam=lam, w=w, s=s, beta=beta,
-                                                 **{CHANNELS[c]: g for c, g in zip(gc, combo)}))
-            print(f"  {arm['name']} s={s} shuffle={shuffle}: {sel.n} configurations [{time.time() - t0:.0f}s]",
+                    gc = list(CH_GRID)
+                    vals_per = [CH_GRID[c] if arm["mask"][c] else (0.0,) for c in gc]
+                    for beta in a.beta:
+                        for combo in itertools.product(*vals_per):
+                            gw = torch.zeros(6)
+                            for c, g in zip(gc, combo):
+                                gw[c] = g
+                            Sc = [bs + ch @ gw + beta * pb for bs, ch, pb in zip(base, chan, pop_b)]
+                            sel.add(Sc, dict(lam=lam, w=w, s=s, beta=beta,
+                                             **{CHANNELS[c]: g for c, g in zip(gc, combo)}))
+            print(f"  {arm['name']} s={s} shuffle={shuffle}: {sel.nc} configurations [{time.time() - t0:.0f}s]",
                   flush=True)
         del tabs, chan
         state["done"].append(key)
         save_state(path, sig, state, sels)
 
 
-def run_full(ctx, a, sel, state, path, sig, O, Y, layout, pop, n):
+def run_full(ctx, a, arms, sels, state, path, sig, O, Y, layout, pop, n):
     pop_b = [pop[bk["cand"]] for bk in layout.buckets]
-    for fam, s, w in itertools.product(a.families, a.s, a.w):
-        key = f"full|{'+'.join(fam)}|s{s}|w{w}"
-        if key in state["done"]:
-            continue
-        t0 = time.time()
-        tabs = ctx.build(s, False)
-        phi = PhiFull(tabs, fam, min_imp=a.min_imp)
-        G, C = collective_gram(O, Y, w, phi)
-        print(f"  Gram {key}: dimension {G.shape[0]} [{time.time() - t0:.0f}s]", flush=True)
-        for lam, lp in itertools.product(a.lam, a.lam_phi):
-            B, W = collective_solve(G, C, n, lam, lp)
-            base = [compact_base(O, Y, w, B, bk["rows"], bk["cand"], phi, W) for bk in layout.buckets]
-            del B, W
-            for beta in a.beta:
-                Sc = [bs + beta * pb for bs, pb in zip(base, pop_b)]
-                sel.add(Sc, dict(lam=lam, lam_phi=lp, w=w, s=s, beta=beta, family="+".join(fam)))
-        del G, C, tabs, phi
-        print(f"  {key}: {sel.n} configurations [{time.time() - t0:.0f}s]", flush=True)
-        state["done"].append(key)
-        save_state(path, sig, state, {"LEAF-full": sel})
+    for arm in arms:
+        sel = sels[arm["name"]]
+        for fam, s, w in itertools.product(a.families, a.s, a.w):
+            key = f"full|{arm['name']}|{'+'.join(fam)}|s{s}|w{w}"
+            if key in state["done"]:
+                continue
+            t0 = time.time()
+            tabs = ctx.build(s, arm["shuffle"])
+            phi = PhiFull(tabs, fam, min_imp=a.min_imp)
+            G, C = collective_gram(O, Y, w, phi)
+            print(f"  Gram {key}: dimension {G.shape[0]} [{time.time() - t0:.0f}s]", flush=True)
+            for lam, lp in itertools.product(a.lam, a.lam_phi):
+                B, W = collective_solve(G, C, n, lam, lp)
+                base = [compact_base(O, Y, w, B, bk["rows"], bk["cand"], phi, W) for bk in layout.buckets]
+                del B, W
+                for beta in a.beta:
+                    Sc = [bs + beta * pb for bs, pb in zip(base, pop_b)]
+                    sel.add(Sc, dict(lam=lam, lam_phi=lp, w=w, s=s, beta=beta, family="+".join(fam)))
+            del G, C, tabs, phi
+            print(f"  {key}: {sel.nc} configurations [{time.time() - t0:.0f}s]", flush=True)
+            state["done"].append(key)
+            save_state(path, sig, state, sels)
 
 
 def run_lgn(ctx, a, arms, sels, state, path, sig, O, Y, layout, pop, n, m):
@@ -200,7 +196,8 @@ def run_lgn(ctx, a, arms, sels, state, path, sig, O, Y, layout, pop, n, m):
                 with torch.no_grad():
                     emb = mod.embeddings()
                     Sc = [mod(bk["rows"][:, None], bk["cand"], emb) for bk in layout.buckets]
-                vals = sel.add(Sc, dict(lr=lr, wd=wd, w=w, epoch=ep), active=[not x for x in done])
+                vals = sel.add(Sc, dict(lr=lr, wd=wd, w=w, epoch=ep), active=[not x for x in done],
+                               new_config=(ep == 0))
                 for s_, v in enumerate(vals):
                     if v is None:
                         continue
@@ -222,23 +219,58 @@ def run_lgn(ctx, a, arms, sels, state, path, sig, O, Y, layout, pop, n, m):
         del tabs
 
 
+def same_test(a, b):
+    return len(a) == len(b) and all(x[0] == y[0] and np.array_equal(x[1], y[1]) and np.array_equal(x[2], y[2])
+                                    for x, y in zip(a, b))
+
+
+def check_cache(path, d):
+    """The cached kuairand_t.pt (run_learned's input) must hold the test lists and users of this loader; a stale cache
+    would make the two families of numbers incomparable. Memory-mapped, so the dense O and Y are not read."""
+    C = torch.load(path, map_location="cpu", weights_only=False, mmap=True)
+    assert same_test(C["test"], d["test"]), f"{path}: test lists differ from the loader (stale cache?)"
+    assert np.array_equal(np.asarray(C["users_raw"]), np.asarray(d["users_raw"])), f"{path}: users_raw differ"
+    print(f"cache {path}: test lists and users match the loader", flush=True)
+
+
+def resolve_lam(a, ap):
+    """--lam as given; else the default grid (tied, lgn); for the full variant the most frequent lam that LEAF-tied chose
+    over the splits in --lam_json."""
+    if a.lam is not None:
+        return [float(x) for x in a.lam]
+    if a.variant != "full":
+        return [1000.0, 3000.0, 10000.0]
+    if not os.path.exists(a.lam_json):
+        ap.error(f"--variant full needs --lam, or the LEAF-tied results in {a.lam_json}")
+    chosen = json.load(open(a.lam_json))["results"]["LEAF-tied"]["chosen"]
+    lams = [float(c["lam"]) for c in chosen]
+    best = Counter(lams).most_common(1)[0][0]
+    print(f"lam {best} (most frequent choice of LEAF-tied over {len(lams)} splits: {sorted(lams)})", flush=True)
+    return [best]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dataset", default="kuairand_t", choices=["kuairand_t", "kuairand_all"])
     ap.add_argument("--variant", required=True, choices=["tied", "full", "lgn"])
-    ap.add_argument("--gamma", default="grid", choices=["grid", "fit"])
+    ap.add_argument("--gamma", default="grid", choices=["grid"], help="channel weights on the validation grid")
     ap.add_argument("--ablate", nargs="+", default=["full"])
     ap.add_argument("--seeds", type=int, default=5, help="number of validation / test splits")
     ap.add_argument("--frac_val", type=float, default=0.3)
     ap.add_argument("--n_users", type=int, default=0, help="0 = all users (smoke runs use a subset)")
-    ap.add_argument("--lam", type=float, nargs="+", default=[1000.0, 3000.0, 10000.0])
+    ap.add_argument("--lam", type=float, nargs="+", default=None,
+                    help="default 1000 3000 10000; for --variant full, the LEAF-tied choice in --lam_json")
+    ap.add_argument("--lam_json", default=os.path.join(ROOT, "results", "v10", "leaf_tied.json"))
     ap.add_argument("--w", type=float, nargs="+", default=[0.0, 0.25, 0.5, 1.0])
     ap.add_argument("--beta", type=float, nargs="+", default=[0.0, 0.25, 0.5])
     ap.add_argument("--s", type=float, nargs="+", default=[5.0, 20.0])
-    ap.add_argument("--ridge", type=float, nargs="+", default=[0.0, 10.0])
+    ap.add_argument("--ridge", type=float, nargs="+", default=[0.0, 10.0],
+                    help="unused since the fit option was removed; kept so that the run signature still matches")
     ap.add_argument("--lam_phi", type=float, nargs="+", default=[1e2, 1e3, 1e4])
     ap.add_argument("--families", nargs="+", default=["tag", "tag+author_id", "tag+author_id+music_id"])
     ap.add_argument("--min_imp", type=int, default=20)
+    ap.add_argument("--min_coverage", type=float, default=0.98,
+                    help="smallest share of users with lifelong history (the run stops below it)")
     ap.add_argument("--lrs", type=float, nargs="+", default=[1e-2, 3e-3])
     ap.add_argument("--wds", type=float, nargs="+", default=[1e-4, 1e-5])
     ap.add_argument("--dim", type=int, default=64)
@@ -250,6 +282,9 @@ def main():
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
     a.families = [tuple(f.split("+")) for f in a.families]
+    if a.variant == "full" and any(x not in ("full", "shuffle_users") for x in a.ablate):
+        ap.error("--variant full takes --ablate full and/or shuffle_users")
+    a.lam = resolve_lam(a, ap)
     torch.set_num_threads(a.threads)
     out = a.out or f"results/v10/leaf_{a.variant}.json"
     os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
@@ -261,6 +296,8 @@ def main():
                            dense_dtype=torch.float32, with_signals=False)
     if cut:
         print("temporal protocol:", check_temporal_protocol(d), flush=True)
+        if a.n_users == 0:
+            check_cache(CACHE, d)
     O, Y = d["O"], d["Y"]
     m, n = O.shape
     test = d["test"]
@@ -276,23 +313,22 @@ def main():
     window = "pre" if cut else "all"
     ctx = Ctx(LIFELONG, window, d["users_raw"], d["item_feat"])
     lifelong_users = np.isin(d["users_raw"], ctx.npz[f"tot_{window}_user"])
+    coverage = float(lifelong_users.mean())
     cells = sum(bk["cand"].numel() for bk in layout.buckets)
     print(f"{m} users, {n} items, {U} test users in {len(layout.buckets)} candidate buckets ({cells} padded cells), "
-          f"lifelong history for "
-          f"{lifelong_users.mean():.3f} of users [{time.time() - t0:.0f}s]", flush=True)
+          f"lifelong history for {coverage:.4f} of users [{time.time() - t0:.0f}s]", flush=True)
+    assert coverage >= a.min_coverage, \
+        f"lifelong history covers {coverage:.4f} of the users, below --min_coverage {a.min_coverage}"
 
-    if a.variant == "full":
-        arms, sel_names = [], ["LEAF-full"]
-    else:
-        base_name = {"tied": "LEAF-tied", "lgn": "LEAF-LGN"}[a.variant]
-        arms = [arm_spec(x) for x in a.ablate]
-        sel_names = [base_name + ("" if x == "full" else f"[{x}]") for x in a.ablate]
-        for arm, nm in zip(arms, sel_names):
-            arm["name"] = nm
+    base_name = {"tied": "LEAF-tied", "lgn": "LEAF-LGN", "full": "LEAF-full"}[a.variant]
+    arms = [arm_spec(x) for x in a.ablate]
+    sel_names = [base_name + ("" if x == "full" else f"[{x}]") for x in a.ablate]
+    for arm, nm in zip(arms, sel_names):
+        arm["name"] = nm
     sels = {nm: BucketSelector(layout, splits, (10,), KEY, rows_ids) for nm in sel_names}
     # the signature is normalised to JSON types, so that a resumed run compares like with like
     sig = json.loads(json.dumps({k: ["+".join(f) for f in v] if k == "families" else v for k, v in vars(a).items()
-                                 if k not in ("out", "threads")}))
+                                 if k not in SIG_EXCLUDE}))
     state = load_state(path, sig)
     if state is None:
         state = {"done": []}
@@ -303,7 +339,7 @@ def main():
     if a.variant == "tied":
         run_tied(ctx, a, arms, sels, state, path, sig, O, Y, layout, pop, n)
     elif a.variant == "full":
-        run_full(ctx, a, sels["LEAF-full"], state, path, sig, O, Y, layout, pop, n)
+        run_full(ctx, a, arms, sels, state, path, sig, O, Y, layout, pop, n)
     else:
         run_lgn(ctx, a, arms, sels, state, path, sig, O, Y, layout, pop, n, m)
 
@@ -311,9 +347,10 @@ def main():
     for nm, sel in sels.items():
         r = sel.result()
         res[nm] = {"test": {KEY: [r["test_mean"], r["test_sd"]]}, "chosen": r["chosen"], "per_split": r["per_split"],
-                   "val_best": r["val_best"], "per_user": r["per_user"], "n_configs": r["n_configs"]}
+                   "val_best": r["val_best"], "per_user": r["per_user"], "n_configs": r["n_configs"],
+                   "n_evals": r["n_evals"]}
         print(f"{nm}: test {r['test_mean']:.4f} +- {r['test_sd']:.4f} (val {r['val_mean']:.4f}, "
-              f"{r['n_configs']} configurations) chosen {r['chosen'][0]}", flush=True)
+              f"{r['n_configs']} configurations, {r['n_evals']} evaluations) chosen {r['chosen'][0]}", flush=True)
     with open(out, "w") as f:
         json.dump({"args": sig, "results": res}, f)
     if os.path.exists(path):
