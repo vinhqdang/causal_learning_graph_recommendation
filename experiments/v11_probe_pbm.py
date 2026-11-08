@@ -60,13 +60,20 @@ def content_centre(al, ni, cov, ridge=10.0):
     return torch.sigmoid(mu + X @ beta)
 
 
-def fit_dax(B, cov, strata, prior=80.0, centre="tag", prior_s=None, k_life=0.0, tab=False, iters=40, life=None):
+def fit_dax(B, cov, strata, prior=80.0, centre="tag", prior_s=None, k_life=0.0, tab=False, iters=40, life=None,
+            tau=None):
+    """tau: optional recency half-life in days; impressions are weighted by 2^(-age / tau) (age before the cut)."""
     lg = B["log"]
     m, n = B["shape"]
     u = torch.as_tensor(lg.u.values.astype(np.int64))
     i = torch.as_tensor(lg.i.values.astype(np.int64))
     tb = torch.as_tensor(lg.tab.values.astype(np.int64))
     y = torch.as_tensor(lg.is_click.values, dtype=torch.float64)
+    if tau is None:
+        wt = torch.ones_like(y)
+    else:
+        age = (1650556800000 - lg.time_ms.values) / 86400000.0
+        wt = torch.as_tensor(np.power(2.0, -age / tau), dtype=torch.float64)
     S = int(strata.max()) + 1
     su = strata[u]
     T = int(tb.max()) + 1
@@ -76,9 +83,8 @@ def fit_dax(B, cov, strata, prior=80.0, centre="tag", prior_s=None, k_life=0.0, 
     als = torch.full((n, S), 0.6, dtype=torch.float64)
     tag = cov["tag"]
     G = int(tag.max()) + 1
-    nu = torch.bincount(u, minlength=m).double()
-    ni = torch.bincount(i, minlength=n).double()
-    nis = torch.zeros(n * S, dtype=torch.float64).index_add_(0, i * S + su, torch.ones_like(y)).view(n, S)
+    ni = torch.zeros(n, dtype=torch.float64).index_add_(0, i, wt)
+    nis = torch.zeros(n * S, dtype=torch.float64).index_add_(0, i * S + su, wt).view(n, S)
     if k_life > 0:
         # prior centre of theta: lifelong click rate rescaled to the in-pool mean examination (updated each round)
         lr = life / life.mean()
@@ -86,11 +92,11 @@ def fit_dax(B, cov, strata, prior=80.0, centre="tag", prior_s=None, k_life=0.0, 
         a = als[i, su] if prior_s is not None else al[i]
         t = (th[u] * ka[tb]).clamp(1e-6, 1 - 1e-6)
         den = (1 - t * a).clamp_min(1e-9)
-        pE = torch.where(y > 0, torch.ones_like(t), t * (1 - a) / den)
-        pR = torch.where(y > 0, torch.ones_like(t), (1 - t) * a / den)
+        pE = torch.where(y > 0, torch.ones_like(t), t * (1 - a) / den) * wt
+        pR = torch.where(y > 0, torch.ones_like(t), (1 - t) * a / den) * wt
         # theta_u (examination of the user, given the tab factor)
         sE = torch.zeros(m, dtype=torch.float64).index_add_(0, u, pE)
-        sK = torch.zeros(m, dtype=torch.float64).index_add_(0, u, ka[tb])
+        sK = torch.zeros(m, dtype=torch.float64).index_add_(0, u, ka[tb] * wt)
         if k_life > 0:
             c0 = (lr * (sE.sum() / sK.sum())).clamp(1e-3, 1.0)
             th = ((sE + k_life * c0) / (sK + k_life)).clamp(1e-3, 1.0)
@@ -98,7 +104,7 @@ def fit_dax(B, cov, strata, prior=80.0, centre="tag", prior_s=None, k_life=0.0, 
             th = ((sE + 1.0) / (sK + 2.0)).clamp(1e-3, 1.0)
         if tab:
             kE = torch.zeros(T, dtype=torch.float64).index_add_(0, tb, pE)
-            kN = torch.zeros(T, dtype=torch.float64).index_add_(0, tb, th[u])
+            kN = torch.zeros(T, dtype=torch.float64).index_add_(0, tb, th[u] * wt)
             ka = (kE + 1.0) / (kN + 1.0)
             ka = ka / ka[1]                                            # tab 1 (the test scenario) is the reference
         # alpha_i with a content-centred prior
@@ -159,6 +165,12 @@ def main():
             report(f"LEAF-{bt.upper()} + {name}", sel.record())
         return cands
 
+    if len(sys.argv) > 1 and sys.argv[1] == "v2":
+        best = dict(prior=80.0, centre="tag", k_life=100.0, tab=True)
+        run("DAX best + recency weights", [dict(best, tau=t) for t in (None, 2.0, 4.0, 8.0)])
+        run("DAX best, tab only (no lifelong theta)", [dict(prior=p, tab=True, k_life=0.0, prior_s=None) for p in (40.0, 80.0)])
+        out(f"done [{time.time() - t0:.0f}s]")
+        return
     P = (40.0, 80.0, 160.0)
     run("DAX tag prior (P3 re-run)", [dict(prior=p) for p in P])
     run("DAX content (Fay-Herriot) prior", [dict(prior=p, centre="content") for p in P])

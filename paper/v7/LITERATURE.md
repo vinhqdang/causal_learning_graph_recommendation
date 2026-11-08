@@ -142,3 +142,8 @@ Ranked by expected gain on the measured headroom x feasibility on 4 CPU cores x 
 
 Ideas 1-5 are probed; 6-12 are listed with the reason they rank lower (they re-express ideas 1-3 with more
 variance, or address parts of the problem the diagnosis rules out).
+
+Probe outcome (DESIGN.md Section 3, validation-selected, per-user paired vs LEAF-LGN): idea 3 (detection x
+attractiveness, "DAX") +9.43e-3 [1.29], the only borrowed idea with a large complementary gain; idea 1 (MRP)
++2.48e-3 [0.87]; idea 2 (Fay-Herriot prior inside DAX) +5.69e-3, below DAX's tag prior; idea 5 (trajectory
+forecast) -0.33e-3; MRP stratum cells inside DAX +7.29e-3 (no gain over DAX alone).

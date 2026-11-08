@@ -1,0 +1,14 @@
+DIAGNOSTIC (test labels)
+  Spearman with the uniform rate (items with >= 50 random impressions): DAX 0.419, pre-cut clicks (popularity) 0.433
+  all users: LEAF-LGN 0.4735, LEAF-LGN + 0.5 z(DAX) 0.4818, item oracle 0.5068; share of the oracle gap closed by DAX 0.25
+  LEAF-LGN + DAX + best oracle term: 0.5194 (weight 3.0); remaining item headroom above LEAF+DAX +37.62e-3
+
+PROBE: DAX on the policy-channel closed-form backbone (no lifelong channels), validation-selected
+  EASE-policy + pop            test 0.4508 chosen {'w': 1.0, 'lam': 10000.0, 'beta': 0.25, 'gamma': 0.0}
+      - QP family   -12.75 [1.96] p=4.3e-37 NB p=0.041 (splits -15.2 -12.0 -12.8 -14.6 -8.5)
+      - LEAF-LGN    -22.38 [2.07] p=6.3e-99 NB p=0.000 (splits -23.1 -21.7 -21.3 -22.1 -21.7)
+      - r-AdjNorm   -11.27 [2.04] p=3.2e-27 NB p=0.004 (splits -11.3 -11.0 -10.5 -10.3 -13.2)
+  EASE-policy + pop + DAX      test 0.4637 chosen {'w': 1.0, 'lam': 10000.0, 'beta': 0.0, 'gamma': 0.2}
+      - QP family    +0.18 [2.27] p=8.8e-01 NB p=0.962 (splits -2.5 +1.4 -1.1 -1.5 +4.9)
+      - LEAF-LGN     -9.45 [2.36] p=4.1e-15 NB p=0.003 (splits -10.4 -8.4 -9.5 -9.0 -8.3)
+      - r-AdjNorm    +1.66 [2.38] p=1.7e-01 NB p=0.374 (splits +1.4 +2.4 +1.3 +2.8 +0.2)
