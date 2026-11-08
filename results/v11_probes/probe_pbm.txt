@@ -1,0 +1,54 @@
+====================================================================================================
+v11 DAX (detection x attractiveness) probes [2026-11-08 22:43]
+    fit {'prior': 40.0} [1s]
+    fit {'prior': 80.0} [1s]
+    fit {'prior': 160.0} [1s]
+  LEAF-LGN + DAX tag prior (P3 re-run)                 test 0.4802  chosen [{'prior': 80.0, 'gamma': 0.5}, {'prior': 80.0, 'gamma': 0.4}, {'prior': 80.0, 'gamma': 0.4}, {'prior': 160.0, 'gamma': 0.4}, {'prior': 40.0, 'gamma': 0.5}]
+      - QP family   +17.22 [1.74] p=3.1e-83 NB p=0.109 (splits +13.2 +16.7 +15.3 +13.2 +25.6)
+      - LEAF-LGN     +7.59 [1.27] p=2.1e-31 NB p=0.179 (splits +5.3 +6.9 +6.8 +5.7 +12.4)
+      - r-AdjNorm   +18.69 [1.93] p=6.4e-80 NB p=0.002 (splits +17.1 +17.7 +17.6 +17.5 +20.9)
+    fit {'prior': 40.0, 'centre': 'content'} [2s]
+    fit {'prior': 80.0, 'centre': 'content'} [2s]
+    fit {'prior': 160.0, 'centre': 'content'} [2s]
+  LEAF-LGN + DAX content (Fay-Herriot) prior           test 0.4783  chosen [{'prior': 40.0, 'centre': 'content', 'gamma': 0.4}, {'prior': 40.0, 'centre': 'content', 'gamma': 0.4}, {'prior': 40.0, 'centre': 'content', 'gamma': 0.3}, {'prior': 40.0, 'centre': 'content', 'gamma': 0.3}, {'prior': 40.0, 'centre': 'content', 'gamma': 0.3}]
+      - QP family   +15.32 [1.65] p=2.1e-73 NB p=0.118 (splits +11.2 +14.2 +13.9 +12.2 +23.0)
+      - LEAF-LGN     +5.69 [1.09] p=1.4e-24 NB p=0.243 (splits +3.3 +4.5 +5.4 +4.7 +9.8)
+      - r-AdjNorm   +16.79 [1.84] p=3.4e-71 NB p=0.001 (splits +15.1 +15.2 +16.2 +16.5 +18.3)
+    fit {'prior': 80.0, 'k_life': 20.0} [1s]
+    fit {'prior': 80.0, 'k_life': 100.0} [1s]
+    fit {'prior': 80.0, 'k_life': 500.0} [1s]
+  LEAF-LGN + DAX + lifelong theta prior                test 0.4809  chosen [{'prior': 80.0, 'k_life': 20.0, 'gamma': 0.5}, {'prior': 80.0, 'k_life': 20.0, 'gamma': 0.5}, {'prior': 80.0, 'k_life': 20.0, 'gamma': 0.4}, {'prior': 80.0, 'k_life': 20.0, 'gamma': 0.5}, {'prior': 80.0, 'k_life': 20.0, 'gamma': 0.5}]
+      - QP family   +17.90 [1.78] p=6.4e-86 NB p=0.110 (splits +13.9 +16.9 +16.0 +13.7 +26.7)
+      - LEAF-LGN     +8.28 [1.35] p=5.0e-33 NB p=0.179 (splits +6.0 +7.1 +7.5 +6.3 +13.5)
+      - r-AdjNorm   +19.38 [1.97] p=2.3e-82 NB p=0.003 (splits +17.8 +17.9 +18.3 +18.1 +22.0)
+    fit {'prior': 40.0, 'tab': True} [2s] tab factors [0.2  1.   0.95 0.05 1.08 0.52 0.42 0.67 0.09 1.44 1.36 0.   0.25 0.71
+ 0.16]
+    fit {'prior': 80.0, 'tab': True} [2s] tab factors [0.2  1.   0.95 0.05 1.09 0.51 0.39 0.67 0.09 1.45 1.36 0.   0.25 0.7
+ 0.16]
+    fit {'prior': 160.0, 'tab': True} [2s] tab factors [0.2  1.   0.95 0.05 1.09 0.5  0.37 0.67 0.09 1.45 1.36 0.   0.25 0.7
+ 0.15]
+  LEAF-LGN + DAX + tab examination                     test 0.4817  chosen [{'prior': 40.0, 'tab': True, 'gamma': 0.5}, {'prior': 40.0, 'tab': True, 'gamma': 0.4}, {'prior': 40.0, 'tab': True, 'gamma': 0.4}, {'prior': 40.0, 'tab': True, 'gamma': 0.5}, {'prior': 40.0, 'tab': True, 'gamma': 0.4}]
+      - QP family   +18.66 [1.74] p=1.1e-96 NB p=0.074 (splits +15.3 +18.1 +16.5 +15.1 +26.6)
+      - LEAF-LGN     +9.03 [1.28] p=4.9e-43 NB p=0.090 (splits +7.4 +8.3 +8.0 +7.6 +13.4)
+      - r-AdjNorm   +20.14 [1.94] p=2.1e-91 NB p=0.001 (splits +19.2 +19.1 +18.8 +19.5 +21.9)
+    fit {'prior': 80.0, 'prior_s': 20.0} [1s]
+    fit {'prior': 80.0, 'prior_s': 80.0} [2s]
+    fit {'prior': 80.0, 'prior_s': 320.0} [1s]
+  LEAF-LGN + DAX + stratum cells (MRP)                 test 0.4799  chosen [{'prior': 80.0, 'prior_s': 320.0, 'gamma': 0.4}, {'prior': 80.0, 'prior_s': 320.0, 'gamma': 0.4}, {'prior': 80.0, 'prior_s': 320.0, 'gamma': 0.3}, {'prior': 80.0, 'prior_s': 320.0, 'gamma': 0.4}, {'prior': 80.0, 'prior_s': 320.0, 'gamma': 0.5}]
+      - QP family   +16.92 [1.72] p=2.1e-82 NB p=0.102 (splits +13.5 +15.9 +14.6 +13.4 +25.1)
+      - LEAF-LGN     +7.29 [1.23] p=2.9e-31 NB p=0.168 (splits +5.6 +6.1 +6.1 +5.9 +11.9)
+      - r-AdjNorm   +18.40 [1.91] p=4.6e-79 NB p=0.001 (splits +17.4 +16.9 +17.0 +17.8 +20.4)
+    fit {'prior': 80.0, 'centre': 'tag', 'k_life': 0.0, 'tab': False, 'prior_s': None} [1s]
+    fit {'prior': 80.0, 'centre': 'tag', 'k_life': 0.0, 'tab': False, 'prior_s': 80.0} [1s]
+    fit {'prior': 80.0, 'centre': 'tag', 'k_life': 0.0, 'tab': True, 'prior_s': None} [2s] tab factors [0.2  1.   0.95 0.05 1.09 0.51 0.39 0.67 0.09 1.45 1.36 0.   0.25 0.7
+ 0.16]
+    fit {'prior': 80.0, 'centre': 'tag', 'k_life': 0.0, 'tab': True, 'prior_s': 80.0} [2s] tab factors [0.2  1.   0.95 0.06 1.07 0.53 0.44 0.68 0.09 1.41 1.33 0.   0.25 0.71
+ 0.17]
+    fit {'prior': 80.0, 'centre': 'tag', 'k_life': 100.0, 'tab': False, 'prior_s': None} [1s]
+    fit {'prior': 80.0, 'centre': 'tag', 'k_life': 100.0, 'tab': False, 'prior_s': 80.0} [1s]
+    fit {'prior': 80.0, 'centre': 'tag', 'k_life': 100.0, 'tab': True, 'prior_s': None} [2s] tab factors [0.25 1.   0.94 0.06 1.19 0.5  0.38 0.69 0.1  1.36 1.29 0.01 0.33 0.67
+ 0.17]
+    fit {'prior': 80.0, 'centre': 'tag', 'k_life': 100.0, 'tab': True, 'prior_s': 80.0} [2s] tab factors [0.25 1.   0.95 0.07 1.18 0.51 0.42 0.69 0.1  1.34 1.28 0.01 0.33 0.68
+ 0.17]
+    fit {'prior': 80.0, 'centre': 'content', 'k_life': 0.0, 'tab': False, 'prior_s': None} [2s]
+    fit {'prior': 80.0, 'centre': 'content', 'k_life': 0.0, 'tab': False, 'prior_s': 80.0} [2s]

@@ -1,0 +1,105 @@
+====================================================================================================
+v11 item-appeal probes ['P3'] [2026-11-08 22:35]
+====================================================================================================
+v11 item-appeal probes ['P3'] [2026-11-08 22:36]
+  reproduced LEAF-lgn: test 0.4728 (stored 0.4728)
+  reproduced LEAF-tied: test 0.4691 (stored 0.4691)
+  POP (control) alone                          test 0.4197  chosen {}
+      - QP family   -43.32 [2.50] p=1.7e-246 NB p=0.001 (splits -46.8 -43.1 -42.9 -46.3 -39.5)
+      - LEAF-LGN    -52.95 [2.54] p=0.0e+00 NB p=0.000 (splits -54.7 -52.9 -51.4 -53.8 -52.7)
+      - r-AdjNorm   -41.84 [2.60] p=1.5e-214 NB p=0.000 (splits -42.9 -42.1 -40.6 -42.0 -44.2)
+  LEAF-LGN + POP (control)                     test 0.4728  chosen {'gamma': 0.0}
+      - QP family    +9.70 [1.60] p=1.9e-32 NB p=0.072 (splits +7.9 +9.8 +8.5 +7.5 +13.5)
+      - LEAF-LGN     +0.08 [0.11] p=1.6e-01 NB p=0.793 (splits +0.0 +0.0 +0.0 +0.0 +0.3)
+      - r-AdjNorm   +11.18 [1.71] p=1.2e-37 NB p=0.005 (splits +11.8 +10.8 +10.8 +11.9 +8.8)
+====================================================================================================
+v11 item-appeal probes ['P3', 'P5'] [2026-11-08 22:36]
+  reproduced LEAF-lgn: test 0.4728 (stored 0.4728)
+  reproduced LEAF-tied: test 0.4691 (stored 0.4691)
+  POP (control) alone                          test 0.4197  chosen {}
+      - QP family   -43.32 [2.50] p=1.7e-246 NB p=0.001 (splits -46.8 -43.1 -42.9 -46.3 -39.5)
+      - LEAF-LGN    -52.95 [2.54] p=0.0e+00 NB p=0.000 (splits -54.7 -52.9 -51.4 -53.8 -52.7)
+      - r-AdjNorm   -41.84 [2.60] p=1.5e-214 NB p=0.000 (splits -42.9 -42.1 -40.6 -42.0 -44.2)
+  LEAF-LGN + POP (control)                     test 0.4728  chosen {'gamma': 0.0}
+      - QP family    +9.70 [1.60] p=1.9e-32 NB p=0.072 (splits +7.9 +9.8 +8.5 +7.5 +13.5)
+      - LEAF-LGN     +0.08 [0.11] p=1.6e-01 NB p=0.793 (splits +0.0 +0.0 +0.0 +0.0 +0.3)
+      - r-AdjNorm   +11.18 [1.71] p=1.2e-37 NB p=0.005 (splits +11.8 +10.8 +10.8 +11.9 +8.8)
+  P3 PBM-EM alone                              test 0.4160  chosen {'prior': 80.0}
+      - QP family   -46.81 [3.12] p=1.2e-186 NB p=0.001 (splits -50.7 -47.8 -46.9 -50.1 -41.3)
+      - LEAF-LGN    -56.44 [3.20] p=3.2e-255 NB p=0.000 (splits -58.6 -57.6 -55.4 -57.6 -54.5)
+      - r-AdjNorm   -45.34 [3.28] p=3.9e-159 NB p=0.000 (splits -46.8 -46.8 -44.6 -45.8 -46.0)
+  LEAF-LGN + P3 PBM-EM                         test 0.4804  chosen {'prior': 80.0, 'gamma': 0.5}
+      - QP family   +17.43 [1.75] p=2.0e-84 NB p=0.115 (splits +13.2 +16.7 +15.3 +13.6 +26.1)
+      - LEAF-LGN     +7.80 [1.29] p=1.8e-32 NB p=0.192 (splits +5.3 +6.9 +6.8 +6.1 +12.9)
+      - r-AdjNorm   +18.90 [1.93] p=3.4e-81 NB p=0.003 (splits +17.1 +17.7 +17.6 +17.9 +21.4)
+  LEAF-TIED + P3 PBM-EM                        test 0.4710  chosen {'prior': 20.0, 'gamma': 0.3}
+      - QP family    +7.68 [2.44] p=6.7e-10 NB p=0.263 (splits +3.9 +7.9 +7.8 +5.0 +13.4)
+      - LEAF-LGN     -1.95 [2.25] p=9.0e-02 NB p=0.528 (splits -4.0 -1.9 -0.7 -2.5 +0.2)
+      - r-AdjNorm    +9.15 [2.54] p=1.8e-12 NB p=0.003 (splits +7.8 +8.9 +10.1 +9.3 +8.6)
+  P5 TRAJ alone                                test 0.3907  chosen {'shrink': 10.0, 'h': 4.0}
+      - QP family   -72.38 [2.94] p=0.0e+00 NB p=0.000 (splits -75.3 -72.7 -71.8 -76.3 -67.7)
+      - LEAF-LGN    -82.01 [2.98] p=0.0e+00 NB p=0.000 (splits -83.2 -82.4 -80.3 -83.8 -80.9)
+      - r-AdjNorm   -70.91 [2.97] p=0.0e+00 NB p=0.000 (splits -71.4 -71.7 -69.5 -71.9 -72.4)
+  LEAF-LGN + P5 TRAJ                           test 0.4725  chosen {'shrink': 2.0, 'h': 12.0, 'gamma': 0.05}
+      - QP family    +9.30 [1.59] p=3.4e-30 NB p=0.084 (splits +6.6 +9.8 +8.5 +7.5 +13.0)
+      - LEAF-LGN     -0.33 [0.22] p=3.7e-03 NB p=0.751 (splits -1.4 +0.0 +0.0 +0.0 -0.2)
+      - r-AdjNorm   +10.77 [1.70] p=2.3e-35 NB p=0.008 (splits +10.5 +10.8 +10.8 +11.9 +8.2)
+done [75s]
+====================================================================================================
+v11 item-appeal probes ['P1', 'P3', 'UC', 'COMBO'] [2026-11-08 22:38]
+  reproduced LEAF-lgn: test 0.4728 (stored 0.4728)
+  reproduced LEAF-tied: test 0.4691 (stored 0.4691)
+  POP (control) alone                          test 0.4197  chosen {}
+      - QP family   -43.32 [2.50] p=1.7e-246 NB p=0.001 (splits -46.8 -43.1 -42.9 -46.3 -39.5)
+      - LEAF-LGN    -52.95 [2.54] p=0.0e+00 NB p=0.000 (splits -54.7 -52.9 -51.4 -53.8 -52.7)
+      - r-AdjNorm   -41.84 [2.60] p=1.5e-214 NB p=0.000 (splits -42.9 -42.1 -40.6 -42.0 -44.2)
+  LEAF-LGN + POP (control)                     test 0.4728  chosen {'gamma': 0.0}
+      - QP family    +9.70 [1.60] p=1.9e-32 NB p=0.072 (splits +7.9 +9.8 +8.5 +7.5 +13.5)
+      - LEAF-LGN     +0.08 [0.11] p=1.6e-01 NB p=0.793 (splits +0.0 +0.0 +0.0 +0.0 +0.3)
+      - r-AdjNorm   +11.18 [1.71] p=1.2e-37 NB p=0.005 (splits +11.8 +10.8 +10.8 +11.9 +8.8)
+    MRP fit lam_e 1.0 content False lam_d None [2s]
+    MRP fit lam_e 1.0 content False lam_d 20.0 [2s]
+    MRP fit lam_e 1.0 content True lam_d None [2s]
+    MRP fit lam_e 1.0 content True lam_d 20.0 [3s]
+    MRP fit lam_e 5.0 content False lam_d None [2s]
+    MRP fit lam_e 5.0 content False lam_d 20.0 [3s]
+    MRP fit lam_e 5.0 content True lam_d None [2s]
+    MRP fit lam_e 5.0 content True lam_d 20.0 [3s]
+    MRP fit lam_e 20.0 content False lam_d None [1s]
+    MRP fit lam_e 20.0 content False lam_d 20.0 [2s]
+    MRP fit lam_e 20.0 content True lam_d None [1s]
+    MRP fit lam_e 20.0 content True lam_d 20.0 [2s]
+  P1 MRP alone                                 test 0.3874  chosen {'lam_e': 5.0, 'content': False, 'lam_d': 20.0, 'form': 'own_cell'}
+      - QP family   -75.26 [3.08] p=0.0e+00 NB p=0.000 (splits -78.3 -75.9 -76.1 -78.7 -71.0)
+      - LEAF-LGN    -84.89 [3.22] p=0.0e+00 NB p=0.000 (splits -86.2 -85.7 -84.6 -86.2 -84.2)
+      - r-AdjNorm   -73.79 [3.25] p=0.0e+00 NB p=0.000 (splits -74.4 -74.9 -73.8 -74.3 -75.7)
+  LEAF-LGN + P1 MRP                            test 0.4752  chosen {'lam_e': 20.0, 'content': False, 'lam_d': None, 'form': 'item', 'gamma': 0.3}
+      - QP family   +12.11 [1.58] p=1.2e-50 NB p=0.147 (splits +9.6 +11.2 +10.1 +9.2 +19.1)
+      - LEAF-LGN     +2.48 [0.87] p=2.1e-08 NB p=0.471 (splits +1.6 +1.4 +1.6 +1.7 +5.9)
+      - r-AdjNorm   +13.58 [1.76] p=2.4e-51 NB p=0.001 (splits +13.5 +12.2 +12.4 +13.5 +14.3)
+  LEAF-TIED + P1 MRP                           test 0.4687  chosen {'lam_e': 5.0, 'content': False, 'lam_d': 20.0, 'form': 'poststrat', 'gamma': 0.05}
+      - QP family    +5.37 [2.40] p=1.2e-05 NB p=0.425 (splits +1.8 +6.2 +5.1 +2.4 +11.2)
+      - LEAF-LGN     -4.26 [2.19] p=1.4e-04 NB p=0.194 (splits -6.1 -3.6 -3.4 -5.1 -1.9)
+      - r-AdjNorm    +6.84 [2.49] p=6.8e-08 NB p=0.003 (splits +5.7 +7.2 +7.4 +6.7 +6.5)
+  P3 PBM-EM alone                              test 0.4160  chosen {'prior': 80.0}
+      - QP family   -46.81 [3.12] p=1.2e-186 NB p=0.001 (splits -50.7 -47.8 -46.9 -50.1 -41.3)
+      - LEAF-LGN    -56.44 [3.20] p=3.2e-255 NB p=0.000 (splits -58.6 -57.6 -55.4 -57.6 -54.5)
+      - r-AdjNorm   -45.34 [3.28] p=3.9e-159 NB p=0.000 (splits -46.8 -46.8 -44.6 -45.8 -46.0)
+  LEAF-LGN + P3 PBM-EM                         test 0.4803  chosen {'prior': 80.0, 'gamma': 0.5}
+      - QP family   +17.31 [1.74] p=6.1e-84 NB p=0.121 (splits +13.2 +16.7 +15.3 +13.0 +26.1)
+      - LEAF-LGN     +7.68 [1.27] p=2.8e-32 NB p=0.207 (splits +5.3 +6.9 +6.8 +5.5 +12.9)
+      - r-AdjNorm   +18.79 [1.93] p=6.3e-81 NB p=0.003 (splits +17.1 +17.7 +17.6 +17.4 +21.4)
+  LEAF-TIED + P3 PBM-EM                        test 0.4710  chosen {'prior': 20.0, 'gamma': 0.3}
+      - QP family    +7.68 [2.44] p=6.7e-10 NB p=0.263 (splits +3.9 +7.9 +7.8 +5.0 +13.4)
+      - LEAF-LGN     -1.95 [2.25] p=9.0e-02 NB p=0.528 (splits -4.0 -1.9 -0.7 -2.5 +0.2)
+      - r-AdjNorm    +9.15 [2.54] p=1.8e-12 NB p=0.003 (splits +7.8 +8.9 +10.1 +9.3 +8.6)
+  LEAF-LGN + P1 + P3                           test 0.4804  chosen {'g1': 0.0, 'g3': 0.5}
+      - QP family   +17.43 [1.75] p=2.0e-84 NB p=0.115 (splits +13.2 +16.7 +15.3 +13.6 +26.1)
+      - LEAF-LGN     +7.80 [1.29] p=1.8e-32 NB p=0.192 (splits +5.3 +6.9 +6.8 +6.1 +12.9)
+      - r-AdjNorm   +18.90 [1.93] p=3.4e-81 NB p=0.003 (splits +17.1 +17.7 +17.6 +17.9 +21.4)
+  OFF-PROTOCOL (post-cut random data of validation users; not a candidate method):
+  OFF-PROTOCOL LEAF-LGN + validation-user uniform rate test 0.5093  chosen {'a0': 80.0, 'gamma': 1.0}
+      - QP family   +46.24 [2.05] p=0.0e+00 NB p=0.003 (splits +43.4 +45.7 +46.3 +41.1 +52.9)
+      - LEAF-LGN    +36.62 [1.79] p=0.0e+00 NB p=0.001 (splits +35.5 +35.9 +37.8 +33.6 +39.7)
+      - r-AdjNorm   +47.72 [2.19] p=0.0e+00 NB p=0.000 (splits +47.3 +46.7 +48.6 +45.5 +48.2)
+done [226s]

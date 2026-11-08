@@ -1,0 +1,121 @@
+====================================================================================================
+DIAGNOSTIC: uses test labels. Never a method or a selection input.
+random impressions 1181865, items with any 7583, mean per item 155.9, uniform CTR 0.1758
+
+1. Levels (all 22661 evaluated users, nDCG@10)
+  LEAF-LGN (split-0 configuration)     0.4735
+  item oracle (LOO uniform rate)       0.5068   gap +33.31e-3
+  popularity (pre-cut clicks)          0.4199
+  random period: 17 days; impressions per day [25156, 52186, 44317, 41695, 42238, 41595, 40570, 49640, 62467, 61988, 85865, 109296, 107932, 96900, 102934, 103673, 113413]
+  time-local oracle (+-1 days, shrunk to the period rate) 0.4949
+  time-local oracle (+-3 days, shrunk to the period rate) 0.4998
+  oracle from the first 8 days only (all candidates)   0.4854
+  LEAF + 0.25 * z(oracle)              0.4914
+  LEAF + 0.5 * z(oracle)              0.5027
+  LEAF + 0.75 * z(oracle)              0.5106
+  LEAF + 1.0 * z(oracle)              0.5153
+  LEAF + 1.5 * z(oracle)              0.5194
+  LEAF + 2.0 * z(oracle)              0.5208
+  LEAF + 3.0 * z(oracle)              0.5206
+  -> G_all (LEAF + 2.0 z(oracle) minus LEAF) = +47.26e-3; oracle alone minus LEAF +33.31e-3
+
+2. Item-level Spearman with the uniform rate q (items with >= 50 random impressions: 7334)
+  split-half reliability of q: 0.775  (Spearman-Brown full-data ceiling 0.873)
+  leaf_item              +0.552
+  pre_clk                +0.431
+  pre_imp                +0.398
+  pre_users              +0.402
+  pre_lv                 +0.426
+  pre_ctr                +0.261
+  pre_tab1_ctr           +0.200
+  pre_last3_clk          +0.368
+  pre_userres            +0.333
+  post_clk               +0.405
+  post_imp               +0.363
+  post_ctr               +0.204
+  growth                 +0.010
+  author_id_oop_imp      +0.326
+  author_id_oop_ctr      +0.272
+  author_id_oop_lvr      +0.276
+  music_id_oop_ctr       +0.132
+  tag_oop_ctr            +0.167
+  duration               -0.077
+  aspect                 +0.100
+  music_type             +0.042
+  uniform rate, first 8 days vs later days: Spearman 0.729 (7225 items with >= 30 in both); same-size random-user halves: see reliability above
+  matched-size check (6795 items): early(user half A) vs early(user half B) 0.485; early(half B) vs late(half A) 0.591
+
+3. Attribution. item residual r = z(q) - 0.840 * LEAF item effect - -0.011; var(z q) explained by LEAF item effect: 0.318
+  full residual correction S_LEAF + a r(LOO): +53.85e-3 (a=1.5)  [reference G_all of z(oracle): +47.26e-3]
+  factor (bins)                 R2 of residual (cross-fit)   nDCG gain x1e-3   share of full residual gain
+  pre_clk                        +0.012                       +0.85            0.02
+  pre_imp                        +0.006                       +0.54            0.01
+  pre_ctr                        +0.001                       +0.35            0.01
+  pre_tab1_ctr                   +0.014                       +0.58            0.01
+  pre_last3_clk                  -0.005                       +0.02            0.00
+  pre_userres                    +0.019                       +3.26            0.06
+  post_clk [post-cut, leak]      -0.002                       +0.21            0.00
+  post_ctr [post-cut, leak]      +0.011                       +0.94            0.02
+  growth [post-cut, leak]        +0.013                       +0.58            0.01
+  author_id_oop_ctr              +0.026                       +0.85            0.02
+  author_id_oop_imp              +0.041                       +3.00            0.06
+  author_id_oop_lvr              +0.037                       +1.77            0.03
+  music_id_oop_ctr               +0.022                       +0.66            0.01
+  duration                       +0.006                       +0.35            0.01
+  aspect                         +0.010                       +0.59            0.01
+  upload_dt                      -0.001                       +0.10            0.00
+  upload_type                    +0.055                       +1.75            0.03
+  video_type                     -0.000                       +0.23            0.00
+  music_type                     +0.003                       +0.17            0.00
+  tag                            +0.137                       +9.33            0.17
+  all pre-cut item factors (GBM) +0.312                      +23.96            0.44
+  pre-cut + post-cut [leak] (GBM) +0.328                      +26.12            0.49
+
+  item groups (exact LOO residual correction applied only to the group's items; share of the full gain)
+  pre_imp            bin 0 [0, 13] (1517 items): +10.07e-3 share  0.19
+  pre_imp            bin 1 [13, 29] (1516 items):  +9.66e-3 share  0.18
+  pre_imp            bin 2 [29, 67] (1517 items): +10.92e-3 share  0.20
+  pre_imp            bin 3 [67, 179] (1516 items): +13.39e-3 share  0.25
+  pre_imp            bin 4 [179, 9110] (1517 items): +15.26e-3 share  0.28
+  pre_clk            bin 0 [0, 3] (1517 items): +10.02e-3 share  0.19
+  pre_clk            bin 1 [3, 9] (1516 items): +10.02e-3 share  0.19
+  pre_clk            bin 2 [9, 24] (1517 items): +11.55e-3 share  0.21
+  pre_clk            bin 3 [24, 74] (1516 items): +12.31e-3 share  0.23
+  pre_clk            bin 4 [74, 5218] (1517 items): +15.30e-3 share  0.28
+  author_id_oop_imp  bin 0 [0, 317] (1896 items): +11.63e-3 share  0.22
+  author_id_oop_imp  bin 1 [317, 801] (1896 items): +11.88e-3 share  0.22
+  author_id_oop_imp  bin 2 [802, 1966] (1895 items): +12.95e-3 share  0.24
+  author_id_oop_imp  bin 3 [1969, 1.217e+05] (1896 items): +23.02e-3 share  0.43
+  duration           bin 0 [5000, 3.32e+04] (1896 items): +14.42e-3 share  0.27
+  duration           bin 1 [3.325e+04, 8.117e+04] (1896 items): +14.96e-3 share  0.28
+  duration           bin 2 [8.117e+04, 1.453e+05] (1895 items): +18.15e-3 share  0.34
+  duration           bin 3 [1.453e+05, 1.178e+06] (1896 items): +10.36e-3 share  0.19
+  q                  bin 0 [0.01541, 0.1048] (1517 items): +11.75e-3 share  0.22
+  q                  bin 1 [0.1048, 0.1431] (1516 items):  +4.77e-3 share  0.09
+  q                  bin 2 [0.1431, 0.182] (1517 items):  +1.91e-3 share  0.04
+  q                  bin 3 [0.182, 0.2419] (1516 items):  +1.56e-3 share  0.03
+  q                  bin 4 [0.242, 0.6143] (1517 items): +44.88e-3 share  0.83
+
+  user groups (additive: share of G_all = LEAF + a z(oracle) minus LEAF; and oracle-alone minus LEAF)
+  pre-cut in-pool impressions  q0 [0, 9] users 4533: LEAF 0.4977, oracle 0.5248; share of G_all 0.16, share of (oracle - LEAF) 0.16
+  pre-cut in-pool impressions  q1 [9, 21] users 4532: LEAF 0.4802, oracle 0.5092; share of G_all 0.18, share of (oracle - LEAF) 0.17
+  pre-cut in-pool impressions  q2 [21, 39] users 4532: LEAF 0.4761, oracle 0.5056; share of G_all 0.20, share of (oracle - LEAF) 0.18
+  pre-cut in-pool impressions  q3 [39, 67] users 4532: LEAF 0.4690, oracle 0.5117; share of G_all 0.24, share of (oracle - LEAF) 0.26
+  pre-cut in-pool impressions  q4 [67, 809] users 4532: LEAF 0.4448, oracle 0.4829; share of G_all 0.22, share of (oracle - LEAF) 0.23
+  lifelong impressions         q0 [0, 1255] users 4533: LEAF 0.5236, oracle 0.5631; share of G_all 0.21, share of (oracle - LEAF) 0.24
+  lifelong impressions         q1 [1255, 2513] users 4532: LEAF 0.5053, oracle 0.5307; share of G_all 0.18, share of (oracle - LEAF) 0.15
+  lifelong impressions         q2 [2513, 4129] users 4532: LEAF 0.4831, oracle 0.5199; share of G_all 0.21, share of (oracle - LEAF) 0.22
+  lifelong impressions         q3 [4129, 7038] users 4532: LEAF 0.4554, oracle 0.4911; share of G_all 0.22, share of (oracle - LEAF) 0.21
+  lifelong impressions         q4 [7039, 81056] users 4532: LEAF 0.4002, oracle 0.4293; share of G_all 0.18, share of (oracle - LEAF) 0.17
+  candidates                   q0 [9, 13] users 4533: LEAF 0.6284, oracle 0.6495; share of G_all 0.13, share of (oracle - LEAF) 0.13
+  candidates                   q1 [13, 20] users 4532: LEAF 0.5298, oracle 0.5687; share of G_all 0.22, share of (oracle - LEAF) 0.23
+  candidates                   q2 [20, 32] users 4532: LEAF 0.4544, oracle 0.4903; share of G_all 0.22, share of (oracle - LEAF) 0.22
+  candidates                   q3 [32, 64] users 4532: LEAF 0.3811, oracle 0.4159; share of G_all 0.22, share of (oracle - LEAF) 0.21
+  candidates                   q4 [64, 1580] users 4532: LEAF 0.3739, oracle 0.4097; share of G_all 0.21, share of (oracle - LEAF) 0.21
+
+4. Test time: exact residual correction applied only to candidates by the day of their random impression
+  days  0- 3 after the cut (0.14 of candidates):  +6.48e-3 share  0.12
+  days  4- 7 after the cut (0.15 of candidates):  +6.49e-3 share  0.12
+  days  8-11 after the cut (0.27 of candidates): +16.33e-3 share  0.30
+  days 12-16 after the cut (0.44 of candidates): +27.46e-3 share  0.51
+item frame written to the scratch directory (v11_item_frame.csv)
