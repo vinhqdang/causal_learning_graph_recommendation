@@ -1,0 +1,55 @@
+Stage B / C (v11): DAX on the temporal all-user KuaiRand-27K setting, nDCG@10
+Gate summary: B1 PASS; B2 NOT EVALUABLE; C reported (no threshold)
+Inputs read: dax_ease.json, dax_lgn_post.json, dax_qp.json, leaf_lgn.json, learned_kuairand_t_base.json, learned_kuairand_t_qp.json
+Inputs missing or not used:
+  - missing: results/v11/dax_lgn_joint.json
+  - missing: results/v11/dax_lgn_joint_small.json
+  - missing: results/v11/dax_lightgcn.json
+  - missing: results/v11/dax_ablate.json
+  - LEAF-LGN base of dax_ablate.json is missing (gate B2 not evaluable)
+
+1. Methods: mean +- sd over the splits of nDCG@10, configurations searched, source file
+  method                       mean    +- sd  n_configs  file
+  LEAF-LGN+DAX               0.4854   0.0009       3840  dax_lgn_post.json
+  LEAF-LGN                   0.4736   0.0002         12  dax_lgn_post.json
+  LEAF-LGN(stored)           0.4728   0.0011        197  leaf_lgn.json
+  QP family                  0.4634   0.0031         20  learned_kuairand_t_qp.json
+  QP family+DAX              0.4733   0.0012       3200  dax_qp.json
+  QP family (retrained)      0.4652   0.0017         10  dax_qp.json
+  r-AdjNorm                  0.4620   0.0008          8  learned_kuairand_t_base.json
+  LightGCN                   0.4576   0.0031          4  learned_kuairand_t_base.json
+  EASE                       0.4507   0.0009         27  dax_ease.json
+  EASE+DAX                   0.4623   0.0010       8640  dax_ease.json
+  n_configs: posthoc runs count backbone trainings x DAX configurations x gammas; LEAF-LGN (stored) keeps the
+  count written by experiments/run_leaf.py, which is not comparable (it counts another unit).
+
+2. Gate B1 (post-hoc, joint selection): primary family of fixed size m = 5 (Holm over all five, both p values)
+   LEAF-LGN+DAX against each comparator; per-user paired difference x1e-3 nDCG@10 [95% half-width],
+   two-sided t p, Nadeau-Bengio p over split means
+  split sizes (test users per split): [15809, 15892, 15840, 15913, 15869]; pooled users 22612 (expected 22612 from results/v10/leaf_lgn.json)
+  LEAF-LGN+DAX - QP family                       +22.32 [ 1.83]  p=3.64e-125  p_Holm=1.45e-124  NB p=0.023  NB p_Holm=2.28e-02  (splits +19.8 +22.2 +21.8 +17.8 +28.0)
+  LEAF-LGN+DAX - QP family+DAX                   +12.04 [ 1.63]  p=3.96e-47  p_Holm=3.96e-47  NB p=0.006  NB p_Holm=1.67e-02  (splits +10.7 +12.9 +10.7 +11.8 +13.9)
+  LEAF-LGN+DAX - LEAF-LGN                        +11.96 [ 1.47]  p=6.55e-57  p_Holm=1.31e-56  NB p=0.001  NB p_Holm=5.48e-03  (splits +11.8 +12.4 +12.0 +10.2 +12.4)
+  LEAF-LGN+DAX - r-AdjNorm                       +23.79 [ 1.96]  p=2.43e-123  p_Holm=7.29e-123  NB p=0.000  NB p_Holm=1.95e-04  (splits +23.7 +23.2 +24.2 +22.2 +23.3)
+  LEAF-LGN+DAX - LightGCN                        +28.15 [ 1.86]  p=5.33e-190  p_Holm=2.67e-189  NB p=0.008  NB p_Holm=1.67e-02  (splits +25.1 +26.3 +30.5 +24.5 +32.6)
+
+3. Gate B1 decision and fair-baseline reading
+  B1 vs QP family: PASS  LEAF-LGN+DAX - QP family = +22.32e-3 (required >= 15e-3), t p_Holm 1.45e-124, NB p_Holm 0.023 (both required < 0.05)
+  fair baseline, LEAF-LGN+DAX vs QP family+DAX: +12.04e-3 [1.63], t p_Holm 3.96e-47, NB p_Holm 0.017; LEAF-LGN+DAX higher (both tests, alpha 0.05) (no pre-set margin)
+  configurations searched: LEAF-LGN+DAX n_configs = 3840, QP family+DAX n_configs = 3200
+  QP family+DAX searches only the QP configurations selected on QP alone (selection restricted; conservative for the method)
+  QP family + DAX - QP family: +10.28e-3 [1.37], NB p 0.105 (DESIGN expects about +6 to +9e-3 from the LEAF increment)
+
+4. Gate B2 (ablations, relative to the backbone of the same run): gains are paired differences of the arm
+   against LEAF-LGN (dax_ablate.json), x1e-3 nDCG@10 [95% half-width]
+  GATE B2: NOT EVALUABLE (dax_ablate.json is missing the full arm or the base)
+
+5. Stage C (robustness): reported, not a pass or fail (DESIGN.md Section 7 defines the stage without a threshold)
+   per setting: LEAF-LGN+DAX - QP family and LEAF-LGN+DAX - (QP family + DAX), x1e-3 nDCG@10
+  not run (no c_*.json present: KuaiRand-1K, concurrent protocol, long-view label, seeds 1-3)
+
+6. Checks and information (not gates)
+  info: LEAF-LGN (posthoc run) - LEAF-LGN (stored)    +0.73 [ 0.52]  p=5.38e-03  NB p=0.660  (splits +0.1 +0.0 +1.4 +0.2 +2.4)
+  QP family (retrained) - QP family (stored)      +1.70 [ 0.70]  p=1.89e-06  NB p=0.803  (splits -0.0 +2.2 +2.9 -3.8 +7.6)
+  EASE + DAX - EASE (E1 - E0)                    +11.98 [ 1.64]  p=2.27e-46  NB p=0.000  (splits +11.5 +11.5 +11.2 +11.8 +11.9)
+
