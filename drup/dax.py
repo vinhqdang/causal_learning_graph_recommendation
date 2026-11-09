@@ -21,6 +21,7 @@ Pieces:
   content_centre       Fay-Herriot style prior centre: ridge regression of logit alpha on content covariates
   item_content_codes   the content covariates of the pool items (tag, upload type, duration, author history, ...)
   fit_additive         MRP-style additive logistic model with tab effects (the fair additive arm, no detection)
+  dax_variant          the configuration of an ablation arm (no_tab, no_life_prior, no_tag_prior; None = full)
   within_code_perm / all_perm   negative controls of the item appeal (gate B2)
   masked_rowstd        per-row standardisation over the real candidates of a bucket
   DAXChannel           standardised item appeal with the interface of drup.leaf.LifelongTables
@@ -220,6 +221,22 @@ def fit_dax_dataset(d, cut=CUT_MS, content=None, life=None, strata=None, **kw):
     if kw.get("prior_s") is not None and strata is None:
         strata = user_strata(d["users_raw"])
     return fit_dax(log, m, n, tag, life_rate=life, content_codes=content, strata=strata, **kw)
+
+
+def dax_variant(cfg, ablation=None):
+    """Configuration of one DAX ablation arm (gate B2, DESIGN.md Section 6). ablation None is the switch off: the
+    configuration is returned unchanged, so the arm is the full DAX arm. Otherwise the named switch takes its off value:
+    no_tab (no examination factor kappa_t), no_life_prior (k_life = 0, no lifelong prior on theta_u), no_tag_prior
+    (alpha_i centred on the global mean, not on its tag)."""
+    if ablation is None:
+        return dict(cfg)
+    if ablation == "no_tab":
+        return dict(cfg, tab=False)
+    if ablation == "no_life_prior":
+        return dict(cfg, k_life=0.0)
+    if ablation == "no_tag_prior":
+        return dict(cfg, centre="global")
+    raise ValueError(f"unknown DAX ablation {ablation!r}")
 
 
 def fit_additive(log, n_users, n_items, tag_codes, lam_e=5.0, lam_b=1.0, lam_g=1.0, tab=True, iters=60):

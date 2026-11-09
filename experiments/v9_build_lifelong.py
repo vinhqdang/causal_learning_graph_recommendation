@@ -10,6 +10,8 @@ pool videos are kept (they are the only ones that can transfer to the test items
 never read by the aggregation.
 
 python3 experiments/v9_build_lifelong.py --archive data/raw/dl_kr27k/KuaiRand-27K.tar.gz --version 27k
+KuaiRand-1K with its own pool: --archive data/raw/dl_kr1k/KuaiRand-1K.tar.gz --version 1k
+    --pool_dir data/raw/KuaiRand-1K/data --pool_suffix 1k
 """
 import argparse
 import io
@@ -47,15 +49,20 @@ def main():
     ap.add_argument("--archive", required=True)
     ap.add_argument("--version", default="27k")
     ap.add_argument("--pool_dir", default="data/raw/KuaiRand-Pure/data")
+    ap.add_argument("--pool_suffix", default="pure", help="file suffix of the pool files in --pool_dir "
+                    "(pure, or 1k for KuaiRand-1K: the pool of the 1K random log, see drup/data2.py)")
     ap.add_argument("--out", default=None)
     ap.add_argument("--chunksize", type=int, default=4_000_000)
     ap.add_argument("--members", nargs="*", default=None, help="member names (skips the slow listing)")
     a = ap.parse_args()
     out = a.out or f"data/raw/lifelong_{a.version}.npz"
     t0 = time.time()
-    pool_feat = pd.read_csv(os.path.join(a.pool_dir, "video_features_basic_pure.csv"))
-    pool_ids = np.sort(pd.read_csv(os.path.join(a.pool_dir, "log_random_4_22_to_5_08_pure.csv"),
+    pool_feat = pd.read_csv(os.path.join(a.pool_dir, f"video_features_basic_{a.pool_suffix}.csv"))
+    pool_ids = np.sort(pd.read_csv(os.path.join(a.pool_dir, f"log_random_4_22_to_5_08_{a.pool_suffix}.csv"),
                                    usecols=["video_id"]).video_id.unique())
+    # the key vocabulary is the pool's: for Pure the feature file is the random pool itself (7583 videos, checked), for
+    # 1K the feature file covers all 4.4M videos of the archive and only the pool videos may define key values
+    pool_feat = pool_feat[pool_feat.video_id.isin(pool_ids)].reset_index(drop=True)
     for k in KEYS:
         pool_feat[k] = keystr(pool_feat[k], k)
     pool_vals = {k: pd.Index(pool_feat[k][pool_feat[k] != "<NA>"].unique()) for k in KEYS}

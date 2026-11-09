@@ -7,6 +7,8 @@ Inputs missing or not used:
   - missing: results/v11/dax_lightgcn.json
   - missing: results/v11/dax_ablate.json
   - LEAF-LGN base of dax_ablate.json is missing (gate B2 not evaluable)
+  - missing: c_1k_lgn.json, c_1k_base.json, c_1k_qp.json
+  - missing: c_seeds.json
 
 1. Methods: mean +- sd over the splits of nDCG@10, configurations searched, source file
   method                       mean    +- sd  n_configs  file
@@ -45,8 +47,12 @@ Inputs missing or not used:
   GATE B2: NOT EVALUABLE (dax_ablate.json is missing the full arm or the base)
 
 5. Stage C (robustness): reported, not a pass or fail (DESIGN.md Section 7 defines the stage without a threshold)
-   per setting: LEAF-LGN+DAX - QP family and LEAF-LGN+DAX - (QP family + DAX), x1e-3 nDCG@10
-  not run (no c_*.json present: KuaiRand-1K, concurrent protocol, long-view label, seeds 1-3)
+   per setting: LEAF-LGN+DAX - QP family and LEAF-LGN+DAX - (QP family + DAX), x1e-3 nDCG@10 per user
+   [95% half-width], two-sided t p, Nadeau-Bengio p over split means (5 splits each)
+  KuaiRand-27K (main run): vs QP family          +22.32 [ 1.83]  p=3.64e-125  NB p=0.023  (splits +19.8 +22.2 +21.8 +17.8 +28.0)
+  KuaiRand-27K (main run): vs QP family + DAX    +12.04 [ 1.63]  p=3.96e-47  NB p=0.006  (splits +10.7 +12.9 +10.7 +11.8 +13.9)
+  KuaiRand-1K: not run (c_1k_lgn.json, c_1k_base.json, c_1k_qp.json: see the notes)
+  seed replicates: not run (c_seeds.json missing)
 
 6. Checks and information (not gates)
   info: LEAF-LGN (posthoc run) - LEAF-LGN (stored)    +0.73 [ 0.52]  p=5.38e-03  NB p=0.660  (splits +0.1 +0.0 +1.4 +0.2 +2.4)
