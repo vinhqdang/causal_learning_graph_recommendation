@@ -126,6 +126,7 @@ class Posthoc:
         self.mask = [torch.arange(bk["cand"].shape[1])[None, :] < torch.as_tensor(lengths[bk["k"]])[:, None]
                      for bk in layout.buckets]
         self.base_name, self.arms = base_name, arms
+        self.zcache = {}      # (arm, configuration index) -> row-standardised DAX channel per bucket (epoch-free)
         self.sels = {base_name: BucketSelector(layout, splits, (10,), KEY, row_ids)}
         for name, _ in arms:
             self.sels[name] = BucketSelector(layout, splits, (10,), KEY, row_ids)
@@ -140,8 +141,11 @@ class Posthoc:
         base = [masked_rowstd(b, mk) for b, mk in zip(base_b, self.mask)] if self.base_std else base_b
         take(self.sels[self.base_name].add(base, dict(cfg, epoch=ep), active=active, new_config=(ep == 0)))
         for name, cfgs in self.arms:
-            for dcfg, ch in cfgs:
-                Z = [masked_rowstd(ch.compact(r, c), mk) for r, c, mk in zip(self.rows, self.cand, self.mask)]
+            for j, (dcfg, ch) in enumerate(cfgs):
+                if (name, j) not in self.zcache:       # the channel does not depend on the epoch: computed once
+                    self.zcache[(name, j)] = [masked_rowstd(ch.compact(r, c), mk)
+                                              for r, c, mk in zip(self.rows, self.cand, self.mask)]
+                Z = self.zcache[(name, j)]
                 for g in GAMMAS:
                     S = [b + g * z for b, z in zip(base, Z)]
                     take(self.sels[name].add(S, dict(cfg, epoch=ep, dax=dcfg, gamma=g), active=active,
@@ -369,6 +373,8 @@ def main():
         ap.error("--mode joint is for leaf_lgn")
     if a.backbone != "leaf_lgn" and a.ablate:
         ap.error("--ablate is for leaf_lgn")
+    if a.mode == "joint" and a.ablate:
+        ap.error("--ablate is for --mode posthoc (the ablation arms are post hoc)")
     torch.set_num_threads(a.threads)
     path = a.out + ".partial.json"
     os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)

@@ -1,8 +1,8 @@
 """DAX: EM of the detection x attractiveness model, leakage of the pre-cut fit, negative controls, and the probe
 reproduction (paper/v7/DESIGN.md, Sections 5, 6 and 7 gate B2).
 
-The probe reproduction (last test) needs the split-0 LEAF-LGN scores of the probes in $V11_SCORES (default
-/tmp/v11_scores/lgn_s0.pt) and the KuaiRand temporal dataset; it is skipped when they are absent.
+The probe reproduction (last test) reads the split-0 LEAF-LGN scores stored in results/v11_probes/lgn_s0.pt (written by
+experiments/v11_leaf_scores.py) and needs the KuaiRand temporal dataset (data/raw).
 """
 
 import json
@@ -11,7 +11,6 @@ import sys
 
 import numpy as np
 import pandas as pd
-import pytest
 import torch
 from scipy import stats
 
@@ -25,12 +24,13 @@ from drup.metrics import evaluate  # noqa: E402
 T0 = CUT_MS
 
 
-def click_world(seed=0, m=1500, n=300, n_tags=8, per_user=60, tabs=3, item_sd=1.0):
-    """Clicks of a click model: P(click) = theta_u * kappa_t * alpha_i with tab factors kappa = (0.2, 1, 0.5)."""
+def click_world(seed=0, m=1500, n=300, n_tags=8, per_user=60, tabs=3, item_sd=1.0, theta_range=None):
+    """Clicks of a click model: P(click) = theta_u * kappa_t * alpha_i with tab factors kappa = (0.2, 1, 0.5).
+    theta ~ Beta(2, 3), or Uniform(theta_range) when given."""
     rng = np.random.default_rng(seed)
     tag = np.arange(n) % n_tags
     alpha = 1 / (1 + np.exp(-(rng.normal(0, 0.5, n_tags)[tag] + rng.normal(0, item_sd, n) - 0.5)))
-    theta = rng.beta(2, 3, m)
+    theta = rng.beta(2, 3, m) if theta_range is None else rng.uniform(*theta_range, m)
     kappa = np.array([0.2, 1.0, 0.5])[:tabs]
     u = np.repeat(np.arange(m), per_user)
     i = np.concatenate([rng.choice(n, per_user, replace=False) for _ in range(m)])
@@ -69,6 +69,22 @@ def test_em_recovers_attractiveness_and_examination_ranking():
     # examination is estimated from 60 impressions per user: the ranking is noise-limited (about 0.79 here)
     assert rho_t > 0.75, rho_t
     # the tab factors are recovered up to the reference (tab 1 = 1)
+    assert np.allclose(ka.numpy(), [0.2, 1.0, 0.5], atol=0.08), ka
+
+
+def test_em_recovers_examination_up_to_the_global_scale():
+    """theta is recovered within 0.05 once the one global scale is removed. The clicks depend on theta and alpha only
+    through their product, so (c theta, alpha / c) has the same likelihood for every c: the absolute level of theta
+    is not identified (the rankings are). The scale is removed here with the true mean of theta (a test-only
+    oracle). With 8000 impressions per user and theta in (0.1, 0.4) the largest error is about 0.03 (mean absolute
+    error about 0.01). Higher theta makes the raw fit exceed the bound 1 on the scale ridge and clip, so the range is
+    kept below it."""
+    log, _, theta, tag, m, n = click_world(7, m=40, n=10000, per_user=8000, theta_range=(0.1, 0.4))
+    _, th, ka, _ = fit_dax(log, m, n, tag, prior=5.0, k_life=0.0, tab=True, iters=60)
+    th = th.numpy().astype(float)
+    th = th * (theta.mean() / th.mean())
+    err = np.abs(th - theta)
+    assert err.max() < 0.05, (err.max(), err.mean())
     assert np.allclose(ka.numpy(), [0.2, 1.0, 0.5], atol=0.08), ka
 
 
@@ -179,12 +195,9 @@ def test_channel_interface_and_joint_module_shapes():
     assert torch.allclose(z.mean(1), torch.zeros(m), atol=1e-5)
 
 
-def _load_split0_scores():
-    path = os.path.join(os.environ.get("V11_SCORES", "/tmp/v11_scores"), "lgn_s0.pt")
-    return torch.load(path, weights_only=False) if os.path.exists(path) else None
+SPLIT0_SCORES = os.path.join(ROOT, "results", "v11_probes", "lgn_s0.pt")
 
 
-@pytest.mark.skipif(_load_split0_scores() is None, reason="needs the split-0 LEAF-LGN scores of the probes")
 def test_post_hoc_dax_reproduces_the_probe_split0():
     """Post-hoc DAX added to the stored split-0 LEAF-LGN scores gives the probe's number for split 0 (tolerance 1e-4):
     LEAF-LGN + DAX full grid, chosen configuration prior 80, tag centre, k_life 100, tab on, stratum cells 80, gamma 0.5
@@ -202,7 +215,7 @@ def test_post_hoc_dax_reproduces_the_probe_split0():
     ctest = [(k, np.arange(len(it)), rel) for k, (_, it, rel) in enumerate(test)]
     splits = [protocol_split(ctest, s, 0.3) for s in range(5)]
     row_ids = np.array([u for u, _, _ in test])
-    base = _load_split0_scores()
+    base = torch.load(SPLIT0_SCORES, weights_only=False)
     mask = [torch.arange(bk["cand"].shape[1])[None, :] < torch.as_tensor(lengths[bk["k"]])[:, None]
             for bk in layout.buckets]
     kw = {k: cfg[k] for k in ("prior", "centre", "k_life", "tab", "prior_s")}
