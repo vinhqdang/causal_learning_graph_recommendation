@@ -1,11 +1,10 @@
 Stage B / C (v11): DAX on the temporal all-user KuaiRand-27K setting, nDCG@10
 Gate summary: B1 PASS; B2 PASS; C reported (no threshold)
-Inputs read: c_1k_base.json, dax_ablate.json, dax_ease.json, dax_lgn_post.json, dax_qp.json, leaf_lgn.json, learned_kuairand_t_base.json, learned_kuairand_t_qp.json
+Inputs read: c_1k_base.json, c_1k_lgn.json, c_1k_qp.json, dax_ablate.json, dax_ease.json, dax_lgn_post.json, dax_qp.json, leaf_lgn.json, learned_kuairand_t_base.json, learned_kuairand_t_qp.json
 Inputs missing or not used:
   - missing: results/v11/dax_lgn_joint.json
   - missing: results/v11/dax_lgn_joint_small.json
   - missing: results/v11/dax_lightgcn.json
-  - missing: c_1k_lgn.json, c_1k_qp.json
   - missing: c_seeds.json
 
 1. Methods: mean +- sd over the splits of nDCG@10, configurations searched, source file
@@ -75,7 +74,10 @@ Inputs missing or not used:
    [95% half-width], two-sided t p, Nadeau-Bengio p over split means (5 splits each)
   KuaiRand-27K (main run): vs QP family          +22.32 [ 1.83]  p=3.64e-125  NB p=0.023  (splits +19.8 +22.2 +21.8 +17.8 +28.0)
   KuaiRand-27K (main run): vs QP family + DAX    +12.04 [ 1.63]  p=3.96e-47  NB p=0.006  (splits +10.7 +12.9 +10.7 +11.8 +13.9)
-  KuaiRand-1K: not run (c_1k_lgn.json, c_1k_base.json, c_1k_qp.json: see the notes)
+  KuaiRand-1K: 842 users with a test list, pooled over the 5 splits (each split: 30% validation, 70% test)
+  KuaiRand-1K: vs QP family                      +37.58 [11.10]  p=5.37e-11  NB p=0.011  (splits +36.7 +25.7 +35.6 +37.2 +36.6)
+  KuaiRand-1K: vs QP family + DAX                +25.82 [ 9.66]  p=1.96e-07  NB p=0.007  (splits +21.3 +20.3 +23.7 +23.1 +27.8)
+  KuaiRand-1K: QP family + DAX - QP family       +11.76 [ 8.54]  p=7.04e-03  NB p=0.160  (splits +15.4 +5.4 +11.9 +14.1 +8.8)
   seed replicates: not run (c_seeds.json missing)
 
 6. Checks and information (not gates)
