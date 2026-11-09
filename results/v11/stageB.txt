@@ -1,13 +1,11 @@
 Stage B / C (v11): DAX on the temporal all-user KuaiRand-27K setting, nDCG@10
-Gate summary: B1 PASS; B2 NOT EVALUABLE; C reported (no threshold)
-Inputs read: dax_ease.json, dax_lgn_post.json, dax_qp.json, leaf_lgn.json, learned_kuairand_t_base.json, learned_kuairand_t_qp.json
+Gate summary: B1 PASS; B2 PASS; C reported (no threshold)
+Inputs read: c_1k_base.json, dax_ablate.json, dax_ease.json, dax_lgn_post.json, dax_qp.json, leaf_lgn.json, learned_kuairand_t_base.json, learned_kuairand_t_qp.json
 Inputs missing or not used:
   - missing: results/v11/dax_lgn_joint.json
   - missing: results/v11/dax_lgn_joint_small.json
   - missing: results/v11/dax_lightgcn.json
-  - missing: results/v11/dax_ablate.json
-  - LEAF-LGN base of dax_ablate.json is missing (gate B2 not evaluable)
-  - missing: c_1k_lgn.json, c_1k_base.json, c_1k_qp.json
+  - missing: c_1k_lgn.json, c_1k_qp.json
   - missing: c_seeds.json
 
 1. Methods: mean +- sd over the splits of nDCG@10, configurations searched, source file
@@ -44,7 +42,33 @@ Inputs missing or not used:
 
 4. Gate B2 (ablations, relative to the backbone of the same run): gains are paired differences of the arm
    against LEAF-LGN (dax_ablate.json), x1e-3 nDCG@10 [95% half-width]
-  GATE B2: NOT EVALUABLE (dax_ablate.json is missing the full arm or the base)
+  grid size per arm (DAX configurations = n_configs / (trainings x gammas x permutation seeds)):
+    full             n_configs    320  DAX configurations  32.0 (run_dax grid 32)
+    shuffle_tags     n_configs    960  DAX configurations  32.0 (run_dax grid 32)
+    shuffle_items    n_configs    960  DAX configurations  32.0 (run_dax grid 32)
+    additive         n_configs    320  DAX configurations  32.0 (run_dax grid 32)
+    no_tab           n_configs    160  DAX configurations  16.0 (run_dax grid 16)
+    no_life_prior    n_configs    160  DAX configurations  16.0 (run_dax grid 16)
+    no_tag_prior     n_configs    160  DAX configurations  16.0 (run_dax grid 16)
+    grid balance: DAX arm 32 configurations, additive arm 32 (ratio 1.00x)
+  shuffle_items gain, permutation seed 0          +5.66 [ 1.14]  p=1.88e-22  NB p=0.010  (splits +5.2 +5.9 +5.5 +4.6 +6.6)
+  shuffle_items gain, permutation seed 1          +6.84 [ 1.13]  p=1.50e-32  NB p=0.002  (splits +6.3 +6.8 +7.0 +6.1 +7.6)
+  shuffle_items gain, permutation seed 2          +6.35 [ 1.24]  p=1.14e-23  NB p=0.001  (splits +6.0 +7.0 +5.8 +6.3 +5.9)
+  shuffle_tags gain, permutation seed 0           -0.44 [ 0.50]  p=7.90e-02  NB p=0.510  (splits -0.1 -0.3 -0.8 -0.1 -0.8)
+  shuffle_tags gain, permutation seed 1           -0.16 [ 0.53]  p=5.55e-01  NB p=0.986  (splits +0.3 -0.1 -0.2 +0.6 -0.6)
+  shuffle_tags gain, permutation seed 2           -0.20 [ 0.51]  p=4.54e-01  NB p=0.775  (splits +0.0 +0.3 -0.6 -0.0 -0.9)
+  full DAX gain (LEAF-LGN+DAX - LEAF-LGN)        +15.10 [ 1.42]  p=1.26e-95  NB p=0.009  (splits +12.4 +15.6 +16.6 +12.8 +16.2)
+  shuffle_tags gain                               -0.27 [ 0.36]  p=1.48e-01  NB p=0.754  (splits +0.1 -0.0 -0.5 +0.2 -0.8)
+  shuffle_items gain                              +6.28 [ 1.10]  p=6.17e-29  NB p=0.001  (splits +5.8 +6.6 +6.1 +5.7 +6.7)
+  no_tab gain                                    +13.59 [ 1.43]  p=2.46e-77  NB p=0.012  (splits +10.6 +14.4 +14.8 +11.9 +14.5)
+  no_life_prior gain                             +13.31 [ 1.43]  p=1.98e-73  NB p=0.007  (splits +11.1 +14.4 +14.7 +11.8 +13.1)
+  no_tag_prior gain                              +11.68 [ 1.22]  p=2.13e-77  NB p=0.002  (splits +10.2 +11.9 +12.3 +10.6 +12.1)
+  additive gain (MRP-style, tab effects)          +9.01 [ 1.25]  p=3.07e-45  NB p=0.024  (splits +7.2 +10.1 +10.7 +7.4 +8.7)
+  checks:
+    shuffle_tags removes >= 90% of the DAX gain          PASS           removed 101.8%
+    shuffle_items (within tag) drops the gain by >= 30%  PASS           drop 58.4%
+    additive stays >= 4e-3 below DAX                     PASS           DAX - additive +6.09e-3
+  GATE B2: PASS
 
 5. Stage C (robustness): reported, not a pass or fail (DESIGN.md Section 7 defines the stage without a threshold)
    per setting: LEAF-LGN+DAX - QP family and LEAF-LGN+DAX - (QP family + DAX), x1e-3 nDCG@10 per user
