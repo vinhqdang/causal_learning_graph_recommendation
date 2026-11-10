@@ -93,11 +93,17 @@ DATASETS = {
 }
 
 
-def post_grid(small=False):
+PRIOR_DEFAULT = (80.0, 160.0)      # prior strength grid of the main run (--prior_grid extends it)
+KLIFE_DEFAULT = (0.0, 100.0)       # k_life grid of the main run (--klife_grid extends it)
+
+
+def post_grid(small=False, priors=PRIOR_DEFAULT, klifes=KLIFE_DEFAULT):
+    """Post-hoc DAX grid. The defaults are the 32 configurations of the main run (prior {80, 160} x centre {tag,
+    content} x k_life {0, 100} x tab x stratum cells {off, 80}); priors and klifes extend the two grids (v12)."""
     if small:
         return [dict(prior=80.0, centre="tag", k_life=100.0, tab=True, prior_s=None)]
-    return [dict(prior=p, centre=c, k_life=k, tab=t, prior_s=ps)
-            for p, c, k, t, ps in itertools.product((80.0, 160.0), ("tag", "content"), (0.0, 100.0), (False, True),
+    return [dict(prior=float(p), centre=c, k_life=float(k), tab=t, prior_s=ps)
+            for p, c, k, t, ps in itertools.product(priors, ("tag", "content"), klifes, (False, True),
                                                     (None, 80.0))]
 
 
@@ -318,6 +324,28 @@ def qp_jobs(a):
     return jobs
 
 
+def qp_select_jobs(a):
+    """QP-family trainings restricted to the configurations chosen per split in --select_from (a results file of this
+    script, method "QP family+DAX"): one job per distinct (method, configuration), with the splits that chose it and
+    the window e_s - W .. e_s + W of each of them (W = --epoch_window >= 0). Same trainings as qp_jobs, fewer epochs
+    read and no DAX search outside the window."""
+    chosen = json.load(open(a.select_from))["results"]["QP family+DAX"]["chosen"]
+    S = len(chosen)
+    groups = {}
+    for s, c in enumerate(chosen):
+        cfg = {k: v for k, v in c.items() if k not in ("epoch", "dax", "gamma")}
+        meth = cfg.pop("method")
+        groups.setdefault(json.dumps([meth, cfg], sort_keys=True), (meth, cfg, []))[2].append((s, int(c["epoch"])))
+    jobs = []
+    for meth, cfg, items in groups.values():
+        W = a.epoch_window
+        win = dict(splits=[s for s, _ in items], lo={s: max(0, e - W) for s, e in items},
+                   hi={s: min(a.epochs - 1, e + W) for s, e in items})
+        jobs.append((meth, cfg, win))
+    assert len({s for _, _, w in jobs for s in w["splits"]}) == S, "a split chose no configuration"
+    return jobs
+
+
 def patience_update(best, bad, done, vals, patience):
     for s, v in enumerate(vals):
         if v is None or done[s]:
@@ -423,26 +451,40 @@ def run_ease(a, d, post, state, save, layout, pop, n):
 
 def run_learned_posthoc(a, d, post, state, save, layout, jobs):
     """LightGCN or the QP family, each (method, configuration) of jobs retrained with the unchanged training code
-    (experiments/learned_ctx.train_cfg, seed --train_seed); selection over epoch x DAX x gamma per split."""
+    (experiments/learned_ctx.train_cfg, seed --train_seed); selection over epoch x DAX x gamma per split. A job is
+    (method, configuration) or (method, configuration, window) with window = {splits, lo, hi} (qp_select_jobs): only
+    the listed splits read the epochs lo..hi of that training, and the training has no patience then."""
     ctx = learned_context(d, threads=a.threads)
     ja = {"epochs": a.epochs, "batch": a.batch, "patience": a.patience, "threads": a.threads, "n_neg": 64,
           "adv_lr": 1e-4, "adv_interval": 5, "adv_min_steps": 100, "pairs_per_epoch": None}
     print(f"{len(jobs)} (method, configuration) trainings", flush=True)
     S = post.n_splits
     k_idx = [torch.as_tensor(bk["k"]) for bk in layout.buckets]
-    for meth, cfg in jobs:
+    for job in jobs:
+        meth, cfg = job[0], job[1]
+        win = job[2] if len(job) > 2 else None
         key = f"{meth}|{json.dumps(cfg, sort_keys=True)}"
         if key in state["done"]:
             continue
         t0 = time.time()
-        best, bad, done = [-1.0] * S, [0] * S, [False] * S
+        pat = a.patience if win is None else 10 ** 9
+        ja_job = dict(ja, patience=pat)
+        best, bad = [-1.0] * S, [0] * S
+        done = [False] * S if win is None else [s not in win["splits"] for s in range(S)]
 
-        def record(Sd, ep, cfg=cfg, meth=meth, best=best, bad=bad, done=done):
+        def active_at(ep, done=done, win=win):
+            if win is None:
+                return [not x for x in done]
+            return [(not done[s]) and win["lo"].get(s, 0) <= ep <= win["hi"].get(s, INF) for s in range(S)]
+
+        def record(Sd, ep, cfg=cfg, meth=meth, best=best, bad=bad, done=done, win=win, pat=pat):
             base_b = [Sd[kk[:, None], bk["cand"]] for kk, bk in zip(k_idx, layout.buckets)]
-            vals = post.add_epoch(base_b, dict(method=meth, **cfg), ep, active=[not x for x in done])
-            patience_update(best, bad, done, vals, a.patience)
-            return all(done)
-        LC.train_cfg(ctx, meth, cfg, a.train_seed, ja, record)
+            vals = post.add_epoch(base_b, dict(method=meth, **cfg), ep, active=active_at(ep))
+            patience_update(best, bad, done, vals, pat)
+            if win is None:
+                return all(done)
+            return all(done[s] or ep >= win["hi"][s] for s in win["splits"])
+        LC.train_cfg(ctx, meth, cfg, a.train_seed, ja_job, record)
         print(f"  {key} [{time.time() - t0:.0f}s]", flush=True)
         state["done"].append(key)
         save()
@@ -487,7 +529,13 @@ def main():
     ap.add_argument("--gammas", type=float, nargs="+", default=list(GAMMAS))
     ap.add_argument("--no_zcache", action="store_true",
                     help="recompute every arm's DAX channel at every epoch instead of caching it")
-    ap.add_argument("--select_from", default=None, help="LEAF-LGN+DAX chosen configurations to restrict to (leaf_lgn)")
+    ap.add_argument("--prior_grid", type=float, nargs="+", default=list(PRIOR_DEFAULT),
+                    help="posthoc full grid: prior strengths (default 80 160; v12 extension e.g. 10 20 40 80 160)")
+    ap.add_argument("--klife_grid", type=float, nargs="+", default=list(KLIFE_DEFAULT),
+                    help="posthoc full grid: k_life values (default 0 100; v12 extension e.g. 0 100 200 400 1000)")
+    ap.add_argument("--select_from", default=None,
+                    help="chosen configurations to restrict to: LEAF-LGN+DAX of a results file (leaf_lgn), or "
+                         "QP family+DAX of a results file (qp_posthoc)")
     ap.add_argument("--epoch_window", type=int, default=-1,
                     help="with --select_from: epochs read by each split around its chosen epoch (-1: all epochs)")
     ap.add_argument("--qp_source", default="stored", choices=["stored", "grid"])
@@ -513,8 +561,12 @@ def main():
         a.mode = "posthoc"
     if a.backbone in ("ease", "qp_posthoc", "lightgcn") and a.mode == "joint":
         ap.error("--mode joint is for leaf_lgn")
-    if a.backbone != "leaf_lgn" and (a.ablate or a.select_from):
-        ap.error("--ablate and --select_from are for leaf_lgn")
+    if a.backbone not in ("leaf_lgn", "qp_posthoc") and (a.ablate or a.select_from):
+        ap.error("--ablate is for leaf_lgn; --select_from is for leaf_lgn and qp_posthoc")
+    if a.backbone == "qp_posthoc" and a.ablate:
+        ap.error("--ablate is for leaf_lgn")
+    if a.backbone == "qp_posthoc" and a.select_from and a.epoch_window < 0:
+        ap.error("qp_posthoc with --select_from needs --epoch_window >= 0")
     if a.mode == "joint" and (a.ablate or a.select_from):
         ap.error("--ablate and --select_from are for --mode posthoc (the ablation arms are post hoc)")
     if a.epoch_window >= 0 and a.select_from is None:
@@ -556,7 +608,7 @@ def main():
     sig = json.loads(json.dumps({k: v for k, v in vars(a).items() if k not in SIG_EXCLUDE}))
     state = {"done": []}
     if a.mode == "posthoc":
-        grid = post_grid(a.dax_grid == "small")
+        grid = post_grid(a.dax_grid == "small", tuple(a.prior_grid), tuple(a.klife_grid))
         content = item_content_codes(d["item_feat"], d["items_raw"], video=ds["video"], path=ds["lifelong"])
         arms = dax_arms(d, dax_name, grid, a.ablate, life, strata, content, tags, a.perm_seeds)
         if a.backbone == "ease":
@@ -601,7 +653,7 @@ def main():
     elif a.backbone == "ease":
         run_ease(a, d, post, state, save, layout, pop, n)
     else:
-        run_learned_posthoc(a, d, post, state, save, layout, qp_jobs(a))
+        run_learned_posthoc(a, d, post, state, save, layout, qp_select_jobs(a) if a.select_from else qp_jobs(a))
 
     res = {}
     for nm in names:

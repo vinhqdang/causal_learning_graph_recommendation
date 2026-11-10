@@ -1,0 +1,567 @@
+"""Final analysis of DAX with the lifelong-aware deep baselines and the wider DAX grid (v12), extending
+experiments/final_v11.py (whose gate B1 / B2 / C definitions are unchanged and reprinted here).
+
+Additions (paper/v8/OUTLINE.md limitation 8: no lifelong-aware deep baseline was run):
+  - DIN, DIN + DAX, SIM, SIM + DAX (experiments/run_din.py, results/v12/din_<d>.json, sim_<d>.json) in the method table;
+  - section 3b: the Holm family of the main table (LEAF-LGN + DAX against every comparator present: QP family, QP family
+    + DAX, LEAF-LGN, r-AdjNorm, LightGCN, DIN, DIN + DAX, SIM, SIM + DAX), per-user t p and Nadeau-Bengio p, Holm over the
+    family (both tests). The gate B1 family of size 5 is kept as pre-declared and printed unchanged;
+  - section 5b: the extended DAX grid (prior strength {10, 20, 40, 80, 160}, k_life {0, 100, 200, 400, 1000}) against the
+    default grid under the same reduced gammas and epoch window (daxref_*) and the stored full run (dax_lgn_post, dax_qp);
+  - the seed replicates (results/v11/c_seeds.json) are reported in section 5 as before.
+
+Output: results/v12/final12.txt (also printed). Environment variable V12_OUT overrides results/v12/.
+"""
+import json
+import os
+import sys
+
+import numpy as np
+from scipy import stats
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(ROOT)
+sys.path.insert(0, os.path.join(ROOT, "experiments"))
+from significance import nadeau_bengio  # importing significance.py runs nothing
+
+V10 = "results/v10/"
+V11 = os.environ.get("V11_OUT", "results/v11/").rstrip("/") + "/"
+KEY = "ndcg@10"
+FRAC_VAL = 0.3
+N_GAMMAS = 10         # gammas of experiments/run_dax.py (GAMMAS)
+B1_MARGIN = 15.0      # x1e-3 nDCG@10 per user
+B1_ALPHA = 0.05
+B1_M = 5              # fixed size of the Holm family of gate B1
+B2_SHUFFLE_TAGS = 0.90
+B2_SHUFFLE_ITEMS = 0.30
+B2_ADDITIVE = 4.0     # x1e-3
+# DAX configurations per arm of experiments/run_dax.py: full 2x2x2x2x2 = 32; no_tab / no_life_prior / no_tag_prior
+# are the full grid with one switch off (16 distinct configurations); additive is matched to 32 (additive_grid);
+# the shuffles run 32 configurations once per permutation seed
+GRID_SIZE = {"full": 32, "no_tab": 16, "no_life_prior": 16, "no_tag_prior": 16, "additive": 32,
+             "shuffle_items": 32, "shuffle_tags": 32}
+V12 = os.environ.get("V12_OUT", "results/v12/").rstrip("/") + "/"
+OUT = V12 + "final12.txt"
+DIN_27K = V12 + "din_27k.json"       # DIN and DIN + DAX (run_din.py --arch din)
+SIM_27K = V12 + "sim_27k.json"        # SIM and SIM + DAX (run_din.py --arch sim)
+DIN_1K = V12 + "din_1k.json"
+SIM_1K = V12 + "sim_1k.json"
+DAXREF_LGN = V12 + "daxref_lgn.json"    # LEAF-LGN + DAX, default prior / k_life grid, reduced gammas and window
+DAXWIDE_LGN = V12 + "daxwide_lgn.json"  # LEAF-LGN + DAX, extended prior / k_life grid, same gammas and window
+DAXREF_QP = V12 + "daxref_qp.json"
+DAXWIDE_QP = V12 + "daxwide_qp.json"
+
+STORED_LGN = V10 + "leaf_lgn.json"
+STORED_BASE = V10 + "learned_kuairand_t_base.json"        # LightGCN, r-AdjNorm
+STORED_QP = V10 + "learned_kuairand_t_qp.json"            # DR-BPR-LGN-1 / -p2 / -p
+POST = V11 + "dax_lgn_post.json"
+JOINT_SMALL = V11 + "dax_lgn_joint_small.json"
+JOINT = V11 + "dax_lgn_joint.json"
+QP_DAX = V11 + "dax_qp.json"
+LGN_GCN = V11 + "dax_lightgcn.json"
+ABLATE = V11 + "dax_ablate.json"
+EASE = V11 + "dax_ease.json"
+C1K_LGN = V11 + "c_1k_lgn.json"        # KuaiRand-1K: LEAF-LGN+DAX and LEAF-LGN (run_dax, leaf_lgn posthoc)
+C1K_BASE = V11 + "c_1k_base.json"      # KuaiRand-1K: LightGCN, r-AdjNorm and the three QP methods (run_learned_t)
+C1K_QP = V11 + "c_1k_qp.json"          # KuaiRand-1K: QP family + DAX (run_dax, qp_posthoc, --qp_source grid)
+C_SEEDS = V11 + "c_seeds.json"         # seed replicates 0-3 (scripts v11_merge_seeds.py): LEAF-LGN(+DAX), QP family(+DAX)
+QP_NAMES = ("DR-BPR-LGN-1", "DR-BPR-LGN-p2", "DR-BPR-LGN-p")
+
+body, notes = [], []
+_cache = {}
+
+
+def out(s=""):
+    body.append(s)
+
+
+def note(s):
+    if s not in notes:
+        notes.append(s)
+
+
+def results_of(path):
+    if path not in _cache:
+        _cache[path] = json.load(open(path))["results"]
+    return _cache[path]
+
+
+def method_from(path, name, label=None):
+    """A method of one result file (None with a note when the file or the method is missing)."""
+    if not os.path.exists(path):
+        note(f"missing: {path}")
+        return None
+    res = results_of(path)
+    if name not in res:
+        note(f"{path} has no method {name}")
+        return None
+    r = res[name]
+    return {"name": label or name, "per_user": r["per_user"], "per_split": r["per_split"], "chosen": r["chosen"],
+            "val_best": r["val_best"], "n_configs": int(r["n_configs"]), "file": os.path.basename(path)}
+
+
+def combine(recs, name):
+    """Per split, the job with the largest stored validation value (for stored methods with several jobs)."""
+    pu, ps, ch, vb = [], [], [], []
+    for s in range(len(recs[0]["per_split"])):
+        j = int(np.argmax([r["val_best"][s] for r in recs]))
+        pu.append(recs[j]["per_user"][s])
+        ps.append(recs[j]["per_split"][s])
+        ch.append(recs[j]["chosen"][s])
+        vb.append(recs[j]["val_best"][s])
+    return {"name": name, "per_user": pu, "per_split": ps, "chosen": ch, "val_best": vb,
+            "n_configs": int(sum(r["n_configs"] for r in recs)), "file": "+".join(sorted({r["file"] for r in recs}))}
+
+
+def qp_stored():
+    if not os.path.exists(STORED_QP):
+        note(f"missing: {STORED_QP}")
+        return None
+    recs = [method_from(STORED_QP, m, m) for m in ("DR-BPR-LGN-1", "DR-BPR-LGN-p2", "DR-BPR-LGN-p")]
+    recs = [r for r in recs if r is not None]
+    return combine(recs, "QP family") if recs else None
+
+
+def peru(per_user):
+    acc = {}
+    for q in per_user:
+        for u, v in q.items():
+            acc.setdefault(u, []).append(v)
+    return {u: float(np.mean(v)) for u, v in acc.items()}
+
+
+def pooled_users(m):
+    return set().union(*[set(q) for q in m["per_user"]])
+
+
+def check_users(a, b, expect):
+    """Every split s: the two methods have the same test users in per_user[s]; the pooled n equals `expect`
+    (the pooled user count of the stored v10 LEAF-LGN, the same splits and loader). Returns the split sizes, n."""
+    pa, pb = a["per_user"], b["per_user"]
+    assert len(pa) == len(pb), f"{a['name']} vs {b['name']}: {len(pa)} and {len(pb)} splits"
+    for s, (x, y) in enumerate(zip(pa, pb)):
+        assert set(x) == set(y), (f"{a['name']} vs {b['name']}: user sets differ in split {s} "
+                                  f"({len(x)} vs {len(y)} users)")
+    n = len(set().union(*[set(q) for q in pa]))
+    if expect is not None:
+        assert n == expect, f"{a['name']} vs {b['name']}: pooled n = {n}, expected {expect}"
+    return [len(q) for q in pa], n
+
+
+def compare(a, b):
+    """Paired per-user difference a - b (users intersected), x1e-3: mean, 95% t half-width, two-sided t p."""
+    x, y = peru(a["per_user"]), peru(b["per_user"])
+    us = sorted(set(x) & set(y))
+    d = np.array([x[u] - y[u] for u in us])
+    n = len(d)
+    if n < 2 or np.abs(d).max() < 1e-9:
+        return {"n": n, "diff": 0.0, "half": 0.0, "p": 1.0, "identical": True}
+    half = 1000 * stats.t.ppf(0.975, n - 1) * d.std(ddof=1) / np.sqrt(n)
+    return {"n": n, "diff": 1000 * float(d.mean()), "half": float(half),
+            "p": float(stats.ttest_1samp(d, 0.0).pvalue), "identical": False}
+
+
+def pair(a, b, expect=None):
+    """compare plus the Nadeau-Bengio split-level p over split means (identical rankings: 1). The user sets are
+    asserted equal split by split (check_users); the split sizes and the pooled n are returned."""
+    sizes, n_pool = check_users(a, b, expect)
+    r = compare(a, b)
+    if r["identical"]:
+        r["nb"] = 1.0
+    else:
+        r["nb"] = float(nadeau_bengio({"per_split": a["per_split"]}, {"per_split": b["per_split"]}, KEY, FRAC_VAL))
+    r["split_diffs"] = [1000 * (p[KEY] - q[KEY]) for p, q in zip(a["per_split"], b["per_split"])]
+    r["split_sizes"], r["pooled"] = sizes, n_pool
+    assert r["n"] == n_pool, (a["name"], b["name"], r["n"], n_pool)
+    return r
+
+
+def holm(ps):
+    ps = np.asarray(ps, dtype=float)
+    if len(ps) == 0:
+        return ps
+    o = np.argsort(ps)
+    m = len(ps)
+    adj = np.empty(m)
+    run = 0.0
+    for k, i in enumerate(o):
+        run = max(run, (m - k) * ps[i])
+        adj[i] = min(1.0, run)
+    return adj
+
+
+def mean_sd(m):
+    v = np.array([d[KEY] for d in m["per_split"]])
+    return float(v.mean()), float(v.std(ddof=1)) if len(v) > 1 else 0.0
+
+
+def line(label, r, pH=None, nbH=None):
+    if r["identical"]:
+        return f"  {label:<44s} identical rankings in every split (diff 0, p = 1)"
+    ph = "" if pH is None else f"  p_Holm={pH:.2e}"
+    nh = "" if nbH is None else f"  NB p_Holm={nbH:.2e}"
+    sd = " ".join(f"{x:+.1f}" for x in r["split_diffs"])
+    return (f"  {label:<44s} {r['diff']:+8.2f} [{r['half']:5.2f}]  p={r['p']:.2e}{ph}  NB p={r['nb']:.3f}{nh}"
+            f"  (splits {sd})")
+
+
+def reading(r, ph, nh):
+    """Descriptive reading of a comparison (no pre-set margin): significant at B1_ALPHA on both Holm-adjusted tests."""
+    if ph is None:
+        return "p_Holm not computed (family incomplete): no reading"
+    if ph < B1_ALPHA and nh < B1_ALPHA:
+        return ("LEAF-LGN+DAX higher" if r["diff"] > 0 else "QP family+DAX higher") + " (both tests, alpha 0.05)"
+    return "no significant difference at alpha 0.05 (both tests)"
+
+
+# ---------------------------------------------------------------------------------------------
+# Methods
+# ---------------------------------------------------------------------------------------------
+M = {}
+M["LEAF-LGN+DAX"] = method_from(POST, "LEAF-LGN+DAX")
+M["LEAF-LGN"] = method_from(POST, "LEAF-LGN", "LEAF-LGN (posthoc run)")
+M["LEAF-LGN(stored)"] = method_from(STORED_LGN, "LEAF-LGN", "LEAF-LGN (stored)")
+M["LEAF-LGN+DAX (joint)"] = method_from(JOINT, "LEAF-LGN+DAX (joint)")
+if M["LEAF-LGN+DAX (joint)"] is None:
+    M["LEAF-LGN+DAX (joint)"] = method_from(JOINT_SMALL, "LEAF-LGN+DAX (joint)")
+M["QP family"] = qp_stored()
+M["QP family+DAX"] = method_from(QP_DAX, "QP family+DAX", "QP family + DAX")
+M["QP family (retrained)"] = method_from(QP_DAX, "QP family", "QP family (retrained)")
+M["r-AdjNorm"] = method_from(STORED_BASE, "r-AdjNorm")
+M["LightGCN"] = method_from(STORED_BASE, "LightGCN")
+M["LightGCN+DAX"] = method_from(LGN_GCN, "LightGCN+DAX", "LightGCN + DAX")
+M["EASE"] = method_from(EASE, "EASE")
+M["EASE+DAX"] = method_from(EASE, "EASE+DAX", "EASE + DAX")
+M["DIN"] = method_from(DIN_27K, "DIN")
+M["DIN+DAX"] = method_from(DIN_27K, "DIN+DAX", "DIN + DAX")
+M["SIM"] = method_from(SIM_27K, "SIM")
+M["SIM+DAX"] = method_from(SIM_27K, "SIM+DAX", "SIM + DAX")
+M = {k: v for k, v in M.items() if v is not None}
+
+# expected pooled user count: the stored v10 LEAF-LGN (same splits, same loader); the other stored files must agree
+EXPECTED_N = None
+if M.get("LEAF-LGN(stored)") is not None:
+    EXPECTED_N = len(pooled_users(M["LEAF-LGN(stored)"]))
+    for k in ("r-AdjNorm", "LightGCN", "QP family"):
+        if k in M and len(pooled_users(M[k])) != EXPECTED_N:
+            note(f"stored {k} pools a different user count than the stored LEAF-LGN")
+else:
+    note("stored LEAF-LGN (results/v10/leaf_lgn.json) is missing: the pooled user count is not checked")
+
+out("1. Methods: mean +- sd over the splits of nDCG@10, configurations searched, source file")
+out(f"  {'method':<24s} {'mean':>8s} {'+- sd':>8s} {'n_configs':>10s}  file")
+for k, m in M.items():
+    mu, sd = mean_sd(m)
+    out(f"  {k:<24s} {mu:8.4f} {sd:8.4f} {m['n_configs']:10d}  {m['file']}")
+out("  n_configs: posthoc runs count backbone trainings x DAX configurations x gammas; LEAF-LGN (stored) keeps the")
+out("  count written by experiments/run_leaf.py, which is not comparable (it counts another unit).")
+out()
+
+# ---------------------------------------------------------------------------------------------
+# Gate B1
+# ---------------------------------------------------------------------------------------------
+B1_FAMILY = (("QP family", "QP family"), ("QP family+DAX", "QP family+DAX"), ("LEAF-LGN", "LEAF-LGN"),
+             ("r-AdjNorm", "r-AdjNorm"), ("LightGCN", "LightGCN"))
+out("2. Gate B1 (post-hoc, joint selection): primary family of fixed size m = 5 (Holm over all five, both p values)")
+out("   LEAF-LGN+DAX against each comparator; per-user paired difference x1e-3 nDCG@10 [95% half-width],")
+out("   two-sided t p, Nadeau-Bengio p over split means")
+if "LEAF-LGN+DAX" in M:
+    sz = M["LEAF-LGN+DAX"]
+    out(f"  split sizes (test users per split): {[len(q) for q in sz['per_user']]}; pooled users "
+        f"{len(pooled_users(sz))} (expected {EXPECTED_N} from results/v10/leaf_lgn.json)")
+missing_b1 = [lab for lab, key in B1_FAMILY if key not in M]
+if "LEAF-LGN+DAX" not in M:
+    missing_b1.insert(0, "LEAF-LGN+DAX (dax_lgn_post.json)")
+family = []
+if "LEAF-LGN+DAX" in M:
+    for label, key in B1_FAMILY:
+        if key in M:
+            family.append((label, pair(M["LEAF-LGN+DAX"], M[key], EXPECTED_N)))
+b1_evaluable = not missing_b1 and len(family) == B1_M
+if b1_evaluable:
+    pH = holm([r["p"] for _, r in family])
+    nbH = holm([r["nb"] for _, r in family])
+else:
+    pH = nbH = [None] * len(family)
+    if missing_b1:
+        note("gate B1 family incomplete: " + ", ".join(missing_b1))
+for (comp, r), ph, nh in zip(family, pH, nbH):
+    out(line(f"LEAF-LGN+DAX - {comp}", r, ph, nh))
+if not b1_evaluable:
+    out(f"  p_Holm not computed: the family needs {B1_M} members, missing: {', '.join(missing_b1) or 'none'}")
+out()
+
+out("3. Gate B1 decision and fair-baseline reading")
+b1 = None
+fam = dict(zip([c for c, _ in family], zip([r for _, r in family], pH, nbH)))
+if not b1_evaluable:
+    out("  GATE B1: NOT EVALUABLE (family of size 5 incomplete: " + ", ".join(missing_b1) + ")")
+else:
+    r, ph, nh = fam["QP family"]
+    passed = r["diff"] >= B1_MARGIN and ph < B1_ALPHA and nh < B1_ALPHA
+    b1 = passed
+    out(f"  B1 vs QP family: {'PASS' if passed else 'FAIL'}  LEAF-LGN+DAX - QP family = {r['diff']:+.2f}e-3 "
+        f"(required >= {B1_MARGIN:.0f}e-3), t p_Holm {ph:.2e}, NB p_Holm {nh:.3f} (both required < {B1_ALPHA})")
+    r2, ph2, nh2 = fam["QP family+DAX"]
+    out(f"  fair baseline, LEAF-LGN+DAX vs QP family+DAX: {r2['diff']:+.2f}e-3 [{r2['half']:.2f}], "
+        f"t p_Holm {ph2:.2e}, NB p_Holm {nh2:.3f}; {reading(r2, ph2, nh2)} (no pre-set margin)")
+    out(f"  configurations searched: LEAF-LGN+DAX n_configs = {M['LEAF-LGN+DAX']['n_configs']}, "
+        f"QP family+DAX n_configs = {M['QP family+DAX']['n_configs'] if 'QP family+DAX' in M else 'missing'}")
+    out("  QP family+DAX searches only the QP configurations selected on QP alone (selection restricted; "
+        "conservative for the method)")
+if "QP family+DAX" in M and "QP family" in M:
+    rq = pair(M["QP family+DAX"], M["QP family"], EXPECTED_N)
+    out(f"  QP family + DAX - QP family: {rq['diff']:+.2f}e-3 [{rq['half']:.2f}], NB p {rq['nb']:.3f} "
+        "(DESIGN expects about +6 to +9e-3 from the LEAF increment)")
+out()
+
+# ---------------------------------------------------------------------------------------------
+# Section 3b: Holm family of the main table (v12)
+# ---------------------------------------------------------------------------------------------
+FAMILY_V12 = ("QP family", "QP family+DAX", "LEAF-LGN", "r-AdjNorm", "LightGCN", "DIN", "DIN+DAX", "SIM", "SIM+DAX")
+out("3b. Main-table family (v12): LEAF-LGN + DAX against every comparator of the table, Holm over the family")
+out("   per-user paired difference x1e-3 nDCG@10 [95% half-width], two-sided t p, Nadeau-Bengio p over split means")
+fam12 = []
+if "LEAF-LGN+DAX" in M:
+    for key in FAMILY_V12:
+        if key in M:
+            fam12.append((key, pair(M["LEAF-LGN+DAX"], M[key], EXPECTED_N)))
+    absent = [k for k in FAMILY_V12 if k not in M]
+    if absent:
+        note("main-table family: not run (absent): " + ", ".join(absent))
+    if fam12:
+        ph12 = holm([r["p"] for _, r in fam12])
+        nh12 = holm([r["nb"] for _, r in fam12])
+        for (key, r), ph, nh in zip(fam12, ph12, nh12):
+            out(line(f"LEAF-LGN+DAX - {key}", r, ph, nh))
+        out(f"  family size {len(fam12)} (Holm over the comparators present); reading per comparator: "
+            "both Holm-adjusted tests below 0.05 = significant")
+        for (key, r), ph, nh in zip(fam12, ph12, nh12):
+            out(f"    {key:<14s} {reading(r, ph, nh)}")
+else:
+    out("  LEAF-LGN+DAX missing: no family")
+out()
+
+# ---------------------------------------------------------------------------------------------
+# Gate B2
+# ---------------------------------------------------------------------------------------------
+out("4. Gate B2 (ablations, relative to the backbone of the same run): gains are paired differences of the arm")
+out("   against LEAF-LGN (dax_ablate.json), x1e-3 nDCG@10 [95% half-width]")
+abl = {}
+for ab in ("full", "shuffle_tags", "shuffle_items", "additive", "no_tab", "no_life_prior", "no_tag_prior"):
+    name = "LEAF-LGN+DAX" if ab == "full" else f"LEAF-LGN+DAX[{ab}]"
+    m = method_from(ABLATE, name, name)
+    if m is not None:
+        abl[ab] = m
+base_abl = method_from(ABLATE, "LEAF-LGN", "LEAF-LGN (ablation run)")
+if base_abl is None:
+    note("LEAF-LGN base of dax_ablate.json is missing (gate B2 not evaluable)")
+if abl and base_abl is not None:
+    out("  grid size per arm (DAX configurations = n_configs / (trainings x gammas x permutation seeds)):")
+    ntr = base_abl["n_configs"]
+    run_args = json.load(open(ABLATE))["args"]
+    n_gam = len(run_args.get("gammas", [])) or N_GAMMAS
+    n_perm = len(run_args.get("perm_seeds", [0]))
+    for ab, m in abl.items():
+        k_perm = n_perm if ab in ("shuffle_items", "shuffle_tags") else 1
+        cfgs = m["n_configs"] / (ntr * n_gam * k_perm)
+        out(f"    {ab:<16s} n_configs {m['n_configs']:6d}  DAX configurations {cfgs:5.1f} "
+            f"(run_dax grid {GRID_SIZE.get(ab, '?')})")
+    if "additive" in abl and "full" in abl:
+        ca = abl["full"]["n_configs"] / abl["additive"]["n_configs"]
+        out(f"    grid balance: DAX arm {GRID_SIZE['full']} configurations, additive arm {GRID_SIZE['additive']} "
+            f"(ratio {ca:.2f}x)")
+    for ab in ("shuffle_items", "shuffle_tags"):
+        for pseed in run_args.get("perm_seeds", [0]):
+            if f"LEAF-LGN+DAX[{ab}|p{pseed}]" in results_of(ABLATE):
+                pm = method_from(ABLATE, f"LEAF-LGN+DAX[{ab}|p{pseed}]", f"{ab} seed {pseed}")
+                out(line(f"{ab} gain, permutation seed {pseed}", pair(pm, base_abl, EXPECTED_N)))
+if "full" not in abl or base_abl is None:
+    out("  GATE B2: NOT EVALUABLE (dax_ablate.json is missing the full arm or the base)")
+    b2 = None
+else:
+    gain_full = pair(abl["full"], base_abl, EXPECTED_N)
+    out(line("full DAX gain (LEAF-LGN+DAX - LEAF-LGN)", gain_full))
+    gains = {}
+    for ab in ("shuffle_tags", "shuffle_items", "no_tab", "no_life_prior", "no_tag_prior"):
+        if ab in abl:
+            gains[ab] = pair(abl[ab], base_abl, EXPECTED_N)
+            out(line(f"{ab} gain", gains[ab]))
+    if "additive" in abl:
+        out(line("additive gain (MRP-style, tab effects)", pair(abl["additive"], base_abl, EXPECTED_N)))
+    g0 = gain_full["diff"]
+    checks = []
+    if "shuffle_tags" in gains and g0 > 0:
+        removed = 1.0 - gains["shuffle_tags"]["diff"] / g0
+        checks.append(("shuffle_tags removes >= 90% of the DAX gain", removed >= B2_SHUFFLE_TAGS,
+                       f"removed {100 * removed:.1f}%"))
+    elif "shuffle_tags" in gains:
+        checks.append(("shuffle_tags removes >= 90% of the DAX gain", False, "full DAX gain not positive"))
+    else:
+        checks.append(("shuffle_tags removes >= 90% of the DAX gain", None, "not evaluable"))
+    if "shuffle_items" in gains and g0 > 0:
+        drop = 1.0 - gains["shuffle_items"]["diff"] / g0
+        checks.append(("shuffle_items (within tag) drops the gain by >= 30%", drop >= B2_SHUFFLE_ITEMS,
+                       f"drop {100 * drop:.1f}%"))
+    elif "shuffle_items" in gains:
+        checks.append(("shuffle_items (within tag) drops the gain by >= 30%", False, "full DAX gain not positive"))
+    else:
+        checks.append(("shuffle_items (within tag) drops the gain by >= 30%", None, "not evaluable"))
+    if "additive" in abl:
+        below = pair(abl["full"], abl["additive"], EXPECTED_N)["diff"]
+        checks.append(("additive stays >= 4e-3 below DAX", below >= B2_ADDITIVE, f"DAX - additive {below:+.2f}e-3"))
+    else:
+        checks.append(("additive stays >= 4e-3 below DAX", None, "not evaluable"))
+    out("  checks:")
+    for label, ok, txt in checks:
+        status = "NOT EVALUABLE" if ok is None else ("PASS" if ok else "FAIL")
+        out(f"    {label:<52s} {status:<14s} {txt}")
+    if all(c[1] is not None for c in checks):
+        b2 = all(c[1] for c in checks)
+    elif any(c[1] is False for c in checks):
+        b2 = False
+    else:
+        b2 = None
+    out(f"  GATE B2: {'NOT EVALUABLE' if b2 is None else ('PASS' if b2 else 'FAIL')}")
+out()
+
+# ---------------------------------------------------------------------------------------------
+# Stage C (robustness; no numeric threshold in DESIGN.md)
+# ---------------------------------------------------------------------------------------------
+def c1k_methods():
+    """KuaiRand-1K: LEAF-LGN+DAX (c_1k_lgn.json), the QP family (the three QP methods of c_1k_base.json combined per split,
+    as the 27K QP family) and QP family + DAX (c_1k_qp.json). None with a note when a file is missing."""
+    missing = [f for f in (C1K_LGN, C1K_BASE, C1K_QP) if not os.path.exists(f)]
+    if missing:
+        note("missing: " + ", ".join(os.path.basename(f) for f in missing))
+        return None
+    lg = method_from(C1K_LGN, "LEAF-LGN+DAX", "LEAF-LGN+DAX")
+    qd = method_from(C1K_QP, "QP family+DAX", "QP family+DAX")
+    recs = [method_from(C1K_BASE, m, m) for m in QP_NAMES]
+    recs = [r for r in recs if r is not None]
+    if lg is None or qd is None or len(recs) != len(QP_NAMES):
+        note("KuaiRand-1K files are incomplete (LEAF-LGN+DAX, QP family+DAX or a QP method is missing)")
+        return None
+    return lg, combine(recs, "QP family"), qd
+
+
+def entry(r, label, file):
+    """A stored result entry (run_dax / run_learned format) as a method record."""
+    return {"name": label, "per_user": r["per_user"], "per_split": r["per_split"], "chosen": r["chosen"],
+            "val_best": r["val_best"], "n_configs": int(r["n_configs"]), "file": file}
+
+
+out("5. Stage C (robustness): reported, not a pass or fail (DESIGN.md Section 7 defines the stage without a threshold)")
+out("   per setting: LEAF-LGN+DAX - QP family and LEAF-LGN+DAX - (QP family + DAX), x1e-3 nDCG@10 per user")
+out("   [95% half-width], two-sided t p, Nadeau-Bengio p over split means (5 splits each)")
+if all(k in M for k in ("LEAF-LGN+DAX", "QP family", "QP family+DAX")):
+    out(line("KuaiRand-27K (main run): vs QP family", pair(M["LEAF-LGN+DAX"], M["QP family"], EXPECTED_N)))
+    out(line("KuaiRand-27K (main run): vs QP family + DAX", pair(M["LEAF-LGN+DAX"], M["QP family+DAX"], EXPECTED_N)))
+c1k = c1k_methods()
+if c1k is not None:
+    lg, qp, qd = c1k
+    n1k = len(pooled_users(lg))
+    out(f"  KuaiRand-1K: {n1k} users with a test list, pooled over the 5 splits (each split: 30% validation, 70% test)")
+    out(line("KuaiRand-1K: vs QP family", pair(lg, qp, n1k)))
+    out(line("KuaiRand-1K: vs QP family + DAX", pair(lg, qd, n1k)))
+    out(line("KuaiRand-1K: QP family + DAX - QP family", pair(qd, qp, n1k)))
+else:
+    out("  KuaiRand-1K: not run (c_1k_lgn.json, c_1k_base.json, c_1k_qp.json: see the notes)")
+if not os.path.exists(C_SEEDS):
+    note(f"missing: {os.path.basename(C_SEEDS)}")
+    out("  seed replicates: not run (c_seeds.json missing)")
+else:
+    seeds = json.load(open(C_SEEDS))["seeds"]
+    per_seed, lv, qv = [], [], []
+    out("  seed replicates (train seed 0 = main run; DAX and gamma re-selected per split on validation):")
+    for sd in sorted(seeds, key=int):
+        r = seeds[sd]
+        if not all(k in r for k in ("LEAF-LGN+DAX", "QP family+DAX", "QP family")):
+            note(f"c_seeds.json seed {sd} is incomplete")
+            continue
+        lg = entry(r["LEAF-LGN+DAX"], f"seed {sd} LEAF-LGN+DAX", "c_seeds.json")
+        qd = entry(r["QP family+DAX"], f"seed {sd} QP family+DAX", "c_seeds.json")
+        qp = entry(r["QP family"], f"seed {sd} QP family", "c_seeds.json")
+        p_qd, p_qp = pair(lg, qd), pair(lg, qp)
+        out(line(f"seed {sd}: LEAF-LGN+DAX - QP family + DAX", p_qd))
+        out(line(f"seed {sd}: LEAF-LGN+DAX - QP family", p_qp))
+        per_seed.append((p_qd["diff"], p_qp["diff"]))
+        lv.append(mean_sd(lg)[0])
+        qv.append(mean_sd(qd)[0])
+    if len(per_seed) > 1:
+        a1 = np.array([x[0] for x in per_seed])
+        a2 = np.array([x[1] for x in per_seed])
+        out(f"  spread over {len(per_seed)} seeds: LEAF-LGN+DAX - QP family + DAX {a1.mean():+.2f} +- {a1.std(ddof=1):.2f}; "
+            f"LEAF-LGN+DAX - QP family {a2.mean():+.2f} +- {a2.std(ddof=1):.2f} (x1e-3)")
+        out(f"  method means over splits and seeds: LEAF-LGN+DAX {np.mean(lv):.4f} +- {np.std(lv, ddof=1):.4f}, "
+            f"QP family + DAX {np.mean(qv):.4f} +- {np.std(qv, ddof=1):.4f}")
+out()
+
+# ---------------------------------------------------------------------------------------------
+# Section 5b: extended DAX grid (v12)
+# ---------------------------------------------------------------------------------------------
+out("5b. Extended DAX grid (v12): prior strength {10, 20, 40, 80, 160} x k_life {0, 100, 200, 400, 1000}")
+out("   against the default grid (prior {80, 160}, k_life {0, 100}) under the same gammas and epoch window")
+out("   (daxref_*); the stored full runs (dax_lgn_post.json, dax_qp.json: 10 gammas, all epochs) for reference")
+for lab, full_key, ref_f, wide_f, base_f, base_key in (
+        ("LEAF-LGN + DAX", "LEAF-LGN+DAX", DAXREF_LGN, DAXWIDE_LGN, POST, "LEAF-LGN+DAX"),
+        ("QP family + DAX", "QP family+DAX", DAXREF_QP, DAXWIDE_QP, QP_DAX, "QP family+DAX")):
+    ref = method_from(ref_f, full_key, f"{lab} (default grid)")
+    wide = method_from(wide_f, full_key, f"{lab} (extended grid)")
+    if ref is None or wide is None:
+        out(f"  {lab}: not run (daxref / daxwide file missing or incomplete)")
+        continue
+    full = M.get(full_key)
+    out(f"  {lab}: default grid {mean_sd(ref)[0]:.4f} +- {mean_sd(ref)[1]:.4f} ({ref['n_configs']} configurations); "
+        f"extended grid {mean_sd(wide)[0]:.4f} +- {mean_sd(wide)[1]:.4f} ({wide['n_configs']} configurations)"
+        + ("" if full is None else f"; stored full run {mean_sd(full)[0]:.4f} (10 gammas, all epochs)"))
+    out(line(f"{lab}: extended - default grid (same gammas)", pair(wide, ref, EXPECTED_N)))
+    if full is not None:
+        out(line(f"{lab}: extended grid - stored full run", pair(wide, full, EXPECTED_N)))
+        out(line(f"{lab}: default grid (same gammas) - stored full run", pair(ref, full, EXPECTED_N)))
+    cnt = {}
+    for c in wide["chosen"]:
+        dx = c.get("dax", {})
+        key = (dx.get("prior"), dx.get("k_life"))
+        cnt[key] = cnt.get(key, 0) + 1
+    out(f"    chosen (prior, k_life) over the 5 splits, extended grid: "
+        + ", ".join(f"({p:g}, {k:g}) x{n}" for (p, k), n in sorted(cnt.items(), key=lambda x: str(x[0]))
+                    if p is not None))
+out()
+
+# ---------------------------------------------------------------------------------------------
+# Reproduction checks and information (not gates)
+# ---------------------------------------------------------------------------------------------
+out("6. Checks and information (not gates)")
+if "LEAF-LGN" in M and "LEAF-LGN(stored)" in M:
+    out(line("info: LEAF-LGN (posthoc run) - LEAF-LGN (stored)", pair(M["LEAF-LGN"], M["LEAF-LGN(stored)"], EXPECTED_N)))
+if "QP family (retrained)" in M and "QP family" in M:
+    out(line("QP family (retrained) - QP family (stored)", pair(M["QP family (retrained)"], M["QP family"], EXPECTED_N)))
+if "LEAF-LGN+DAX (joint)" in M and "LEAF-LGN+DAX" in M:
+    out(line("LEAF-LGN+DAX (joint) - LEAF-LGN+DAX (posthoc)",
+             pair(M["LEAF-LGN+DAX (joint)"], M["LEAF-LGN+DAX"], EXPECTED_N)))
+    out("  joint variant (DESIGN Section 5.1, main instantiation): reported beside the post-hoc gate, not in its family")
+if "EASE+DAX" in M and "EASE" in M:
+    out(line("EASE + DAX - EASE (E1 - E0)", pair(M["EASE+DAX"], M["EASE"], EXPECTED_N)))
+if "LightGCN+DAX" in M and "LightGCN" in M:
+    out(line("LightGCN + DAX - LightGCN (retrained)", pair(M["LightGCN+DAX"], M["LightGCN"], EXPECTED_N)))
+out()
+
+header = ["Final analysis (v12): DAX, lifelong-aware deep baselines, extended grid; KuaiRand-27K unless stated, nDCG@10",
+          "Gate summary: B1 " + ("PASS" if b1 else "FAIL" if b1 is not None else "NOT EVALUABLE")
+          + "; B2 " + ("NOT EVALUABLE" if b2 is None else ("PASS" if b2 else "FAIL"))
+          + "; C reported (no threshold)",
+          "Inputs read: " + ", ".join(sorted(os.path.basename(p) for p in
+                                             [STORED_LGN, STORED_BASE, STORED_QP, POST, JOINT, JOINT_SMALL, QP_DAX,
+                                              LGN_GCN, ABLATE, EASE, C1K_LGN, C1K_BASE, C1K_QP, C_SEEDS,
+                                              DIN_27K, SIM_27K, DIN_1K, SIM_1K, DAXREF_LGN, DAXWIDE_LGN,
+                                              DAXREF_QP, DAXWIDE_QP]
+                                             if os.path.exists(p))),
+          "Inputs missing or not used:"]
+header += [f"  - {n}" for n in notes] if notes else ["  (none)"]
+header.append("")
+text = "\n".join(header + body) + "\n"
+os.makedirs(os.path.dirname(OUT), exist_ok=True)
+with open(OUT, "w") as f:
+    f.write(text)
+print(text)
