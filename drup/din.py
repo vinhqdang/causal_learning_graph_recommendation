@@ -107,7 +107,7 @@ class DIN(nn.Module):
         B, C = cand.shape
         L, d = tok.shape[1], self.d
         cc = self.cand_codes[cand]                                            # (B, C, 3)
-        ie = self.item(cand) if self.use_id else torch.zeros(B, C, d)         # (B, C, d); zero without ID embeddings
+        ie = self.item(cand) if self.use_id else torch.zeros(B, C, d, device=cand.device)  # zero without ID embeddings
         x = torch.cat([ie, self.tag(cc[..., 0]), self.author(cc[..., 1]), self.music(cc[..., 2])], -1)
         q = self.query(x)                                                     # (B, C, d)
         h = self.tag(tok[..., 0]) + self.author(tok[..., 1]) + self.music(tok[..., 2]) + self.sig(tok[..., 3])
@@ -130,25 +130,29 @@ class DIN(nn.Module):
         s = s.masked_fill(~ms, -1e9)
         w = torch.softmax(s, -1) * ms.float()                                 # all-zero when nothing matches
         interest = (w[..., None] * hs).sum(2)                                 # (B, C, d)
-        e_u = (self.user(rows) if self.use_id else torch.zeros(B, d))[:, None, :].expand(B, C, d)
+        e_u = (self.user(rows) if self.use_id else torch.zeros(B, d, device=cand.device))[:, None, :].expand(B, C, d)
         out = self.head(torch.cat([interest, q, e_u], -1)).squeeze(-1)
         return out + (e_u * ie).sum(-1)
 
 
 @torch.no_grad()
-def score_rows(model, rows, cand, tok, valid, chunk=16):
-    """(U, C) scores of the candidate matrix cand (U, C) of the users rows (U,), chunked over users."""
+def score_rows(model, rows, cand, tok, valid, chunk=16, device="cpu"):
+    """(U, C) scores of the candidate matrix cand (U, C) of the users rows (U,), chunked over users. tok and valid
+    must be on device; the scores are returned on the CPU (the evaluation runs there)."""
     out = torch.empty(cand.shape, dtype=torch.float32)
     for r0 in range(0, len(rows), chunk):
         sl = slice(r0, r0 + chunk)
-        out[sl] = model.score(rows[sl], cand[sl], tok[rows[sl]], valid[rows[sl]]).float()
+        r = rows[sl].to(device)
+        out[sl] = model.score(r, cand[sl].to(device), tok[r], valid[r]).float().cpu()
     return out
 
 
-def fit_bpr(model, X, tok, valid, lr, wd, epochs, batch, on_epoch, seed=0, log=None):
+def fit_bpr(model, X, tok, valid, lr, wd, epochs, batch, on_epoch, seed=0, log=None, device="cpu"):
     """BPR on the clicked pairs X (bool (m, n), the pre-cut in-pool clicks): one uniform negative per positive outside
     X (one resample if it falls in X). Sparse embeddings use SparseAdam, the MLPs Adam. on_epoch(model, ep) is called
-    after every epoch (model in eval mode) and returns True to stop. Returns the number of epochs run."""
+    after every epoch (model in eval mode) and returns True to stop. Returns the number of epochs run.
+    The model, tok and valid are on device; the sampling (batches, negatives) runs on the CPU generator whatever the
+    device, and only the batch indices are moved to it."""
     g = torch.Generator().manual_seed(seed)
     torch.manual_seed(seed)
     pu, pi = torch.nonzero(X, as_tuple=True)
@@ -168,9 +172,10 @@ def fit_bpr(model, X, tok, valid, lr, wd, epochs, batch, on_epoch, seed=0, log=N
             j = torch.randint(0, n, (len(u),), generator=g)
             j = torch.where(X[u, j], torch.randint(0, n, (len(u),), generator=g), j)
             cand = torch.stack([i, j], 1)
-            s = model.score(u, cand, tok[u], valid[u])
+            ud, cd = u.to(device), cand.to(device)
+            s = model.score(ud, cd, tok[ud], valid[ud])
             loss = -F.logsigmoid(s[:, 0] - s[:, 1]).mean()
-            reg = wd * (model.user(u).pow(2).sum() + model.item(cand).pow(2).sum()) / len(u) if model.use_id else 0.0
+            reg = wd * (model.user(ud).pow(2).sum() + model.item(cd).pow(2).sum()) / len(u) if model.use_id else 0.0
             opt_s.zero_grad()
             opt_d.zero_grad()
             (loss + reg).backward()

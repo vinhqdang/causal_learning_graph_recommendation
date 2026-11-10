@@ -37,6 +37,13 @@ class MF(torch.nn.Module):
         out = Ue[rows] @ Ve.T + self.bu.weight[rows] + self.bi.weight.T + self.b0
         return out + self.pbeta * self.prior[rows] if self.pbeta else out
 
+    def to_device(self, device):
+        """Moves the module and the fixed prior (a plain attribute, not a buffer) to device. Returns self."""
+        self.to(device)
+        if isinstance(self.prior, torch.Tensor):
+            self.prior = self.prior.to(device)
+        return self
+
 
 class LightGCN(MF):
     """LightGCN over a (possibly weighted) user-item graph of positive edges.
@@ -52,6 +59,12 @@ class LightGCN(MF):
         v_iu = w * di[edges_i].pow(-r) * du[edges_u].pow(-(1 - r))     # user -> item message
         idx = torch.stack([torch.cat([edges_u, edges_i + m]), torch.cat([edges_i + m, edges_u])])
         self.A = torch.sparse_coo_tensor(idx, torch.cat([v_ui, v_iu]), (m + n, m + n)).coalesce()
+
+    def to_device(self, device):
+        """Moves the module, its fixed prior and the sparse adjacency A (a plain attribute) to device. Returns self."""
+        super().to_device(device)
+        self.A = self.A.to(device)
+        return self
 
     def embeddings(self):
         E = torch.cat([self.U.weight, self.V.weight])
@@ -291,7 +304,8 @@ def _elu1(x):
 def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
           patience=5, pairs_per_epoch=None, seed=0, item_pop=None, gamma=0.1, log=None,
           cl_weight=0.1, aux_weight=1e-3, tau=0.2, fn=0.0, ipsw=0, n_neg=32, clip_w=5.0, fn_w=None, qmode="dr",
-          adv_lr=1e-4, adv_interval=5, adv_eta=0, k_neg=64.0, adv_min_steps=100, pimp=None, eta=1.0):
+          adv_lr=1e-4, adv_interval=5, adv_eta=0, k_neg=64.0, adv_min_steps=100, pimp=None, eta=1.0,
+          device="cpu"):
     """Pointwise losses: naive / IPS iterate over exposed pairs; DR samples
     pairs uniformly from all (u, i) (pseudo-label DR with a fixed imputation).
     Pairwise losses: 'bpr' (logged positives vs uniformly sampled items that
@@ -308,7 +322,13 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
     term, weights 1/p). 'bprdr': BPR plus eta times the 'drres' term on the same step.
     on_epoch(model, ep) evaluates the model and returns either the early-
     stopping criterion (higher is better; ``patience`` applies) or a bool
-    (True: stop now), which lets the caller run its own per-split stopping."""
+    (True: stop now), which lets the caller run its own per-split stopping.
+    device: the model (and its prior and adjacency, see to_device) is on this device. Only 'bpr' and 'drbpr' run on
+    a non-CPU device: the sampling and the weights stay on the CPU generator and data, and the batch indices and the
+    gathered weights are moved to the device; the other losses raise NotImplementedError off the CPU."""
+    dev = torch.device(device)
+    if dev.type != "cpu" and loss_type not in ("bpr", "drbpr"):
+        raise NotImplementedError(f"loss {loss_type} runs on the CPU only (device {dev})")
     fn_w = fn if fn_w is None else fn_w
     g = torch.Generator().manual_seed(seed)
     torch.manual_seed(seed)
@@ -477,16 +497,17 @@ def train(model, O, Y, P, Yhat, loss_type, lr, wd, epochs, batch, on_epoch,
                 j = torch.randint(0, n, (len(u),), generator=g)
                 bad_neg = pos[u, j]
                 j = torch.where(bad_neg, torch.randint(0, n, (len(u),), generator=g), j)
-                fp, fneg = model(u, i, emb), model(u, j, emb)
+                ud, idv, jd = u.to(dev), i.to(dev), j.to(dev)
+                fp, fneg = model(ud, idv, emb), model(ud, jd, emb)
                 if loss_type == "pda":
                     fp = _elu1(fp) * item_pop[i].pow(gamma)
                     fneg = _elu1(fneg) * item_pop[j].pow(gamma)
                 if loss_type == "drbpr":
-                    wn = (1.0 - fn_w * Q[u, j]).clamp_min(1e-3)
+                    wn = (1.0 - fn_w * Q[u, j]).clamp_min(1e-3).to(dev)
                     loss = (-(wn * F.logsigmoid(fp - fneg)).mean()) / wn.mean()
                 else:
                     loss = -F.logsigmoid(fp - fneg).mean()
-                reg = wd * sum((e ** 2).sum() for e in (emb[0][u], emb[1][i], emb[1][j])) / len(u)
+                reg = wd * sum((e ** 2).sum() for e in (emb[0][ud], emb[1][idv], emb[1][jd])) / len(u)
                 if loss_type == "simgcl":
                     v1, v2 = model.embeddings(perturb=True), model.embeddings(perturb=True)
                     uq, iq = torch.unique(u), torch.unique(i)

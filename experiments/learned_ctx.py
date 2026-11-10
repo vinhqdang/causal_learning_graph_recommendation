@@ -93,12 +93,19 @@ def train_cfg(ctx, name, cfg, seed, ja, record):
     cfg = {k: v for k, v in cfg.items() if k != "epoch"}
     torch.set_num_threads(ja.get("threads", 1))
     torch.manual_seed(seed)
+    dev = torch.device(ja.get("device", "cpu"))
+    if dev.type != "cpu" and kind != "lgn":
+        raise NotImplementedError(f"method {name} ({kind}) runs on the CPU only; --device cuda is for LightGCN-type "
+                                  f"methods (lgn)")
     m, n, O, Y, P, rows = ctx["m"], ctx["n"], ctx["O"], ctx["Y"], ctx["P"], ctx["rows"]
     model = RL.build(kind, m, n, cfg["dim"], O, Y, P, cfg, seed=seed)
+    if hasattr(model, "to_device"):
+        model = model.to_device(dev)
+    rows_d = rows.to(dev)
 
     def on_epoch(mod, ep):
         with torch.no_grad():
-            S = mod.full_scores(rows)
+            S = mod.full_scores(rows_d).cpu()
         return bool(record(S, ep))
 
     if kind in IALS_KINDS:
@@ -110,4 +117,4 @@ def train_cfg(ctx, name, cfg, seed, ja, record):
                  qmode=cfg.get("qmode", "dr"),
                  adv_lr=ja.get("adv_lr", 1e-4), adv_interval=ja.get("adv_interval", 5), adv_eta=cfg.get("eta", 0),
                  n_neg=(ja.get("n_neg", 64) if loss in ("advinfonce", "dradvinfonce") else 32),
-                 adv_min_steps=ja.get("adv_min_steps", 100))
+                 adv_min_steps=ja.get("adv_min_steps", 100), device=dev)

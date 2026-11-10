@@ -121,8 +121,10 @@ class LifelongTables:
         return torch.cat([self.tab[k][rows[:, None], self.ci[k][cand]].float() for k in KEYS], -1)
 
     def dense_rows(self, rows, weights, chunk=2048):
-        """(len(rows), n): sum over channels of weights[c] * channel c, for all pool items of the users rows."""
-        out = torch.zeros(len(rows), self.n)
+        """(len(rows), n): sum over channels of weights[c] * channel c, for all pool items of the users rows. The result
+        is on the device of weights (the tables' device, see to_device)."""
+        rows = rows.to(weights.device)
+        out = torch.zeros(len(rows), self.n, device=weights.device)
         for r0 in range(0, len(rows), chunk):
             rr = rows[r0:r0 + chunk]
             S = 0.0
@@ -131,6 +133,12 @@ class LifelongTables:
                 S = S + T @ weights[2 * ki:2 * ki + 2]
             out[r0:r0 + len(rr)] = S
         return out
+
+    def to_device(self, device):
+        """Moves the channel tables and the key-index maps to device (LEAFLGN scores on the device). Returns self."""
+        self.tab = {k: t.to(device) for k, t in self.tab.items()}
+        self.ci = {k: t.to(device) for k, t in self.ci.items()}
+        return self
 
 
 class PhiFull:
@@ -241,19 +249,28 @@ class LEAFLGN(torch.nn.Module):
         out = self.base.full_scores(rows) + self.beta * self.pop[None, :]
         return out + self.tabs.dense_rows(rows, self.gain * self.mask)
 
+    def to_device(self, device):
+        """Moves the model (base LightGCN with its adjacency, buffers, weights) and the lifelong tables to device."""
+        self.to(device)
+        self.base.to_device(device)
+        self.tabs.to_device(device)
+        return self
 
-def make_lightgcn(m, n, X, dim, layers, seed=0):
-    """LightGCN on the clicked pairs of the training log, as drup.learned / run_learned build it."""
+
+def make_lightgcn(m, n, X, dim, layers, seed=0, device="cpu"):
+    """LightGCN on the clicked pairs of the training log, as drup.learned / run_learned build it (on device)."""
     torch.manual_seed(seed)
     eu, ei = torch.nonzero(X > 0, as_tuple=True)
-    return LightGCN(m, n, dim, eu, ei, torch.ones(len(eu)), layers=layers, r=0.5)
+    return LightGCN(m, n, dim, eu, ei, torch.ones(len(eu)), layers=layers, r=0.5).to_device(device)
 
 
-def fit_bpr_policy(model, O, Y, w, lr, wd, epochs, batch, on_epoch, seed=0, log=None):
+def fit_bpr_policy(model, O, Y, w, lr, wd, epochs, batch, on_epoch, seed=0, log=None, device="cpu"):
     """BPR with the policy channel. A copy of the 'bpr' branch of drup.learned.train with one change: the positives
     are the clicked pairs (weight 1) and the shown-not-clicked pairs (weight w, realised by keeping each of them
     with probability w in every epoch). Negatives are uniform items outside the positives (clicked pairs, and
-    shown-not-clicked pairs when w > 0), one resample as in train. on_epoch(model, ep) returns True to stop."""
+    shown-not-clicked pairs when w > 0), one resample as in train. on_epoch(model, ep) returns True to stop.
+    The model (see LEAFLGN.to_device) is on device; the sampling runs on the CPU generator, and the batch indices are
+    moved to device."""
     g = torch.Generator().manual_seed(seed)
     torch.manual_seed(seed)
     m, n = O.shape
@@ -277,9 +294,10 @@ def fit_bpr_policy(model, O, Y, w, lr, wd, epochs, batch, on_epoch, seed=0, log=
             emb = model.embeddings()
             j = torch.randint(0, n, (len(u),), generator=g)
             j = torch.where(rej[u, j], torch.randint(0, n, (len(u),), generator=g), j)
-            fp, fneg = model(u, i, emb), model(u, j, emb)
+            ud, idv, jd = u.to(device), i.to(device), j.to(device)
+            fp, fneg = model(ud, idv, emb), model(ud, jd, emb)
             loss = -F.logsigmoid(fp - fneg).mean()
-            reg = wd * sum((e ** 2).sum() for e in (emb[0][u], emb[1][i], emb[1][j])) / len(u)
+            reg = wd * sum((e ** 2).sum() for e in (emb[0][ud], emb[1][idv], emb[1][jd])) / len(u)
             opt.zero_grad()
             (loss + reg).backward()
             opt.step()

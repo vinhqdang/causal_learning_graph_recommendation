@@ -15,6 +15,10 @@ results {"DIN", "DIN+DAX"} (or "SIM", "SIM+DAX") with per_user keyed by dataset 
 configurations x gammas for the DAX arm (trainings for the base), n_evals = validation evaluations. Resumable through
 OUT.partial.json (written after every training).
 
+--device cpu (default) or cuda: the DIN model, the sequence tables and the batches are computed on the device; the
+data, the splits, the sampling (CPU generator), the model selection and the metrics stay on the CPU. --device is not
+part of the stored arguments (the output and the partial file are the same on both devices).
+
 Inputs: data/raw/seq_<27k|1k>.npz from experiments/v12_build_seq.py (--dataset selects it).
 
 python3 experiments/run_din.py --arch din --dataset kuairand27k --out results/v12/din_27k.json
@@ -37,6 +41,7 @@ sys.path.insert(0, ROOT)
 sys.path.insert(0, HERE)
 import run_dax as RD  # noqa: E402
 from drup.data2 import load_kuairand_rich  # noqa: E402
+from drup.device import get_device  # noqa: E402
 from drup.din import DIN, fit_bpr, load_sequences, score_rows  # noqa: E402
 from drup.dax import item_content_codes, lifelong_rate, tag_codes, user_strata  # noqa: E402
 from drup.leaf import CUT_MS, Layout, check_temporal_protocol  # noqa: E402
@@ -70,8 +75,10 @@ def main():
     ap.add_argument("--frac_val", type=float, default=0.3)
     ap.add_argument("--n_users", type=int, default=0, help="0 = all users (smoke runs use a subset)")
     ap.add_argument("--threads", type=int, default=2)
+    ap.add_argument("--device", default="cpu", choices=["cpu", "cuda"], help="device of the model computations")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
+    dev = get_device(a.device)
     torch.set_num_threads(a.threads)
     path = a.out + ".partial.json"
     os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
@@ -90,7 +97,7 @@ def main():
     splits = RD.make_splits(test, a.seeds, a.frac_val)
     seq = load_sequences(seq_path, d["users_raw"], d["item_feat"], L=a.L)
     assert seq["cut_ms"] == CUT_MS, "the sequence file was built with another cut-off"
-    tok, valid = seq["tok"], seq["valid"]
+    tok, valid = seq["tok"].to(dev), seq["valid"].to(dev)
     X = (d["O"] * d["Y"]) > 0
     del d["O"], d["Y"]                       # the DIN fit reads only the clicked pairs X
     pos_u, pos_i = torch.nonzero(X, as_tuple=True)
@@ -108,7 +115,7 @@ def main():
     arms = RD.dax_arms(d, dax_name, grid, [], life, strata, content, tags, [0])
     post = RD.Posthoc(layout, splits, row_ids, lengths, base_name, arms, base_std=True, gammas=a.gammas,
                       cache_z=not a.no_zcache)
-    sig = json.loads(json.dumps({k: v for k, v in vars(a).items() if k not in ("out", "threads")}))
+    sig = json.loads(json.dumps({k: v for k, v in vars(a).items() if k not in ("out", "threads", "device")}))
     state = {"done": []}
     if os.path.exists(path):
         st = json.load(open(path))
@@ -130,18 +137,19 @@ def main():
             continue
         t1 = time.time()
         torch.manual_seed(a.train_seed)
+        # built on the CPU (the initialisation is the same on both devices), then moved
         model = DIN(m, n, seq["n_tag"], seq["n_author"], seq["n_music"], seq["cand"], d=a.dim, hidden=a.hidden,
-                    mlp=a.mlp, sim_k=(a.sim_k if a.arch == "sim" else 0))
+                    mlp=a.mlp, sim_k=(a.sim_k if a.arch == "sim" else 0)).to(dev)
         best, bad, done = [-1.0] * S, [0] * S, [False] * S
 
         def on_epoch(mod, ep, lr=lr, wd=wd, best=best, bad=bad, done=done):
-            base_b = [score_rows(mod, bk["rows"], bk["cand"], tok, valid) for bk in layout.buckets]
+            base_b = [score_rows(mod, bk["rows"], bk["cand"], tok, valid, device=dev) for bk in layout.buckets]
             vals = post.add_epoch(base_b, dict(lr=lr, wd=wd), ep, active=[not x for x in done])
             RD.patience_update(best, bad, done, vals, a.patience)
             print(f"    {key} epoch {ep} [{time.time() - t1:.0f}s] "
                   f"val {' '.join('-' if v is None else f'{v:.4f}' for v in vals)}", flush=True)
             return all(done)
-        ran = fit_bpr(model, X, tok, valid, lr, wd, a.epochs, a.batch, on_epoch, seed=a.train_seed)
+        ran = fit_bpr(model, X, tok, valid, lr, wd, a.epochs, a.batch, on_epoch, seed=a.train_seed, device=dev)
         print(f"  {key}: {ran} epochs [{time.time() - t1:.0f}s]", flush=True)
         del model
         state["done"].append(key)

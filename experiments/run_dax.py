@@ -43,6 +43,11 @@ LEAF-LGN training, one joint training, one learned-backbone training, or one EAS
 The DAX table is fitted on the pre-cut standard log only (drup.dax.fit_dax_dataset). The learned backbones use the
 unchanged training code of experiments/learned_ctx.py on the same protocol.
 
+--device cpu (default) or cuda, for leaf_lgn posthoc and qp_posthoc: the backbone model (LightGCN adjacency,
+embeddings, LEAF lifelong tables, QP-family training) is computed on the device; the scores are moved back to the CPU
+before the DAX arms, gammas and the validation selection, which stay on the CPU. Sampling uses the CPU generators as
+before. --device is not part of the stored arguments. Joint mode, ease and lightgcn accept only cpu.
+
 python3 experiments/run_dax.py --backbone leaf_lgn --mode posthoc --seeds 5 --out results/v11/dax_lgn_post.json
 """
 
@@ -67,6 +72,7 @@ from drup.data2 import load_kuairand_rich  # noqa: E402
 from drup.dax import (DAXChannel, LEAFLGNDAX, all_perm, dax_variant, fit_additive, fit_dax_dataset,  # noqa: E402
                       item_content_codes, lifelong_rate, masked_rowstd, pre_cut, tag_codes, user_strata,
                       within_code_perm)
+from drup.device import get_device  # noqa: E402
 from drup.estimation import baseline_imputation, clip_propensity, get_propensity  # noqa: E402
 from drup.leaf import (CUT_MS, LEAFLGN, BucketSelector, Layout, LifelongTables, check_temporal_protocol,  # noqa: E402
                        collective_gram, collective_solve, compact_base, fit_bpr_policy, make_lightgcn,
@@ -74,7 +80,7 @@ from drup.leaf import (CUT_MS, LEAFLGN, BucketSelector, Layout, LifelongTables, 
 
 DATA = os.path.join(ROOT, "data", "raw")
 V10 = os.path.join(ROOT, "results", "v10")
-SIG_EXCLUDE = ("out", "threads")
+SIG_EXCLUDE = ("out", "threads", "device")
 KEY = "ndcg@10"
 GAMMAS = (0.0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.7, 1.0)
 GAMMAS_SMALL = (0.1, 0.25, 0.5, 0.7, 1.0)          # the gamma grid of the ablation setting (--gammas)
@@ -361,7 +367,8 @@ def patience_update(best, bad, done, vals, patience):
 def run_leaf_posthoc(a, d, post, state, save, layout, plans, npz, pop, m, n):
     """LEAF-LGN trained alone, one training per plan entry (the lr, wd, w grid of run_leaf unless --select_from); DAX and
     gamma selected post hoc on validation, per split, over the epochs that split reads."""
-    tabs = LifelongTables(npz, d["users_raw"], d["item_feat"], window="pre", s=a.s)
+    dev = torch.device(a.device)
+    tabs = LifelongTables(npz, d["users_raw"], d["item_feat"], window="pre", s=a.s).to_device(dev)
     O, Y = d["O"], d["Y"]
     S = post.n_splits
     patience = 10 ** 9 if a.epoch_window >= 0 else a.patience    # windowed splits read their window, no patience
@@ -371,8 +378,8 @@ def run_leaf_posthoc(a, d, post, state, save, layout, plans, npz, pop, m, n):
         if key in state["done"]:
             continue
         t0 = time.time()
-        base = make_lightgcn(m, n, Y, a.dim, a.layers, seed=a.train_seed)
-        model = LEAFLGN(base, tabs, pop, None)
+        base = make_lightgcn(m, n, Y, a.dim, a.layers, seed=a.train_seed, device=dev)
+        model = LEAFLGN(base, tabs, pop, None).to_device(dev)
         best, bad = [-1.0] * S, [0] * S
         done = [s not in pl["splits"] for s in range(S)]
 
@@ -382,11 +389,12 @@ def run_leaf_posthoc(a, d, post, state, save, layout, plans, npz, pop, m, n):
             if any(active):
                 with torch.no_grad():
                     emb = mod.embeddings()
-                    base_b = [mod(bk["rows"][:, None], bk["cand"], emb) for bk in layout.buckets]
+                    base_b = [mod(bk["rows"][:, None].to(dev), bk["cand"].to(dev), emb).cpu()
+                              for bk in layout.buckets]
             vals = post.add_epoch(base_b, dict(lr=lr, wd=wd, w=w), ep, active=active)
             patience_update(best, bad, done, vals, patience)
             return all(done[s] or ep >= pl["hi"][s] for s in pl["splits"])
-        fit_bpr_policy(model, O, Y, w, lr, wd, a.epochs, a.batch, on_epoch, seed=a.train_seed)
+        fit_bpr_policy(model, O, Y, w, lr, wd, a.epochs, a.batch, on_epoch, seed=a.train_seed, device=dev)
         print(f"  {key}: splits {pl['splits']} [{time.time() - t0:.0f}s]", flush=True)
         del model, base
         state["done"].append(key)
@@ -456,7 +464,7 @@ def run_learned_posthoc(a, d, post, state, save, layout, jobs):
     the listed splits read the epochs lo..hi of that training, and the training has no patience then."""
     ctx = learned_context(d, threads=a.threads)
     ja = {"epochs": a.epochs, "batch": a.batch, "patience": a.patience, "threads": a.threads, "n_neg": 64,
-          "adv_lr": 1e-4, "adv_interval": 5, "adv_min_steps": 100, "pairs_per_epoch": None}
+          "adv_lr": 1e-4, "adv_interval": 5, "adv_min_steps": 100, "pairs_per_epoch": None, "device": a.device}
     print(f"{len(jobs)} (method, configuration) trainings", flush=True)
     S = post.n_splits
     k_idx = [torch.as_tensor(bk["k"]) for bk in layout.buckets]
@@ -555,10 +563,15 @@ def main():
     ap.add_argument("--patience", type=int, default=3)
     ap.add_argument("--batch", type=int, default=8192)
     ap.add_argument("--threads", type=int, default=2)
+    ap.add_argument("--device", default="cpu", choices=["cpu", "cuda"],
+                    help="device of the backbone computations (leaf_lgn posthoc and qp_posthoc only)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     if a.backbone in ("qp_posthoc", "ease"):
         a.mode = "posthoc"
+    if a.device == "cuda" and (a.mode == "joint" or a.backbone not in ("leaf_lgn", "qp_posthoc")):
+        ap.error("--device cuda is for leaf_lgn and qp_posthoc in posthoc mode")
+    get_device(a.device)                 # fails here, before any data is read, when cuda is not available
     if a.backbone in ("ease", "qp_posthoc", "lightgcn") and a.mode == "joint":
         ap.error("--mode joint is for leaf_lgn")
     if a.backbone not in ("leaf_lgn", "qp_posthoc") and (a.ablate or a.select_from):
