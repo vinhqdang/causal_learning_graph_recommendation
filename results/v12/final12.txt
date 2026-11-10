@@ -1,0 +1,114 @@
+Final analysis (v12): DAX, lifelong-aware deep baselines, extended grid; KuaiRand-27K unless stated, nDCG@10
+Gate summary: B1 PASS; B2 PASS; C reported (no threshold)
+Inputs read: c_1k_base.json, c_1k_lgn.json, c_1k_qp.json, dax_ablate.json, dax_ease.json, dax_lgn_post.json, dax_qp.json, din_1k.json, leaf_lgn.json, learned_kuairand_t_base.json, learned_kuairand_t_qp.json, sim_1k.json
+Inputs missing or not used:
+  - missing: results/v11/dax_lgn_joint.json
+  - missing: results/v11/dax_lgn_joint_small.json
+  - missing: results/v11/dax_lightgcn.json
+  - missing: results/v12/din_27k.json
+  - missing: results/v12/sim_27k.json
+  - main-table family: not run (absent): DIN, DIN+DAX, SIM, SIM+DAX
+  - missing: c_seeds.json
+  - missing: results/v12/daxref_lgn.json
+  - missing: results/v12/daxwide_lgn.json
+  - missing: results/v12/daxref_qp.json
+  - missing: results/v12/daxwide_qp.json
+
+1. Methods: mean +- sd over the splits of nDCG@10, configurations searched, source file
+  method                       mean    +- sd  n_configs  file
+  LEAF-LGN+DAX               0.4854   0.0009       3840  dax_lgn_post.json
+  LEAF-LGN                   0.4736   0.0002         12  dax_lgn_post.json
+  LEAF-LGN(stored)           0.4728   0.0011        197  leaf_lgn.json
+  QP family                  0.4634   0.0031         20  learned_kuairand_t_qp.json
+  QP family+DAX              0.4733   0.0012       3200  dax_qp.json
+  QP family (retrained)      0.4652   0.0017         10  dax_qp.json
+  r-AdjNorm                  0.4620   0.0008          8  learned_kuairand_t_base.json
+  LightGCN                   0.4576   0.0031          4  learned_kuairand_t_base.json
+  EASE                       0.4507   0.0009         27  dax_ease.json
+  EASE+DAX                   0.4623   0.0010       8640  dax_ease.json
+  n_configs: posthoc runs count backbone trainings x DAX configurations x gammas; LEAF-LGN (stored) keeps the
+  count written by experiments/run_leaf.py, which is not comparable (it counts another unit).
+
+2. Gate B1 (post-hoc, joint selection): primary family of fixed size m = 5 (Holm over all five, both p values)
+   LEAF-LGN+DAX against each comparator; per-user paired difference x1e-3 nDCG@10 [95% half-width],
+   two-sided t p, Nadeau-Bengio p over split means
+  split sizes (test users per split): [15809, 15892, 15840, 15913, 15869]; pooled users 22612 (expected 22612 from results/v10/leaf_lgn.json)
+  LEAF-LGN+DAX - QP family                       +22.32 [ 1.83]  p=3.64e-125  p_Holm=1.45e-124  NB p=0.023  NB p_Holm=2.28e-02  (splits +19.8 +22.2 +21.8 +17.8 +28.0)
+  LEAF-LGN+DAX - QP family+DAX                   +12.04 [ 1.63]  p=3.96e-47  p_Holm=3.96e-47  NB p=0.006  NB p_Holm=1.67e-02  (splits +10.7 +12.9 +10.7 +11.8 +13.9)
+  LEAF-LGN+DAX - LEAF-LGN                        +11.96 [ 1.47]  p=6.55e-57  p_Holm=1.31e-56  NB p=0.001  NB p_Holm=5.48e-03  (splits +11.8 +12.4 +12.0 +10.2 +12.4)
+  LEAF-LGN+DAX - r-AdjNorm                       +23.79 [ 1.96]  p=2.43e-123  p_Holm=7.29e-123  NB p=0.000  NB p_Holm=1.95e-04  (splits +23.7 +23.2 +24.2 +22.2 +23.3)
+  LEAF-LGN+DAX - LightGCN                        +28.15 [ 1.86]  p=5.33e-190  p_Holm=2.67e-189  NB p=0.008  NB p_Holm=1.67e-02  (splits +25.1 +26.3 +30.5 +24.5 +32.6)
+
+3. Gate B1 decision and fair-baseline reading
+  B1 vs QP family: PASS  LEAF-LGN+DAX - QP family = +22.32e-3 (required >= 15e-3), t p_Holm 1.45e-124, NB p_Holm 0.023 (both required < 0.05)
+  fair baseline, LEAF-LGN+DAX vs QP family+DAX: +12.04e-3 [1.63], t p_Holm 3.96e-47, NB p_Holm 0.017; LEAF-LGN+DAX higher (both tests, alpha 0.05) (no pre-set margin)
+  configurations searched: LEAF-LGN+DAX n_configs = 3840, QP family+DAX n_configs = 3200
+  QP family+DAX searches only the QP configurations selected on QP alone (selection restricted; conservative for the method)
+  QP family + DAX - QP family: +10.28e-3 [1.37], NB p 0.105 (DESIGN expects about +6 to +9e-3 from the LEAF increment)
+
+3b. Main-table family (v12): LEAF-LGN + DAX against every comparator of the table, Holm over the family
+   per-user paired difference x1e-3 nDCG@10 [95% half-width], two-sided t p, Nadeau-Bengio p over split means
+  LEAF-LGN+DAX - QP family                       +22.32 [ 1.83]  p=3.64e-125  p_Holm=1.45e-124  NB p=0.023  NB p_Holm=2.28e-02  (splits +19.8 +22.2 +21.8 +17.8 +28.0)
+  LEAF-LGN+DAX - QP family+DAX                   +12.04 [ 1.63]  p=3.96e-47  p_Holm=3.96e-47  NB p=0.006  NB p_Holm=1.67e-02  (splits +10.7 +12.9 +10.7 +11.8 +13.9)
+  LEAF-LGN+DAX - LEAF-LGN                        +11.96 [ 1.47]  p=6.55e-57  p_Holm=1.31e-56  NB p=0.001  NB p_Holm=5.48e-03  (splits +11.8 +12.4 +12.0 +10.2 +12.4)
+  LEAF-LGN+DAX - r-AdjNorm                       +23.79 [ 1.96]  p=2.43e-123  p_Holm=7.29e-123  NB p=0.000  NB p_Holm=1.95e-04  (splits +23.7 +23.2 +24.2 +22.2 +23.3)
+  LEAF-LGN+DAX - LightGCN                        +28.15 [ 1.86]  p=5.33e-190  p_Holm=2.67e-189  NB p=0.008  NB p_Holm=1.67e-02  (splits +25.1 +26.3 +30.5 +24.5 +32.6)
+  family size 5 (Holm over the comparators present); reading per comparator: both Holm-adjusted tests below 0.05 = significant
+    QP family      LEAF-LGN+DAX higher (both tests, alpha 0.05)
+    QP family+DAX  LEAF-LGN+DAX higher (both tests, alpha 0.05)
+    LEAF-LGN       LEAF-LGN+DAX higher (both tests, alpha 0.05)
+    r-AdjNorm      LEAF-LGN+DAX higher (both tests, alpha 0.05)
+    LightGCN       LEAF-LGN+DAX higher (both tests, alpha 0.05)
+
+4. Gate B2 (ablations, relative to the backbone of the same run): gains are paired differences of the arm
+   against LEAF-LGN (dax_ablate.json), x1e-3 nDCG@10 [95% half-width]
+  grid size per arm (DAX configurations = n_configs / (trainings x gammas x permutation seeds)):
+    full             n_configs    320  DAX configurations  32.0 (run_dax grid 32)
+    shuffle_tags     n_configs    960  DAX configurations  32.0 (run_dax grid 32)
+    shuffle_items    n_configs    960  DAX configurations  32.0 (run_dax grid 32)
+    additive         n_configs    320  DAX configurations  32.0 (run_dax grid 32)
+    no_tab           n_configs    160  DAX configurations  16.0 (run_dax grid 16)
+    no_life_prior    n_configs    160  DAX configurations  16.0 (run_dax grid 16)
+    no_tag_prior     n_configs    160  DAX configurations  16.0 (run_dax grid 16)
+    grid balance: DAX arm 32 configurations, additive arm 32 (ratio 1.00x)
+  shuffle_items gain, permutation seed 0          +5.66 [ 1.14]  p=1.88e-22  NB p=0.010  (splits +5.2 +5.9 +5.5 +4.6 +6.6)
+  shuffle_items gain, permutation seed 1          +6.84 [ 1.13]  p=1.50e-32  NB p=0.002  (splits +6.3 +6.8 +7.0 +6.1 +7.6)
+  shuffle_items gain, permutation seed 2          +6.35 [ 1.24]  p=1.14e-23  NB p=0.001  (splits +6.0 +7.0 +5.8 +6.3 +5.9)
+  shuffle_tags gain, permutation seed 0           -0.44 [ 0.50]  p=7.90e-02  NB p=0.510  (splits -0.1 -0.3 -0.8 -0.1 -0.8)
+  shuffle_tags gain, permutation seed 1           -0.16 [ 0.53]  p=5.55e-01  NB p=0.986  (splits +0.3 -0.1 -0.2 +0.6 -0.6)
+  shuffle_tags gain, permutation seed 2           -0.20 [ 0.51]  p=4.54e-01  NB p=0.775  (splits +0.0 +0.3 -0.6 -0.0 -0.9)
+  full DAX gain (LEAF-LGN+DAX - LEAF-LGN)        +15.10 [ 1.42]  p=1.26e-95  NB p=0.009  (splits +12.4 +15.6 +16.6 +12.8 +16.2)
+  shuffle_tags gain                               -0.27 [ 0.36]  p=1.48e-01  NB p=0.754  (splits +0.1 -0.0 -0.5 +0.2 -0.8)
+  shuffle_items gain                              +6.28 [ 1.10]  p=6.17e-29  NB p=0.001  (splits +5.8 +6.6 +6.1 +5.7 +6.7)
+  no_tab gain                                    +13.59 [ 1.43]  p=2.46e-77  NB p=0.012  (splits +10.6 +14.4 +14.8 +11.9 +14.5)
+  no_life_prior gain                             +13.31 [ 1.43]  p=1.98e-73  NB p=0.007  (splits +11.1 +14.4 +14.7 +11.8 +13.1)
+  no_tag_prior gain                              +11.68 [ 1.22]  p=2.13e-77  NB p=0.002  (splits +10.2 +11.9 +12.3 +10.6 +12.1)
+  additive gain (MRP-style, tab effects)          +9.01 [ 1.25]  p=3.07e-45  NB p=0.024  (splits +7.2 +10.1 +10.7 +7.4 +8.7)
+  checks:
+    shuffle_tags removes >= 90% of the DAX gain          PASS           removed 101.8%
+    shuffle_items (within tag) drops the gain by >= 30%  PASS           drop 58.4%
+    additive stays >= 4e-3 below DAX                     PASS           DAX - additive +6.09e-3
+  GATE B2: PASS
+
+5. Stage C (robustness): reported, not a pass or fail (DESIGN.md Section 7 defines the stage without a threshold)
+   per setting: LEAF-LGN+DAX - QP family and LEAF-LGN+DAX - (QP family + DAX), x1e-3 nDCG@10 per user
+   [95% half-width], two-sided t p, Nadeau-Bengio p over split means (5 splits each)
+  KuaiRand-27K (main run): vs QP family          +22.32 [ 1.83]  p=3.64e-125  NB p=0.023  (splits +19.8 +22.2 +21.8 +17.8 +28.0)
+  KuaiRand-27K (main run): vs QP family + DAX    +12.04 [ 1.63]  p=3.96e-47  NB p=0.006  (splits +10.7 +12.9 +10.7 +11.8 +13.9)
+  KuaiRand-1K: 842 users with a test list, pooled over the 5 splits (each split: 30% validation, 70% test)
+  KuaiRand-1K: vs QP family                      +37.58 [11.10]  p=5.37e-11  NB p=0.011  (splits +36.7 +25.7 +35.6 +37.2 +36.6)
+  KuaiRand-1K: vs QP family + DAX                +25.82 [ 9.66]  p=1.96e-07  NB p=0.007  (splits +21.3 +20.3 +23.7 +23.1 +27.8)
+  KuaiRand-1K: QP family + DAX - QP family       +11.76 [ 8.54]  p=7.04e-03  NB p=0.160  (splits +15.4 +5.4 +11.9 +14.1 +8.8)
+  seed replicates: not run (c_seeds.json missing)
+
+5b. Extended DAX grid (v12): prior strength {10, 20, 40, 80, 160} x k_life {0, 100, 200, 400, 1000}
+   against the default grid (prior {80, 160}, k_life {0, 100}) under the same gammas and epoch window
+   (daxref_*); the stored full runs (dax_lgn_post.json, dax_qp.json: 10 gammas, all epochs) for reference
+  LEAF-LGN + DAX: not run (daxref / daxwide file missing or incomplete)
+  QP family + DAX: not run (daxref / daxwide file missing or incomplete)
+
+6. Checks and information (not gates)
+  info: LEAF-LGN (posthoc run) - LEAF-LGN (stored)    +0.73 [ 0.52]  p=5.38e-03  NB p=0.660  (splits +0.1 +0.0 +1.4 +0.2 +2.4)
+  QP family (retrained) - QP family (stored)      +1.70 [ 0.70]  p=1.89e-06  NB p=0.803  (splits -0.0 +2.2 +2.9 -3.8 +7.6)
+  EASE + DAX - EASE (E1 - E0)                    +11.98 [ 1.64]  p=2.27e-46  NB p=0.000  (splits +11.5 +11.5 +11.2 +11.8 +11.9)
+
