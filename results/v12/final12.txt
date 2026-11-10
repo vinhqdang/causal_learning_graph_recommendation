@@ -1,13 +1,12 @@
 Final analysis (v12): DAX, lifelong-aware deep baselines, extended grid; KuaiRand-27K unless stated, nDCG@10
 Gate summary: B1 PASS; B2 PASS; C reported (no threshold)
-Inputs read: c_1k_base.json, c_1k_lgn.json, c_1k_qp.json, dax_ablate.json, dax_ease.json, dax_lgn_post.json, dax_qp.json, din_1k.json, leaf_lgn.json, learned_kuairand_t_base.json, learned_kuairand_t_qp.json, sim_1k.json
+Inputs read: c_1k_base.json, c_1k_lgn.json, c_1k_qp.json, dax_ablate.json, dax_ease.json, dax_lgn_post.json, dax_qp.json, din_1k.json, din_27k.json, leaf_lgn.json, learned_kuairand_t_base.json, learned_kuairand_t_qp.json, sim_1k.json
 Inputs missing or not used:
   - missing: results/v11/dax_lgn_joint.json
   - missing: results/v11/dax_lgn_joint_small.json
   - missing: results/v11/dax_lightgcn.json
-  - missing: results/v12/din_27k.json
   - missing: results/v12/sim_27k.json
-  - main-table family: not run (absent): DIN, DIN+DAX, SIM, SIM+DAX
+  - main-table family: not run (absent): SIM, SIM+DAX
   - missing: c_seeds.json
   - missing: results/v12/daxref_lgn.json
   - missing: results/v12/daxwide_lgn.json
@@ -26,6 +25,8 @@ Inputs missing or not used:
   LightGCN                   0.4576   0.0031          4  learned_kuairand_t_base.json
   EASE                       0.4507   0.0009         27  dax_ease.json
   EASE+DAX                   0.4623   0.0010       8640  dax_ease.json
+  DIN                        0.4675   0.0007          4  din_27k.json
+  DIN+DAX                    0.4796   0.0015       1280  din_27k.json
   n_configs: posthoc runs count backbone trainings x DAX configurations x gammas; LEAF-LGN (stored) keeps the
   count written by experiments/run_leaf.py, which is not comparable (it counts another unit).
 
@@ -48,17 +49,21 @@ Inputs missing or not used:
 
 3b. Main-table family (v12): LEAF-LGN + DAX against every comparator of the table, Holm over the family
    per-user paired difference x1e-3 nDCG@10 [95% half-width], two-sided t p, Nadeau-Bengio p over split means
-  LEAF-LGN+DAX - QP family                       +22.32 [ 1.83]  p=3.64e-125  p_Holm=1.45e-124  NB p=0.023  NB p_Holm=2.28e-02  (splits +19.8 +22.2 +21.8 +17.8 +28.0)
-  LEAF-LGN+DAX - QP family+DAX                   +12.04 [ 1.63]  p=3.96e-47  p_Holm=3.96e-47  NB p=0.006  NB p_Holm=1.67e-02  (splits +10.7 +12.9 +10.7 +11.8 +13.9)
-  LEAF-LGN+DAX - LEAF-LGN                        +11.96 [ 1.47]  p=6.55e-57  p_Holm=1.31e-56  NB p=0.001  NB p_Holm=5.48e-03  (splits +11.8 +12.4 +12.0 +10.2 +12.4)
-  LEAF-LGN+DAX - r-AdjNorm                       +23.79 [ 1.96]  p=2.43e-123  p_Holm=7.29e-123  NB p=0.000  NB p_Holm=1.95e-04  (splits +23.7 +23.2 +24.2 +22.2 +23.3)
-  LEAF-LGN+DAX - LightGCN                        +28.15 [ 1.86]  p=5.33e-190  p_Holm=2.67e-189  NB p=0.008  NB p_Holm=1.67e-02  (splits +25.1 +26.3 +30.5 +24.5 +32.6)
-  family size 5 (Holm over the comparators present); reading per comparator: both Holm-adjusted tests below 0.05 = significant
+  LEAF-LGN+DAX - QP family                       +22.32 [ 1.83]  p=3.64e-125  p_Holm=2.18e-124  NB p=0.023  NB p_Holm=4.56e-02  (splits +19.8 +22.2 +21.8 +17.8 +28.0)
+  LEAF-LGN+DAX - QP family+DAX                   +12.04 [ 1.63]  p=3.96e-47  p_Holm=7.92e-47  NB p=0.006  NB p_Holm=2.23e-02  (splits +10.7 +12.9 +10.7 +11.8 +13.9)
+  LEAF-LGN+DAX - LEAF-LGN                        +11.96 [ 1.47]  p=6.55e-57  p_Holm=1.97e-56  NB p=0.001  NB p_Holm=6.85e-03  (splits +11.8 +12.4 +12.0 +10.2 +12.4)
+  LEAF-LGN+DAX - r-AdjNorm                       +23.79 [ 1.96]  p=2.43e-123  p_Holm=1.22e-122  NB p=0.000  NB p_Holm=2.73e-04  (splits +23.7 +23.2 +24.2 +22.2 +23.3)
+  LEAF-LGN+DAX - LightGCN                        +28.15 [ 1.86]  p=5.33e-190  p_Holm=3.73e-189  NB p=0.008  NB p_Holm=2.44e-02  (splits +25.1 +26.3 +30.5 +24.5 +32.6)
+  LEAF-LGN+DAX - DIN                             +18.26 [ 1.97]  p=1.41e-73  p_Holm=5.62e-73  NB p=0.001  NB p_Holm=6.62e-03  (splits +19.0 +18.0 +17.3 +15.9 +19.1)
+  LEAF-LGN+DAX - DIN+DAX                          +5.73 [ 1.64]  p=7.95e-12  p_Holm=7.95e-12  NB p=0.043  NB p_Holm=4.56e-02  (splits +6.3 +4.6 +7.6 +4.8 +5.3)
+  family size 7 (Holm over the comparators present); reading per comparator: both Holm-adjusted tests below 0.05 = significant
     QP family      LEAF-LGN+DAX higher (both tests, alpha 0.05)
     QP family+DAX  LEAF-LGN+DAX higher (both tests, alpha 0.05)
     LEAF-LGN       LEAF-LGN+DAX higher (both tests, alpha 0.05)
     r-AdjNorm      LEAF-LGN+DAX higher (both tests, alpha 0.05)
     LightGCN       LEAF-LGN+DAX higher (both tests, alpha 0.05)
+    DIN            LEAF-LGN+DAX higher (both tests, alpha 0.05)
+    DIN+DAX        LEAF-LGN+DAX higher (both tests, alpha 0.05)
 
 4. Gate B2 (ablations, relative to the backbone of the same run): gains are paired differences of the arm
    against LEAF-LGN (dax_ablate.json), x1e-3 nDCG@10 [95% half-width]
