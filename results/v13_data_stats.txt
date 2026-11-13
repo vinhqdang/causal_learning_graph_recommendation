@@ -1,0 +1,30 @@
+== KuaiRand-27K (pure)
+dataset users 27077; random-log pool videos 7583; cached O shape (27077, 7583)
+pre-cut standard impressions of dataset users, pool videos (CSV): 1141300
+pre-cut standard impressions of dataset users, non-pool videos (CSV): 0
+distinct pre-cut pairs (CSV) 1092935; nonzero entries of cached O 1092935; match: True
+pre-cut out-of-pool impressions (lifelong npz, 26904 users with history): 135219176
+median pre-cut impressions per pool item (over 7583 pool videos, zeros included): 43.0; mean 150.5; share with zero 0.0059
+test users (candidate lists): 27077; candidates per user mean 43.6, median 22, min 9, max 1580
+split 0 (seed 0, frac_val 0.3): validation users 8123; test users 18954; test users with a click 15809
+split 1 (seed 1, frac_val 0.3): validation users 8123; test users 18954; test users with a click 15892
+split 2 (seed 2, frac_val 0.3): validation users 8123; test users 18954; test users with a click 15840
+split 3 (seed 3, frac_val 0.3): validation users 8123; test users 18954; test users with a click 15913
+split 4 (seed 4, frac_val 0.3): validation users 8123; test users 18954; test users with a click 15869
+test users with a click in at least one split, pooled: 22612; users with a click in any candidate list: 22661
+
+== KuaiRand-1K (1k)
+dataset users 993; random-log pool videos 7388; cached O shape (993, 7388)
+pre-cut standard impressions of dataset users, pool videos (CSV): 40738
+pre-cut standard impressions of dataset users, non-pool videos (CSV): 5016818
+distinct pre-cut pairs (CSV) 39003; nonzero entries of cached O 39003; match: True
+pre-cut out-of-pool impressions (lifelong npz, 983 users with history): 5017598
+median pre-cut impressions per pool item (over 7388 pool videos, zeros included): 2.0; mean 5.5; share with zero 0.3002
+test users (candidate lists): 993; candidates per user mean 43.2, median 22, min 10, max 650
+split 0 (seed 0, frac_val 0.3): validation users 298; test users 695; test users with a click 584
+split 1 (seed 1, frac_val 0.3): validation users 298; test users 695; test users with a click 591
+split 2 (seed 2, frac_val 0.3): validation users 298; test users 695; test users with a click 590
+split 3 (seed 3, frac_val 0.3): validation users 298; test users 695; test users with a click 588
+split 4 (seed 4, frac_val 0.3): validation users 298; test users 695; test users with a click 579
+test users with a click in at least one split, pooled: 842; users with a click in any candidate list: 842
+

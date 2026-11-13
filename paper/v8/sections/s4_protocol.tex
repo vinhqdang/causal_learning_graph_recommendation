@@ -41,7 +41,7 @@ smaller scale and not an independent sample. Table~\ref{tab:data} gives the size
 
 \begin{table}[t]
 \centering
-\caption{Sizes of the two KuaiRand settings under the temporal protocol. A cell marked TBD is not in a result file.}
+\caption{Sizes of the two KuaiRand settings under the temporal protocol.}
 \label{tab:data}
 \footnotesize
 \begin{tabular}{p{0.36\textwidth}p{0.15\textwidth}p{0.15\textwidth}p{0.32\textwidth}}
@@ -51,21 +51,24 @@ Quantity & KuaiRand-27K & KuaiRand-1K & Source \\
 Users in both logs (dataset users) & 27,077 & 993 & run logs (27K: \texttt{dax\_\allowbreak{}lgn\_\allowbreak{}post.log}; 1K: \texttt{din\_\allowbreak{}1k.log}) \\
 Pool items & 7,583 & 7,388 & same \\
 Pre-cut training clicks & 523,176 & 18,873 & \texttt{din\_\allowbreak{}27k.log}; \texttt{din\_\allowbreak{}1k.log} \\
-Pre-cut training impressions & \{TBD:temporal impressions 27K\} & \{TBD:temporal impressions 1K\} & not in a file \\
+Pre-cut training impressions & 1,141,300 & 40,738 & \texttt{v13\_\allowbreak{}data\_\allowbreak{}stats.txt} (CSV count) \\
 Users with a pre-cut lifelong history & 26,723 & 977 & \texttt{din\_\allowbreak{}27k.log}; \texttt{din\_\allowbreak{}1k.log} \\
-Out-of-pool impressions before $T_0$ & 135,219,168 & \{TBD:1K pre-cut out-of-pool\} & \texttt{lifelong\_\allowbreak{}27k\_\allowbreak{}summary.txt}, all users of the release \\
+Out-of-pool impressions before $T_0$ & 135,219,168 & 5,016,818 & \texttt{lifelong\_\allowbreak{}27k\_\allowbreak{}summary.txt} (27K); \texttt{v13\_\allowbreak{}data\_\allowbreak{}stats.txt} (1K, CSV count) \\
 Random-exposure rows & 1,186,059 & 42,944 & \texttt{link\_\allowbreak{}users.txt}; \texttt{stats\_\allowbreak{}1k.txt} (993 users) \\
 Test users (candidate lists) & 27,077 & 993 & run logs \\
 Test users with a click, pooled & 22,612 & 842 & \texttt{stageB.txt} Section 2; \texttt{stats\_\allowbreak{}1k.txt} \\
-Test users with a click, per split & 15,809 to 15,913 & \{TBD:1K per split\} & \texttt{stageB.txt} Section 2 \\
-Candidates per user (temporal) & \{TBD:27K candidates per user\} & \{TBD:1K candidates per user\} & not in a file \\
+Test users with a click, per split & 15,809 to 15,913 & 579 to 591 & \texttt{stageB.txt} Section 2; \texttt{v13\_\allowbreak{}data\_\allowbreak{}stats.txt} \\
+Candidates per user (temporal), mean (median) & 43.6 (22) & 43.2 (22) & \texttt{v13\_\allowbreak{}data\_\allowbreak{}stats.txt} \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
 
 \raggedright\scriptsize
 Sources are in \texttt{results/} (\texttt{v9\_probes}, \texttt{v11}, \texttt{logs\_v11}, \texttt{logs\_v12}). The 42,944 rows are the
-random-log impressions of the 993 users, and the random log does not depend on the protocol.
+random-log impressions of the 993 users, and the random log does not depend on the protocol. The rows marked
+\texttt{v13\_data\_stats.txt} are computed by \texttt{experiments/v13\_data\_stats.py} from the CSV logs and the cached test lists.
+The 1K out-of-pool value counts the 993 users in the CSV logs; \texttt{lifelong\_1k.npz} gives 5,017,598 for the 983 users with
+history (the difference of 780 is not traced). The 27K value is the release summary; the npz sums to 135,219,176 (8 more).
 \end{table}
 
 Coat \citep{schnabel2016} and Yahoo! R3 \citep{marlin2009collaborative} contain ratings that users gave, together with a
@@ -75,11 +78,11 @@ videos outside the test pool. Neither component can be run on these data, and ru
 different question. KuaiRec \citep{gao2022kuairec} has a near-complete small user-video matrix and a larger sparse log of watch
 ratios. It has no scenario field among its interaction fields, and the user's history is confined to its own matrix, so the
 history on videos outside the test pool is not available. Its daily item counts are platform aggregates and not user
-impressions. The Open Bandit Dataset has no persistent user identifiers, so no lifelong history can be formed for it.
+impressions. The Open Bandit Dataset \citep{saito2021obd} has no persistent user identifiers, so no lifelong history can be formed for it.
 
 The motivation for a randomised test is the headroom of the classic benchmarks. A leave-one-user-out item oracle uses test labels,
-so it is a diagnostic and not a method. On KuaiRec, the earlier diagnostics of the item oracle relative to the best training-free
-prior are not yet in a result file: \{TBD:results/v12/saturation\_kuairec.txt oracle nDCG@20, prior nDCG@20, best gain\}. On
+so it is a diagnostic and not a method. On KuaiRec, a training-free log-fitted prior alone reaches nDCG@20 0.6367 on the 1,410 evaluated users, against
+0.6378 for DRUP (\texttt{v13\_saturation\_kuairec.txt}, copied from \texttt{v8\_probes/probe\_linear.txt}). On
 KuaiRand-27K the same kind of diagnostic is in a file, and it is over all users: the item oracle reaches nDCG@10 0.5072, the log
 prior 0.3884 and the random ranking 0.3329. A rank-64 model on the residuals of the uniform item means moves the item-mean value
 from 0.5850 to 0.5851 (\texttt{v9\_probes/headroom\_kuairand\_pure.txt}). The residual headroom therefore lies at the item level, and
@@ -136,8 +139,7 @@ alternative $3/7$, so this choice inflates the variance more and is the more con
 two-sided test at level 0.05 needs a mean-to-standard-deviation ratio of the split differences of at least
 $t_{0.975,4}\sqrt{1/5+7/3}\approx4.42$.
 
-\paragraph{Holm adjustment.} The p-values of a family are adjusted by the step-down procedure of Holm \{TBD:citation key holm1979,
-not in the allowed bibliographies\}. Each table names its family. The primary family for gate B1 has size five and was fixed before the
+\paragraph{Holm adjustment.} The p-values of a family are adjusted by the step-down procedure of \citet{holm1979}. Each table names its family. The primary family for gate B1 has size five and was fixed before the
 Stage B runs: LEAF-LGN+DAX against the QP family, the QP family with DAX, the post-hoc LEAF-LGN backbone, r-AdjNorm and LightGCN. The
 table family of the deep-baseline extension contains every comparator that is present in the table, and it was defined after the
 Stage B results. It has seven members with the deep baselines. The Stage 1 family for the closed-form comparison contains the two LEAF
@@ -236,7 +238,7 @@ Method & Search grid & Configurations & Source \\
 \raggedright EASE + DAX & \raggedright EASE with the DAX grid & 8,640 & same \\
 \raggedright LEAF-LGN (post-hoc backbone) & \raggedright 12 trainings (lr, wd, $w$), no DAX & 12 & \texttt{v11/dax\_lgn\_post.json} \\
 \raggedright LEAF-LGN + DAX & \raggedright 12 trainings with the DAX grid and $\gamma$ & 3,840 & same \\
-\raggedright DIN (deep interest network; \{TBD:citation key, not in the allowed bibliographies\}) & \raggedright 4 trainings (lr, wd); dim 16, hidden 16, MLP 32, batch 1024, at most 12 epochs, patience 2; last $L=200$ pre-cut events & 4 & \texttt{v12/din\_27k.json} \\
+\raggedright DIN (deep interest network; \citealp{zhou2018din}) & \raggedright 4 trainings (lr, wd); dim 16, hidden 16, MLP 32, batch 1024, at most 12 epochs, patience 2; last $L=200$ pre-cut events & 4 & \texttt{v12/din\_27k.json} \\
 \raggedright DIN + DAX & \raggedright 4 trainings with the DAX grid and $\gamma$ & 1,280 & same \\
 \raggedright SIM-hard \citep{pi2020sim} & \raggedright as DIN, with the $K=50$ most recent events sharing the tag or author of the candidate & 4 & \texttt{v12/sim\_1k.json} (1K) \\
 \raggedright SIM-hard + DAX & \raggedright as DIN + DAX & 1,280 & same \\

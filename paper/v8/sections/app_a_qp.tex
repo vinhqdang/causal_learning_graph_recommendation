@@ -1,6 +1,6 @@
 \section{The QP family}\label{app:qp}
 
-The QP family is an earlier method of the authors. It has not been published, and it is described here in full so that the baseline can be reproduced from this appendix. It is a weighted Bayesian personalised ranking (BPR) objective on a LightGCN backbone, with three variants, DR-BPR-LGN-1, DR-BPR-LGN-p2 and DR-BPR-LGN-p. The variants differ only in an offset term, and each is trained on the same pre-cut in-pool log as LEAF-LGN.
+The QP family is an earlier method of the authors. It has not been published, and it is described here in full so that the baseline can be reproduced from this appendix. It is a weighted Bayesian personalised ranking (BPR) objective \citep{rendle2009bpr} on a LightGCN backbone, with three variants, DR-BPR-LGN-1, DR-BPR-LGN-p2 and DR-BPR-LGN-p. The variants differ only in an offset term, and each is trained on the same pre-cut in-pool log as LEAF-LGN.
 
 \paragraph{Exposure model.} The probability $P_{ui}$ that item $i$ was exposed to user $u$ comes from a logistic exposure model on item popularity (the \texttt{pop} option of \texttt{drup/estimation.py}, \texttt{get\_propensity}). The propensities are clipped below at 0.05.
 

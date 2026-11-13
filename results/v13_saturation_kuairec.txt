@@ -1,0 +1,15 @@
+KuaiRec saturation diagnostic: values copied from stored probe outputs (no new computation).
+Users: 1,410 evaluated test users (n=1410 in every row below), split value val 0.6372 for the prior.
+
+Training-free log-fitted prior alone (no IPS, prior_only):
+  results/v8_probes/probe_linear.txt line 55:  kuairec prior_only: test 0.6367 +- 0.0019 (val 0.6372, 1 cfg-epochs)
+  results/v8_probes/log_linear_kuairec.txt line 1: same line
+  results/v8_probes/probe_multi.txt line 41 (single_pos block): ref 0.6367 for prior alone (noIPS)
+
+DRUP reference on the same users:
+  results/v8_probes/probe_linear.txt line 62:  vs DRUP  ref 0.6378  diff -0.38 [2.18] p=0.73 n=1410
+
+Leave-one-user-out item oracle on KuaiRec:
+  not stored. experiments/v8_probes/diag_headroom.py prints it, but no output file was saved, so no value is reported.
+
+Summary (nDCG@20): prior alone 0.6367, DRUP 0.6378.

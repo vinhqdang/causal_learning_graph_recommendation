@@ -142,3 +142,16 @@ No number in s1 is a placeholder. Numbers in s2: none.
     count (`drup/leaf.py` BucketSelector.load_state comment). s4 does not use it.
 46. **Ablation gains are against the ablation run's own base** (0.4706 in `dax_ablate.json`, not the main-run 0.4736). The full DAX
     gain is +15.10 [1.42] there and +11.96 [1.47] against the main-run backbone (item 23 of section C). s4 says which base applies.
+
+## G. Status update (2026-11-13)
+
+- holm1979, rendle2009bpr, zhang2024advdrop, islam2026ppd: cited in s4, s3, app A, s2 (entries already in refs_new.bib).
+- zhou2018din (DIN, KDD 2018): verified against Crossref DOI 10.1145/3219819.3219823 and cited in s1 and the s4 baseline table.
+- saito2021obd (Open Bandit Dataset): verified by web search (NeurIPS 2021 Datasets and Benchmarks, arXiv 2008.07146). Page
+  numbers are omitted; BibTeX reports an empty-pages warning for this entry. Add pages once the proceedings record is checked.
+- pi2020sim (SIM): verified against Crossref DOI 10.1145/3340531.3412744 (pages 2685-2692). Cited in s1 and s2 and in s4.
+- The data statistics TBDs (s3, s4 table tab:data) are now filled from results/v13_data_stats.txt (experiments/v13_data_stats.py).
+- KuaiRec saturation: the stored prior-alone (0.6367) and DRUP (0.6378) values are in results/v13_saturation_kuairec.txt. The
+  leave-one-user-out oracle value is not stored in any results file, so the oracle sentence was removed from s4.
+- Note: paper/v8/OUTLINE.md and DESIGN.md (paper/v5) quote a prior value of 0.6369 and 1,411 users. The probe files give 0.6367
+  with n = 1410; the paper uses the probe-file values.

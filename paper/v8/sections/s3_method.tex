@@ -80,7 +80,7 @@ where $q_i$ is the standardised logarithm $\log(1+\sum_u X_{ui})$ of the pre-cut
 $\beta$ and the six channel gains $g\in\mathbb R^6$ are zero-initialised and are learned together with the embeddings and
 the biases.
 
-The model is trained with the Bayesian personalised ranking (BPR) loss. The positives are the clicked pairs
+The model is trained with the Bayesian personalised ranking (BPR) loss \citep{rendle2009bpr}. The positives are the clicked pairs
 $X$, each with weight 1. The policy channel adds the shown-but-not-clicked pairs $N$ as positives. In every epoch each
 such pair is kept with probability $w$, so $w$ is the weight of the policy channel. A negative is an item drawn uniformly
 from the items outside $X\cup N$ (outside $X$ when $w=0$), and an item that falls in the excluded set is redrawn once.
@@ -208,7 +208,7 @@ strengths are validation hyperparameters, and the paper does not report the valu
 The factors $\theta$ and $\kappa$ are nuisance parameters. They should not be read as user traits. The scenario factors are relative to tab 1. In the probe fit with prior 80, several tabs have factors above one,
 which is allowed because the factors are only identified relative to the reference. Items with few pre-cut impressions are
 pulled towards their content centre, and users with few clicks are pulled towards their lifelong prior. The median number of
-pre-cut impressions per pool item is \{TBD:data statistics script, pre-cut impressions per pool item, median\}.
+pre-cut impressions per pool item is 43 over the 7,583 pool items, with items without a pre-cut impression counted as zero (0.6\% of items; \texttt{results/v13\_data\_stats.txt}).
 % source: results/v11_probes/probe_pbm.txt (tab factors line, prior 80)
 
 \subsection{Cost and measured run times}

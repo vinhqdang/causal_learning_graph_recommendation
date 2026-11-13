@@ -1,4 +1,4 @@
-\begin{thebibliography}{34}
+\begin{thebibliography}{40}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\href}[2]{#2}
@@ -109,6 +109,15 @@
   of the 43rd International ACM SIGIR Conference on Research and Development in
   Information Retrieval}, pp. \bibinfo{pages}{639--648}.
 %Type = Article
+\bibitem[{Holm(1979)}]{holm1979}
+\bibinfo{author}{Holm, S.}, \bibinfo{year}{1979}.
+\newblock \bibinfo{title}{A simple sequentially rejective multiple test
+  procedure}.
+\newblock \bibinfo{journal}{Scandinavian Journal of Statistics}
+  \bibinfo{volume}{6}, \bibinfo{pages}{65--70}.
+\newblock \URLprefix \url{https://www.jstor.org/stable/4615733},
+  \DOIprefix\doi{10.2307/4615733}.
+%Type = Article
 \bibitem[{Hu et~al.(2025)Hu, Sun, Liu, Wu and Wang}]{hu2025uncertainty}
 \bibinfo{author}{Hu, W.}, \bibinfo{author}{Sun, X.}, \bibinfo{author}{Liu, Q.},
   \bibinfo{author}{Wu, L.}, \bibinfo{author}{Wang, L.}, \bibinfo{year}{2025}.
@@ -125,6 +134,15 @@
   datasets}, in: \bibinfo{booktitle}{2008 Eighth IEEE International Conference
   on Data Mining (ICDM)}, pp. \bibinfo{pages}{263--272}.
 \newblock \DOIprefix\doi{10.1109/ICDM.2008.22}.
+%Type = Inproceedings
+\bibitem[{Islam et~al.(2026)Islam, Zheleva and Wang}]{islam2026ppd}
+\bibinfo{author}{Islam, M.A.}, \bibinfo{author}{Zheleva, E.},
+  \bibinfo{author}{Wang, R.}, \bibinfo{year}{2026}.
+\newblock \bibinfo{title}{Post-hoc popularity bias correction in {GNN}-based
+  collaborative filtering}, in: \bibinfo{booktitle}{Proceedings of the ACM Web
+  Conference 2026 (WWW '26)}, \bibinfo{address}{Dubai, United Arab Emirates}.
+\newblock \DOIprefix\doi{10.1145/3774904.3792670},
+  \href{http://arxiv.org/abs/2510.12959}{{\tt arXiv:2510.12959}}.
 %Type = Inproceedings
 \bibitem[{Jeunen et~al.(2020)Jeunen, Balen and Goethals}]{jeunen2020cease}
 \bibinfo{author}{Jeunen, O.}, \bibinfo{author}{Balen, J.V.},
@@ -245,6 +263,16 @@
   \bibinfo{pages}{2685--2692}.
 \newblock \DOIprefix\doi{10.1145/3340531.3412744}.
 %Type = Inproceedings
+\bibitem[{Rendle et~al.(2009)Rendle, Freudenthaler, Gantner and
+  Schmidt-Thieme}]{rendle2009bpr}
+\bibinfo{author}{Rendle, S.}, \bibinfo{author}{Freudenthaler, C.},
+  \bibinfo{author}{Gantner, Z.}, \bibinfo{author}{Schmidt-Thieme, L.},
+  \bibinfo{year}{2009}.
+\newblock \bibinfo{title}{{BPR}: Bayesian personalized ranking from implicit
+  feedback}, in: \bibinfo{booktitle}{Proceedings of the 25th Conference on
+  Uncertainty in Artificial Intelligence (UAI)}, pp. \bibinfo{pages}{452--461}.
+\newblock \href{http://arxiv.org/abs/1205.2618}{{\tt arXiv:1205.2618}}.
+%Type = Inproceedings
 \bibitem[{Richardson et~al.(2007)Richardson, Dominowska and
   Ragno}]{richardson2007predicting}
 \bibinfo{author}{Richardson, M.}, \bibinfo{author}{Dominowska, E.},
@@ -254,6 +282,16 @@
   Conference on World Wide Web}, \bibinfo{publisher}{ACM}. pp.
   \bibinfo{pages}{521--530}.
 \newblock \DOIprefix\doi{10.1145/1242572.1242643}.
+%Type = Inproceedings
+\bibitem[{Saito et~al.(2021)Saito, Aihara, Matsutani and Narita}]{saito2021obd}
+\bibinfo{author}{Saito, Y.}, \bibinfo{author}{Aihara, S.},
+  \bibinfo{author}{Matsutani, M.}, \bibinfo{author}{Narita, Y.},
+  \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{Open bandit dataset and pipeline: Towards realistic
+  and reproducible off-policy evaluation}, in: \bibinfo{booktitle}{Advances in
+  Neural Information Processing Systems 34: Datasets and Benchmarks Track
+  (Round 2)}.
+\newblock \href{http://arxiv.org/abs/2008.07146}{{\tt arXiv:2008.07146}}.
 %Type = Inproceedings
 \bibitem[{Saito et~al.(2020)Saito, Yaginuma, Nishino, Sakata and
   Nakata}]{saito2020unbiased}
@@ -315,6 +353,16 @@
   \bibinfo{publisher}{ACM}. pp. \bibinfo{pages}{610--618}.
 \newblock \DOIprefix\doi{10.1145/3159652.3159732}.
 %Type = Inproceedings
+\bibitem[{Zhang et~al.(2024)Zhang, Ma, Wei, Sheng and Wang}]{zhang2024advdrop}
+\bibinfo{author}{Zhang, A.}, \bibinfo{author}{Ma, W.}, \bibinfo{author}{Wei,
+  P.}, \bibinfo{author}{Sheng, L.}, \bibinfo{author}{Wang, X.},
+  \bibinfo{year}{2024}.
+\newblock \bibinfo{title}{General debiasing for graph-based collaborative
+  filtering via adversarial graph dropout}, in: \bibinfo{booktitle}{Proceedings
+  of the ACM Web Conference 2024 (WWW '24)}, \bibinfo{address}{Singapore}.
+\newblock \DOIprefix\doi{10.1145/3589334.3645667},
+  \href{http://arxiv.org/abs/2402.13769}{{\tt arXiv:2402.13769}}.
+%Type = Inproceedings
 \bibitem[{Zhang et~al.(2021)Zhang, Feng, He, Wei, Song, Ling and
   Zhang}]{zhang2021pda}
 \bibinfo{author}{Zhang, Y.}, \bibinfo{author}{Feng, F.}, \bibinfo{author}{He,
@@ -359,5 +407,18 @@
   Information Retrieval}, \bibinfo{publisher}{ACM}. pp.
   \bibinfo{pages}{50--59}.
 \newblock \DOIprefix\doi{10.1145/3477495.3532005}.
+%Type = Inproceedings
+\bibitem[{Zhou et~al.(2018)Zhou, Zhu, Song, Fan, Zhu, Ma, Yan, Jin, Li and
+  Gai}]{zhou2018din}
+\bibinfo{author}{Zhou, G.}, \bibinfo{author}{Zhu, X.}, \bibinfo{author}{Song,
+  C.}, \bibinfo{author}{Fan, Y.}, \bibinfo{author}{Zhu, H.},
+  \bibinfo{author}{Ma, X.}, \bibinfo{author}{Yan, Y.}, \bibinfo{author}{Jin,
+  J.}, \bibinfo{author}{Li, H.}, \bibinfo{author}{Gai, K.},
+  \bibinfo{year}{2018}.
+\newblock \bibinfo{title}{Deep interest network for click-through rate
+  prediction}, in: \bibinfo{booktitle}{Proceedings of the 24th ACM SIGKDD
+  International Conference on Knowledge Discovery \& Data Mining},
+  \bibinfo{publisher}{ACM}. pp. \bibinfo{pages}{1059--1068}.
+\newblock \DOIprefix\doi{10.1145/3219819.3219823}.
 
 \end{thebibliography}

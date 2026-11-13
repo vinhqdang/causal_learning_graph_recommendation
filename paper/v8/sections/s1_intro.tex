@@ -63,10 +63,9 @@ difference as the closer comparison.
 % source: results/v11/stageB.txt Section 3 (configurations searched; fair baseline), Section 1 (n_configs)
 
 We do not claim that DAX recovers an unbiased or causally identified item quality, since its factors are identified
-only up to a scale; that LEAF-LGN+DAX outperforms SIM or TWIN, which were not run on the main setting; that the weight of
+only up to a scale; that LEAF-LGN+DAX outperforms SIM \\citep{pi2020sim} or TWIN \\citep{chang2023twin}, which were not run on the main setting; that the weight of
 DAX is learned end to end; or that the results hold beyond one platform family and one training seed per split.
-The deep lifelong baseline that we did run on the main setting is DIN \textit{[TBD: cite Deep Interest Network; key not in
-the allowed bibliographies]}, which attends over the last $L$ events of each user's lifelong sequence. LEAF-LGN+DAX exceeds
+The deep lifelong baseline that we did run on the main setting is DIN \citep{zhou2018din}, which attends over the last $L$ events of each user's lifelong sequence. LEAF-LGN+DAX exceeds
 DIN+DAX by $+5.73$ [1.64] $\times10^{-3}$ nDCG@10 on the same splits.
 % source: results/v12/final12.txt Section 3b (LEAF-LGN+DAX - DIN+DAX); DIN definition in experiments/run_din.py
 
