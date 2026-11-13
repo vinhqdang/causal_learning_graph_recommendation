@@ -1,0 +1,27 @@
+\begin{table}[tbp]
+\centering
+\footnotesize
+\caption{Sensitivity of the Holm adjustment: the main family extended by EASE and EASE+DAX (the family size is given in the column header and counts the comparators whose files exist).}
+\label{tab:sens}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrccc}
+\toprule
+Comparator & $p$ & $p_{\mathrm{Holm}}$ (family of $9$) & NB $p$ & NB $p_{\mathrm{Holm}}$ \\
+\midrule
+QP family & $3.64\times10^{-125}$ & $2.55\times10^{-124}$ & 0.023 & $4.56\times10^{-2}$ \\
+QP family+DAX & $3.96\times10^{-47}$ & $7.92\times10^{-47}$ & 0.006 & $2.23\times10^{-2}$ \\
+LEAF-LGN (post-hoc run) & $6.55\times10^{-57}$ & $1.97\times10^{-56}$ & 0.001 & $6.85\times10^{-3}$ \\
+r-AdjNorm & $2.43\times10^{-123}$ & $1.46\times10^{-122}$ & 0.000 & $3.52\times10^{-4}$ \\
+LightGCN & $5.33\times10^{-190}$ & $4.27\times10^{-189}$ & 0.008 & $2.44\times10^{-2}$ \\
+DIN & $1.41\times10^{-73}$ & $5.62\times10^{-73}$ & 0.001 & $6.62\times10^{-3}$ \\
+DIN+DAX & $7.95\times10^{-12}$ & $7.95\times10^{-12}$ & 0.043 & $4.56\times10^{-2}$ \\
+SIM & \textnormal{\{TBD:results/v12/sim\_27k.json SIM paired test\}} & \textnormal{\{TBD:results/v12/sim\_27k.json SIM paired test\}} & \textnormal{\{TBD:results/v12/sim\_27k.json SIM paired test\}} & \textnormal{\{TBD:results/v12/sim\_27k.json SIM paired test\}} \\
+SIM+DAX & \textnormal{\{TBD:results/v12/sim\_27k.json SIM+DAX paired test\}} & \textnormal{\{TBD:results/v12/sim\_27k.json SIM+DAX paired test\}} & \textnormal{\{TBD:results/v12/sim\_27k.json SIM+DAX paired test\}} & \textnormal{\{TBD:results/v12/sim\_27k.json SIM+DAX paired test\}} \\
+EASE & $6.53\times10^{-205}$ & $5.88\times10^{-204}$ & 0.000 & $1.16\times10^{-3}$ \\
+EASE+DAX & $1.52\times10^{-115}$ & $7.61\times10^{-115}$ & 0.001 & $5.39\times10^{-3}$ \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize The Holm values differ from Table~\ref{tab:main} only through the family size.\end{minipage}
+\end{table}

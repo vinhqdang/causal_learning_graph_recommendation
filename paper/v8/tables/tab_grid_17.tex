@@ -1,0 +1,19 @@
+\begin{table}[tbp]
+\centering
+\footnotesize
+\caption{Chosen configurations per split: SIM+DAX (1K) (nDCG@10 mean 0.4357).}
+\label{tab:grid17}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{rp{0.82\linewidth}}
+\toprule
+Split & Chosen configuration \\
+\midrule
+1 & \texttt{lr=0.003, wd=0.0001, epoch=0, gamma=0.2, prior=160, centre=content, k\_life=100, tab=False, prior\_s=None} \\
+2 & \texttt{lr=0.01, wd=1e-05, epoch=1, gamma=0.4, prior=160, centre=tag, k\_life=0, tab=True, prior\_s=80} \\
+3 & \texttt{lr=0.01, wd=1e-05, epoch=1, gamma=0.3, prior=160, centre=tag, k\_life=100, tab=True, prior\_s=None} \\
+4 & \texttt{lr=0.003, wd=0.0001, epoch=6, gamma=0.5, prior=80, centre=tag, k\_life=0, tab=False, prior\_s=None} \\
+5 & \texttt{lr=0.01, wd=1e-05, epoch=1, gamma=0.5, prior=160, centre=tag, k\_life=100, tab=True, prior\_s=80} \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}

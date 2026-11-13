@@ -1,0 +1,20 @@
+\begin{table}[tbp]
+\centering
+\footnotesize
+\caption{Fair-baseline reading: the DAX increments and the stored LEAF-LGN against the QP family, with their search budgets (configurations of the first and second method).}
+\label{tab:fair}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lccccl}
+\toprule
+Comparison & Configurations & Diff.\ [95\% hw] & $p$ & NB $p$ & Test family \\
+\midrule
+LEAF-LGN+DAX minus QP family+DAX (fair baseline) & 3840 / 3200 & +12.04 [1.63] & $3.96\times10^{-47}$ & 0.006 & main family \\
+QP family+DAX minus QP family (DAX on the QP backbone) & 3200 / 20 & +10.28 [1.37] & $1.09\times10^{-48}$ & 0.105 & raw \\
+LEAF-LGN+DAX minus LEAF-LGN (DAX on the LEAF backbone) & 3840 / 12 & +11.96 [1.47] & $6.55\times10^{-57}$ & 0.001 & main family \\
+LEAF-LGN (stored, v10) minus QP family & 197 / 20 & +9.63 [1.60] & $6.77\times10^{-32}$ & 0.063 & raw \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize Rows marked raw are not Holm-adjusted: the stored v10 comparison is part of a different family (eight comparisons in the stage 1 run), and the DAX increments are reported beside the main family. The QP family + DAX search uses only the QP backbone configurations selected without DAX.\end{minipage}
+\end{table}

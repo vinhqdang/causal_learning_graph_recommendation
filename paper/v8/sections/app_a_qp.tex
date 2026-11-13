@@ -1,0 +1,19 @@
+\section{The QP family}\label{app:qp}
+
+The QP family is an earlier method of the authors. It has not been published, and it is described here in full so that the baseline can be reproduced from this appendix. It is a weighted Bayesian personalised ranking (BPR) objective on a LightGCN backbone, with three variants, DR-BPR-LGN-1, DR-BPR-LGN-p2 and DR-BPR-LGN-p. The variants differ only in an offset term, and each is trained on the same pre-cut in-pool log as LEAF-LGN.
+
+\paragraph{Exposure model.} The probability $P_{ui}$ that item $i$ was exposed to user $u$ comes from a logistic exposure model on item popularity (the \texttt{pop} option of \texttt{drup/estimation.py}, \texttt{get\_propensity}). The propensities are clipped below at 0.05.
+
+\paragraph{Imputation.} The outcome imputation $\hat Y_{ui}$ is the additive model of \texttt{baseline\_imputation} with inverse-propensity weights, clipped to $[0,1]$ for the weights and to $[0.01, 0.99]$ for the offset. Its standardised logit $z_{ui}$ is the offset feature.
+
+\paragraph{Unlogged-pair weight.} For a pair that is not a logged positive, $Q_{ui}=\hat Y_{ui}(1-P_{ui})/(1-P_{ui}\hat Y_{ui})$, clipped to $[0,1]$. It is the probability that such a pair is a positive after all, under $Y$ independent of exposure given the imputation.
+
+\paragraph{Loss.} For a logged positive pair $(u,i)$ and a sampled negative $j$ (resampled when $(u,j)$ is a logged positive), the weight of the negative is $w_{uj}=\max(1-Q_{uj},10^{-3})$ and the loss is
+\[
+\mathcal L=-\frac{\sum_{(u,i,j)} w_{uj}\log\sigma(s_{ui}-s_{uj})}{\sum_{(u,i,j)} w_{uj}},
+\]
+with the score $s_{ui}=\langle e_u,e_i\rangle+\beta\,z_{ui}$. The DR-BPR-LGN-1 variant has $\beta=0$. The DR-BPR-LGN-p2 and DR-BPR-LGN-p variants use $\beta\in\{1,2\}$ and $\beta\in\{0.5,1\}$ respectively.
+
+\paragraph{Grids and selection.} The backbone is LightGCN with two layers and dimension 64. The grid is learning rate in $\{10^{-2}, 3\times10^{-3}\}$ and weight decay in $\{10^{-5}, 10^{-4}\}$, with the offset grid above. That gives 4 configurations for DR-BPR-LGN-1, 8 for DR-BPR-LGN-p2 and 8 for DR-BPR-LGN-p, 20 in total (\texttt{results/v10/learned\_kuairand\_t\_qp.json}). Training runs for at most 40 epochs with patience 3, and batch size 8,192. Validation nDCG@10 selects the configuration in each split. The QP family in the main comparison is the variant with the largest validation value in each split, so its search is 20 configurations per split. The QP family with DAX (the method section) reuses the QP backbones selected without DAX.
+
+\paragraph{Controls on the same family.} The variants with the weight replaced by a popularity weight, by the imputation alone, or by a shuffled weight are defined in \texttt{experiments/run\_learned.py} and are not part of the reported results.

@@ -1,0 +1,37 @@
+\section{EM for detection-adjusted attractiveness}\label{app:em}
+
+This appendix gives the model and the updates implemented in \texttt{drup/dax.py} (\texttt{fit\_dax}). Only rows with time before the cut-off $T_0$ are read.
+
+\paragraph{Model.} A logged impression of user $u$, item $i$ and tab $t$ has an examination indicator $E$ and an attractiveness indicator $R$,
+\[
+E\sim\mathrm{Bernoulli}(\theta_u\kappa_t),\qquad R\sim\mathrm{Bernoulli}(\alpha_i),\qquad y=ER,
+\]
+where $y$ is the click. The factors are in $[0,1]$, $\kappa_1=1$ for the tab with code 1, which is the test scenario.
+
+\paragraph{Priors.} The priors are $\alpha_i\sim\mathrm{Beta}(a\,c_i,\,a(1-c_i))$ with $a$ the prior strength (80 in the main run), $\theta_u\sim\mathrm{Beta}(k\,\tilde r_u,\,k(1-\tilde r_u))$ with $k$ the lifelong strength (100 in the main run), and $\kappa_t$ free. The lifelong rate $\tilde r_u$ is the user's lifelong click rate rescaled to have mean one and multiplied by the pooled examination rate of the pre-cut log, and is clipped to $[10^{-3},1]$. With $k=0$ the code uses $\mathrm{Beta}(2,2)$ on $\theta_u$. The attractiveness centre $c_i$ is the pooled attraction of the tag of $i$ with a $\mathrm{Beta}(1,1)$ smoothing, or, in the content variant, a weighted ridge regression (penalty 10) of $\operatorname{logit}\alpha$ on one-hot content codes with weights $\sqrt{n_i+1}$; the content variant replaces the tag centre after five iterations.
+
+\paragraph{Initialisation and iterations.} $\theta_u=0.7$, $\kappa_t=1$, $\alpha_i=0.6$. There are 40 EM iterations, and no convergence test is applied.
+
+\paragraph{E-step.} Let $\tau=\theta_u\kappa_t$. A click gives $P(E=1)=P(R=1)=1$. A non-click gives
+\[
+P(E=1\mid y=0)=\frac{\tau(1-\alpha_i)}{1-\tau\alpha_i},\qquad
+P(R=1\mid y=0)=\frac{(1-\tau)\alpha_i}{1-\tau\alpha_i}.
+\]
+
+\paragraph{M-step.} Let $S^E_u=\sum P(E=1)$ over the rows of $u$, $K_u=\sum\kappa_t$ over the same rows and $c^0_u=\tilde r_u\,\sum_u S^E_u/\sum_u K_u$, clipped to $[10^{-3},1]$. Then
+\[
+\theta_u=\frac{S^E_u+k\,c^0_u}{K_u+k}\quad(k>0),\qquad \theta_u=\frac{S^E_u+1}{K_u+2}\quad(k=0),
+\]
+clipped to $[10^{-3},1]$. For the tab factors, with $\kappa$ of the tab coded $t$,
+\[
+\kappa_t=\frac{\sum_{\text{rows of }t}P(E=1)+1}{\sum_{\text{rows of }t}\theta_u+1},
+\]
+and all $\kappa_t$ are divided by the value of the reference tab (code 1) after each update, so that it equals one. Note that the code adds a pseudo-count of one to the numerator and denominator; this smoothing is part of the reported model. The attractiveness update is
+\[
+\alpha_i=\frac{\sum_{\text{rows of }i}P(R=1)+a\,c_i}{n_i+a},
+\]
+clipped to $[10^{-4},1-10^{-4}]$, where $n_i$ is the number of pre-cut rows of item $i$.
+
+\paragraph{Strata.} The optional user-stratum cells $\alpha_{i,s}$ of the main run use the same update with $\alpha_i$ as the centre and the cell prior strength $\texttt{prior\_s}=80$ (\texttt{results/v11/dax\_lgn\_post.json}, chosen configurations).
+
+\paragraph{Output.} The fit returns $\operatorname{logit}\alpha_i$, $\theta_u$ and $\kappa_t$. The combined score of the method section uses $\operatorname{logit}\alpha_i$ standardised over each user's candidate list.

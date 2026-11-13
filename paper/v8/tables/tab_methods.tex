@@ -1,0 +1,31 @@
+\begin{table}[tbp]
+\centering
+\footnotesize
+\caption{Methods on KuaiRand-27K (temporal, all users): mean and standard deviation of nDCG@10 over the five splits, configurations searched per split, and the source file.}
+\label{tab:methods}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrrr}
+\toprule
+Method & Mean & SD & Configurations & Source \\
+\midrule
+LEAF-LGN+DAX & 0.4854 & 0.0009 & 3840 & dax\_lgn\_post.json \\
+LEAF-LGN (post-hoc run) & 0.4736 & 0.0002 & 12 & dax\_lgn\_post.json \\
+LEAF-LGN (stored, v10) & 0.4728 & 0.0011 & 197 & leaf\_lgn.json \\
+QP family & 0.4634 & 0.0031 & 20 & learned\_kuairand\_t\_qp.json \\
+QP family+DAX & 0.4733 & 0.0012 & 3200 & dax\_qp.json \\
+QP family (retrained) & 0.4652 & 0.0017 & 10 & dax\_qp.json \\
+r-AdjNorm & 0.4620 & 0.0008 & 8 & learned\_kuairand\_t\_base.json \\
+LightGCN & 0.4576 & 0.0031 & 4 & learned\_kuairand\_t\_base.json \\
+LightGCN+DAX & \textnormal{\{TBD:results/v11/dax\_lightgcn.json LightGCN+DAX mean\}} & \textnormal{\{TBD:results/v11/dax\_lightgcn.json LightGCN+DAX sd\}} & \textnormal{\{TBD:results/v11/dax\_lightgcn.json LightGCN+DAX n\_configs\}} & \textnormal{\{TBD:results/v11/dax\_lightgcn.json LightGCN+DAX\}} \\
+EASE & 0.4507 & 0.0009 & 27 & dax\_ease.json \\
+EASE+DAX & 0.4623 & 0.0010 & 8640 & dax\_ease.json \\
+DIN & 0.4675 & 0.0007 & 4 & din\_27k.json \\
+DIN+DAX & 0.4796 & 0.0015 & 1280 & din\_27k.json \\
+SIM & \textnormal{\{TBD:results/v12/sim\_27k.json SIM mean\}} & \textnormal{\{TBD:results/v12/sim\_27k.json SIM sd\}} & \textnormal{\{TBD:results/v12/sim\_27k.json SIM n\_configs\}} & \textnormal{\{TBD:results/v12/sim\_27k.json SIM\}} \\
+SIM+DAX & \textnormal{\{TBD:results/v12/sim\_27k.json SIM+DAX mean\}} & \textnormal{\{TBD:results/v12/sim\_27k.json SIM+DAX sd\}} & \textnormal{\{TBD:results/v12/sim\_27k.json SIM+DAX n\_configs\}} & \textnormal{\{TBD:results/v12/sim\_27k.json SIM+DAX\}} \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize Configurations: post-hoc runs count backbone trainings times DAX configurations times gammas. The stored LEAF-LGN counts another unit (not comparable). QP family is the per-split best of the three stored QP variants on validation.\end{minipage}
+\end{table}

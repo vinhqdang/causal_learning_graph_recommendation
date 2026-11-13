@@ -1,0 +1,78 @@
+\section{Introduction}
+\label{sec:intro}
+
+Recommenders are usually trained and evaluated on logs written by a production policy. Such a log records which
+items the policy chose to show to which users, and whether those users clicked. A model fitted to this record
+learns the response of the audiences that the policy selected, and a model that ranks well on a held-out part of
+the same record is rewarded partly for reproducing the policy. The question that matters for an item is different:
+how a user who was not selected for the item would respond to it. Randomised exposure measures this target
+directly. In the KuaiRand logs \citep{gao2022kuairand}, a feed slot is replaced with small probability by a video
+drawn uniformly from a pool of 7,583 videos, so the inserted candidates reach users whatever the policy would have
+predicted.
+% source: results/v11_probes/diag_gap.txt (header: items with any 7583)
+
+We first ask where the remaining accuracy of a strong graph recommender lies on this target. The headroom is at the
+item level. A leave-one-user-out item oracle, which scores each candidate by the uniform click rate of the item among
+the other test users, reaches nDCG@10 of 0.5068 against 0.4735 for LEAF-LGN, a gap of $+33.31\times10^{-3}$. The
+oracle reads test labels, so it is a diagnostic and not a method. The gap is concentrated in the items with the
+highest uniform click rates. The post-cut log predicts the uniform rate no better than the pre-cut log (Spearman
+0.405 against 0.431), so temporal drift is not the bottleneck. Personalisation fitted on uniform in-pool data adds
+nothing once item means are known. What the policy log lacks is a measurement of how appealing an item is to an
+audience the policy did not select.
+% sources: results/v11_probes/diag_gap.txt (oracle 0.5068, gap +33.31e-3, LEAF-LGN 0.4735, Spearman rows
+% post_clk +0.405 and pre_clk +0.431, quintile share in row q bin 4);
+% results/v9_probes/headroom_kuairand_pure.txt (H2: item-only 0.5850, rank-64 residual 0.5851)
+
+We address this with two signals that are estimated from the log alone and added to a graph backbone. The first is a
+lifelong, exposure-conditional affinity (LEAF). For each user, LEAF uses the impressions of videos outside the test
+pool before the cut-off, and summarises, for every content key of a pool video (tag, author, music), how often the
+user clicked after an impression. Because the statistics are conditioned on the impression, they measure the response
+of the user given exposure, not how often the policy chose the key. The second is detection-adjusted attractiveness
+(DAX). DAX models each logged impression as an examination event, whose probability depends on the user and the
+scenario, followed by a click that depends on the attractiveness of the item. A non-click is then weak evidence
+against an item when the user rarely examines, and strong evidence when examination is likely. The attractiveness is
+fitted by expectation-maximisation on the pre-cut log and shrunk towards the mean of its content tag.
+
+We make four contributions. Each is stated with the number that supports it. Section~\ref{sec:results} gives the
+full tables, and each number is traced to a result file in the replication materials.
+
+\begin{description}
+\item[C1 (headroom diagnosis).] On randomised insertions, the item oracle exceeds LEAF-LGN by
+  $+33.31\times10^{-3}$ nDCG@10. This is a diagnostic that uses test labels and is never a selection input.
+% source: results/v11_probes/diag_gap.txt
+\item[C2 (LEAF).] Lifelong exposure-conditional channels built from out-of-pool videos transfer through content keys
+  to a disjoint, randomly exposed pool. Added to LightGCN they give $+15.46$ [1.53] $\times10^{-3}$ nDCG@10, and a
+  control that shuffles the users' lifelong tables removes the lifelong gain. LEAF alone does not pass the pre-declared
+  Stage 1 gate against the QP family (Section~\ref{sec:results}).
+% source: results/v10/stage1.txt Sections 3 and 5 (LEAF-LGN vs LightGCN; shuffle control, closed-form variant)
+\item[C3 (DAX).] DAX is complementary to LEAF. On top of LEAF-LGN it gives $+11.96$ [1.47] $\times10^{-3}$ nDCG@10,
+  and the same post-hoc module is applied to EASE and to the QP family. The DAX weight is selected on validation
+  together with the backbone epoch and the DAX configuration; it is not learned jointly.
+% source: results/v11/stageB.txt Section 2 (LEAF-LGN+DAX - LEAF-LGN); post-hoc rule from results/v11/dax_lgn_post.json
+\item[C4 (main result).] Under a temporal protocol with five user-level splits, LEAF-LGN+DAX reaches nDCG@10 of
+  0.4854 against 0.4634 for the QP family, a paired difference of $+22.32$ [1.83] $\times10^{-3}$ with a positive
+  difference in every split. The QP family is an IPS- and DR-weighted BPR LightGCN baseline that is described in full
+  in Appendix~A.
+% source: results/v11/stageB.txt Sections 1 and 2
+\end{description}
+
+The comparison in C4 is not budget-matched. LEAF-LGN+DAX searches 3,840 configurations per split, whereas the QP family
+alone searches 20. The fair comparator QP family+DAX adds the same DAX module to the QP family and searches 3,200
+configurations. LEAF-LGN+DAX still exceeds it, by $+12.04$ [1.63] $\times10^{-3}$ nDCG@10, and we treat this
+difference as the closer comparison.
+% source: results/v11/stageB.txt Section 3 (configurations searched; fair baseline), Section 1 (n_configs)
+
+We do not claim that DAX recovers an unbiased or causally identified item quality, since its factors are identified
+only up to a scale; that LEAF-LGN+DAX outperforms SIM or TWIN, which were not run on the main setting; that the weight of
+DAX is learned end to end; or that the results hold beyond one platform family and one training seed per split.
+The deep lifelong baseline that we did run on the main setting is DIN \textit{[TBD: cite Deep Interest Network; key not in
+the allowed bibliographies]}, which attends over the last $L$ events of each user's lifelong sequence. LEAF-LGN+DAX exceeds
+DIN+DAX by $+5.73$ [1.64] $\times10^{-3}$ nDCG@10 on the same splits.
+% source: results/v12/final12.txt Section 3b (LEAF-LGN+DAX - DIN+DAX); DIN definition in experiments/run_din.py
+
+Section~\ref{sec:related} places the work among lifelong behaviour models, click models, exposure-aware recommenders,
+occupancy and small-area estimators, and debiased graph recommenders. Section~\ref{sec:method} defines the LEAF
+channels, DAX and their combination. Section~\ref{sec:protocol} gives the temporal protocol, the splits, the controls
+and the tests. Section~\ref{sec:results} reports the headroom diagnosis, the main comparison, the backbone and ablation
+analyses and the robustness checks. Section~\ref{sec:discussion} discusses why the multiplicative combination and the
+lifelong channels help. Section~\ref{sec:limits} lists the limitations, and Section~\ref{sec:conclusion} concludes.

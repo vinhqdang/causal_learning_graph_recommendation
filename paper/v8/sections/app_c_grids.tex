@@ -1,0 +1,24 @@
+\section{Grids and chosen configurations}\label{app:grids}
+
+The search spaces are as follows. LEAF-LGN and the other post-hoc backbones use learning rate $\{10^{-2}, 3\times10^{-3}\}$ and weight decay $\{10^{-4}, 10^{-5}\}$, with the backbone's own grid. LEAF-LGN uses $w\in\{0, 0.25, 0.5\}$ (its policy weight). EASE uses $w\in\{0,0.25,0.5\}$, $\lambda\in\{10^{3},3\times10^{3},10^{4}\}$ and $\beta\in\{0,0.25,0.5\}$, which gives 27 configurations. The DAX grid has 32 configurations: prior strength $\{80,160\}$, centre $\{$tag, content$\}$, lifelong strength $k\in\{0,100\}$, tab factor on or off, and stratum cells off or on with $\texttt{prior\_s}=80$. The gammas are $\{0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.7, 1.0\}$. A post-hoc arm searches the backbone trainings times 32 DAX configurations times 10 gammas, for example $12\times32\times10=3{,}840$ for LEAF-LGN+DAX and $27\times32\times10=8{,}640$ for EASE+DAX. The QP family with DAX searches 10 backbone trainings, or $10\times32\times10=3{,}200$, and the 1K arm searches 20, or 6,400 (Appendix~\ref{app:qp}).
+
+The tables below give the configuration chosen on validation in each split, for every method with a result file. Entries marked TBD have no result file yet. In the main run, LEAF-LGN+DAX chooses the tab factor on, the stratum cell prior 80 and gamma 0.5 in every split; the attractiveness centre is the tag mean in four splits and the content centre in split two; the lifelong strength is 100 in every split, the upper edge of its grid, and the prior strength is 80 in every split, the lower edge (Section~\ref{sec:limits}). The backbone chooses learning rate 3e-3, weight decay 1e-4 and $w\in\{0.25,0.5\}$, with 14 to 27 epochs.
+
+\input{tables/tab_grid_00}
+\input{tables/tab_grid_01}
+\input{tables/tab_grid_02}
+\input{tables/tab_grid_03}
+\input{tables/tab_grid_04}
+\input{tables/tab_grid_05}
+\input{tables/tab_grid_06}
+\input{tables/tab_grid_07}
+\input{tables/tab_grid_08}
+\input{tables/tab_grid_09}
+\input{tables/tab_grid_10}
+\input{tables/tab_grid_11}
+\input{tables/tab_grid_12}
+\input{tables/tab_grid_13}
+\input{tables/tab_grid_14}
+\input{tables/tab_grid_15}
+\input{tables/tab_grid_16}
+\input{tables/tab_grid_17}

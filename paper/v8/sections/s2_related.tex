@@ -1,0 +1,120 @@
+\section{Related work}
+\label{sec:related}
+
+We organise the related work by the question that each line of work answers. Each subsection ends with the
+difference from the present work. Table~\ref{tab:positioning} collects the closest works, and the paragraph after
+it states the novelty claim.
+
+\subsection{Lifelong behaviour models}
+\label{sec:rel-lifelong}
+
+Lifelong behaviour models in click-through prediction retrieve information from long user histories. SIM
+\citep{pi2020sim} selects behaviours from a lifelong sequence that match the category of the target item, and passes
+them to a deep CTR model. TWIN \citep{chang2023twin} applies a two-stage target attention over a lifelong sequence on
+the Kuaishou platform, which belongs to the same platform family as KuaiRand. Both learn from policy logs and rely on
+item identifiers that the history shares with the target.
+\textit{Difference.} LEAF uses exposure-conditional statistics in which non-clicks enter the denominator, transfers to
+a pool that is disjoint from the lifelong history through content keys only, and is evaluated on randomised insertions
+under a temporal protocol.
+
+\subsection{Click models and examination}
+\label{sec:rel-click}
+
+A click model explains a click as the product of an examination event and a judgement about the item. The examination
+hypothesis and its position-based form \citep{richardson2007predicting} make the examination probability depend on the
+position of the item. \citet{craswell2008cascade} compare cascade and position-bias models on search logs, and the
+monograph of \citet{chuklin2015clickmodels} summarises this family. The dynamic Bayesian network model
+\citep{chapelle2009dbn} separates perceived relevance from actual relevance through a satisfaction state.
+\textit{Difference.} DAX conditions examination on the user, through a lifelong prior, and on the scenario, through a tab
+factor; it has no position term and no satisfaction state, and it targets item appeal under uniform insertion, which
+we check on randomised exposure.
+
+\subsection{Exposure-aware recommendation}
+\label{sec:rel-exposure}
+
+A line of work learns from impressions and not only from clicks. Impression-aware recommenders treat shown but unclicked
+items as evidence and use the impression set as features or as negative samples \citep{perezmaurera2025iars}. ExpoMF
+\citep{liang2016exposure} models exposure as a latent variable that is fitted by EM. Inverse-propensity estimators for
+missing-not-at-random implicit feedback \citep{saito2020unbiased} weight the loss by estimated exposure propensities, and
+\citet{joachims2017unbiased} apply the same idea to clicks with examination propensities. \citet{wang2018regressionem}
+and \citet{wang2016selection} estimate position bias and relevance jointly, without randomisation, in personal search.
+ESMM \citep{ma2018esmm} models the entire impression space, and \citet{krause2024coexposure} use multinomial-logit
+choice with item co-exposure. cEASE \citep{jeunen2020cease} adds item side information to a closed-form model.
+\textit{Difference.} The impression channel alone is not claimed as new here, and DAX differs in that it is a generative
+model of examination and appeal fitted by EM, whereas the estimators above weight a loss or use impressions as negatives
+or features.
+
+\subsection{Occupancy, detection and small-area estimation}
+\label{sec:rel-occupancy}
+
+Occupancy models separate the presence of a species from its detection in repeated surveys \citep{mackenzie2002occupancy}:
+a site can be occupied and still go undetected, and the pattern of repeated non-detections identifies both quantities.
+Small-area estimation shrinks noisy direct estimates for many small areas towards a regression on area covariates
+\citep{fay1979smallarea}, and multilevel regression with poststratification estimates population quantities from
+non-representative samples \citep{park2004mrp}. We found no recommendation paper that uses the occupancy likelihood to
+estimate item appeal from a policy log.
+\textit{Difference.} The likelihood of DAX has the same structure as the occupancy model, with an impression playing the
+role of a survey and a click the role of a detection, but its estimand is item appeal under a uniform audience, and the
+borrowed MRP and Fay-Herriot forms, which we tested on this target, are weaker than the multiplicative form.
+
+\subsection{Debiasing for graph recommenders}
+\label{sec:rel-graph}
+
+Graph collaborative filtering propagates signals over the user-item graph, and bias corrections have been applied to that
+propagation. NAVIP \citep{kim2022navip} debiases neighbour aggregation in a graph neural network for recommendation.
+Popularity-bias work \citep{zhang2021pda} applies a causal intervention to the popularity effect. AutoDebias
+\citep{chen2021autodebias} learns debiasing parameters from a small uniform sample, which is not admissible under our
+protocol because the randomly exposed data serve only for validation and test. Two further graph methods, adversarial
+edge dropout and the removal of a popularity direction from the embeddings after training, are relevant here
+\textit{[TBD: cite AdvDrop and PPD; their keys exist only in paper/v2/refs\_new.bib]}; neither is re-run in this paper.
+The backbones used in our experiments are LightGCN \citep{he2020lightgcn}, EASE \citep{steck2019ease} and the
+r-AdjNorm normalisation \citep{zhao2022radjnorm}.
+\textit{Difference.} The graph methods above act on propagation or on the embeddings and use no impressions and no
+lifelong data, whereas DAX re-estimates item appeal from the impressions under a different audience, and LEAF adds
+user-side behaviour on other items.
+
+\subsection{Evaluation under randomised exposure}
+\label{sec:rel-eval}
+
+Random insertion is a direct test of how a recommender responds to items that the policy did not choose. KuaiRand
+\citep{gao2022kuairand} ships randomly exposed videos in its feed logs, and KuaiRec \citep{gao2022kuairec} is a fully
+observed matrix that supports the evaluation of recommenders. Several recent papers use the random insertions of KuaiRand
+for evaluation: propensity calibration \citep{hu2025uncertainty}, debiasing of watch-time signals \citep{zhao2023d2co},
+an analysis of whether the evaluation of debiasing methods is itself biased \citep{wang2025debiasunreliable}, and an audit
+of category means in logs with random insertions \citep{zhang2026categorymeans}. Classical debiasing benchmarks use a
+small randomly exposed sample from Coat and Yahoo! R3 \citep{schnabel2016, marlin2009collaborative}.
+\textit{Difference.} As far as our searches went, none of these works uses the out-of-pool history of each user in the
+random test, which is the source of the LEAF channels here.
+
+\subsection{Positioning and novelty}
+\label{sec:rel-position}
+
+\begin{table}[t]
+\caption{Closest works and the difference from the present work.}
+\label{tab:positioning}
+\centering
+\footnotesize
+\raggedright
+\begin{tabular}{p{3.4cm}p{4.2cm}p{5.4cm}}
+\toprule
+Work & What it estimates, and from which data & Difference from this work \\
+\midrule
+SIM \citep{pi2020sim}; TWIN \citep{chang2023twin} & CTR from lifelong sequences; policy logs; history and target share item ids & Exposure-conditional statistics; transfer to a disjoint pool through content keys; randomised test; SIM and TWIN not run on the main setting \\
+Examination models \citep{richardson2007predicting,craswell2008cascade,chuklin2015clickmodels} & Click as examination times attractiveness; position or list scan & User and scenario examination; no position term; uniform-insertion target \\
+Dynamic Bayesian network \citep{chapelle2009dbn} & Perceived versus actual relevance with satisfaction & No satisfaction state \\
+Regression-EM \citep{wang2018regressionem,wang2016selection} & Position bias and relevance without randomisation; personal search & Item appeal under a uniform audience; generative fit by EM over user and tab \\
+ExpoMF \citep{liang2016exposure} & Latent exposure fitted by EM & Impressions are observed; latent examination given an impression \\
+Unbiased LTR \citep{joachims2017unbiased} & Inverse-propensity weighted losses & Generative model instead of a weighted loss \\
+Occupancy \citep{mackenzie2002occupancy} & Presence and detection from repeated surveys & Same likelihood structure; no recommender use found \\
+MRP, Fay-Herriot \citep{park2004mrp,fay1979smallarea} & Population and small-area estimates & Borrowed and tested on this target; weaker than DAX \\
+NAVIP \citep{kim2022navip} & Propensity-weighted propagation in LightGCN & No lifelong data; no examination model \\
+KuaiRand evaluations \citep{gao2022kuairand,zhang2026categorymeans} & Random insertion as the test set & No out-of-pool lifelong history in the test \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The novelty claim is therefore a combination and its controlled evidence, not any single ingredient. Each ingredient has
+a precedent: lifelong behaviour statistics, examination multiplied by attractiveness, and Beta shrinkage towards a group
+mean. As far as our searches went, none of the works in Table~\ref{tab:positioning} evaluates the combination in the form
+used here, which has lifelong channels built from other pools, examination factors for the user and the scenario, and a
+temporal protocol on randomly inserted items, with tuned baselines and split-level inference.

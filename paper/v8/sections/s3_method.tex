@@ -1,0 +1,281 @@
+\section{Method}
+\label{sec:method}
+
+The method has two components, and both are computed from the log alone. LEAF (lifelong exposure-conditional
+affinities) gives each user a set of channel values on the content keys of a pool video. The values are computed from
+the user's impressions of other videos before the cut-off. LEAF-LGN adds these channels to a LightGCN backbone. DAX
+(detection-adjusted attractiveness) estimates an appeal for each pool item by fitting a two-factor Bernoulli model to
+the pre-cut standard log. The two components are combined with a weight that is selected on validation. The
+random-exposure log is never used to fit either component; it is used only to validate and test the scores
+(Section~\ref{sec:protocol}).
+
+\subsection{Setting, notation and leakage boundary}
+\label{sec:method-notation}
+
+Let $\mathcal U$ be the set of users ($m=|\mathcal U|$), $\mathcal I$ the pool of videos that the random insertion can
+place ($n=|\mathcal I|$), and $\mathcal T$ the set of scenarios (tabs). Tab 1 is the scenario of the random test.
+The cut-off is $T_0$, 2022-04-22 00:00 UTC+8, which is $1\,650\,556\,800\,000$ ms. Every quantity that is used for
+training or for selection is computed from events with time strictly before $T_0$.
+
+\emph{Pre-cut standard log.} For a pair $(u,i)$ let $O_{ui}=1$ if $u$ was shown $i$ before $T_0$, and let $Y_{ui}=1$ if
+at least one of these impressions was clicked. The clicked pairs are $X_{ui}=O_{ui}Y_{ui}$ and the pairs shown but not
+clicked are $N_{ui}=O_{ui}(1-Y_{ui})$. Each impression $r$ of the pre-cut log carries a user $u_r$, an item $i_r$, a
+tab $t_r$ and a click $y_r\in\{0,1\}$.
+
+\emph{Lifelong log.} For each user, the lifelong log consists of the impressions before $T_0$ on videos outside $\mathcal I$.
+Three content-key families are used, $\mathcal K=\{\mathrm{tag},\mathrm{author},\mathrm{music}\}$. For a family $k$ the
+map $v_k:\mathcal I\to\mathcal V_k\cup\{\varnothing\}$ gives the key value of a pool item: the first tag, the author
+identifier, or the music identifier. A missing value is mapped to $\varnothing$.
+
+\emph{Test target.} The random-exposure impressions of a user after $T_0$ form that user's candidate list. A candidate is
+a pool item that the user saw in the random log, and the label is the click. A pair that was shown before $T_0$ is
+never a candidate.
+
+\emph{Boundary.} The latest pre-cut training timestamp is $1\,650\,556\,797\,718$ ms, which is before $T_0$. The earliest test
+timestamp is $1\,650\,595\,332\,831$ ms, which is after $T_0$ (\texttt{results/logs\_v11/dax\_lgn\_post.log}, line
+``temporal protocol''). The runners of the DAX and LEAF-LGN experiments assert this ordering (\texttt{drup/leaf.py} \texttt{check\_temporal\_protocol}). Each lifelong table and the DAX fit read only rows
+with $t<T_0$.
+% source: results/logs_v11/dax_lgn_post.log (temporal protocol line); drup/leaf.py check_temporal_protocol
+
+\subsection{LEAF: lifelong exposure-conditional channels}
+\label{sec:method-leaf}
+
+For a user $u$, a key family $k$ and a key value $v\in\mathcal V_k$, let $n^k_{uv}$ and $c^k_{uv}$ be the number of
+impressions and the number of clicks of $u$ before $T_0$ on out-of-pool videos whose key value in family $k$ is $v$.
+Let $M_u$ and $C_u$ be the number of impressions and clicks of $u$ before $T_0$ on all out-of-pool videos. The lifelong
+base rate is
+\begin{equation}
+  r_u=\frac{C_u+1}{M_u+2}.
+\end{equation}
+Two statistics are formed for each user and key value. The first is the exposure-conditional lift, which shrinks the click
+rate of the key towards the base rate with strength $s=5$:
+\begin{equation}
+  \ell^k_{uv}=\frac{c^k_{uv}+s\,r_u}{n^k_{uv}+s}-r_u .
+\end{equation}
+The second is the familiarity
+\begin{equation}
+  f^k_{uv}=\log(1+n^k_{uv}).
+\end{equation}
+The lift is conditioned on exposure. Impressions without a click are in its denominator, so the statistic measures the
+click rate of the user given that the key was shown. It does not measure how often the policy chose the key. Each of the
+six columns $(\ell^k,f^k)$ is divided by the standard deviation of its non-zero entries over all user and pool-item cells.
+The columns are not centred. A pool item with no key value, or a user with no impression on the value, has a zero channel.
+The channel vector of a pair $(u,i)$ is $z_{ui}\in\mathbb R^6$, whose entries are the six standardised statistics of user $u$ at the key values of $i$: the lift and familiarity for the tag $v_{\mathrm{tag}}(i)$, then for the author $v_{\mathrm{author}}(i)$, then for the music $v_{\mathrm{music}}(i)$. A tilde denotes the standardised statistic. Given the user and the item, the channel is a table lookup.
+% source: drup/leaf.py LifelongTables (formulas, standardisation, zero channels); experiments/v9_build_lifelong.py (columns n, c, l)
+% source: results/v9_probes/lifelong_27k_summary.txt (26,904 users with a pre-cut history; 44, 6,510 and 7,202 key values on pool videos)
+
+\subsection{LEAF-LGN: channels inside a graph backbone}
+\label{sec:method-leaflgn}
+
+The backbone is LightGCN \citep{he2020lightgcn} on the graph of clicked pre-cut pairs $X$. The normalisation is
+symmetric. The model has $d=64$ dimensions and two propagation layers, and the embeddings used for scoring are the mean of
+the layer-zero and the propagated embeddings, $\bar e_u$ and $\bar e_i$. The base score of the implementation is the
+matrix-factorisation score with biases, so the user and item biases $b_u$ and $b_i$ and a global bias $b_0$ are learned
+and are zero-initialised. The biases are not penalised by the weight decay, which applies to the embeddings only.
+LEAF-LGN scores a pair as
+\begin{equation}
+  s^{\mathrm{LEAF}}_{ui}=\langle\bar e_u,\bar e_i\rangle+b_u+b_i+b_0+\beta\,q_i+\sum_{c=1}^{6}g_c\,z_{ui,c},
+\end{equation}
+where $q_i$ is the standardised logarithm $\log(1+\sum_u X_{ui})$ of the pre-cut click count of $i$. The scalars
+$\beta$ and the six channel gains $g\in\mathbb R^6$ are zero-initialised and are learned together with the embeddings and
+the biases.
+
+The model is trained with the Bayesian personalised ranking (BPR) loss. The positives are the clicked pairs
+$X$, each with weight 1. The policy channel adds the shown-but-not-clicked pairs $N$ as positives. In every epoch each
+such pair is kept with probability $w$, so $w$ is the weight of the policy channel. A negative is an item drawn uniformly
+from the items outside $X\cup N$ (outside $X$ when $w=0$), and an item that falls in the excluded set is redrawn once.
+The loss is the batch mean of $-\log\sigma(s_p-s_n)$ plus a weight-decay term $\mathrm{wd}\sum_{\mathrm{batch}}
+(\|\bar e_u\|^2+\|\bar e_i\|^2+\|\bar e_j\|^2)/|B|$, where $j$ is the negative item. Training uses Adam with batch size
+8,192, at most 40 epochs, and early stopping for each split after three epochs without a gain in validation nDCG@10.
+
+In LEAF-LGN the learning rate $\mathrm{lr}\in\{10^{-2},3\cdot10^{-3}\}$, the weight decay $\mathrm{wd}\in\{10^{-4},10^{-5}\}$
+and the policy weight $w\in\{0,0.25,0.5\}$ define twelve trainings. The grid and the selection rule are given in
+Section~\ref{sec:protocol}. The closed-form variant LEAF-tied, which fits a collective linear autoencoder with the same
+channels, is reported only in the Stage 1 comparison and in the ablations of the LEAF channels.
+% source: experiments/run_dax.py (leaf_lgn grid, GAMMAS); drup/leaf.py LEAFLGN and fit_bpr_policy; drup/learned.py MF.forward and LightGCN
+% source: results/v10/stage1.txt Section 5 (LEAF-tied ablations)
+
+\subsection{DAX: detection-adjusted attractiveness}
+\label{sec:method-dax}
+
+DAX models each pre-cut impression of user $u$ on item $i$ in tab $t$ as an examination followed by an attraction:
+\begin{equation}
+  E_r\sim\mathrm{Bernoulli}(\theta_{u}\kappa_{t}),\qquad R_r\sim\mathrm{Bernoulli}(\alpha_{i}),\qquad y_r=E_rR_r .
+\end{equation}
+The factor $\theta_u$ is the examination probability of the user, $\kappa_t$ is the examination factor of the scenario, and
+$\alpha_i$ is the attractiveness of the item. The click probability is therefore $\theta_u\kappa_t\alpha_i$. The scenario
+factor is normalised by the first tab, $\kappa_1=1$. The factors $\theta$ and $\alpha$ are probabilities. The factor
+$\kappa_t$ is a relative quantity, and its values are not bounded by one (Section~\ref{sec:method-identify}).
+
+\paragraph{Priors.} The attractiveness of an item is shrunk towards the centre $c_i$ of its content group, with prior
+strength $\nu=80$ pseudo-impressions. The default centre is the tag centre defined below. The examination of a user is
+shrunk towards the lifelong prior $\tilde c_u$ defined below, with strength $\lambda=100$ pseudo-impressions. The scenario
+factor has one pseudo-count in its numerator and one in its denominator, which pulls it towards one for a tab with few
+impressions.
+
+\paragraph{E-step.} Let $\tau_r=\theta_{u_r}\kappa_{t_r}$. If $y_r=1$ the event is an examination and an attraction, so
+$p_{E,r}=p_{R,r}=1$. If $y_r=0$, the posterior probabilities are
+\begin{equation}
+  p_{E,r}=\frac{\tau_r(1-\alpha_{i_r})}{1-\tau_r\alpha_{i_r}},\qquad
+  p_{R,r}=\frac{(1-\tau_r)\,\alpha_{i_r}}{1-\tau_r\alpha_{i_r}} .
+\end{equation}
+
+\paragraph{M-step.} The three factors are updated in the order $\theta$, $\kappa$, $\alpha$, using the posteriors of the
+E-step and the most recent value of each factor. Each update is a closed form:
+\begin{align}
+  \theta_u&\leftarrow\frac{\sum_{r:u_r=u}p_{E,r}+\lambda\,\tilde c_u}{\sum_{r:u_r=u}\kappa_{t_r}+\lambda},\\
+  \kappa_t&\leftarrow\frac{\sum_{r:t_r=t}p_{E,r}+1}{\sum_{r:t_r=t}\theta_{u_r}+1}\quad\text{then}\quad
+  \kappa\leftarrow\kappa/\kappa_1,\\
+  \alpha_i&\leftarrow\frac{\sum_{r:i_r=i}p_{R,r}+\nu\,c_i}{n_i+\nu},
+\end{align}
+where $n_i$ is the number of pre-cut impressions of $i$. The values are clipped to $[10^{-3},1]$ for $\theta$ and to
+$[10^{-4},1-10^{-4}]$ for $\alpha$. The factors start at $\theta=0.7$, $\kappa=1$ and $\alpha=0.6$. The EM runs for 40
+iterations, with no convergence test. The output is $\operatorname{logit}\alpha$, which is the channel that is combined
+with LEAF-LGN.
+
+The $\theta$ and $\kappa$ updates are the closed forms that are implemented in \texttt{drup/dax.py}. They are not the exact
+maximisers of the expected complete-data log-likelihood. The exact stationarity condition for $\theta_u$ has
+$(1-p_{E,r})\kappa_{t_r}/(1-\tau_r)$ in place of $\kappa_{t_r}$ in the denominator, and this term is zero for a click.
+The implemented update therefore counts every impression in the denominator. The same approximation applies to $\kappa_t$.
+The synthetic check of the observed-data likelihood in \texttt{tests/test\_dax.py} does not decrease at any iteration when the
+priors are negligible. We do not claim that the penalised likelihood increases in every iteration of the fits used in
+the paper.
+% source: drup/dax.py fit_dax (E- and M-steps as written); tests/test_dax.py test_em_likelihood_is_monotone_without_priors
+
+\paragraph{Tag-mean shrinkage.} The default centre of an item is the pooled attraction of its first tag. For a tag $g$,
+\begin{equation}
+  c_g=\frac{\sum_{i:\,\mathrm{tag}(i)=g}\sum_{r:\,i_r=i}p_{R,r}+1}{\sum_{i:\,\mathrm{tag}(i)=g}n_i+2},\qquad c_i=c_{\mathrm{tag}(i)} .
+\end{equation}
+An item without a tag forms a group of its own. The centre is recomputed at each iteration. The tag centre is the default.
+The DAX grid of Section~\ref{sec:method-combine} also contains a Fay-Herriot style alternative \citep{fay1979smallarea}: after the first
+five iterations, $c_i=\sigma(\mu+x_i^\top\beta)$, where $x_i$ is a set of one-hot content codes (tag, upload type, video type,
+duration decile, aspect ratio, music type, and three bins of the out-of-pool author history), the ridge penalty is 10, and the
+weights are $\sqrt{n_i+1}$. The ablation without a tag prior replaces the centre by one global mean. A user-stratum option
+follows the MRP idea of \citep{park2004mrp}: it keeps an attraction $\alpha_{i,s}$ for each stratum $s$ of users (five quantile
+groups of the lifelong click rate and one group without history), shrunk to $\alpha_i$ with strength 80.
+
+\paragraph{Lifelong user prior.} The centre of the examination prior is the lifelong click rate of the user, rescaled to the
+examination level of the pre-cut log. Let $\bar r_u=r_u/\bar r$, where $\bar r$ is the mean of $r_u$ over the users of the
+dataset. The centre is
+\begin{equation}
+  \tilde c_u=\mathrm{clip}_{[10^{-3},1]}\!\Bigl(\bar r_u\,\frac{\sum_{r}p_{E,r}}{\sum_{r}\kappa_{t_r}}\Bigr),
+\end{equation}
+where both sums are over the pre-cut impressions at the current iteration. A user without a lifelong history has the mean
+rate. When $\lambda=0$ the $\theta$ update is $(\sum_{r:u_r=u}p_{E,r}+1)/(\sum_{r:u_r=u}\kappa_{t_r}+2)$, so the prior is a
+weak, uniform one.
+% source: drup/dax.py fit_dax (theta update, c0), lifelong_rate, user_strata, content_centre, fit_dax_dataset
+
+\subsection{Combination with LEAF-LGN}
+\label{sec:method-combine}
+
+The DAX channel is standardised over the pool items. Let $\zeta_i=(\operatorname{logit}\alpha_i-\mu)/\sigma$, where $\mu$ and $\sigma$
+are the mean and standard deviation of $\operatorname{logit}\alpha$ over $\mathcal I$. For a user $u$ and a candidate list $C_u$,
+the combined score is
+\begin{equation}
+  s_{ui}=\operatorname{rstd}_{C_u}\bigl(s^{\mathrm{LEAF}}_{ui}\bigr)+\gamma\,\operatorname{rstd}_{C_u}\bigl(\zeta_{i}\bigr),
+  \qquad i\in C_u,
+\end{equation}
+where $\operatorname{rstd}_{C_u}$ subtracts the mean over the candidate list and divides by its standard deviation. With
+stratum cells, $\zeta_i$ is replaced by the value of the stratum of $u$. The weight $\gamma$ takes values in
+$\{0,0.05,0.1,0.15,0.2,0.3,0.4,0.5,0.7,1.0\}$. At $\gamma=0$ the score is the backbone score, so the combined model is
+never worse than the backbone on the selection set.
+
+The combination is post hoc. The backbone is trained alone. At each epoch, every DAX configuration and every $\gamma$ is
+scored on validation users. A DAX configuration is one of the 32 settings of the prior strength $\nu\in\{80,160\}$, the centre
+(tag or content), the lifelong strength $\lambda\in\{0,100\}$, the tab factor (off or on), and the stratum cells (off or 80). The
+selection of each split is the epoch, configuration and $\gamma$ with the best validation value. The early-stopping rule of each
+split uses the best validation value over all candidates of the epoch, the backbone and the combined scores alike.
+
+A jointly trained variant is implemented in \texttt{drup/dax.py} as \texttt{LEAFLGNDAX}. It adds $\zeta$ as a seventh channel
+with a learned weight, and that weight is trained with the BPR objective. No result of this variant is reported in the paper,
+so the weight $\gamma$ of the reported combination is a validation-selected hyperparameter and not a learned parameter.
+% source: experiments/run_dax.py (Posthoc, GAMMAS, post_grid, patience_update); drup/dax.py LEAFLGNDAX (not reported; no result file)
+
+\subsection{Identifiability and what the appeal measures}
+\label{sec:method-identify}
+
+The likelihood of an impression depends on the parameters only through the product $\theta_u\kappa_t\alpha_i$, because
+$P(y=1)=\theta_u\kappa_t\alpha_i$ and $P(y=0)=1-\theta_u\kappa_t\alpha_i$. For any constant $c>0$ the transformation
+$(\theta,\alpha)\mapsto(c\theta,\alpha/c)$ leaves every term of the likelihood unchanged, as long as the values stay in $[0,1]$.
+The normalisation $\kappa_1=1$ fixes the scale of the scenario factors. The likelihood therefore identifies the factors up
+to one global scale that is shared by $\theta$ and $\alpha$. The scale is fixed in practice by the bounds and by the priors,
+not by the likelihood. We have not shown that no other transformation leaves the likelihood unchanged on the observed design.
+
+The order of $\alpha$ is invariant to this scale, but the logit is not a linear function of the scale. The standardised
+channel $\zeta$, and therefore the combined score, depends on the prior strengths $\nu$ and $\lambda$. For this reason these
+strengths are validation hyperparameters, and the paper does not report the values of $\alpha$ as absolute probabilities.
+
+The factors $\theta$ and $\kappa$ are nuisance parameters. They should not be read as user traits. The scenario factors are relative to tab 1. In the probe fit with prior 80, several tabs have factors above one,
+which is allowed because the factors are only identified relative to the reference. Items with few pre-cut impressions are
+pulled towards their content centre, and users with few clicks are pulled towards their lifelong prior. The median number of
+pre-cut impressions per pool item is \{TBD:data statistics script, pre-cut impressions per pool item, median\}.
+% source: results/v11_probes/probe_pbm.txt (tab factors line, prior 80)
+
+\subsection{Cost and measured run times}
+\label{sec:method-cost}
+
+The LEAF tables are dense user by key-value arrays for the three key families, with one row per user. A pair is a gather,
+which costs a constant amount per pair. The tables are built in one streaming pass over the lifelong log.
+The LightGCN propagation costs $O(L|E|d)$ per epoch, where $|E|$ is the number of clicked pairs, and each sampled pair adds
+$O(6)$ for the channels.
+
+Each DAX iteration is linear in the number of pre-cut impressions plus the numbers of users, items and tabs, because all
+accumulations are index-add operations. The Fay-Herriot alternative adds one ridge solve per iteration, whose size is the
+number of covariate levels. The main run measured the following on two threads
+(\texttt{results/logs\_v11/dax\_lgn\_post.log}). It fitted 32 DAX tables in 1.8 to 3.3 s each, which is 77.6 s in total. It
+trained the twelve LEAF-LGN backbones in 884 to 2,437 s each, which is 19,490 s in total. The run took 19,628 s of wall time
+with 86,400 validation evaluations and a peak resident memory of 6,032 MB.
+
+\subsection{Algorithms}
+\label{sec:method-algorithms}
+
+Algorithm~\ref{alg:dax} gives the DAX fit, and Algorithm~\ref{alg:leaflgn} gives the training and selection of
+LEAF-LGN+DAX.
+
+\begin{algorithm}[t]
+\caption{DAX-EM on the pre-cut log}
+\label{alg:dax}
+\begin{algorithmic}[1]
+\Require pre-cut impressions $(u_r,i_r,t_r,y_r)$, tag groups, lifelong rates $r_u$, prior strengths $\nu,\lambda$, 40 iterations
+\State $\theta_u\gets 0.7$, $\kappa_t\gets 1$, $\alpha_i\gets 0.6$
+\For{$it=1,\dots,40$}
+  \For{each impression $r$} \Comment{E-step}
+    \If{$y_r=1$}\ $p_{E,r}\gets 1$, $p_{R,r}\gets 1$
+    \Else\ $\tau_r\gets\theta_{u_r}\kappa_{t_r}$, $p_{E,r}\gets\tau_r(1-\alpha_{i_r})/(1-\tau_r\alpha_{i_r})$,
+      $p_{R,r}\gets(1-\tau_r)\alpha_{i_r}/(1-\tau_r\alpha_{i_r})$
+    \EndIf
+  \EndFor
+  \State $\tilde c_u\gets\mathrm{clip}_{[10^{-3},1]}(\bar r_u\sum_r p_{E,r}/\sum_r\kappa_{t_r})$ \Comment{lifelong centre}
+  \State $\theta_u\gets(\sum_{r:u_r=u}p_{E,r}+\lambda\tilde c_u)/(\sum_{r:u_r=u}\kappa_{t_r}+\lambda)$, clipped
+  \State $\kappa_t\gets(\sum_{r:t_r=t}p_{E,r}+1)/(\sum_{r:t_r=t}\theta_{u_r}+1)$; \ $\kappa\gets\kappa/\kappa_1$
+  \State $c_g\gets(\sum_{i\in g}\sum_{r:i_r=i}p_{R,r}+1)/(\sum_{i\in g}n_i+2)$ for each tag group $g$, \ $c_i\gets c_{\mathrm{tag}(i)}$
+  \State $\alpha_i\gets(\sum_{r:i_r=i}p_{R,r}+\nu c_i)/(n_i+\nu)$, clipped
+\EndFor
+\State \Return $\operatorname{logit}\alpha$, $\theta$, $\kappa$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[t]
+\caption{Training and post-hoc selection of LEAF-LGN+DAX}
+\label{alg:leaflgn}
+\begin{algorithmic}[1]
+\Require pre-cut log, the twelve backbone settings $(\mathrm{lr},\mathrm{wd},w)$, the 32 DAX configurations, the ten values of $\gamma$, five splits of the validation and test users
+\For{each backbone setting $(\mathrm{lr},\mathrm{wd},w)$}
+  \State train LEAF-LGN (BPR, policy channel $w$) one epoch at a time, at most 40 epochs
+  \State fit (once per configuration) the DAX table $\operatorname{logit}\alpha$ of Algorithm~\ref{alg:dax}
+  \For{each epoch}
+    \State compute $s^{\mathrm{LEAF}}_{ui}$ on the candidates of every validation and test user
+    \For{each DAX configuration and each $\gamma$}
+      \State $s_{ui}\gets\operatorname{rstd}(s^{\mathrm{LEAF}}_{ui})+\gamma\operatorname{rstd}(\zeta_i)$ \Comment{$\gamma=0$ is the backbone}
+      \For{each split $s$ still active}
+        \If{validation nDCG@10 of $s_{ui}$ exceeds the best value of $s$}
+          \State record the configuration, the epoch, $\gamma$, and the test nDCG@10 of $s$
+        \EndIf
+      \EndFor
+    \EndFor
+    \State each split stops after three epochs without a gain in its best validation value
+  \EndFor
+\EndFor
+\State \Return for each split the recorded configuration with the best validation value and its test value
+\end{algorithmic}
+\end{algorithm}

@@ -1,0 +1,19 @@
+\begin{table}[tbp]
+\centering
+\footnotesize
+\caption{Chosen configurations per split: QP family+DAX (1K) (nDCG@10 mean 0.4358).}
+\label{tab:grid13}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{rp{0.82\linewidth}}
+\toprule
+Split & Chosen configuration \\
+\midrule
+1 & \texttt{method=DR-BPR-LGN-1, lr=0.01, wd=0.0001, dim=64, layers=2, fn=1, epoch=4, gamma=1, prior=160, centre=tag, k\_life=100, tab=True, prior\_s=80} \\
+2 & \texttt{method=DR-BPR-LGN-p, lr=0.01, wd=0.0001, dim=64, layers=2, fn=1, pbeta=0.5, epoch=37, gamma=1, prior=160, centre=tag, k\_life=100, tab=True, prior\_s=80} \\
+3 & \texttt{method=DR-BPR-LGN-p, lr=0.01, wd=1e-05, dim=64, layers=2, fn=1, pbeta=0.5, epoch=31, gamma=0.4, prior=80, centre=tag, k\_life=100, tab=False, prior\_s=80} \\
+4 & \texttt{method=DR-BPR-LGN-p, lr=0.01, wd=0.0001, dim=64, layers=2, fn=1, pbeta=0.5, epoch=33, gamma=0.7, prior=80, centre=tag, k\_life=100, tab=False, prior\_s=80} \\
+5 & \texttt{method=DR-BPR-LGN-1, lr=0.01, wd=0.0001, dim=64, layers=2, fn=1, epoch=10, gamma=0.7, prior=80, centre=tag, k\_life=100, tab=True, prior\_s=None} \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}

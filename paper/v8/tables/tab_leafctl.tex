@@ -1,0 +1,26 @@
+\begin{table}[tbp]
+\centering
+\footnotesize
+\caption{LEAF controls on KuaiRand-27K (stage 1 stored run, LEAF-tied backbone): arm means and full minus arm.}
+\label{tab:leafctl}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrccccc}
+\toprule
+Arm & Configs & Mean & Full minus arm [95\% hw] & $p_{\mathrm{Holm}}$ & NB $p$ & NB $p_{\mathrm{Holm}}$ \\
+\midrule
+LEAF-tied (full) & 3456 & 0.4691 & n/a & n/a & n/a & n/a \\
+\midrule
+shuffle users & 3456 & 0.4499 & +18.90 [1.99] & $4.90\times10^{-76}$ & 0.001 & $4.60\times10^{-3}$ \\
+no tag channels & 1152 & 0.4594 & +9.38 [1.63] & $1.17\times10^{-28}$ & 0.002 & $6.48\times10^{-3}$ \\
+no author channels & 432 & 0.4628 & +6.45 [1.17] & $2.10\times10^{-26}$ & 0.001 & $4.42\times10^{-3}$ \\
+no lifelong channels & 72 & 0.4512 & +17.88 [2.04] & $9.61\times10^{-65}$ & 0.000 & $2.51\times10^{-3}$ \\
+no policy channel & 864 & 0.4643 & +5.01 [1.20] & $6.91\times10^{-16}$ & 0.066 & $1.32\times10^{-1}$ \\
+lift only & 432 & 0.4634 & +5.78 [1.11] & $6.10\times10^{-24}$ & 0.001 & $4.60\times10^{-3}$ \\
+familiarity only & 576 & 0.4585 & +10.26 [1.66] & $4.07\times10^{-33}$ & 0.001 & $4.60\times10^{-3}$ \\
+no music channels & 1728 & 0.4691 & 0.00 [0.00] & 1 & 1.000 & 1 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize Full minus arm: positive means the channel helps. Holm within the eight arms; NB over the split means. The no-music arm gives identical rankings in every split. The LEAF-LGN ablations are not run (results/v10/leaf\_lgn\_ablate.json is missing); these controls use the closed-form LEAF-tied backbone. The shuffle-users control removes the lifelong gain (design check on the difference between the shuffled and the no-lifelong arm).\end{minipage}
+\end{table}

@@ -1,0 +1,23 @@
+\begin{table}[tbp]
+\centering
+\footnotesize
+\caption{Training seeds on KuaiRand-27K: LEAF-LGN+DAX and its within-seed gain over LEAF-LGN (same seed), seeds 0 to 3.}
+\label{tab:seeds}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrrccc}
+\toprule
+Seed & LEAF-LGN+DAX & LEAF-LGN & Configs & Gain [95\% hw] & $p$ & NB $p$ \\
+\midrule
+0 (main run) & 0.4854 & 0.4736 & 3840 & +11.96 [1.47] & $6.55\times10^{-57}$ & 0.001 \\
+1 & 0.4858 & 0.4714 & 640 & +14.67 [1.42] & $1.63\times10^{-90}$ & 0.001 \\
+2 & 0.4856 & 0.4708 & 640 & +15.10 [1.46] & $1.87\times10^{-90}$ & 0.002 \\
+3 & 0.4844 & 0.4716 & 640 & +12.89 [1.44] & $1.90\times10^{-68}$ & 0.002 \\
+\midrule
+Spread over seeds & 0.4853 $\pm$ 0.0006 &  &  & +13.65 $\pm$ 1.48 &  &  \\
+QP family (seeds not run) & \textnormal{\{TBD:results/v11/c\_seeds QP seeds 1-3: qp\_s1.json.partial.json incomplete\}} &  &  &  &  &  \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize Seed 0 is the main run with the full backbone grid (12 trainings). Seeds 1 to 3 re-train with the training seed changed and a reduced backbone grid: lr 3e-3 and wd 1e-4 in every split, w in {0.25, 0.5} for the DAX arm (2 trainings) and w 0.25 for the base. The epoch, the DAX configuration and gamma are selected on validation per split. Raw p values, not Holm-adjusted. The QP family was not re-trained under seeds 1 to 3, so no seed comparison with it is reported.\end{minipage}
+\end{table}

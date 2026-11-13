@@ -1,0 +1,23 @@
+\begin{table}[tbp]
+\centering
+\footnotesize
+\caption{KuaiRand-1K replication: LEAF-LGN+DAX against the QP family with and without DAX (nDCG@10).}
+\label{tab:1k}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrrccccc}
+\toprule
+Method or comparison & Mean & SD & Configs & Diff.\ [95\% hw] & $p$ & $p_{\mathrm{Holm}}$ & NB $p$ & NB $p_{\mathrm{Holm}}$ \\
+\midrule
+LEAF-LGN+DAX & 0.4590 & 0.0038 & 3840 &  &  &  &  &  \\
+QP family & 0.4246 & 0.0043 & 20 &  &  &  &  &  \\
+QP family+DAX & 0.4358 & 0.0035 & 6400 &  &  &  &  &  \\
+\midrule
+LEAF-LGN+DAX minus QP family &  &  &  & +37.58 [11.10] & $5.37\times10^{-11}$ & $1.61\times10^{-10}$ & 0.011 & $2.28\times10^{-2}$ \\
+LEAF-LGN+DAX minus QP family+DAX &  &  &  & +25.82 [9.66] & $1.96\times10^{-7}$ & $3.91\times10^{-7}$ & 0.007 & $2.18\times10^{-2}$ \\
+QP family+DAX minus QP family &  &  &  & +11.76 [8.54] & $7.04\times10^{-3}$ & $7.04\times10^{-3}$ & 0.160 & $1.60\times10^{-1}$ \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize KuaiRand-1K: 842 test users pooled over five splits (each split 30\% validation, 70\% test); 1K users are a subset of the 27K users, a lower-power replication. The 1K QP family + DAX arm searches all 20 QP configurations (6400 configurations in total) whereas the 27K arm searches the 10 selected ones (3200); this favours the baseline and is stated as such. Holm over the three comparisons of this table; NB over the split means. Split differences (x1e-3): LEAF-LGN+DAX minus QP family: +36.7 +25.7 +35.6 +37.2 +36.6; LEAF-LGN+DAX minus QP family+DAX: +21.3 +20.3 +23.7 +23.1 +27.8; QP family+DAX minus QP family: +15.4 +5.4 +11.9 +14.1 +8.8.\end{minipage}
+\end{table}

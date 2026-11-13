@@ -1,0 +1,41 @@
+\documentclass[preprint,12pt,authoryear]{elsarticle}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{adjustbox}
+\usepackage{hyperref}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\newtheorem{proposition}{Proposition}
+\newtheorem{assumption}{Assumption}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Yhat}{\hat Y}
+\newcommand{\leaf}{LEAF}
+\newcommand{\dax}{DAX}
+\begin{document}
+\begin{frontmatter}
+\title{Examination before attraction: lifelong affinities and detection-adjusted item appeal for recommendation under randomised exposure}
+\author{Anonymous}
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+\begin{keyword}
+recommender systems \sep exposure bias \sep click models \sep lifelong user behaviour \sep randomised exposure \sep graph collaborative filtering
+\end{keyword}
+\end{frontmatter}
+\input{sections/s1_intro}
+\input{sections/s2_related}
+\input{sections/s3_method}
+\input{sections/s4_protocol}
+\input{sections/s5_results}
+\input{sections/s6_discussion}
+\input{sections/s7_limitations}
+\input{sections/s8_conclusion}
+\bibliographystyle{elsarticle-harv}
+\bibliography{../refs,refs_new}
+\appendix
+\input{sections/app_a_qp}
+\input{sections/app_b_em}
+\input{sections/app_c_grids}
+\end{document}

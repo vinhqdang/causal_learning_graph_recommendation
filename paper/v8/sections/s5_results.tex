@@ -1,0 +1,85 @@
+\section{Results}\label{sec:results}
+
+All numbers in this section are produced by \texttt{experiments/v13\_tables.py} and \texttt{experiments/v13\_figs.py} from the result files named in each table note. Differences are per-user paired differences of nDCG@10 multiplied by $10^{3}$, with the 95\% half-width in brackets. A comparison is called significant only when the Holm-adjusted p value is below 0.05 and the test is named. Tests are the per-user paired t test over the pooled test users (n = 22,612 on KuaiRand-27K) and the Nadeau-Bengio corrected resampled t test over the five split means (\citealp{nadeau2003}); the Holm family is stated in each table.
+
+\subsection{Methods and search budgets}\label{sec:res-methods}
+
+Table~\ref{tab:methods} lists the mean and standard deviation over the five splits. The search budgets differ by two orders of magnitude, so they are reported with every number. LEAF-LGN+DAX searches 3,840 configurations per split, the QP family with DAX 3,200, and the QP family itself 20. The budget of the fair baseline is therefore not matched in the strict sense; Section~\ref{sec:res-fair} discusses what this does to the comparison.
+
+\input{tables/tab_methods}
+
+\subsection{Main comparison}\label{sec:res-main}
+
+Table~\ref{tab:main} gives the paired comparisons of LEAF-LGN+DAX with each comparator of the main family. The family has seven members: the QP family, the QP family with DAX, the LEAF-LGN backbone without DAX, r-AdjNorm, LightGCN, DIN and DIN with DAX. SIM and SIM with DAX are part of the family but have no result file for KuaiRand-27K yet, so their rows are marked as pending and the Holm correction runs over the seven comparators present. EASE and EASE with DAX are reported outside the family. Table~\ref{tab:sens} shows that adding them to the family does not change any conclusion at the 0.05 level.
+
+\input{tables/tab_main}
+
+\input{tables/tab_sens}
+
+The per-user paired test gives an adjusted p value below $10^{-11}$ for each of the seven comparators, and the sign is the same in every split for each of them (Figure~\ref{fig:forest}). The split-level test is also below 0.05 after Holm adjustment for all seven comparators, but the margins are small for the two QP comparators and for DIN with DAX, whose adjusted Nadeau-Bengio p values are $4.56\times10^{-2}$, $2.23\times10^{-2}$ and $4.56\times10^{-2}$. With five splits the split-level test has low power, and these values are the closest to the threshold in the paper.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/fig_forest.pdf}
+\caption{Paired differences of LEAF-LGN+DAX against each comparator of the main family. Grey dots: the five split differences. Diamond: pooled per-user mean with its 95\% half-width. Source: \texttt{results/v11/dax\_lgn\_post.json} and the comparator files named in Table~\ref{tab:methods}.}
+\label{fig:forest}
+\end{figure}
+
+The pre-declared gate for the primary comparison requires a paired difference of at least $15\times10^{-3}$ against the QP family, with both adjusted p values below 0.05 (\texttt{results/v11/stageB.txt}, Section 3). The observed difference is $+22.32$ [1.83], and the gate is passed. The gate was declared before Stage B, and the combination it evaluates is the post-hoc one described in the method section.
+
+\subsection{Fair-baseline reading}\label{sec:res-fair}
+
+The QP family has the smaller search budget, so the fairer reference for the DAX module is the QP family with DAX, which searches the QP backbones selected without DAX. Against that baseline LEAF-LGN+DAX is higher by $+12.04$ [1.63] (per-user t test, Holm-adjusted $p=7.92\times10^{-47}$; Nadeau-Bengio Holm-adjusted $p=2.23\times10^{-2}$). The DAX increment on the QP backbone is $+10.28$ [1.37] with an unadjusted Nadeau-Bengio p of 0.105, so on the split-level test the increment on the QP backbone alone is not significant. The LEAF backbone without DAX, against the stored QP family, is $+9.63$ [1.60] with an unadjusted Nadeau-Bengio p of 0.063; in the stage 1 run this comparison is not significant after Holm adjustment (Table~\ref{tab:fair}). The LEAF backbone is therefore not, by itself, a clear improvement over the QP family on the split-level test; the combination is.
+
+\input{tables/tab_fair}
+
+\subsection{DAX on other backbones}\label{sec:res-backbone}
+
+Table~\ref{tab:backbone} applies the same post-hoc DAX module to four backbones with a result file. The increments are $+11.98$ [1.64] for EASE (unadjusted Nadeau-Bengio p 0.000), $+10.28$ [1.37] for the QP family, $+11.96$ [1.47] for LEAF-LGN and $+12.53$ [1.41] for DIN. The LightGCN increment is pending (\url{results/v11/dax_lightgcn.json} is missing), and so is the SIM increment. The increment is positive on every backbone with a result, which is the basis for describing the module as backbone-agnostic. The claim is about the module's increment under the same post-hoc rule, not about the backbones' absolute accuracy.
+
+\input{tables/tab_backbone}
+
+\subsection{Ablations of DAX}\label{sec:res-ablate}
+
+Table~\ref{tab:ablate} decomposes the DAX module. The arms are run in a reduced setting: two backbone trainings, five gammas and an epoch window of three around the main selection. The full arm reproduces the per-split values of the main run, so the arms can be compared with each other. The gain of each arm is measured against the LEAF-LGN base of that run, which has a mean of 0.4706; this base is lower than the 0.4736 of the main run, so the gains in Table~\ref{tab:ablate} are larger than the main increment of $+11.96$ [1.47]. The comparisons that do not depend on the base are the differences from the full arm, in the rightmost columns.
+
+Each removal lowers the score. Removing the examination factor $\kappa_t$ costs $+1.51$ [0.79] (Holm-adjusted $p=2.02\times10^{-4}$ by the per-user t test), removing the lifelong prior on $\theta_u$ costs $+1.78$ [0.61] ($p_{\text{Holm}}=2.16\times10^{-8}$), and removing the tag prior on $\alpha_i$ costs $+3.41$ [0.99] ($p_{\text{Holm}}=4.79\times10^{-11}$). Replacing the multiplicative form by the additive logit with tab effects costs $+6.09$ [0.96], which is the largest of the structural comparisons ($p_{\text{Holm}}=5.43\times10^{-35}$); the additive arm keeps 59.7\% of the full gain.
+
+The shuffle controls test the item-level part of $\alpha_i$. Permuting $\alpha$ across all items removes the whole gain: the pooled shuffled arm has a gain of $-0.27$ [0.36], that is $-1.8\%$ of the full gain, and the full arm is higher by $+15.36$ [1.40] ($p_{\text{Holm}}=3.53\times10^{-101}$). Permuting $\alpha$ within each tag keeps 41.6\% of the full gain ($+6.28$ [1.10]), and the full arm is higher by $+8.81$ [1.00] ($p_{\text{Holm}}=2.47\times10^{-65}$). The within-tag arm therefore keeps a substantial part of the gain, which is the tag mean, and the remaining part lies in the item-level deviation from it. The three permutation seeds give the same ordering (Table~\ref{tab:ablate}, lower block): the across-item shuffles have gains between $-0.44$ and $-0.16$ and the within-tag shuffles between $+5.66$ and $+6.84$.
+
+\input{tables/tab_ablate}
+
+\subsection{KuaiRand-1K replication}\label{sec:res-1k}
+
+Table~\ref{tab:1k} repeats the primary comparisons on KuaiRand-1K, which contains 842 test users pooled over the five splits. LEAF-LGN+DAX reaches 0.4590 against 0.4246 for the QP family, a difference of $+37.58$ [11.10] (per-user t test, Holm-adjusted $p=1.61\times10^{-10}$; Nadeau-Bengio Holm-adjusted $p=2.28\times10^{-2}$), and against 0.4358 for the QP family with DAX, a difference of $+25.82$ [9.66] (Holm-adjusted $p=3.91\times10^{-7}$; Nadeau-Bengio Holm-adjusted $p=2.18\times10^{-2}$). The DAX increment on the QP backbone, $+11.76$ [8.54], is significant under the per-user t test (Holm-adjusted $p=7.04\times10^{-3}$) but not under the split-level test (Nadeau-Bengio Holm-adjusted $p=0.160$). The 1K replication uses a wider QP search for the DAX arm (6,400 configurations against 3,200 at 27K), which favours the baseline. The 1K users are a subset of the 27K users, so the replication has lower power and is not an independent sample.
+
+\input{tables/tab_1k}
+
+\subsection{Training seeds}\label{sec:res-seeds}
+
+Table~\ref{tab:seeds} repeats the LEAF-LGN+DAX run with training seeds 1 to 3. The QP family was not re-trained with these seeds, so no seed comparison with it is reported. The LEAF-LGN+DAX mean is 0.4854 for seed 0, 0.4858, 0.4856 and 0.4844, with a spread over seeds of $0.4853\pm0.0006$. The within-seed gain over LEAF-LGN is positive in all four seeds, between $+11.96$ and $+15.10$, with per-user t p values below $10^{-56}$ and Nadeau-Bengio p values of at most 0.002. These seed tests are not in a Holm family and are not called significant; they show that the gain is not a feature of one training run. Seeds 1 to 3 use a reduced backbone grid, as the table note states, which limits what the seed spread can show about the full search.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/fig_seeds.pdf}
+\caption{Training seeds 0 to 3 on KuaiRand-27K. Left: LEAF-LGN+DAX mean nDCG@10 with the standard deviation over splits. Right: within-seed gain over LEAF-LGN with the 95\% half-width. Source: \texttt{results/v11/dax\_lgn\_post.json} (seed 0) and \texttt{results/v11/c\_seeds/lgn\_s1.json} to \texttt{lgn\_s3.json}.}
+\label{fig:seeds}
+\end{figure}
+
+\input{tables/tab_seeds}
+
+\subsection{Lifelong deep baselines}\label{sec:res-deep}
+
+DIN attends over the last 200 lifelong events of each user. On KuaiRand-27K it reaches 0.4675 and is below LEAF-LGN+DAX by $+18.26$ [1.97] (per-user t test, Holm-adjusted $p=5.62\times10^{-73}$). DIN with DAX reaches 0.4796 and remains below LEAF-LGN+DAX by $+5.73$ [1.64] (Holm-adjusted $p=7.95\times10^{-12}$; Nadeau-Bengio Holm-adjusted $p=4.56\times10^{-2}$). SIM-hard, which keeps the 50 most recent events that share the candidate's tag or author, has no KuaiRand-27K result file yet, so its rows are pending. On KuaiRand-1K, LEAF-LGN+DAX (0.4590) is above DIN with DAX (0.4228) and above SIM-hard (0.4246) and SIM with DAX (0.4357); the unadjusted differences are reported in Table~\ref{tab:deep}. The deep models are tuned over four configurations each (learning rate and weight decay, with the DAX arms on the post-hoc grid), so they are not tuned as widely as LEAF-LGN. The paper does not claim that LEAF-LGN+DAX is better than a lifelong deep model that has been tuned over a wider grid.
+
+\input{tables/tab_deep}
+
+\subsection{What the controls show}\label{sec:res-controls}
+
+The LEAF controls come from the stage 1 run on the LEAF-tied backbone, the closed-form variant on which those ablations were run (Table~\ref{tab:leafctl}). Shuffling the users' lifelong tables across users gives the largest loss, $+18.90$ [1.99] (Holm-adjusted $p=4.90\times10^{-76}$; Nadeau-Bengio Holm-adjusted $p=4.60\times10^{-3}$), and removing all lifelong channels gives $+17.88$ [2.04]. The design check of that run, the difference between the shuffled-user arm and the no-lifelong arm, is $-1.02\times10^{-3}$, within its $\pm2\times10^{-3}$ tolerance. The policy channel contributes $+5.01$ [1.20] (per-user t test Holm-adjusted $p=6.91\times10^{-16}$), but its split-level test is not significant after Holm adjustment (Nadeau-Bengio Holm-adjusted $p=0.132$). The LEAF-LGN ablations have no result file (\texttt{results/v10/leaf\_lgn\_ablate.json} is missing), so the controls are reported on the LEAF-tied backbone only.
+
+\input{tables/tab_leafctl}
+
+\subsection{Summary of the evidence}\label{sec:res-summary}
+
+Across the controls the picture is consistent. The LEAF signal depends on the users' lifelong histories and not only on the item channels: shuffling the users removes the gain. The DAX module depends on the item-level appeal beyond the tag mean and on its user and scenario terms, and a shuffle across items removes its gain. The combination is above every comparator with a result, including the lifelong deep models with DAX on KuaiRand-27K and KuaiRand-1K, and its gain is not specific to one training seed or to the 1K subset. The controls do not establish that the item-level estimate is an unbiased measure of item quality; Section~\ref{sec:limits} lists what remains untested.

@@ -1,0 +1,306 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{gao2022kuairand}
+\providecommand \oddpage@label [2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{1}{1}{Introduction}{section.1}{}}
+\citation{pi2020sim}
+\citation{chang2023twin}
+\citation{richardson2007predicting}
+\citation{craswell2008cascade}
+\citation{chuklin2015clickmodels}
+\citation{chapelle2009dbn}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related work}{4}{section.2}\protected@file@percent }
+\newlabel{sec:related}{{2}{4}{Related work}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Lifelong behaviour models}{4}{subsection.2.1}\protected@file@percent }
+\newlabel{sec:rel-lifelong}{{2.1}{4}{Lifelong behaviour models}{subsection.2.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Click models and examination}{4}{subsection.2.2}\protected@file@percent }
+\newlabel{sec:rel-click}{{2.2}{4}{Click models and examination}{subsection.2.2}{}}
+\citation{perezmaurera2025iars}
+\citation{liang2016exposure}
+\citation{saito2020unbiased}
+\citation{joachims2017unbiased}
+\citation{wang2018regressionem}
+\citation{wang2016selection}
+\citation{ma2018esmm}
+\citation{krause2024coexposure}
+\citation{jeunen2020cease}
+\citation{mackenzie2002occupancy}
+\citation{fay1979smallarea}
+\citation{park2004mrp}
+\citation{kim2022navip}
+\citation{zhang2021pda}
+\citation{chen2021autodebias}
+\citation{he2020lightgcn}
+\citation{steck2019ease}
+\citation{zhao2022radjnorm}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Exposure-aware recommendation}{5}{subsection.2.3}\protected@file@percent }
+\newlabel{sec:rel-exposure}{{2.3}{5}{Exposure-aware recommendation}{subsection.2.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Occupancy, detection and small-area estimation}{5}{subsection.2.4}\protected@file@percent }
+\newlabel{sec:rel-occupancy}{{2.4}{5}{Occupancy, detection and small-area estimation}{subsection.2.4}{}}
+\citation{gao2022kuairand}
+\citation{gao2022kuairec}
+\citation{hu2025uncertainty}
+\citation{zhao2023d2co}
+\citation{wang2025debiasunreliable}
+\citation{zhang2026categorymeans}
+\citation{schnabel2016,marlin2009collaborative}
+\citation{pi2020sim}
+\citation{chang2023twin}
+\citation{richardson2007predicting,craswell2008cascade,chuklin2015clickmodels}
+\citation{chapelle2009dbn}
+\citation{wang2018regressionem,wang2016selection}
+\citation{liang2016exposure}
+\citation{joachims2017unbiased}
+\citation{mackenzie2002occupancy}
+\citation{park2004mrp,fay1979smallarea}
+\citation{kim2022navip}
+\citation{gao2022kuairand,zhang2026categorymeans}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Debiasing for graph recommenders}{6}{subsection.2.5}\protected@file@percent }
+\newlabel{sec:rel-graph}{{2.5}{6}{Debiasing for graph recommenders}{subsection.2.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.6}Evaluation under randomised exposure}{6}{subsection.2.6}\protected@file@percent }
+\newlabel{sec:rel-eval}{{2.6}{6}{Evaluation under randomised exposure}{subsection.2.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.7}Positioning and novelty}{6}{subsection.2.7}\protected@file@percent }
+\newlabel{sec:rel-position}{{2.7}{6}{Positioning and novelty}{subsection.2.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Method}{7}{section.3}\protected@file@percent }
+\newlabel{sec:method}{{3}{7}{Method}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Setting, notation and leakage boundary}{7}{subsection.3.1}\protected@file@percent }
+\newlabel{sec:method-notation}{{3.1}{7}{Setting, notation and leakage boundary}{subsection.3.1}{}}
+\citation{he2020lightgcn}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}LEAF: lifelong exposure-conditional channels}{8}{subsection.3.2}\protected@file@percent }
+\newlabel{sec:method-leaf}{{3.2}{8}{LEAF: lifelong exposure-conditional channels}{subsection.3.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}LEAF-LGN: channels inside a graph backbone}{9}{subsection.3.3}\protected@file@percent }
+\newlabel{sec:method-leaflgn}{{3.3}{9}{LEAF-LGN: channels inside a graph backbone}{subsection.3.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}DAX: detection-adjusted attractiveness}{9}{subsection.3.4}\protected@file@percent }
+\newlabel{sec:method-dax}{{3.4}{9}{DAX: detection-adjusted attractiveness}{subsection.3.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{Priors.}{10}{section*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{E-step.}{10}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{M-step.}{10}{section*.3}\protected@file@percent }
+\citation{fay1979smallarea}
+\citation{park2004mrp}
+\@writefile{toc}{\contentsline {paragraph}{Tag-mean shrinkage.}{11}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Lifelong user prior.}{11}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Combination with LEAF-LGN}{11}{subsection.3.5}\protected@file@percent }
+\newlabel{sec:method-combine}{{3.5}{11}{Combination with LEAF-LGN}{subsection.3.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Identifiability and what the appeal measures}{12}{subsection.3.6}\protected@file@percent }
+\newlabel{sec:method-identify}{{3.6}{12}{Identifiability and what the appeal measures}{subsection.3.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7}Cost and measured run times}{13}{subsection.3.7}\protected@file@percent }
+\newlabel{sec:method-cost}{{3.7}{13}{Cost and measured run times}{subsection.3.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.8}Algorithms}{13}{subsection.3.8}\protected@file@percent }
+\newlabel{sec:method-algorithms}{{3.8}{13}{Algorithms}{subsection.3.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Experimental protocol}{13}{section.4}\protected@file@percent }
+\newlabel{sec:protocol}{{4}{13}{Experimental protocol}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Temporal protocol and the role of the random-exposure data}{13}{subsection.4.1}\protected@file@percent }
+\newlabel{sec:protocol-temporal}{{4.1}{13}{Temporal protocol and the role of the random-exposure data}{subsection.4.1}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces DAX-EM on the pre-cut log}}{14}{algorithm.1}\protected@file@percent }
+\newlabel{alg:dax}{{1}{14}{Algorithms}{algorithm.1}{}}
+\citation{gao2022kuairand}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces Training and post-hoc selection of LEAF-LGN+DAX}}{15}{algorithm.2}\protected@file@percent }
+\newlabel{alg:leaflgn}{{2}{15}{Algorithms}{algorithm.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Datasets}{15}{subsection.4.2}\protected@file@percent }
+\newlabel{sec:protocol-data}{{4.2}{15}{Datasets}{subsection.4.2}{}}
+\citation{schnabel2016}
+\citation{marlin2009collaborative}
+\citation{gao2022kuairec}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Splits, users and per-split selection}{16}{subsection.4.3}\protected@file@percent }
+\newlabel{sec:protocol-splits}{{4.3}{16}{Splits, users and per-split selection}{subsection.4.3}{}}
+\citation{nadeau2003}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Statistical tests}{17}{subsection.4.4}\protected@file@percent }
+\newlabel{sec:protocol-stats}{{4.4}{17}{Statistical tests}{subsection.4.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{Paired per-user differences.}{17}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Split-level test.}{17}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Holm adjustment.}{18}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Gate and reading.}{18}{section*.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Leakage checks and controls}{18}{subsection.4.5}\protected@file@percent }
+\newlabel{sec:protocol-controls}{{4.5}{18}{Leakage checks and controls}{subsection.4.5}{}}
+\citation{he2020lightgcn}
+\citation{zhao2022radjnorm}
+\citation{hu2008ials}
+\citation{steck2019ease}
+\citation{pi2020sim}
+\citation{kim2022navip}
+\citation{chang2023twin}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Baselines}{19}{subsection.4.6}\protected@file@percent }
+\newlabel{sec:protocol-baselines}{{4.6}{19}{Baselines}{subsection.4.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}Ablation design}{19}{subsection.4.7}\protected@file@percent }
+\newlabel{sec:protocol-ablation}{{4.7}{19}{Ablation design}{subsection.4.7}{}}
+\citation{nadeau2003}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.8}Kinds of number}{20}{subsection.4.8}\protected@file@percent }
+\newlabel{sec:protocol-kinds}{{4.8}{20}{Kinds of number}{subsection.4.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Results}{20}{section.5}\protected@file@percent }
+\newlabel{sec:results}{{5}{20}{Results}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Methods and search budgets}{21}{subsection.5.1}\protected@file@percent }
+\newlabel{sec:res-methods}{{5.1}{21}{Methods and search budgets}{subsection.5.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Main comparison}{21}{subsection.5.2}\protected@file@percent }
+\newlabel{sec:res-main}{{5.2}{21}{Main comparison}{subsection.5.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Paired differences of LEAF-LGN+DAX against each comparator of the main family. Grey dots: the five split differences. Diamond: pooled per-user mean with its 95\% half-width. Source: \texttt  {results/v11/dax\_lgn\_post.json} and the comparator files named in Table~\ref {tab:methods}.}}{22}{figure.1}\protected@file@percent }
+\newlabel{fig:forest}{{1}{22}{Paired differences of LEAF-LGN+DAX against each comparator of the main family. Grey dots: the five split differences. Diamond: pooled per-user mean with its 95\% half-width. Source: \texttt {results/v11/dax\_lgn\_post.json} and the comparator files named in Table~\ref {tab:methods}}{figure.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Fair-baseline reading}{22}{subsection.5.3}\protected@file@percent }
+\newlabel{sec:res-fair}{{5.3}{22}{Fair-baseline reading}{subsection.5.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}DAX on other backbones}{23}{subsection.5.4}\protected@file@percent }
+\newlabel{sec:res-backbone}{{5.4}{23}{DAX on other backbones}{subsection.5.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Ablations of DAX}{23}{subsection.5.5}\protected@file@percent }
+\newlabel{sec:res-ablate}{{5.5}{23}{Ablations of DAX}{subsection.5.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}KuaiRand-1K replication}{24}{subsection.5.6}\protected@file@percent }
+\newlabel{sec:res-1k}{{5.6}{24}{KuaiRand-1K replication}{subsection.5.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Training seeds}{24}{subsection.5.7}\protected@file@percent }
+\newlabel{sec:res-seeds}{{5.7}{24}{Training seeds}{subsection.5.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.8}Lifelong deep baselines}{24}{subsection.5.8}\protected@file@percent }
+\newlabel{sec:res-deep}{{5.8}{24}{Lifelong deep baselines}{subsection.5.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Training seeds 0 to 3 on KuaiRand-27K. Left: LEAF-LGN+DAX mean nDCG@10 with the standard deviation over splits. Right: within-seed gain over LEAF-LGN with the 95\% half-width. Source: \texttt  {results/v11/dax\_lgn\_post.json} (seed 0) and \texttt  {results/v11/c\_seeds/lgn\_s1.json} to \texttt  {lgn\_s3.json}.}}{25}{figure.2}\protected@file@percent }
+\newlabel{fig:seeds}{{2}{25}{Training seeds 0 to 3 on KuaiRand-27K. Left: LEAF-LGN+DAX mean nDCG@10 with the standard deviation over splits. Right: within-seed gain over LEAF-LGN with the 95\% half-width. Source: \texttt {results/v11/dax\_lgn\_post.json} (seed 0) and \texttt {results/v11/c\_seeds/lgn\_s1.json} to \texttt {lgn\_s3.json}}{figure.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.9}What the controls show}{25}{subsection.5.9}\protected@file@percent }
+\newlabel{sec:res-controls}{{5.9}{25}{What the controls show}{subsection.5.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.10}Summary of the evidence}{26}{subsection.5.10}\protected@file@percent }
+\newlabel{sec:res-summary}{{5.10}{26}{Summary of the evidence}{subsection.5.10}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Discussion}{26}{section.6}\protected@file@percent }
+\newlabel{sec:discussion}{{6}{26}{Discussion}{section.6}{}}
+\@writefile{toc}{\contentsline {paragraph}{Why the multiplicative form.}{26}{section*.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{What the item-level part contributes.}{26}{section*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Why the lifelong channels are not interchangeable with the item channels.}{26}{section*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Complementarity rather than stand-alone accuracy.}{27}{section*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Lifelong deep models.}{27}{section*.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{What the remaining headroom would require.}{27}{section*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Limitations}{27}{section.7}\protected@file@percent }
+\newlabel{sec:limits}{{7}{27}{Limitations}{section.7}{}}
+\@writefile{toc}{\contentsline {paragraph}{One platform family.}{27}{section*.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Few splits and a low-power split-level test.}{27}{section*.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{The novelty is a combination.}{28}{section*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{The combination is post hoc.}{28}{section*.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Unequal search budgets and grid edges.}{28}{section*.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Identifiability up to scale.}{28}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Reduced grids in the ablations and the seeds.}{29}{section*.22}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Seeds for the QP family are not run.}{29}{section*.23}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Deep lifelong baselines are tuned narrowly.}{29}{section*.24}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Single training seed per split in the main table.}{29}{section*.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Click label only.}{29}{section*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Remaining headroom.}{29}{section*.27}\protected@file@percent }
+\bibstyle{elsarticle-harv}
+\bibdata{../refs,refs_new}
+\@writefile{toc}{\contentsline {paragraph}{Coarse content.}{30}{section*.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Test scenario and tab factors.}{30}{section*.29}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Item-level versus tag-level.}{30}{section*.30}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Scope of the claims.}{30}{section*.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {8}Conclusion}{30}{section.8}\protected@file@percent }
+\newlabel{sec:conclusion}{{8}{30}{Conclusion}{section.8}{}}
+\bibcite{chang2023twin}{{1}{2023}{{Chang et~al.}}{{Chang, Zhang, Fu, Zang, Guan, Lu, Hui, Leng, Niu, Song and Gai}}}
+\bibcite{chapelle2009dbn}{{2}{2009}{{Chapelle and Zhang}}{{}}}
+\bibcite{chen2021autodebias}{{3}{2021}{{Chen et~al.}}{{Chen, Dong, Qiu, He, Xin, Chen, Lin and Yang}}}
+\bibcite{chuklin2015clickmodels}{{4}{2015}{{Chuklin et~al.}}{{Chuklin, Markov and de~Rijke}}}
+\bibcite{craswell2008cascade}{{5}{2008}{{Craswell et~al.}}{{Craswell, Zoeter, Taylor and Ramsey}}}
+\bibcite{fay1979smallarea}{{6}{1979}{{Fay and Herriot}}{{}}}
+\bibcite{gao2022kuairec}{{7}{2022a}{{Gao et~al.}}{{Gao, Li, Lei, Chen, Li, Jiang, He, Mao and Chua}}}
+\bibcite{gao2022kuairand}{{8}{2022b}{{Gao et~al.}}{{Gao, Li, Zhang, Chen, Li, Lei, Jiang and He}}}
+\bibcite{he2020lightgcn}{{9}{2020}{{He et~al.}}{{He, Deng, Wang, Li, Zhang and Wang}}}
+\bibcite{hu2025uncertainty}{{10}{2025}{{Hu et~al.}}{{Hu, Sun, Liu, Wu and Wang}}}
+\bibcite{hu2008ials}{{11}{2008}{{Hu et~al.}}{{Hu, Koren and Volinsky}}}
+\bibcite{jeunen2020cease}{{12}{2020}{{Jeunen et~al.}}{{Jeunen, Balen and Goethals}}}
+\bibcite{joachims2017unbiased}{{13}{2017}{{Joachims et~al.}}{{Joachims, Swaminathan and Schnabel}}}
+\bibcite{kim2022navip}{{14}{2022}{{Kim et~al.}}{{Kim, Oh, Do and Lee}}}
+\bibcite{krause2024coexposure}{{15}{2024}{{Krause et~al.}}{{Krause, Deriyeva, Beinke, Bartels and Thomas}}}
+\bibcite{liang2016exposure}{{16}{2016}{{Liang et~al.}}{{Liang, Charlin, McInerney and Blei}}}
+\bibcite{ma2018esmm}{{17}{2018}{{Ma et~al.}}{{Ma, Zhao, Huang, Wang, Hu, Zhu and Gai}}}
+\bibcite{mackenzie2002occupancy}{{18}{2002}{{MacKenzie et~al.}}{{MacKenzie, Nichols, Lachman, Droege, Royle and Langtimm}}}
+\bibcite{marlin2009collaborative}{{19}{2009}{{Marlin and Zemel}}{{}}}
+\bibcite{perezmaurera2025iars}{{20}{2025}{{Maurera et~al.}}{{Maurera, Dacrema, Castells and Cremonesi}}}
+\bibcite{nadeau2003}{{21}{2003}{{Nadeau and Bengio}}{{}}}
+\bibcite{park2004mrp}{{22}{2004}{{Park et~al.}}{{Park, Gelman and Bafumi}}}
+\bibcite{pi2020sim}{{23}{2020}{{Pi et~al.}}{{Pi, Zhou, Zhang, Wang, Ren, Fan, Zhu and Gai}}}
+\bibcite{richardson2007predicting}{{24}{2007}{{Richardson et~al.}}{{Richardson, Dominowska and Ragno}}}
+\bibcite{saito2020unbiased}{{25}{2020}{{Saito et~al.}}{{Saito, Yaginuma, Nishino, Sakata and Nakata}}}
+\bibcite{schnabel2016}{{26}{2016}{{Schnabel et~al.}}{{Schnabel, Swaminathan, Singh, Chandak and Joachims}}}
+\bibcite{steck2019ease}{{27}{2019}{{Steck}}{{}}}
+\bibcite{wang2025debiasunreliable}{{28}{2025}{{Wang et~al.}}{{Wang, Shi, Zhang, Wang, Pan and Feng}}}
+\bibcite{wang2016selection}{{29}{2016}{{Wang et~al.}}{{Wang, Bendersky, Metzler and Najork}}}
+\bibcite{wang2018regressionem}{{30}{2018}{{Wang et~al.}}{{Wang, Golbandi, Bendersky, Metzler and Najork}}}
+\bibcite{zhang2021pda}{{31}{2021}{{Zhang et~al.}}{{Zhang, Feng, He, Wei, Song, Ling and Zhang}}}
+\bibcite{zhang2026categorymeans}{{32}{2026}{{Zhang et~al.}}{{Zhang, Wang, Lu and Li}}}
+\bibcite{zhao2023d2co}{{33}{2023}{{Zhao et~al.}}{{Zhao, Zhang, Xu, Cai, Dong and Wen}}}
+\bibcite{zhao2022radjnorm}{{34}{2022}{{Zhao et~al.}}{{Zhao, Wu, Liang, Chen, Zhang, Deng, Wang, Shen, Lv and Wu}}}
+\@writefile{toc}{\let\numberline\tmptocnumberline}
+\@writefile{toc}{\contentsline {section}{\numberline {Appendix ~A}The QP family}{35}{appendix.A}\protected@file@percent }
+\newlabel{app:qp}{{Appendix ~A}{35}{The QP family}{appendix.A}{}}
+\@writefile{toc}{\contentsline {paragraph}{Exposure model.}{35}{section*.33}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Imputation.}{35}{section*.34}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Unlogged-pair weight.}{35}{section*.35}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Loss.}{36}{section*.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Grids and selection.}{36}{section*.37}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Controls on the same family.}{36}{section*.38}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {Appendix ~B}EM for detection-adjusted attractiveness}{36}{appendix.B}\protected@file@percent }
+\newlabel{app:em}{{Appendix ~B}{36}{EM for detection-adjusted attractiveness}{appendix.B}{}}
+\@writefile{toc}{\contentsline {paragraph}{Model.}{36}{section*.39}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Priors.}{37}{section*.40}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Initialisation and iterations.}{37}{section*.41}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{E-step.}{37}{section*.42}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{M-step.}{37}{section*.43}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Strata.}{37}{section*.44}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Output.}{38}{section*.45}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {Appendix ~C}Grids and chosen configurations}{38}{appendix.C}\protected@file@percent }
+\newlabel{app:grids}{{Appendix ~C}{38}{Grids and chosen configurations}{appendix.C}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Closest works and the difference from the present work.}}{39}{table.1}\protected@file@percent }
+\newlabel{tab:positioning}{{1}{39}{Closest works and the difference from the present work}{table.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Sizes of the two KuaiRand settings under the temporal protocol. A cell marked TBD is not in a result file.}}{40}{table.2}\protected@file@percent }
+\newlabel{tab:data}{{2}{40}{Sizes of the two KuaiRand settings under the temporal protocol. A cell marked TBD is not in a result file}{table.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Leakage checks and controls, one row per unit test and per check.}}{41}{table.3}\protected@file@percent }
+\newlabel{tab:controls}{{3}{41}{Leakage checks and controls, one row per unit test and per check}{table.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Baselines, search grids and configuration counts (the $n_{\mathrm  {configs}}$ of the run logs, as in Section~\ref {sec:protocol-splits}). ``Not run'' marks a row that has no result file.}}{42}{table.4}\protected@file@percent }
+\newlabel{tab:baselines}{{4}{42}{Baselines, search grids and configuration counts (the $n_{\mathrm {configs}}$ of the run logs, as in Section~\ref {sec:protocol-splits}). ``Not run'' marks a row that has no result file}{table.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Methods on KuaiRand-27K (temporal, all users): mean and standard deviation of nDCG@10 over the five splits, configurations searched per split, and the source file.}}{42}{table.5}\protected@file@percent }
+\newlabel{tab:methods}{{5}{42}{Methods on KuaiRand-27K (temporal, all users): mean and standard deviation of nDCG@10 over the five splits, configurations searched per split, and the source file}{table.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Main results on KuaiRand-27K: LEAF-LGN+DAX against every comparator of the main family, with per-user and split-level (Nadeau-Bengio) tests.}}{43}{table.6}\protected@file@percent }
+\newlabel{tab:main}{{6}{43}{Main results on KuaiRand-27K: LEAF-LGN+DAX against every comparator of the main family, with per-user and split-level (Nadeau-Bengio) tests}{table.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Sensitivity of the Holm adjustment: the main family extended by EASE and EASE+DAX (the family size is given in the column header and counts the comparators whose files exist).}}{43}{table.7}\protected@file@percent }
+\newlabel{tab:sens}{{7}{43}{Sensitivity of the Holm adjustment: the main family extended by EASE and EASE+DAX (the family size is given in the column header and counts the comparators whose files exist)}{table.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Fair-baseline reading: the DAX increments and the stored LEAF-LGN against the QP family, with their search budgets (configurations of the first and second method).}}{43}{table.8}\protected@file@percent }
+\newlabel{tab:fair}{{8}{43}{Fair-baseline reading: the DAX increments and the stored LEAF-LGN against the QP family, with their search budgets (configurations of the first and second method)}{table.8}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces DAX is backbone-agnostic: nDCG@10 without and with the post-hoc DAX module on KuaiRand-27K, paired difference x1e-3 with the 95\% half-width, two-sided t test and the Nadeau-Bengio test over the split means.}}{43}{table.9}\protected@file@percent }
+\newlabel{tab:backbone}{{9}{43}{DAX is backbone-agnostic: nDCG@10 without and with the post-hoc DAX module on KuaiRand-27K, paired difference x1e-3 with the 95\% half-width, two-sided t test and the Nadeau-Bengio test over the split means}{table.9}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces DAX ablations on KuaiRand-27K (post-hoc): gain over the backbone of the ablation run, the difference to full DAX, and the shuffle controls.}}{44}{table.10}\protected@file@percent }
+\newlabel{tab:ablate}{{10}{44}{DAX ablations on KuaiRand-27K (post-hoc): gain over the backbone of the ablation run, the difference to full DAX, and the shuffle controls}{table.10}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces KuaiRand-1K replication: LEAF-LGN+DAX against the QP family with and without DAX (nDCG@10).}}{44}{table.11}\protected@file@percent }
+\newlabel{tab:1k}{{11}{44}{KuaiRand-1K replication: LEAF-LGN+DAX against the QP family with and without DAX (nDCG@10)}{table.11}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces Training seeds on KuaiRand-27K: LEAF-LGN+DAX and its within-seed gain over LEAF-LGN (same seed), seeds 0 to 3.}}{45}{table.12}\protected@file@percent }
+\newlabel{tab:seeds}{{12}{45}{Training seeds on KuaiRand-27K: LEAF-LGN+DAX and its within-seed gain over LEAF-LGN (same seed), seeds 0 to 3}{table.12}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces Lifelong deep baselines (DIN and SIM-hard) with and without DAX, and their paired difference to LEAF-LGN+DAX (LEAF-LGN+DAX minus the comparator, x1e-3 nDCG@10).}}{45}{table.13}\protected@file@percent }
+\newlabel{tab:deep}{{13}{45}{Lifelong deep baselines (DIN and SIM-hard) with and without DAX, and their paired difference to LEAF-LGN+DAX (LEAF-LGN+DAX minus the comparator, x1e-3 nDCG@10)}{table.13}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {14}{\ignorespaces LEAF controls on KuaiRand-27K (stage 1 stored run, LEAF-tied backbone): arm means and full minus arm.}}{46}{table.14}\protected@file@percent }
+\newlabel{tab:leafctl}{{14}{46}{LEAF controls on KuaiRand-27K (stage 1 stored run, LEAF-tied backbone): arm means and full minus arm}{table.14}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {C.15}{\ignorespaces Chosen configurations per split: LEAF-LGN+DAX (main, post-hoc) (nDCG@10 mean 0.4854).}}{46}{table.15}\protected@file@percent }
+\newlabel{tab:grid00}{{C.15}{46}{Chosen configurations per split: LEAF-LGN+DAX (main, post-hoc) (nDCG@10 mean 0.4854)}{table.15}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {C.16}{\ignorespaces Chosen configurations per split: LEAF-LGN (post-hoc base) (nDCG@10 mean 0.4736).}}{46}{table.16}\protected@file@percent }
+\newlabel{tab:grid01}{{C.16}{46}{Chosen configurations per split: LEAF-LGN (post-hoc base) (nDCG@10 mean 0.4736)}{table.16}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {C.17}{\ignorespaces Chosen configurations per split: QP family (stored, per-split best variant) (nDCG@10 mean 0.4634).}}{47}{table.17}\protected@file@percent }
+\newlabel{tab:grid02}{{C.17}{47}{Chosen configurations per split: QP family (stored, per-split best variant) (nDCG@10 mean 0.4634)}{table.17}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {C.18}{\ignorespaces Chosen configurations per split: QP family+DAX (nDCG@10 mean 0.4733).}}{47}{table.18}\protected@file@percent }
+\newlabel{tab:grid03}{{C.18}{47}{Chosen configurations per split: QP family+DAX (nDCG@10 mean 0.4733)}{table.18}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {C.19}{\ignorespaces Chosen configurations per split: EASE (nDCG@10 mean 0.4507).}}{47}{table.19}\protected@file@percent }
+\newlabel{tab:grid04}{{C.19}{47}{Chosen configurations per split: EASE (nDCG@10 mean 0.4507)}{table.19}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {C.20}{\ignorespaces Chosen configurations per split: EASE+DAX (nDCG@10 mean 0.4623).}}{48}{table.20}\protected@file@percent }
+\newlabel{tab:grid05}{{C.20}{48}{Chosen configurations per split: EASE+DAX (nDCG@10 mean 0.4623)}{table.20}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {C.21}{\ignorespaces Chosen configurations per split: LightGCN (nDCG@10 mean 0.4576).}}{48}{table.21}\protected@file@percent }
+\newlabel{tab:grid06}{{C.21}{48}{Chosen configurations per split: LightGCN (nDCG@10 mean 0.4576)}{table.21}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {C.22}{\ignorespaces Chosen configurations per split: r-AdjNorm (nDCG@10 mean 0.4620).}}{48}{table.22}\protected@file@percent }
+\newlabel{tab:grid07}{{C.22}{48}{Chosen configurations per split: r-AdjNorm (nDCG@10 mean 0.4620)}{table.22}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {C.23}{\ignorespaces Chosen configurations per split: DIN (27K) (nDCG@10 mean 0.4675).}}{48}{table.23}\protected@file@percent }
+\newlabel{tab:grid08}{{C.23}{48}{Chosen configurations per split: DIN (27K) (nDCG@10 mean 0.4675)}{table.23}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {C.24}{\ignorespaces Chosen configurations per split: DIN+DAX (27K) (nDCG@10 mean 0.4796).}}{49}{table.24}\protected@file@percent }
+\newlabel{tab:grid09}{{C.24}{49}{Chosen configurations per split: DIN+DAX (27K) (nDCG@10 mean 0.4796)}{table.24}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {C.25}{\ignorespaces Chosen configurations, SIM (27K): not available.}}{49}{table.25}\protected@file@percent }
+\newlabel{tab:grid10}{{C.25}{49}{Chosen configurations, SIM (27K): not available}{table.25}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {C.26}{\ignorespaces Chosen configurations, SIM+DAX (27K): not available.}}{49}{table.26}\protected@file@percent }
+\newlabel{tab:grid11}{{C.26}{49}{Chosen configurations, SIM+DAX (27K): not available}{table.26}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {C.27}{\ignorespaces Chosen configurations per split: LEAF-LGN+DAX (1K) (nDCG@10 mean 0.4590).}}{49}{table.27}\protected@file@percent }
+\newlabel{tab:grid12}{{C.27}{49}{Chosen configurations per split: LEAF-LGN+DAX (1K) (nDCG@10 mean 0.4590)}{table.27}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {C.28}{\ignorespaces Chosen configurations per split: QP family+DAX (1K) (nDCG@10 mean 0.4358).}}{50}{table.28}\protected@file@percent }
+\newlabel{tab:grid13}{{C.28}{50}{Chosen configurations per split: QP family+DAX (1K) (nDCG@10 mean 0.4358)}{table.28}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {C.29}{\ignorespaces Chosen configurations per split: DIN (1K) (nDCG@10 mean 0.4189).}}{50}{table.29}\protected@file@percent }
+\newlabel{tab:grid14}{{C.29}{50}{Chosen configurations per split: DIN (1K) (nDCG@10 mean 0.4189)}{table.29}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {C.30}{\ignorespaces Chosen configurations per split: DIN+DAX (1K) (nDCG@10 mean 0.4228).}}{50}{table.30}\protected@file@percent }
+\newlabel{tab:grid15}{{C.30}{50}{Chosen configurations per split: DIN+DAX (1K) (nDCG@10 mean 0.4228)}{table.30}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {C.31}{\ignorespaces Chosen configurations per split: SIM (1K) (nDCG@10 mean 0.4246).}}{51}{table.31}\protected@file@percent }
+\newlabel{tab:grid16}{{C.31}{51}{Chosen configurations per split: SIM (1K) (nDCG@10 mean 0.4246)}{table.31}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {C.32}{\ignorespaces Chosen configurations per split: SIM+DAX (1K) (nDCG@10 mean 0.4357).}}{51}{table.32}\protected@file@percent }
+\newlabel{tab:grid17}{{C.32}{51}{Chosen configurations per split: SIM+DAX (1K) (nDCG@10 mean 0.4357)}{table.32}{}}
+\gdef \@abspage@last{51}

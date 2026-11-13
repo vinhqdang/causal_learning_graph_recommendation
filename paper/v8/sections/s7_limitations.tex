@@ -1,0 +1,35 @@
+\section{Limitations}\label{sec:limits}
+
+The limitations below are stated in the order in which they bear on the claims of the paper.
+
+\paragraph{One platform family.} KuaiRand-27K and KuaiRand-1K come from one platform, one period and overlapping users. We found no other public dataset that combines randomised insertion, impression logs and lifelong history of the same users, so the evidence describes one setting. The 1K users are a subset of the 27K users and are not an independent replication.
+
+\paragraph{Few splits and a low-power split-level test.} The main comparisons use five user-level splits. The Nadeau-Bengio test over five split means has low power, and the adjusted split-level p values against the two QP comparators and against DIN with DAX are $4.56\times10^{-2}$, $2.23\times10^{-2}$ and $4.56\times10^{-2}$ in Table~\ref{tab:main}. The per-user t test is far below these values, but it treats the users as independent units across splits, which the Nadeau-Bengio test does not assume.
+
+\paragraph{The novelty is a combination.} Each component has a precedent: lifelong behaviour models, examination models in click modelling, and shrinkage towards a group mean. The contribution is the identification of which log-only signals transfer to a uniform-insertion target, the factorisation of examination into a user and a scenario term, and the controlled evidence in Section~\ref{sec:results}. A reviewer may describe DAX as a click model applied to items; the paper does not dispute that description.
+
+\paragraph{The combination is post hoc.} The mixing weight $\gamma$ is a validation-selected hyperparameter, and the DAX module is not trained jointly with the backbone in the reported results. The jointly trained variant has no result file (\texttt{results/v11/dax\_lgn\_joint\_small.json} and \texttt{dax\_lgn\_joint.json} are missing), so no number for it is reported, and the DAX weight is not described as learned.
+
+\paragraph{Unequal search budgets and grid edges.} LEAF-LGN+DAX searches 3,840 configurations per split and the QP family searches 20, a difference of two orders of magnitude. The QP family with DAX (3,200) reduces the imbalance but searches only the QP backbones selected without DAX, which is conservative for the method and not neutral for the baseline. On KuaiRand-1K the QP family with DAX searches 6,400 configurations, which favours the baseline there. Two DAX choices lie at the edges of their grids: the prior strength is selected at its lower edge 80 (of $\{80, 160\}$) and the lifelong strength $k_{\text{life}}$ at its upper edge 100 (of $\{0, 100\}$) in the main run (Appendix~\ref{app:grids}). The extended grid run that would show whether the optimum lies outside the default grid (\texttt{results/v12/daxwide\_lgn.json}) has no result file, so this is an open question.
+
+\paragraph{Identifiability up to scale.} The examination and attractiveness factors are identified only up to a scale shared by $\theta_u$ and $\alpha_i$. The order of $\alpha_i$ is unaffected, but the logit transform used in the combination is not invariant to the scale, so the prior strengths are hyperparameters selected on validation. The examination factors $\theta_u$ and $\kappa_t$ are nuisance parameters and are not interpretable as absolute user or scenario traits.
+
+\paragraph{Reduced grids in the ablations and the seeds.} The DAX ablations use two backbone trainings, five gammas and an epoch window of three around the main selection. Their base is the LEAF-LGN of that reduced run (mean 0.4706), not the base of the main run (0.4736), so the gains against the base are not comparable with the main increment. The comparisons against the full arm do not depend on the base, and the full arm reproduces the main per-split values. Training seeds 1 to 3 use a fixed backbone (learning rate 3e-3, weight decay 1e-4) with two trainings in the DAX arm.
+
+\paragraph{Seeds for the QP family are not run.} The seed replicates cover LEAF-LGN+DAX only. The QP family has a partial, incomplete seed run (\url{results/v11/c_seeds/qp_s1.json.partial.json}) that is not used. The within-seed gains are therefore not compared with the QP family under varying seeds, and the seed table reports the LEAF-LGN gains only.
+
+\paragraph{Deep lifelong baselines are tuned narrowly.} DIN and SIM-hard are each tuned over four configurations (learning rate and weight decay), with the DAX arms on the post-hoc grid. SIM-hard with DAX has no KuaiRand-27K result file, so the comparison with SIM at the full scale is open. The claim that LEAF-LGN+DAX is better than these lifelong deep models is therefore limited to the tuning reported here. A deep model tuned over a wider grid, or with a sequence length other than 200 for DIN, may close the gap; we did not test this.
+
+\paragraph{Single training seed per split in the main table.} The main table uses one training seed per split. Seeds 1 to 3 for LEAF-LGN+DAX support the direction of the gain but are not a full variance estimate.
+
+\paragraph{Click label only.} The main table uses the click label. A long-view label is not reported, because its result file (\texttt{results/v11/c\_longview*.json}) does not exist. Concurrent-protocol results for the full model are also missing (\texttt{results/v11/c\_concurrent.json}); the concurrent protocol is a separate robustness setting and is not claimed here.
+
+\paragraph{Remaining headroom.} The combination does not close the item-level gap of the uniform-rate oracle, and the diagnostic in Section~2 reports the remaining headroom. The paper does not claim that DAX is the last step towards that bound.
+
+\paragraph{Coarse content.} KuaiRand ships no titles, covers or frames. The tag is the main content key for LEAF and DAX, and the content centre of DAX is a ridge regression on coarse codes. Results with richer content would be needed before the content channels are judged more widely.
+
+\paragraph{Test scenario and tab factors.} The test scenario is tab 1, and its examination factor is anchored at $\kappa_1=1$. The transfer of the tab factors to other scenarios is not tested.
+
+\paragraph{Item-level versus tag-level.} The within-tag shuffle keeps 41.6\% of the gain and the across-item shuffle removes it (Table~\ref{tab:ablate}). These are permutation controls on a fitted model, not a fitted item-level model with a separate tag-level counterpart, so they show that the item deviations from the tag mean carry signal under this protocol, and nothing more.
+
+\paragraph{Scope of the claims.} The paper does not claim unbiasedness, causal identification of item quality, generality beyond one platform family, or any comparison with published numbers from other protocols, which use different binarisation, candidate sets and selection rules.

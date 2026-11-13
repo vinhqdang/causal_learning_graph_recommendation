@@ -1,0 +1,29 @@
+\begin{table}[tbp]
+\centering
+\footnotesize
+\caption{Lifelong deep baselines (DIN and SIM-hard) with and without DAX, and their paired difference to LEAF-LGN+DAX (LEAF-LGN+DAX minus the comparator, x1e-3 nDCG@10).}
+\label{tab:deep}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrccccc}
+\toprule
+Comparator & Mean & Configs & Diff.\ [95\% hw] & $p$ & NB $p$ \\
+\midrule
+\multicolumn{6}{l}{KuaiRand-27K} \\
+DIN & 0.4675 & 4 & +18.26 [1.97] & $1.41\times10^{-73}$ & 0.001 \\
+DIN+DAX & 0.4796 & 1280 & +5.73 [1.64] & $7.95\times10^{-12}$ & 0.043 \\
+SIM & \textnormal{\{TBD:results/v12/sim\_27k.json SIM mean\}} & \textnormal{\{TBD:results/v12/sim\_27k.json SIM configs\}} & \textnormal{\{TBD:results/v12/sim\_27k.json SIM difference\}} &  &  \\
+SIM+DAX & \textnormal{\{TBD:results/v12/sim\_27k.json SIM+DAX mean\}} & \textnormal{\{TBD:results/v12/sim\_27k.json SIM+DAX configs\}} & \textnormal{\{TBD:results/v12/sim\_27k.json SIM+DAX difference\}} &  &  \\
+\midrule
+\multicolumn{6}{l}{KuaiRand-1K} \\
+DIN & 0.4189 & 4 & +39.26 [10.37] & $2.63\times10^{-13}$ & 0.002 \\
+DIN+DAX & 0.4228 & 1280 & +35.89 [9.25] & $7.10\times10^{-14}$ & 0.002 \\
+SIM & 0.4246 & 4 & +35.26 [9.24] & $1.70\times10^{-13}$ & 0.007 \\
+SIM+DAX & 0.4357 & 1280 & +23.29 [8.69] & $1.81\times10^{-7}$ & 0.095 \\
+\midrule
+\multicolumn{6}{l}{Lifelong sequence models: DIN attends over the last 200 lifelong events; SIM-hard keeps the 50 most recent events sharing the candidate's tag or author.} \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize Raw p values. DIN and SIM are tuned over four configurations (lr {1e-2, 3e-3} times wd {1e-4, 1e-5}) with patience 2; their +DAX arms use the post-hoc DAX grid. Entries marked TBD have no result file yet.\end{minipage}
+\end{table}
