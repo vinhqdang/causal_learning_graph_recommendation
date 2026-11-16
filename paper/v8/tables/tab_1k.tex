@@ -1,7 +1,7 @@
 \begin{table}[tbp]
 \centering
 \footnotesize
-\caption{KuaiRand-1K replication: LEAF-LGN+DAX against the QP family with and without DAX (nDCG@10).}
+\caption{KuaiRand-1K replication: LEAF-LGN+DAX against the PW-LightGCN with and without DAX (nDCG@10).}
 \label{tab:1k}
 \begin{adjustbox}{max width=\linewidth}
 \begin{tabular}{lrrrcrr}
@@ -9,15 +9,15 @@
 Method or comparison & Mean & SD & Configs & Diff.\ [95\% hw] & NB $p$ & NB $p_{\mathrm{Holm}}$ \\
 \midrule
 LEAF-LGN+DAX & 0.4590 & 0.0038 & 3840 &  &  &  \\
-QP family & 0.4246 & 0.0043 & 20 &  &  &  \\
-QP family+DAX & 0.4358 & 0.0035 & 6400 &  &  &  \\
+PW-LightGCN & 0.4246 & 0.0043 & 20 &  &  &  \\
+PW-LightGCN+DAX & 0.4358 & 0.0035 & 6400 &  &  &  \\
 \midrule
-LEAF-LGN+DAX minus QP family &  &  &  & +37.58 [11.10] & 0.011 & $2.28\times10^{-2}$ \\
-LEAF-LGN+DAX minus QP family+DAX &  &  &  & +25.82 [9.66] & 0.007 & $2.18\times10^{-2}$ \\
-QP family+DAX minus QP family &  &  &  & +11.76 [8.54] & 0.160 & $1.60\times10^{-1}$ \\
+LEAF-LGN+DAX minus PW-LightGCN &  &  &  & +37.58 [11.10] & 0.011 & $2.28\times10^{-2}$ \\
+LEAF-LGN+DAX minus PW-LightGCN+DAX &  &  &  & +25.82 [9.66] & 0.007 & $2.18\times10^{-2}$ \\
+PW-LightGCN+DAX minus PW-LightGCN &  &  &  & +11.76 [8.54] & 0.160 & $1.60\times10^{-1}$ \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
 \par\smallskip
-\begin{minipage}{\linewidth}\raggedright\footnotesize KuaiRand-1K: 842 test users pooled over five splits (each split 30\% validation, 70\% test). The users are a subset of the 27K users, so this is a lower-power replication. The QP family with DAX searches all 20 QP configurations on this release (6,400 configurations in total), whereas at 27K it searches the 10 selected ones (3,200); this favours the baseline. NB $p_{\mathrm{Holm}}$ is the Holm adjustment over the three comparisons of this table. Split differences ($\times10^{-3}$): LEAF-LGN+DAX minus QP family: +36.7 +25.7 +35.6 +37.2 +36.6; LEAF-LGN+DAX minus QP family+DAX: +21.3 +20.3 +23.7 +23.1 +27.8; QP family+DAX minus QP family: +15.4 +5.4 +11.9 +14.1 +8.8.\end{minipage}
+\begin{minipage}{\linewidth}\raggedright\footnotesize Mean: the mean of the five split means. Diff.: the mean over the pooled test users of each user's paired difference (a user's difference is averaged over the splits in which the user is scored). The two are computed over different weightings, so a difference need not equal the difference of the two means shown. For example, the two means shown for LEAF-LGN+DAX and the PW-LightGCN differ by +34.3, against the paired difference of +37.58. KuaiRand-1K: 842 test users pooled over five splits (each split 30\% validation, 70\% test). The users are a subset of the 27K users, so this is a lower-power replication. The PW-LightGCN with DAX searches all 20 PW-LightGCN configurations on this release (6,400 configurations in total), whereas at 27K it searches the 10 selected ones (3,200); this favours the baseline. NB $p_{\mathrm{Holm}}$ is the Holm adjustment over the three comparisons of this table. Split differences ($\times10^{-3}$): LEAF-LGN+DAX minus PW-LightGCN: +36.7 +25.7 +35.6 +37.2 +36.6; LEAF-LGN+DAX minus PW-LightGCN+DAX: +21.3 +20.3 +23.7 +23.1 +27.8; PW-LightGCN+DAX minus PW-LightGCN: +15.4 +5.4 +11.9 +14.1 +8.8.\end{minipage}
 \end{table}

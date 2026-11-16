@@ -1,34 +1,31 @@
-\section{The QP family}\label{app:qp}
+\section{PW-LightGCN, the propensity-weighted baseline}\label{app:qp}
 
-The QP family is our own baseline. It has not been published, and it is described here in full so that the
-baseline can be reproduced. It is a weighted Bayesian personalised ranking (BPR) objective
-\citep{rendle2009bpr} on a LightGCN backbone, with three variants, DR-BPR-LGN-1, DR-BPR-LGN-p2 and DR-BPR-LGN-p. The variants
-differ only in an offset term, and each is trained on the same pre-cut in-pool log as LEAF-LGN.
+PW-LightGCN is our own propensity-weighted LightGCN. It has not been published, and it is described here in full so that the baseline can
+be reproduced. It is a weighted Bayesian personalised ranking objective \citep{rendle2009bpr} on a LightGCN backbone, with three variants,
+DR-BPR-LGN-1, DR-BPR-LGN-p2 and DR-BPR-LGN-p. The variants differ only in an offset term, and each is trained on the same pre-cut in-pool log
+as LEAF-LGN.
 
 \paragraph{Exposure model} The probability $P_{ui}$ that item $i$ was exposed to user $u$ comes from a logistic exposure model,
-$P_{ui}=\sigma\bigl(a+b\,\operatorname{logit}r_u+c\,\operatorname{logit}r_i\bigr)$, where $r_u$ and $r_i$ are the exposure rates of
-the user and of the item in the policy log. The coefficients are fitted by maximum likelihood on the policy log, and a feature with no
-variation is dropped. The propensities are clipped below at 0.05.
+$P_{ui}=\sigma\bigl(a+b\,\operatorname{logit}r_u+c\,\operatorname{logit}r_i\bigr)$, where $r_u$ and $r_i$ are the exposure rates of the user and of
+the item in the policy log. The coefficients are fitted by maximum likelihood on the policy log, and a feature with no variation is dropped. The
+propensities are clipped below at 0.05.
 
-\paragraph{Imputation} The outcome imputation $\hat Y_{ui}$ is an additive model of user and item effects fitted with
-inverse-propensity weights, clipped to $[0,1]$ for the weights and to $[0.01, 0.99]$ for the offset. Its standardised logit $z_{ui}$
-is the offset feature.
+\paragraph{Imputation} The outcome imputation $\hat Y_{ui}$ is an additive model of user and item effects fitted with inverse-propensity weights,
+clipped to $[0,1]$ for the weights and to $[0.01, 0.99]$ for the offset. Its standardised logit $z_{ui}$ is the offset feature.
 
-\paragraph{Unlogged-pair weight} For a pair that is not a logged positive, $Q_{ui}=\hat Y_{ui}(1-P_{ui})/(1-P_{ui}\hat Y_{ui})$,
-clipped to $[0,1]$. It is the probability that such a pair is a positive after all, under $Y$ independent of exposure given the
-imputation.
+\paragraph{Unlogged-pair weight} For a pair that is not a logged positive, $Q_{ui}=\hat Y_{ui}(1-P_{ui})/(1-P_{ui}\hat Y_{ui})$, clipped to
+$[0,1]$. It is the probability that such a pair is a positive after all, under $Y$ independent of exposure given the imputation.
 
-\paragraph{Loss} For a logged positive pair $(u,i)$ and a sampled negative $j$ (resampled when $(u,j)$ is a logged positive), the
-weight of the negative is $w_{uj}=\max(1-Q_{uj},10^{-3})$ and the loss is
+\paragraph{Loss} For a logged positive pair $(u,i)$ and a sampled negative $j$ (resampled when $(u,j)$ is a logged positive), the weight of the
+negative is $w_{uj}=\max(1-Q_{uj},10^{-3})$ and the loss is
 \[
 \mathcal L=-\frac{\sum_{(u,i,j)} w_{uj}\log\sigma(s_{ui}-s_{uj})}{\sum_{(u,i,j)} w_{uj}},
 \]
-with the score $s_{ui}=\langle e_u,e_i\rangle+\beta\,z_{ui}$. The DR-BPR-LGN-1 variant has $\beta=0$. The DR-BPR-LGN-p2 and
-DR-BPR-LGN-p variants use $\beta\in\{1,2\}$ and $\beta\in\{0.5,1\}$ respectively.
+with the score $s_{ui}=\langle e_u,e_i\rangle+\beta\,z_{ui}$. The DR-BPR-LGN-1 variant has $\beta=0$. The DR-BPR-LGN-p2 and DR-BPR-LGN-p variants use
+$\beta\in\{1,2\}$ and $\beta\in\{0.5,1\}$ respectively.
 
-\paragraph{Grids and selection} The backbone is LightGCN with two layers and dimension 64. The grid is learning rate in
-$\{10^{-2}, 3\times10^{-3}\}$ and weight decay in $\{10^{-5}, 10^{-4}\}$, with the offset grid above. That gives 4 configurations
-for DR-BPR-LGN-1, 8 for DR-BPR-LGN-p2 and 8 for DR-BPR-LGN-p, 20 in total. Training runs for at most 40 epochs with patience 3,
-and batch size 8,192. Validation nDCG@10 selects the configuration in each split. The QP family in the main comparison is the
-variant with the largest validation value in each split, so its search is 20 configurations per split. The QP family with DAX
-(Section~\ref{sec:res-fair}) reuses the QP backbones selected without DAX.
+\paragraph{Grids and selection} The backbone is LightGCN with two layers and dimension 64. The grid is learning rate in $\{10^{-2}, 3\times10^{-3}\}$
+and weight decay in $\{10^{-5}, 10^{-4}\}$, with the offset grid above. That gives 4 configurations for DR-BPR-LGN-1, 8 for DR-BPR-LGN-p2 and 8
+for DR-BPR-LGN-p, 20 in total. Training runs for at most 40 epochs with patience 3, and batch size 8,192. Validation nDCG@10 selects the
+configuration in each split. The PW-LightGCN baseline in the main comparison is the variant with the largest validation value in each split,
+so its search is 20 configurations per split. PW-LightGCN with DAX (Section~\ref{sec:res-fair}) reuses the PW-LightGCN backbones selected without DAX.

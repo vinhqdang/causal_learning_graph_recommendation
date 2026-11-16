@@ -5,48 +5,46 @@ The style file: elsarticle-harv.bst
 Database file #1: ../refs.bib
 Database file #2: refs_new.bib
 Reallocated singl_function (elt_size=4) to 100 items from 50.
-Warning--empty pages in islam2026ppd
 Warning--empty pages in saito2021obd
-Warning--empty pages in zhang2024advdrop
-You've used 42 entries,
+You've used 36 entries,
             2990 wiz_defined-function locations,
-            901 strings with 16197 characters,
-and the built_in function-call counts, 37416 in all, are:
-= -- 2973
-> -- 1748
-< -- 35
-+ -- 675
-- -- 624
-* -- 4198
-:= -- 5206
-add.period$ -- 130
-call.type$ -- 42
-change.case$ -- 419
-chr.to.int$ -- 41
-cite$ -- 45
-duplicate$ -- 2623
-empty$ -- 2469
-format.name$ -- 754
-if$ -- 7237
+            861 strings with 14655 characters,
+and the built_in function-call counts, 32623 in all, are:
+= -- 2593
+> -- 1528
+< -- 33
++ -- 589
+- -- 546
+* -- 3642
+:= -- 4527
+add.period$ -- 111
+call.type$ -- 36
+change.case$ -- 362
+chr.to.int$ -- 35
+cite$ -- 37
+duplicate$ -- 2277
+empty$ -- 2151
+format.name$ -- 658
+if$ -- 6327
 int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 511
-newline$ -- 229
-num.names$ -- 168
-pop$ -- 904
+missing$ -- 443
+newline$ -- 198
+num.names$ -- 144
+pop$ -- 784
 preamble$ -- 1
-purify$ -- 376
+purify$ -- 326
 quote$ -- 0
-skip$ -- 1013
+skip$ -- 895
 stack$ -- 0
-substring$ -- 1576
-swap$ -- 2125
-text.length$ -- 29
+substring$ -- 1409
+swap$ -- 1855
+text.length$ -- 27
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 375
-warning$ -- 3
-while$ -- 225
+type$ -- 321
+warning$ -- 1
+while$ -- 199
 width$ -- 0
-write$ -- 659
-(There were 3 warnings)
+write$ -- 565
+(There was 1 warning)

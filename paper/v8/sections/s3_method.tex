@@ -1,50 +1,47 @@
 \section{Method}
 \label{sec:method}
 
-This section first states the ranking problem and the data available to solve it
-(Section~\ref{sec:method-notation}). It then describes the two signals that we add to a collaborative
-recommender. LEAF summarises what a user's long-term behaviour on other videos says about the content of a
-candidate video (Sections~\ref{sec:method-leaf} and~\ref{sec:method-leaflgn}). DAX estimates how attractive a video
-is once it has actually been looked at, by separating examination from attraction in the logged clicks
-(Section~\ref{sec:method-dax}). Section~\ref{sec:method-combine} explains how the two are combined, and
-Section~\ref{sec:method-identify} states what the estimated attractiveness does and does not measure.
-Detailed settings and the search grids are given in \ref{app:impl} and \ref{app:grids}.
+This section defines the ranking problem and the data, the two signals and their combination. LEAF summarises what a user's
+long-term behaviour on other videos says about a candidate (Sections~\ref{sec:method-leaf} and~\ref{sec:method-leaflgn}). DAX
+estimates how attractive a video is once it has been looked at, by separating examination from attraction in the logged clicks
+(Section~\ref{sec:method-dax}). Section~\ref{sec:method-combine} gives the combination, and Section~\ref{sec:method-identify} states
+what the attractiveness does and does not measure. Settings and search grids are in \ref{app:impl} and~\ref{app:grids}.
+Throughout, one running example is used: a viewer who regularly watches cooking videos, and a short cooking clip by a little-known
+author that the evaluation inserts into her feed at random.
 
-Throughout the section we use one running example: a viewer who regularly watches cooking videos, and a short
-cooking clip by a little-known author that the evaluation inserts into her feed at random.
-
-\subsection{Problem setting and notation}
+\subsection{Problem setting, logs and task}
 \label{sec:method-notation}
 
-\paragraph{Users, items, scenarios and the cut-off} Let $\mathcal U$ be the set of users, with $m=|\mathcal U|$.
-Let $\mathcal I$ be the pool of videos from which the random insertions are drawn; it is the set of videos that
-appear in the random-exposure log. A platform shows videos in several scenarios, which are the tabs of the application
-in which a video is placed. We write $\mathcal T$ for the set of scenarios, of which there are fifteen. The random
-insertions fall almost entirely in one scenario, which we call $t=1$, and the scenario factor of
-Section~\ref{sec:method-dax} is normalised to this scenario. A time $T_0$, the cut-off, separates the data used for learning
-from the data used for evaluation.
-
-\paragraph{Three logs} We use three sources of data, all of which a platform records routinely.
+Let $\mathcal U$ be the set of users, with $m=|\mathcal U|$, and let $\mathcal I$ be the pool of videos from which the random insertions
+are drawn. A platform shows videos in several scenarios, which are the tabs of the application in which a video is placed; $\mathcal T$
+is the set of scenarios. The random insertions fall almost entirely in one scenario, $t=1$, and the scenario factor of
+Section~\ref{sec:method-dax} is normalised to it. A time $T_0$, the cut-off, separates the data used for learning from the data used
+for evaluation. The data are three logs, which are placed in time in Figure~\ref{fig:timeline}.
 \begin{enumerate}
-\item The \emph{policy log} $\mathcal D$ is the set of impressions of pool videos before $T_0$, as chosen by the production
-  recommender. An impression $r\in\mathcal D$ records a user $u_r$, an item $i_r\in\mathcal I$, a scenario
-  $t_r\in\mathcal T$ and a click indicator $y_r\in\{0,1\}$, which equals one when the user clicked the video. For a pair
-  $(u,i)$ we write $X_{ui}=1$ if $u$ clicked $i$ at least once before $T_0$, and $N_{ui}=1$ if $u$ was shown $i$ before $T_0$
-  but never clicked it.
-\item The \emph{lifelong log} of a user is the set of that user's impressions before $T_0$ on videos \emph{outside} the
-  pool $\mathcal I$, with their clicks. On a large platform this history is far longer than the user's history on the
-  pool.
-\item The \emph{random-exposure log} contains the impressions after $T_0$ in which a feed slot was filled with a video
-  drawn uniformly at random from $\mathcal I$. It supplies the candidate lists and labels described below, and nothing else.
+\item The \emph{policy log} $\mathcal D$ holds the impressions of pool videos before $T_0$, as chosen by the production recommender. An
+  impression $r\in\mathcal D$ records a user $u_r$, an item $i_r\in\mathcal I$, a scenario $t_r\in\mathcal T$ and a click indicator
+  $y_r\in\{0,1\}$. For a pair $(u,i)$ let $X_{ui}=1$ if $u$ clicked $i$ before $T_0$.
+\item The \emph{lifelong log} of a user holds that user's impressions before $T_0$ on videos outside the pool $\mathcal I$, with their
+  clicks. It is far longer than the user's history on the pool.
+\item The \emph{random-exposure log} holds the impressions after $T_0$ in which a feed slot was filled with a video drawn uniformly
+  from $\mathcal I$. It supplies candidate lists and labels, and nothing else.
 \end{enumerate}
-Figure~\ref{fig:timeline} shows how the three logs are placed in time.
 
-\paragraph{Candidate lists and labels} For a user $u$, the candidate list $C_u\subseteq\mathcal I$ is the set of pool
-videos that were inserted at random for $u$ after $T_0$, with every pair that $u$ was shown in the policy log before $T_0$
-removed. The label of a candidate is the click indicator of its random impression, so a candidate is relevant when the
-user clicked it. The users are divided into a validation part and a test part (Section~\ref{sec:protocol-splits}). The
-candidate lists and labels of the validation users select the configuration, and those of the test users measure accuracy.
-A user without a click among the candidates has no defined nDCG@10 and is not scored.
+\paragraph{Candidates, labels and task} For a user $u$, the candidate list $C_u\subseteq\mathcal I$ is the set of pool videos inserted
+at random for $u$ after $T_0$, with every pair that $u$ was shown before $T_0$ removed. The label of a candidate is the click
+indicator of its random impression. Validation users select the configuration and test users are scored. A user without a click among
+the candidates has no defined nDCG@10 and is not scored. For each user the recommender must rank $C_u$ so that clicked candidates come
+first, and accuracy is nDCG@10 averaged over users. The policy log, the lifelong log and statistics derived from them may be used for
+training. The random-exposure log may not: its candidates and labels serve only to select hyperparameters and to measure accuracy.
+
+\paragraph{Content keys} Each video carries three content keys, $\mathcal K=\{\mathrm{tag},\mathrm{author},\mathrm{music}\}$. For
+$k\in\mathcal K$, $v_k(i)$ is the key value of video $i$ (its first tag, its author or its music track), or $\varnothing$ if the value is
+absent. The keys are the only link between the lifelong log and the pool: a pool video never appears in the lifelong log, but its
+author or tag usually does.
+
+\paragraph{Why the task is hard} For the cooking clip, a low logged click rate may reflect the audience and scenario that the policy
+chose rather than the clip itself, and the policy log may say little about the viewer's taste for cooking. The two signals address
+the user side and the item side of this mismatch.
 
 \begin{figure}[tbp]
 \centering
@@ -68,148 +65,108 @@ A user without a click among the candidates has no defined nDCG@10 and is not sc
   \node[below] at (6,-2.15) {22 April 2022};
   \node[below] at (10,-2.15) {8 May 2022};
 \end{tikzpicture}
-\caption{The three logs in time. The lifelong log and the policy log end at the cut-off $T_0$, and the random-exposure log
-  starts there. Only the random-exposure log supplies candidates and labels, and only to the validation and test users. The
-  policy log after the cut-off is drawn for completeness and is not used. The bars are schematic and not to scale.}
+\caption{The three logs in time. The lifelong log and the policy log end at the cut-off $T_0$, and the random-exposure log starts
+  there. Only the random-exposure log supplies candidates and labels, and only to the validation and test users. The policy log after
+  the cut-off is not used. The bars are schematic and not to scale.}
 \label{fig:timeline}
 \end{figure}
-
-\paragraph{Content keys} Each video carries content keys from three families,
-$\mathcal K=\{\mathrm{tag},\mathrm{author},\mathrm{music}\}$. For a family $k\in\mathcal K$, $v_k(i)$ denotes the key value
-of video $i$ (its first tag, its author or its music track), or $\varnothing$ when the value is absent. Content keys are
-the only link between the lifelong log and the pool: a pool video never appears in the lifelong log, but its author or
-tag usually does.
-
-\paragraph{Task} For each user $u$, the recommender must rank the candidate list $C_u$ so that the clicked candidates
-come first. Accuracy is measured by nDCG@10 over users. The policy log, the lifelong log and any statistic derived from them
-may be used for training; the random-exposure log may not. Its candidates and labels serve only to select hyperparameters on
-a set of validation users and to measure accuracy on disjoint test users (Section~\ref{sec:protocol}). Every quantity defined
-below is therefore computed from events strictly before $T_0$.
-
-\paragraph{Why the task is hard} In the running example, the cooking clip may have been shown before $T_0$ mostly to users who
-rarely click anything, or in a scenario where users scroll past most videos. Its logged click rate is then low, although the
-viewer, if she looked at it, might well click. Conversely, the viewer may never have been shown any pool video about cooking,
-so the policy log says little about her taste for it. The policy log describes the response of the audiences and
-scenarios that the policy chose, whereas the random insertion asks about an audience that the policy did not choose. The two
-signals below address the user side and the item side of this mismatch.
 
 \subsection{LEAF: lifelong exposure-conditional affinities}
 \label{sec:method-leaf}
 
-\paragraph{Idea} The viewer of the running example has watched thousands of videos outside the pool. If she clicked cooking
-videos far more often than her other videos \emph{when they were shown to her}, she probably likes cooking, and this preference
-should carry over to a cooking clip from the pool. Two details matter. First, the statistic must be conditional on exposure:
-the number of cooking videos that she clicked depends on how many the policy chose to show her, whereas the fraction of shown
-cooking videos that she clicked does not. Second, a rate computed from few impressions is noisy and must be shrunk towards the
-user's overall rate. LEAF (lifelong exposure-conditional affinity) implements both points and adds a separate measure of how
-familiar the user is with a key.
+If the viewer clicked cooking videos much more often than her other videos \emph{when they were shown to her}, she probably likes
+cooking, and this preference should carry over to the clip. Two details matter. The statistic must be conditional on exposure: the
+number of cooking videos she clicked depends on how many the policy chose to show her, whereas the fraction of shown cooking videos she
+clicked does not. And a rate from few impressions must be shrunk towards her overall rate.
 
-\paragraph{Statistics} For a user $u$, a key family $k$ and a key value $v$, let $n^k_{uv}$ and $c^k_{uv}$ be the numbers of
-impressions and clicks in the lifelong log of $u$ on videos whose key value in family $k$ is $v$. Let $M_u$ and $C_u^{\mathrm{life}}$
-be the total numbers of impressions and clicks in the lifelong log of $u$. The lifelong base rate of $u$ is the smoothed click rate
+\paragraph{Statistics} For a user $u$, a key family $k$ and a key value $v$, let $n^k_{uv}$ and $c^k_{uv}$ be the impressions and clicks
+in the lifelong log of $u$ on videos whose key in family $k$ is $v$. Let $M_u$ and $C_u^{\mathrm{life}}$ be the total impressions and
+clicks of $u$ in that log. The lifelong base rate is the smoothed click rate
 \begin{equation}
   r_u=\frac{C_u^{\mathrm{life}}+1}{M_u+2}.
   \label{eq:base-rate}
 \end{equation}
-The \emph{lift} of key value $v$ for user $u$ is the user's click rate on that key, shrunk towards the base rate with a strength
-of $\eta$ pseudo-impressions, minus the base rate:
+The \emph{lift} of value $v$ for $u$ is her click rate on the key, shrunk towards the base rate with $\eta$ pseudo-impressions, minus
+the base rate:
 \begin{equation}
   \ell^k_{uv}=\frac{c^k_{uv}+\eta\,r_u}{n^k_{uv}+\eta}-r_u .
   \label{eq:lift}
 \end{equation}
-The lift is positive when the user clicks the key more often than her other videos once it is shown, negative when she clicks it
-less often, and close to zero when there is too little evidence. The \emph{familiarity} is
+The lift is positive when she clicks the key more often than her other videos once it is shown, and close to zero when the evidence is
+thin. The \emph{familiarity} is
 \begin{equation}
   f^k_{uv}=\log\bigl(1+n^k_{uv}\bigr),
   \label{eq:familiarity}
 \end{equation}
-which records how much the user has been exposed to the key, whatever her response. Lift and familiarity carry different
-information: a user may have seen a popular author very often and still click that author at her average rate.
+which records her exposure to the key whatever her response. The two carry different information: a user may have seen a popular author
+often and still click that author at her average rate.
 
-\paragraph{Channels of a user-item pair} For a candidate $i$, LEAF looks up the statistics of user $u$ at the three key values
-of $i$. This gives the channel vector
+\paragraph{Channels} For a candidate $i$, LEAF looks up the statistics of $u$ at the three key values of $i$, which gives the channel vector
 \begin{equation}
   z_{ui}=\Bigl(\tilde\ell^{\mathrm{tag}}_{u,v_{\mathrm{tag}}(i)},\ \tilde f^{\mathrm{tag}}_{u,v_{\mathrm{tag}}(i)},\
   \tilde\ell^{\mathrm{author}}_{u,v_{\mathrm{author}}(i)},\ \tilde f^{\mathrm{author}}_{u,v_{\mathrm{author}}(i)},\
   \tilde\ell^{\mathrm{music}}_{u,v_{\mathrm{music}}(i)},\ \tilde f^{\mathrm{music}}_{u,v_{\mathrm{music}}(i)}\Bigr)\in\mathbb R^6,
   \label{eq:channels}
 \end{equation}
-where each tilde denotes a statistic divided by the standard deviation of its non-zero values over all pairs $(u,i)$ of users and
-pool videos, computed separately for each of the six channels. The channels are not centred. A channel is therefore zero when the
-key value of $i$ is absent or when $u$ has no lifelong impression with that value, and the six channels are on comparable scales.
-In the running example, the tag channels of the cooking clip are the viewer's lift and familiarity for cooking videos, and the author
-channels are close to zero because she has rarely or never been shown that author. The channels are computed once from the
-lifelong log; scoring a pair is a table lookup.
+where each tilde divides a statistic by the standard deviation of its non-zero values over all pairs of users and pool videos, computed
+separately for each channel. The channels are not centred, so a channel is zero when the key is absent or $u$ has no lifelong impression
+with that value. The channels are computed once from the lifelong log, and scoring a pair is a table lookup.
 
 \subsection{LEAF-LGN: lifelong channels inside a graph recommender}
 \label{sec:method-leaflgn}
 
-LEAF supplies features of a pair; a collaborative model is still needed to capture what the policy log says about users and items.
-We use LightGCN \citep{he2020lightgcn}, a graph recommender that spreads user and item embeddings over the bipartite graph of
-clicked pairs $\{(u,i):X_{ui}=1\}$. Let $\bar e_u$ and $\bar e_i$ be the scoring embeddings of $u$ and $i$, defined below,
-$b_u$, $b_i$ and $b_0$ user, item and global biases, and $q_i$ the standardised logarithm of the number of users who clicked
-$i$ before $T_0$. LEAF-LGN scores a pair by
+LightGCN \citep{he2020lightgcn} spreads user and item embeddings over the bipartite graph of clicked pairs $\{(u,i):X_{ui}=1\}$. LEAF-LGN adds
+the six channels to its score of a pair:
 \begin{equation}
   s^{\mathrm{LEAF}}_{ui}=\langle\bar e_u,\bar e_i\rangle+b_u+b_i+b_0+\beta\,q_i+g^{\top}z_{ui},
   \label{eq:leaflgn}
 \end{equation}
-where $\beta\in\mathbb R$ weights popularity and $g\in\mathbb R^6$ weights the six lifelong channels. All parameters, including
-$\beta$ and $g$, are learned together, so the model decides how much each lifelong channel is worth relative to the collaborative
-signal.
+where $\bar e_u$ and $\bar e_i$ are the scoring embeddings after two propagation layers, $b_u$, $b_i$ and $b_0$ are user, item and global
+biases, $q_i$ is the standardised logarithm of the number of users who clicked $i$ before $T_0$, and $\beta$ and $g\in\mathbb R^6$ are its
+weights. All parameters, including $\beta$ and $g$, are learned together, so the model decides how much each lifelong channel is worth
+relative to the collaborative signal.
 
-\paragraph{Readout and initialisation} The graph has two propagation layers with symmetric normalisation. The scoring embedding
-of each user and item is the mean of its layer-zero embedding and its embeddings after propagation, so $\bar e_u$ and $\bar e_i$ mix the
-two propagation layers. The biases $b_u$, $b_i$ and $b_0$, the popularity weight $\beta$ and the channel weights $g$ are initialised
-at zero, and the weight decay applies to the embeddings only.
-
-\paragraph{Training} The parameters are fitted with the Bayesian personalised ranking (BPR) loss \citep{rendle2009bpr}, which asks
-a positive item to score above a sampled negative item for the same user:
+\paragraph{Training} The parameters are fitted with the Bayesian personalised ranking loss \citep{rendle2009bpr},
 \begin{equation}
   \mathcal L=-\frac{1}{|B|}\sum_{(u,i,j)\in B}\log\sigma\bigl(s^{\mathrm{LEAF}}_{ui}-s^{\mathrm{LEAF}}_{uj}\bigr)
   +\frac{\rho}{|B|}\sum_{(u,i,j)\in B}\bigl(\|\bar e_u\|^2+\|\bar e_i\|^2+\|\bar e_j\|^2\bigr),
   \label{eq:bpr}
 \end{equation}
-where $B$ is a mini-batch of triples, $\sigma$ the logistic function and $\rho$ the weight decay. The positives are the clicked
-pairs. In addition, each shown-but-unclicked pair ($N_{ui}=1$) is used as a positive with probability $w$ in each epoch. We call
-this the \emph{policy channel}: the decision of the policy to show $i$ to $u$ is itself weak evidence of relevance, and $w\in[0,1]$
-sets how much it counts. Negatives $j$ are drawn uniformly from the items that $u$ was never shown before $T_0$ (from the items that $u$
-never clicked when $w=0$). The learning rate,
-$\rho$, $w$ and the number of epochs are selected on the validation users. Its contribution is tested in Section~\ref{sec:res-controls}, where it gives no measurable gain on LEAF-LGN.
+where $B$ is a mini-batch of triples $(u,i,j)$ in which $i$ is a clicked pair, $\sigma$ is the logistic function and $\rho$ the weight
+decay. The negative $j$ is drawn uniformly from the items that $u$ was not shown before $T_0$ (or, when the policy channel is off, did not click).
+
+A policy-log channel, which adds shown but unclicked pairs as weak positives with a weight $w$, was also tried. The separately tuned
+LEAF-LGN selects $w=0$ in four of five splits and does not lose score without the channel (Section~\ref{sec:res-controls}), but the
+backbone selected for LEAF-LGN+DAX uses $w=0.25$ or $0.5$ in every split, so the channel is part of that model. Its definition and
+its control are in \ref{app:supp}.
 
 \subsection{DAX: detection-adjusted attractiveness}
 \label{sec:method-dax}
 
-\paragraph{Idea} LEAF describes the user. The second signal describes the item, and its starting point is the observation that
-a non-click is ambiguous. When the cooking clip is shown and not clicked, either the viewer looked at it and did not find it
-attractive, or she never really looked at it, for instance because she was scrolling quickly in a scenario where few videos are
-watched. The two explanations have very different consequences for the item. A raw click rate treats every non-click as the first
-case, and so penalises items that the policy happened to show to inattentive users or in inattentive scenarios.
+\paragraph{Idea} A non-click is ambiguous. When the cooking clip is shown and not clicked, either the viewer looked at it and did not find
+it attractive, or she never really looked at it, for instance because she was scrolling quickly in a scenario where few videos are watched.
+A raw click rate treats every non-click as the first case, and so penalises items that the policy happened to show to inattentive users or
+in inattentive scenarios. Occupancy models in ecology \citep{mackenzie2002occupancy} face the same ambiguity: a site can be occupied and still
+yield no detection. Click models for web search \citep{richardson2007predicting,craswell2008cascade,chuklin2015clickmodels} write a click as
+examination times attraction, with examination depending on rank. DAX applies this separation to a feed. An impression plays the role of a
+survey, a click the role of a detection, and the attractiveness of the item the role of presence. A feed slot has no rank, so examination
+depends on who is watching and in which scenario.
 
-The same ambiguity is central in two other fields. In ecology, occupancy models \citep{mackenzie2002occupancy} separate whether a
-species is present at a site from whether a survey detects it: a site can be occupied and still yield no detection, and repeated
-surveys under varying detection conditions allow both probabilities to be estimated. In web search, click models
-\citep{richardson2007predicting,craswell2008cascade,chuklin2015clickmodels} write a click as the product of the probability that a
-result is examined, which depends on its position, and the probability that it attracts a click once examined. DAX
-(detection-adjusted attractiveness) applies this separation to a recommendation feed. An impression plays the role of a survey, a
-click the role of a detection, and the attractiveness of the item the role of presence. Since a feed slot has no ranked-list
-position in this sense, examination depends on who is watching and in which scenario.
-
-\paragraph{Generative model} For an impression $r$ of the policy log, DAX introduces two latent binary variables, an
-examination indicator $E_r$ and an attraction indicator $R_r$:
+\paragraph{Generative model} For an impression $r$ of the policy log, DAX introduces latent examination and attraction indicators $E_r$ and
+$R_r$:
 \begin{equation}
   E_r\sim\mathrm{Bernoulli}\bigl(\theta_{u_r}\kappa_{t_r}\bigr),\qquad
   R_r\sim\mathrm{Bernoulli}\bigl(\alpha_{i_r}\bigr),\qquad
   y_r=E_rR_r ,
   \label{eq:dax-model}
 \end{equation}
-with $E_r$ and $R_r$ independent. Here $\theta_u\in(0,1]$ is the examination propensity of user $u$, $\kappa_t>0$ is a relative
-examination factor of scenario $t$, normalised by $\kappa_1=1$ for the evaluation scenario, and $\alpha_i\in(0,1)$ is the
-attractiveness of item $i$, the probability that it is clicked once examined. A click occurs with probability
-$\theta_{u}\kappa_{t}\alpha_{i}$. The quantity of interest is $\alpha_i$; the examination factors $\theta_u$ and $\kappa_t$ are
-nuisance parameters that absorb who saw the item and where.
+with $E_r$ and $R_r$ independent. Here $\theta_u\in(0,1]$ is the examination propensity of user $u$, $\kappa_t>0$ is the relative
+examination factor of scenario $t$, with $\kappa_1=1$ for the evaluation scenario, and $\alpha_i\in(0,1)$ is the probability that item $i$
+is clicked once examined. The quantity of interest is $\alpha_i$. The factors $\theta_u$ and $\kappa_t$ are nuisance parameters that
+absorb who saw the item and where.
 
-\paragraph{What a non-click says} Write $\tau_r=\theta_{u_r}\kappa_{t_r}$ for the examination probability of impression $r$. A click
-implies $E_r=R_r=1$. After a non-click, Bayes' rule gives
+\paragraph{What a non-click says} Write $\tau_r=\theta_{u_r}\kappa_{t_r}$ for the examination probability of impression $r$. A click implies
+$E_r=R_r=1$. After a non-click, Bayes' rule gives
 \begin{equation}
   \begin{aligned}
   p_{E,r}&=P(E_r=1\mid y_r=0)=\frac{\tau_r(1-\alpha_{i_r})}{1-\tau_r\alpha_{i_r}},\\
@@ -217,138 +174,102 @@ implies $E_r=R_r=1$. After a non-click, Bayes' rule gives
   \end{aligned}
   \label{eq:posterior}
 \end{equation}
-If examination is unlikely ($\tau_r\to0$), then $p_{R,r}\to\alpha_{i_r}$ and the non-click leaves the belief about the item almost
-unchanged. If examination is nearly certain ($\tau_r\to1$), then $p_{R,r}\to0$ and the non-click counts fully against the item. A
-non-click by an attentive user in an attentive scenario is therefore strong evidence, and a non-click by an inattentive user is weak
-evidence. An additive model on the logit scale, in which user and scenario effects are added to an item effect, does not have this
-property: once the user effect is absorbed, every non-click shifts the item effect by a similar amount.
+If examination is unlikely, $p_{R,r}\to\alpha_{i_r}$ and the non-click leaves the belief about the item almost unchanged. If examination is
+nearly certain, $p_{R,r}\to0$ and the non-click counts fully against the item. A non-click by an attentive user in an attentive scenario is
+therefore strong evidence, and one by an inattentive user is weak evidence. An additive model on the logit scale does not have this property
+(Section~\ref{sec:res-ablate}).
 
-\paragraph{Priors} Many pool videos have few impressions in the policy log, and many users have few clicks, so all three factors
-are regularised by priors expressed as pseudo-counts.
-\begin{itemize}
-\item \emph{Item attractiveness.} $\alpha_i\sim\mathrm{Beta}\bigl(\nu c_{g(i)},\,\nu(1-c_{g(i)})\bigr)$, where $g(i)$ is the tag of
-  $i$ (items without a tag form one group), $c_g$ is the pooled attractiveness of the items of tag $g$, and $\nu$ is the prior strength
-  in pseudo-impressions. An item with few impressions is pulled towards the attractiveness of its tag.
-\item \emph{User examination.} $\theta_u\sim\mathrm{Beta}\bigl(\lambda\tilde c_u,\,\lambda(1-\tilde c_u)\bigr)$, where the centre
-  $\tilde c_u$ is the user's lifelong base rate $r_u$ of Equation~\eqref{eq:base-rate}, rescaled to the examination level of the policy
-  log (Equation~\eqref{eq:life-centre} below), and $\lambda$ is the prior strength. A user who clicks rarely on the whole platform is
-  presumed to examine rarely. The lifelong log thus enters DAX as well, but only through one number per user.
-\item \emph{Scenario factors.} Each $\kappa_t$ receives one pseudo-count in the numerator and one in the denominator of its update,
-  which pulls the factor of a rarely used scenario towards one.
-\end{itemize}
+\paragraph{Priors} Three factors are regularised by pseudo-counts. The attractiveness of item $i$ has a Beta prior with centre $c_{g(i)}$,
+the pooled attractiveness of its tag $g(i)$ (items without a tag form one group), and strength $\nu$, so an item with few impressions is pulled
+towards its tag. The examination propensity has a Beta prior centred on the user's lifelong rate, $\theta_u\sim\mathrm{Beta}\bigl(\lambda\tilde c_u,\,
+\lambda(1-\tilde c_u)\bigr)$ with strength $\lambda$, so a user who clicks rarely on the platform is presumed to examine rarely. The lifelong log
+enters DAX only through this one number per user. Each scenario factor receives one pseudo-count in the numerator and one in the denominator of
+its update, which pulls the factor of a rarely used scenario towards one.
 
-\paragraph{Estimation by expectation-maximisation} The latent indicators make the likelihood of
-Equation~\eqref{eq:dax-model} awkward to maximise directly but easy to handle by EM. Starting from initial values, the algorithm
-alternates two steps on the policy log. The \emph{E-step} computes, for every impression, the posterior probabilities
-$p_{E,r}$ and $p_{R,r}$ of Equation~\eqref{eq:posterior} under the current parameters, with $p_{E,r}=p_{R,r}=1$ for a click. They are
-the expected numbers of examinations and attractions that the impression contributes. The \emph{M-step} re-estimates each factor
-from these expected counts, in the order $\theta$, $\kappa$, $\alpha$, each time using the most recent values of the other factors.
-Let $n_i$ be the number of impressions of item $i$ in the policy log. The updates are
+\paragraph{Estimation} The latent indicators make the likelihood of Equation~\eqref{eq:dax-model} awkward to maximise directly and easy to
+handle by EM. The E-step computes $p_{E,r}$ and $p_{R,r}$ of Equation~\eqref{eq:posterior} for every impression, with both equal to one for a
+click. The M-step re-estimates the factors in the order $\theta$, $\kappa$, $\alpha$, each time with the most recent values of the others:
 \begin{align}
   \theta_u&\leftarrow\frac{\sum_{r:\,u_r=u}p_{E,r}+\lambda\,\tilde c_u}{\sum_{r:\,u_r=u}\kappa_{t_r}+\lambda},
   \label{eq:m-theta}\\
   \kappa_t&\leftarrow\frac{\sum_{r:\,t_r=t}p_{E,r}+1}{\sum_{r:\,t_r=t}\theta_{u_r}+1},\qquad\text{followed by}\quad
   \kappa_t\leftarrow\kappa_t/\kappa_1,
   \label{eq:m-kappa}\\
-  \alpha_i&\leftarrow\frac{\sum_{r:\,i_r=i}p_{R,r}+\nu\,c_{g(i)}}{n_i+\nu}.
+  \alpha_i&\leftarrow\frac{\sum_{r:\,i_r=i}p_{R,r}+\nu\,c_{g(i)}}{n_i+\nu},
   \label{eq:m-alpha}
 \end{align}
-Each update has a direct reading. The attractiveness of an item is its expected number of attractions per impression, with $\nu$
-pseudo-impressions at the tag level added. The examination propensity of a user is the expected number of examinations divided by
-the examination opportunities that the scenarios of the user's impressions allow. The update of $\alpha_i$ is the posterior mean of the
-Beta prior given the expected counts. The updates of $\theta_u$ and $\kappa_t$ are the exact maximisers when the examination indicator is
-approximated by a Poisson count with mean $\theta_u\kappa_t$, which is accurate when examination probabilities are small; we use them
-because they are closed-form and cheap. In simulations with known parameters, the fit recovers the ordering of the items by
-attractiveness and of the users by examination, and with negligible priors the observed-data likelihood does not decrease from one
-iteration to the next (\ref{app:controls}).
+where $n_i$ is the number of impressions of item $i$. The attractiveness of an item is its expected number of attractions per impression,
+with $\nu$ pseudo-impressions at the tag level added. The updates for $\theta$ and $\kappa$ are closed-form maximisers under a Poisson
+approximation to the examination indicator, which is accurate when examination probabilities are small. \ref{app:em} gives the
+approximation and the clamps. The fit runs for a fixed number of iterations from fixed initial values, without a convergence test (\ref{app:em}).
 
-The two prior centres are re-estimated at every iteration from the current expected counts. The tag centre is the pooled attraction
-rate of the tag,
+The two prior centres are re-estimated at every iteration. The tag centre is the pooled attraction rate of the tag,
 \begin{equation}
   c_g=\frac{\sum_{i:\,g(i)=g}\ \sum_{r:\,i_r=i}p_{R,r}+1}{\sum_{i:\,g(i)=g}n_i+2},
   \label{eq:tag-centre}
 \end{equation}
-and the lifelong centre rescales the user's relative lifelong rate to the average examination rate of the policy log,
+and the lifelong centre rescales the user's lifelong rate to the average examination rate of the policy log,
 \begin{equation}
   \tilde c_u=\operatorname{clip}_{[10^{-3},\,1]}\Bigl(\frac{r_u}{\bar r}\cdot\frac{\sum_{r\in\mathcal D}p_{E,r}}{\sum_{r\in\mathcal D}\kappa_{t_r}}\Bigr),
   \label{eq:life-centre}
 \end{equation}
-where $\bar r$ is the mean of $r_u$ over the users. The two sums in Equation~\eqref{eq:life-centre} run over all impressions of the
-policy log and form one global number, the average examination rate of the log. The only user-specific factor is $r_u/\bar r$. A user
-without lifelong history is given the mean base rate $\bar r$, and therefore the average centre.
+where $\bar r$ is the mean of $r_u$ over users. The only user-specific factor is $r_u/\bar r$, and a user without lifelong history receives the
+mean centre.
 
-\paragraph{Output} After a fixed number of iterations, DAX returns the attractiveness of every pool item. The examination
-factors are discarded. The item score passed on to the combination is the standardised logit
+\paragraph{Output} After the fixed number of iterations, DAX returns the attractiveness of every pool item and discards the examination
+factors. The item score passed on is the standardised logit
 \begin{equation}
   \zeta_i=\frac{\operatorname{logit}\alpha_i-\mu_\alpha}{\sigma_\alpha},
   \label{eq:zeta}
 \end{equation}
 where $\mu_\alpha$ and $\sigma_\alpha$ are the mean and standard deviation of $\operatorname{logit}\alpha$ over $\mathcal I$. In the running
-example, if most of the clip's non-clicks came from users with a low lifelong click rate, or from a scenario with a small factor
-$\kappa_t$, DAX attributes them mostly to missed examination, and the clip receives a higher attractiveness than its raw click rate
-suggests.
+example, if most of the clip's non-clicks came from users with a low lifelong click rate or from a scenario with a small factor $\kappa_t$, DAX
+attributes them mostly to missed examination, and the clip receives a higher attractiveness than its raw click rate suggests.
 
-\paragraph{Two variants of the main experiment} The main experiment selects two variants of the DAX module, which are
-defined here. Other options of the search are in \ref{app:fh}.
-
-\paragraph{Content-regression centre} The tag centre can be replaced, from the sixth iteration on, by a regression on content attributes
-in the spirit of small-area estimation \citep{fay1979smallarea}:
+\paragraph{Two switches of the search} Two options of the DAX module are selected in some splits. The tag centre may be replaced, after a fixed number of initial iterations, by a ridge regression on content codes in the spirit of small-area estimation \citep{fay1979smallarea}:
 \begin{equation}
   c_i=\sigma\bigl(\mu_0+\mathbf x_i^{\top}\boldsymbol\beta\bigr),\qquad
   \boldsymbol\beta=\bigl(\mathbf X^{\top}W\mathbf X+\xi\,I\bigr)^{-1}\mathbf X^{\top}W\bigl(\mathbf y-\mu_0\mathbf 1\bigr),
   \label{eq:content-centre}
 \end{equation}
-where $\mathbf y$ is the vector of $\operatorname{logit}\alpha_i$ over the pool, $\mathbf X$ stacks the one-hot content codes $\mathbf x_i$
-of the pool videos (tag, upload type, video type, duration decile, aspect ratio, music type, and three bins of the out-of-pool history of
-the author), $W=\operatorname{diag}(w_i)$ with $w_i=\sqrt{n_i+1}$, $\mu_0$ is the weighted mean of $\mathbf y$ with weights $w_i$, and
-$\xi$ is a fixed ridge penalty. The first five iterations use the tag centre.
-
-\paragraph{User-group attractiveness} Users are divided into five quantile groups $s=1,\dots,5$ by their lifelong base rate $r_u$ of
-Equation~\eqref{eq:base-rate}, computed on the pre-cut lifelong log, and users without lifelong history form a sixth group. We write
-$s(u)$ for the group of $u$. Each item then has an attractiveness in every group, shrunk towards its overall attractiveness $\alpha_i$:
+where $\mathbf y$ is the vector of $\operatorname{logit}\alpha_i$ over the pool, $\mathbf X$ stacks the one-hot content codes $\mathbf x_i$ of the
+pool videos, $W=\operatorname{diag}(w_i)$ with $w_i=\sqrt{n_i+1}$, $\mu_0$ is the weighted mean of $\mathbf y$, and $\xi$ is a fixed ridge penalty.
+The attractiveness may also be estimated in six groups of users: five quantile groups of the lifelong base rate $r_u$, and a group without
+lifelong history. Each group's attractiveness is shrunk towards the overall attractiveness,
 \begin{equation}
   \alpha_{i,s}=\frac{\sum_{r:\,i_r=i,\ s(u_r)=s}p_{R,r}+\nu_{\mathrm g}\,\alpha_i}{n_{is}+\nu_{\mathrm g}},
   \label{eq:group-alpha}
 \end{equation}
-where $n_{is}$ is the number of pre-cut impressions of $i$ to users of group $s$, and $\nu_{\mathrm g}$ is the group prior strength
-selected on the validation users. The score of a candidate then uses the group of the user,
-$\zeta_{ui}=\bigl(\operatorname{logit}\alpha_{i,s(u)}-\mu_\alpha\bigr)/\sigma_\alpha$, with the same $\mu_\alpha$ and $\sigma_\alpha$ as in
-Equation~\eqref{eq:zeta}. Without the group variant, $\zeta_{ui}=\zeta_i$. The lifelong prior, the tag prior and the scenario factors
-can each be switched off, which defines the ablations of Section~\ref{sec:res-ablate}.
+where $s(u)$ is the group of $u$, $n_{is}$ counts the pre-cut impressions of $i$ to group $s$, and $\nu_{\mathrm g}$ is a fixed strength when this switch is on
+(it is not tuned). A candidate then uses the attractiveness of its user's group, $\zeta_{ui}=(\operatorname{logit}\alpha_{i,s(u)}-\mu_\alpha)/\sigma_\alpha$,
+with the same $\mu_\alpha$ and $\sigma_\alpha$ as in Equation~\eqref{eq:zeta}. Each switch, and each of the lifelong, tag and scenario
+components, can be turned off in the ablations (Section~\ref{sec:res-ablate}).
 
 \subsection{Combining LEAF-LGN and DAX}
 \label{sec:method-combine}
 
-DAX produces one number per item and user group and does not depend on the backbone, so it is added after the backbone has been
-trained. For a user $u$ with candidate list $C_u$ the final score of a candidate $i\in C_u$ is
+DAX produces one number per item and does not depend on the backbone, so it is added after the backbone has been trained. For a user
+$u$ with candidate list $C_u$, the final score of a candidate $i\in C_u$ is
 \begin{equation}
   s_{ui}=\operatorname{std}_{C_u}\bigl(s^{\mathrm{LEAF}}_{ui}\bigr)+\gamma\,\operatorname{std}_{C_u}\bigl(\zeta_{ui}\bigr),
   \label{eq:combine}
 \end{equation}
-where $\operatorname{std}_{C_u}$ subtracts the mean over the candidate list and divides by the standard deviation over the list, so that
-the two terms are on the same scale for every user, and $\gamma\ge0$ is the weight of DAX. With $\gamma=0$ the score is that of the
-backbone.
+where $\operatorname{std}_{C_u}$ subtracts the mean over the candidate list and divides by its standard deviation, so that both terms are on
+the same scale for every user, and $\gamma\ge0$ is the weight of DAX. With $\gamma=0$ the score is that of the backbone.
 
-The weight $\gamma$, the DAX hyperparameters ($\nu$, $\lambda$, the centre and the switches above) and the training epoch of the backbone
-are selected together on the validation users: at every epoch, every DAX configuration and every value of $\gamma$ are scored, and the
-best validation combination is kept. Because $\gamma=0$ is among the candidates, the combination cannot be worse than the backbone on the
-validation users. The weight is therefore a hyperparameter, not a learned parameter. We call the combined model LEAF-LGN+DAX. The same
-rule, with the backbone score in place of $s^{\mathrm{LEAF}}_{ui}$, defines a DAX variant of every other backbone in our experiments.
-Algorithms~\ref{alg:dax} and~\ref{alg:leaflgn} in \ref{app:supp} summarise the fit and the selection.
+The weight $\gamma$, the DAX settings and the training epoch are selected together on validation users. At every epoch, every DAX configuration
+and every value of $\gamma$ are scored, and the best validation combination is kept. Because $\gamma=0$ is among the candidates, the combination
+cannot be worse than its backbone on validation users, and the weight is a hyperparameter rather than a learned parameter. The same rule defines a
+DAX variant of every other backbone in our experiments. Algorithms~\ref{alg:dax} and~\ref{alg:leaflgn} in \ref{app:supp} summarise the fit and the selection.
 
 \subsection{What the attractiveness measures}
 \label{sec:method-identify}
 
-The probability of a click depends on the parameters only through the product $\theta_u\kappa_t\alpha_i$. For any constant $a>0$, the
-transformation $(\theta,\alpha)\mapsto(a\theta,\alpha/a)$ leaves the likelihood unchanged as long as all values stay in $[0,1]$. The
-normalisation $\kappa_1=1$ fixes the scale of the scenario factors, but one global scale shared by $\theta$ and $\alpha$ remains, and it is
-fixed in practice by the priors and by the bounds of the parameters rather than by the data. Two consequences follow. First, the ordering
-of the items by $\alpha_i$ is meaningful, but the values of $\alpha_i$ are not absolute probabilities of a click, and we do not report them
-as such. Second, the logit in Equation~\eqref{eq:zeta} is not invariant to the scale, so the prior strengths $\nu$ and $\lambda$ influence
-the channel; this is why they are selected on validation users like the other hyperparameters.
-
-The examination factors $\theta_u$ and $\kappa_t$ should not be read as user traits or as properties of the scenarios. Their role is to
-explain away non-clicks that carry little information about the item. Finally, $\alpha_i$ is a model-based estimate under the assumptions of
-Equation~\eqref{eq:dax-model}, in particular that examination and attraction are independent given the user, the scenario and the item. We
-do not claim that it is an unbiased or causally identified measure of item quality. We test only whether it improves the ranking of randomly
-inserted items.
+The probability of a click depends on the parameters only through $\theta_u\kappa_t\alpha_i$. For any constant $a>0$, the transformation
+$(\theta,\alpha)\mapsto(a\theta,\alpha/a)$ leaves the likelihood unchanged while all values stay in $[0,1]$. The normalisation $\kappa_1=1$ fixes
+the scale of the scenario factors, but one global scale shared by $\theta$ and $\alpha$ remains, and the priors and bounds fix it in practice.
+The ordering of items by $\alpha_i$ is therefore meaningful, but its values are not click probabilities. The logit in Equation~\eqref{eq:zeta} is
+not scale-invariant, which is why $\nu$ and $\lambda$ are selected on validation users. The factors $\theta_u$ and $\kappa_t$ should not be read as
+user traits or scenario properties; their role is to explain away non-clicks that carry little information about the item. Finally, $\alpha_i$ is
+model-based under the independence of examination and attraction in Equation~\eqref{eq:dax-model}. We do not claim that it is an unbiased or
+causally identified measure of item quality. We test only whether it improves the ranking of randomly inserted items.

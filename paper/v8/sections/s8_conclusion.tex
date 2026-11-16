@@ -1,15 +1,15 @@
-\section{Conclusion}\label{sec:conclusion}
+\section{Conclusion}
+\label{sec:conclusion}
 
-Recommendation for randomly inserted items is a learning problem in which only the policy log may be used for training, and a
-strong graph recommender leaves its remaining error mostly in item-level appeal. We proposed two log-only signals for this
-problem. LEAF summarises each user's lifelong behaviour outside the evaluated pool as exposure-conditional affinities for
-content keys, and these affinities reach candidates from the pool through shared tags, authors and music tracks. DAX treats a
-logged click as an examination, which depends on the user and the scenario, followed by an attraction, which depends on the
-item; it estimates item attractiveness by expectation-maximisation and adds the estimate to any trained recommender. On LEAF-LGN, shuffling the users' lifelong tables removes the lifelong gain, and the gain of DAX disappears when attractiveness is permuted across items.
+Recommendation for randomly inserted items is a learning problem in which only the policy log may be used for training, and the random insertions
+serve for selection and testing. We proposed two log-only signals for it. LEAF summarises each user's lifelong behaviour outside the evaluated pool as
+exposure-conditional affinities for content keys, and these reach candidates from the pool through shared tags, authors and music tracks. DAX treats
+a logged click as an examination, which depends on the user and the scenario, followed by an attraction, which depends on the item, and estimates the
+attractiveness by expectation-maximisation.
 
-On KuaiRand-27K, under a temporal protocol with five user-level splits, the combined model reaches an nDCG@10 of 0.4854, against
-0.4634 for the QP family. It ranks above each of the thirteen comparators of the main family, four of them published debiased estimators, and the strength of each comparison is reported
-in Section~\ref{sec:results}. The evidence comes from one platform family, and it is a controlled
-ranking gain under the stated protocol. Open questions are whether the two signals hold on other platforms, whether joint
-training of DAX with the backbone adds to the increment, and whether richer content would close the remaining gap to an oracle
-on item appeal.
+On KuaiRand-27K, under a temporal protocol with five user-level splits, the combined model reaches an nDCG@10 of 0.4854, against 0.4634 for PW-LightGCN.
+It ranks above each of the thirteen comparators of the main family. The margins over PW-LightGCN and over DIN with DAX are significant but narrow, with
+an adjusted split-level value of 0.0456 for both. DAX increases per-user nDCG@10 on all six backbones, and at split level on five. The evidence comes
+from one platform family, and it is a controlled ranking gain under the stated protocol. Open questions are whether the two signals hold on other
+platforms, whether the examination structure adds to a shrunk click rate, whether joint training of DAX with the backbone adds to the increment, and
+whether richer content would close the remaining gap to an oracle on item appeal.

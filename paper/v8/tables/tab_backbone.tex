@@ -4,19 +4,19 @@
 \caption{DAX on six backbones on KuaiRand-27K: nDCG@10 without and with the DAX module, the paired per-user difference in units of $10^{-3}$ with its 95\% half-width, and the split-level Nadeau-Bengio test. SIM denotes SIM-hard.}
 \label{tab:backbone}
 \begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{lrrcc}
+\begin{tabular}{lrrccc}
 \toprule
-Backbone & Without DAX & With DAX & Diff.\ [95\% hw] & NB $p$ \\
+Backbone & Without DAX & With DAX & Diff.\ [95\% hw] & NB $p$ & NB $p_{\mathrm{Holm}}$ \\
 \midrule
-EASE & 0.4507 & 0.4623 & +11.98 [1.64] & 0.000 \\
-LightGCN (re-trained) & 0.4597 & 0.4709 & +11.60 [1.51] & 0.001 \\
-QP family & 0.4634 & 0.4733 & +10.28 [1.37] & 0.105 \\
-LEAF-LGN & 0.4736 & 0.4854 & +11.96 [1.47] & 0.001 \\
-DIN & 0.4675 & 0.4796 & +12.53 [1.41] & 0.011 \\
-SIM & 0.4590 & 0.4706 & +11.72 [1.46] & 0.008 \\
+EASE & 0.4507 & 0.4623 & +11.98 [1.64] & $<0.001$ & $<0.001$ \\
+LightGCN (same-run base) & 0.4597 & 0.4709 & +11.60 [1.51] & $<0.001$ & 0.005 \\
+PW-LightGCN & 0.4634 & 0.4733 & +10.28 [1.37] & 0.105 & 0.105 \\
+LEAF-LGN & 0.4736 & 0.4854 & +11.96 [1.47] & 0.001 & 0.005 \\
+DIN & 0.4675 & 0.4796 & +12.53 [1.41] & 0.011 & 0.025 \\
+SIM & 0.4590 & 0.4706 & +11.72 [1.46] & 0.008 & 0.025 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
 \par\smallskip
-\begin{minipage}{\linewidth}\raggedright\footnotesize NB $p$ values are not adjusted (no family). LightGCN: the base and the DAX variant come from the same experiment (3 base configurations; 960 with DAX). Against the four-configuration LightGCN of Table~\ref{tab:main} the increment is +13.73 [1.46] (NB $p$ 0.091).\end{minipage}
+\begin{minipage}{\linewidth}\raggedright\footnotesize Mean: the mean of the five split means. Diff.: the mean over the pooled test users of each user's paired difference (a user's difference is averaged over the splits in which the user is scored). The two are computed over different weightings, so a difference need not equal the difference of the two means shown. NB $p$: split-level Nadeau-Bengio test of each increment. NB $p_{\mathrm{Holm}}$: Holm adjustment over the six increments of this table, the family used for the split-level statements of Section~\ref{sec:res-backbone}. The LightGCN row uses the LightGCN of the same experiment as its DAX variant (three base configurations; 960 with DAX). Against the four-configuration LightGCN of Table~\ref{tab:main} the increment is +13.73 [1.46] (NB $p$ 0.091; NB $p_{\mathrm{Holm}}$ 0.182 over the six increments with that base).\end{minipage}
 \end{table}

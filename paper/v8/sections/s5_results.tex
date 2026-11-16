@@ -1,202 +1,122 @@
-\section{Results}\label{sec:results}
+\section{Results}
+\label{sec:results}
 
-Differences are paired per-user differences of nDCG@10, multiplied by $10^{3}$, with the 95\% half-width in brackets
-(Section~\ref{sec:protocol-stats} defines the two tests). A comparison is called significant only when its Holm-adjusted p
-value is below 0.05 for the named test. A Holm-adjusted value of 0.0456 on the split-level test is called borderline. The
-Holm family of each table is stated in its note.
+Differences are means of per-user nDCG@10 differences, multiplied by $10^{3}$, with the 95\% half-width in brackets. Each table states
+the Holm family of its adjusted values. Each subsection gives the question and the answer first.
 
-\subsection{Headroom diagnosis}\label{sec:res-headroom}
+\subsection{Headroom diagnosis}
+\label{sec:res-headroom}
 
-This subsection is a diagnostic. It uses random-exposure labels, including those of the test users, and it is never used to
-select or train a method. Where is the remaining accuracy of a strong graph recommender on random insertions? Mostly at the item
-level: an oracle that knows each item's click rate under random insertion is far ahead of the recommender.
+This subsection is a diagnostic. It uses random-exposure labels, including those of the test users, and it is never used to select or train a
+method. We ask how much accuracy the item level could add. On the 22,661 users with a click in some candidate list, a leave-one-user-out item
+oracle, which scores each candidate by the uniform click rate of the item among the other users, reaches nDCG@10 0.5068. LEAF-LGN, with the
+configuration selected on the first split, reaches 0.4735, a gap of $33.31\times10^{-3}$. The method, LEAF-LGN+DAX, reaches 0.4854 as a mean over
+five splits, which closes about 36\% of the gap. The two sides use slightly different user sets, so this share is approximate. The lifelong user
+channels alone gain $10.65$ to $11.46\times10^{-3}$ (Section~\ref{sec:res-controls}), so the remaining headroom lies at the user level as well as at
+the item level, and this diagnostic does not separate the two.
 
-On the 22,661 users with a click in some candidate list, a leave-one-user-out item oracle, which scores each candidate by the
-uniform click rate of the item among the other test users, reaches nDCG@10 0.5068. LEAF-LGN, with the configuration selected on
-the first split, reaches 0.4735, so the gap is $+33.31\times10^{-3}$.
+\subsection{Main comparison}
+\label{sec:res-main}
 
-Three diagnostics locate the gap. First, the item-level Spearman correlation of the uniform click rate with the post-cut log is
-0.405, against 0.431 for the pre-cut log, over the 7,334 items with at least 50 random impressions. The two correlations are
-similar, which is consistent with the gap lying in item appeal. The comparison does not separate drift in items from drift in
-users, so it does not show that drift is absent. Second, the top quintile of the uniform click rate carries 0.83 of the residual
-gain of the item-level correction. Third, once item means are known, a rank-64 model on their residuals moves the item-mean value
-from 0.5850 to 0.5851 on 19,474 users, so personalisation fitted on uniform in-pool data adds little. The residual headroom
-therefore lies mainly at the item level.
+We ask whether LEAF-LGN+DAX is more accurate than each baseline. The answer is yes on the per-user test against all thirteen comparators, and on the
+split-level test against all thirteen after Holm correction. Two of these margins are significant but narrow. Table~\ref{tab:main} gives the paired
+comparisons, and Figure~\ref{fig:forest} shows that the sign of each difference is positive in every split.
 
-DAX closes part of this gap. In the diagnostic blend LEAF-LGN $+\,0.5\,z(\mathrm{DAX})$, which is not the method of
-Section~\ref{sec:method-combine}, nDCG@10 is 0.4818. The blend closes about a quarter of the oracle gap (0.25 of
-$0.5068-0.4735$) and leaves about $25\times10^{-3}$ of it. The DAX scores have an item-level Spearman of 0.419 with the uniform
-rate, below the 0.433 of the pre-cut click count computed on the same items, so the DAX gain is not simply popularity.
-
-\subsection{Methods and search budgets}\label{sec:res-methods}
-
-\FloatBarrier
-
-How do the methods rank, and how much did each search? LEAF-LGN+DAX has the highest mean; budgets differ widely, which the
-next subsections address.
-
-Table~\ref{tab:methods} gives the mean and standard deviation over the five splits. The search budgets differ by two
-orders of magnitude, so they are reported with every number. LEAF-LGN+DAX searches 3,840 configurations per split, DIN+DAX
-1,280, the QP family with DAX 3,200, the QP family itself 20, and each published estimator four. The budgets are not matched in the strict sense.
-
-\input{tables/tab_methods}
-
-\subsection{Main comparison}\label{sec:res-main}
-
-\FloatBarrier
-
-Is LEAF-LGN+DAX more accurate than each baseline? On the per-user test, the difference is positive against all thirteen comparators. On the split-level test, it is significant against eleven of them after Holm correction and borderline against the other two.
-
-Table~\ref{tab:main} gives the paired comparisons of LEAF-LGN+DAX with each of the thirteen comparators of the main family: the QP family, the QP family with DAX, the LEAF-LGN backbone without DAX, r-AdjNorm, LightGCN, DIN, DIN+DAX, SIM and SIM+DAX, and the four published estimators NAVIP, IPS-MF, DR-JL and MRDR.
-Table~\ref{tab:sens} in \ref{app:sens} adds EASE and EASE+DAX to the family. The conclusions at the 0.05 level do not change.
-
-The four published estimators are below LEAF-LGN+DAX under both tests, after Holm correction over the thirteen comparators. NAVIP, at 0.4579, is close to the 0.4576 of LightGCN, with a split-level Holm value of $1.26\times10^{-2}$. The three matrix factorisation estimators are far lower, at 0.3765 for IPS-MF, 0.3823 for DR-JL and 0.3826 for MRDR, with split-level Holm values below $2\times10^{-5}$. Each was tuned over four configurations, so these values reflect that budget.
+The closest comparator is DIN+DAX (0.4796), with a difference of $+5.73$ [1.64] and an adjusted split-level p value of 0.0456. The second narrow
+comparison is PW-LightGCN (0.4634), with a difference of $+22.32$ [1.83] and the same adjusted value of 0.0456 in the family of thirteen. The
+pre-specified criterion of the primary family of five, a margin of at least $15\times10^{-3}$ with both adjusted values below 0.05, is met, with an
+adjusted split-level value of 0.023 in that family. The four published estimators are far below LEAF-LGN+DAX. NAVIP (0.4579) is close to LightGCN
+(0.4576), with a difference of $+27.80$ [1.91]. IPS-MF (0.3765), DR-JL (0.3823) and MRDR (0.3826) each use four configurations, and their values are
+conditional on that budget. Adding EASE and EASE+DAX to the family (\ref{app:sens}) leaves every conclusion at the 0.05 level unchanged.
 
 \input{tables/tab_main}
-
-On the per-user test, every Holm-adjusted p value of the main family is below $10^{-11}$ (Table~\ref{tab:sens}). On the split-level test, the
-Holm-adjusted values of eleven comparators lie between $2.8\times10^{-6}$ (IPS-MF) and $2.44\times10^{-2}$ (LightGCN). Two comparisons have a split-level value of $4.56\times10^{-2}$:
-the QP family and DIN+DAX. Both lie below 0.05 but are called borderline. With five splits the split-level test has low power.
-The sign of the difference is the same in every split (Figure~\ref{fig:forest}).
 
 \begin{figure}[tbp]
 \centering
 \includegraphics[width=0.85\linewidth]{figs/fig_forest.pdf}
-\caption{Paired differences of LEAF-LGN+DAX against each comparator of the main family, in units of $10^{-3}$ nDCG@10. Each
-grey dot is the difference in one of the five splits. The diamond is the pooled per-user mean difference, with its 95\%
-half-width. Positive values favour LEAF-LGN+DAX. SIM denotes SIM-hard.}
+\caption{Paired differences of LEAF-LGN+DAX against each of the thirteen comparators of the main family, in units of $10^{-3}$ nDCG@10.
+  Each grey dot is the difference in one of the five splits. The diamond is the pooled per-user mean difference, with its 95\%
+  half-width. Positive values favour LEAF-LGN+DAX. SIM denotes SIM-hard, and PW-LightGCN is the propensity-weighted LightGCN.}
 \label{fig:forest}
 \end{figure}
 
-The pre-specified criterion of the primary family, a margin of at least $15\times10^{-3}$ over the QP family with both
-Holm-adjusted p values below 0.05, is met ($+22.32$ [1.83]; split-level Holm-adjusted $p=0.023$ in the family of five). In the
-thirteen-member main family the split-level value is the borderline $4.56\times10^{-2}$.
+\subsection{Comparison with the same DAX module}
+\label{sec:res-fair}
 
-\subsection{Fair-baseline reading}\label{sec:res-fair}
-
-\FloatBarrier
-
-Is the advantage explained by the DAX module or by search budget? No: with the same module and a comparable budget, the QP
-family remains behind.
-
-The QP family has the smaller search budget, so the fairer reference for the DAX module is the QP family with DAX, which
-searches the QP backbones selected without DAX. Against it LEAF-LGN+DAX is higher by $+12.04$ [1.63] (split-level
-Holm-adjusted $p=2.23\times10^{-2}$). The DAX increment on the QP backbone is $+10.28$ [1.37] with an unadjusted split-level p of
-0.105, so on that backbone alone the split-level test does not establish the increment. The LEAF-LGN backbone tuned
-independently, against the QP family, is $+9.63$ [1.60] with an unadjusted split-level p of 0.063, and in the LEAF development
-family of eight it has a split-level Holm value of 0.189 (Table~\ref{tab:fair}). The LEAF backbone alone is therefore not a clear
-improvement over the QP family on the split-level test. The combination is.
+We ask whether the advantage comes from the DAX module or from the search budget. The answer is that the module accounts for part of it: against PW-LightGCN with the same module (Table~\ref{tab:fair}), LEAF-LGN+DAX is higher by $+12.04$ [1.63], with an adjusted split-level value of 0.0223. PW-LightGCN gains $+10.28$ [1.37]
+from DAX on its own backbone, but the split-level p value is 0.105, so that increment is not established at split level. The LEAF-LGN backbone with its
+separate search is $+9.63$ [1.60] above PW-LightGCN, with an unadjusted split-level p value of 0.063. The LEAF backbone alone is therefore not established
+as an improvement over PW-LightGCN at split level, whereas the combination is. PW-LightGCN with DAX searches only the backbones selected without DAX,
+which is conservative for the method.
 
 \input{tables/tab_fair}
 
-\subsection{DAX on six backbones}\label{sec:res-backbone}
+\subsection{DAX on six backbones}
+\label{sec:res-backbone}
 
-\FloatBarrier
-
-Does DAX help backbones other than LEAF-LGN? Yes, its increment is positive on all six; the split-level test supports it on five.
-
-Table~\ref{tab:backbone} applies the same DAX module to six backbones. The per-user increment is positive on all six. The
-split-level tests support the increment for EASE, LightGCN, LEAF-LGN, DIN and SIM, with unadjusted values of 0.011 or below. The
-increment on the QP family, $+10.28$ [1.37], has a split-level value of 0.105 and is not supported at that level. The LightGCN
-row uses a LightGCN re-trained within the same experiment as LightGCN+DAX; against the four-configuration LightGCN of
-Table~\ref{tab:main} the increment is $+13.73$ [1.46]. The claim concerns the increment under one fixed rule, not the absolute
-accuracy of the backbones.
+We ask whether DAX helps backbones other than LEAF-LGN. Table~\ref{tab:backbone} gives the six increments. The answer is that the per-user increment is positive on all six, and that the split-level
+increment is significant on five after Holm correction over the six. PW-LightGCN is the exception, with a split-level p value of 0.105. The LightGCN
+increment depends on its base. Against the LightGCN of the same run it is $+11.60$ [1.51] (adjusted 0.005). Against the four-configuration LightGCN of the
+main table it is $+13.73$ [1.46], with an unadjusted split-level p value of 0.091, which is not significant after adjustment over the six (0.182). Each
+row uses its own base, so the increments are not comparable with the main difference of LEAF-LGN+DAX.
 
 \input{tables/tab_backbone}
 
-\subsection{Ablations of DAX}\label{sec:res-ablate}
+\subsection{Ablations of DAX}
+\label{sec:res-ablate}
 
-\FloatBarrier
-
-Which parts of DAX matter? All three priors contribute; the multiplicative form beats an additive one; permuting attractiveness
-across items removes the gain, and permuting it within tags keeps part of it.
-
-Table~\ref{tab:ablate} decomposes the DAX module. The variants are run in the reduced setting of
-Section~\ref{sec:protocol-ablation}. Their base, the LEAF-LGN of the ablation experiment, has a mean of 0.4706, which is below the
-0.4736 of the main experiment. The gain of full DAX against this base is $+15.10$ [1.42], that is $3.14\times10^{-3}$ above the
-main increment of $+11.96$ [1.47]. The gains of the other variants are therefore raised in the same way, and the comparisons
-that do not use the base are the full-minus-variant differences, in the rightmost columns.
+We ask which parts of DAX matter. The answer is that the full DAX gain over its base is significant (adjusted 0.037), that permuting attractiveness across
+items removes it, and that permuting within tags keeps 41.6\% of it. Across items the gain is $-0.27$ [0.36], which is not distinguishable from zero (adjusted
+0.754). Within tags it is $+6.28$ [1.10] (adjusted 0.007). Over the three permutation seeds the across-item gains lie between $-0.44$ and $-0.16$, and the
+within-tag gains between $+5.66$ and $+6.84$ (Table~\ref{tab:ablate}, lower block). Each removal of a DAX component lowers the per-user score. Removing the
+scenario factors costs $+1.51$ [0.79], removing the lifelong prior costs $+1.78$ [0.61], removing the tag prior costs $+3.41$ [0.99], and the additive model
+costs $+6.09$ [0.96]. None of these six full-minus-variant differences is significant at split level: the smallest adjusted value over the six is 0.088.
+The per-user evidence therefore favours full DAX over each variant, but the split-level evidence does not separate the three switches or the additive
+model from full DAX.
 
 \input{tables/tab_ablate}
 
-Each removal lowers the score (Figure~\ref{fig:ablate}). Removing the examination factor $\kappa_t$ costs $+1.51$ [0.79],
-removing the lifelong prior on $\theta_u$ costs $+1.78$ [0.61], and removing the tag prior on $\alpha_i$ costs $+3.41$ [0.99].
-The additive logit model with user and scenario effects costs $+6.09$ [0.96], the largest of the structural comparisons.
-The split-level Nadeau-Bengio p values of these full-minus-variant differences are not adjusted: 0.015 to 0.031 for the additive
-variant and the two permutations, and 0.076 to 0.263 for the three switches.
+%RESULT-PENDING: the examination-off control (DAX with theta = kappa = 1, a shrunk tag-pooled click rate with the same selection) and the stand-alone rankers (popularity, and DAX alone) go here, as rows of tab:ablate under the same protocol and Holm family.
 
-\begin{figure}[tbp]
-\centering
-\includegraphics[width=0.8\linewidth]{figs/fig_ablate.pdf}
-\caption{DAX ablations on KuaiRand-27K: gain over the LEAF-LGN base of the ablation experiment, with the 95\% half-width; dots
-are the five splits. The base is as in Table~\ref{tab:ablate}.}
-\label{fig:ablate}
-\end{figure}
+These variants do not test the examination structure against a shrunk click rate, so the title's claim is not yet isolated (Section~\ref{sec:limits}).
 
-The shuffle controls test the item-level part of $\alpha_i$. Permuting $\alpha$ across all items removes the gain: the
-across-item variant has a gain of $-0.27$ [0.36], and full DAX is higher by $+15.36$ [1.40]. Permuting $\alpha$ within each tag
-keeps 41.6\% of the full gain ($+6.28$ [1.10]), and full DAX is higher by $+8.81$ [1.00]. Over the three permutation seeds the
-across-item gains lie between $-0.44$ and $-0.16$, and the within-tag gains between $+5.66$ and $+6.84$ (Table~\ref{tab:ablate},
-lower block). The within-tag variant therefore keeps part of the gain, and the rest lies in the item deviation from the tag mean.
+\subsection{Lifelong deep baselines}
+\label{sec:res-deep}
 
-\subsection{KuaiRand-1K replication}\label{sec:res-1k}
-
-\FloatBarrier
-
-Does the result hold on the smaller release? The advantage over the QP family, with and without DAX, holds in direction and size.
-
-Table~\ref{tab:1k} repeats the primary comparisons on KuaiRand-1K, with 842 test users pooled over the five splits. LEAF-LGN+DAX
-reaches 0.4590 against 0.4246 for the QP family, a difference of $+37.58$ [11.10] (split-level Holm-adjusted $p=2.28\times10^{-2}$).
-Against the QP family with DAX (0.4358) the difference is $+25.82$ [9.66] (split-level Holm-adjusted $p=2.18\times10^{-2}$). The DAX
-increment on the QP backbone, $+11.76$ [8.54], is not supported on the split-level test (Holm-adjusted $p=0.160$). The QP family with
-DAX searches 6,400 configurations on this release, against 3,200 at 27K, which favours the baseline.
-
-\input{tables/tab_1k}
-
-\subsection{Training seeds}\label{sec:res-seeds}
-
-Is the result specific to one training seed? No; three further seeds give the same level.
-
-Table~\ref{tab:seeds} and Figure~\ref{fig:seeds} in \ref{app:seeds} repeat the LEAF-LGN+DAX run with training seeds 1 to 3.
-% RESULT-PENDING: the QP family re-trained under seeds 1 to 3 goes here, as a row of tab:seeds with its own gain.
-The LEAF-LGN+DAX mean is 0.4854 for seed 0, and 0.4858, 0.4856 and 0.4844 for seeds 1 to 3, a spread of $0.4853\pm0.0006$.
-Seeds 1 to 3 use a reduced backbone search with two trainings for the DAX variant, and their bases are 0.4714, 0.4708 and 0.4716
-instead of the 0.4736 of seed 0. Their gains of $+14.67$, $+15.10$ and $+12.89$ are therefore not comparable with the seed 0 gain of
-$+11.96$ [1.47]. Within each seed the gain is positive, and the split-level Nadeau-Bengio p values lie between 0.0009 and 0.0023.
-These seed tests are raw and are not in a Holm family. They show that the gain is not specific to one training run, and they do not
-give a variance estimate for the full search.
-
-\subsection{Lifelong deep baselines}\label{sec:res-deep}
-
-\FloatBarrier
-
-Do lifelong deep models do as well? No; DIN and SIM-hard, with or without DAX, stay below on KuaiRand-27K, with one borderline
-comparison.
-
-Table~\ref{tab:deep} gives the comparisons. DIN attends over the last 200 lifelong events of each user. On KuaiRand-27K it reaches
-0.4675, and LEAF-LGN+DAX is above it by $+18.26$ [1.97]. DIN+DAX reaches 0.4796, and LEAF-LGN+DAX is above it by $+5.73$ [1.64]
-(split-level Holm-adjusted $p=4.56\times10^{-2}$, borderline). SIM, which keeps the 50 most recent events that share the candidate's
-tag or author, reaches 0.4590 on KuaiRand-27K, and LEAF-LGN+DAX is above it by $+26.44$ [2.01]. SIM+DAX reaches 0.4706, and
-LEAF-LGN+DAX is above it by $+14.72$ [1.77] (split-level Holm-adjusted $p=6.13\times10^{-3}$). On KuaiRand-1K, LEAF-LGN+DAX (0.4590)
-is above DIN+DAX (0.4228), SIM (0.4246) and SIM+DAX (0.4357). These 1K comparisons are not adjusted. For SIM+DAX the split-level p
-value is 0.095, so that difference is not supported at the split level. The deep models are tuned over four configurations each, so
-they are tuned less widely than LEAF-LGN.
+We ask whether lifelong deep models do as well. The answer is no on the main family. DIN is $+18.26$ [1.97] below LEAF-LGN+DAX (adjusted 0.0077) and SIM-hard is
+$+26.44$ [2.01] below it (adjusted 0.0003). With DAX, DIN+DAX (0.4796) is $+5.73$ [1.64] below (adjusted 0.0456, significant but narrow), and SIM+DAX (0.4706)
+is $+14.72$ [1.77] below (adjusted 0.0061). On KuaiRand-1K the same order holds. Those differences are not adjusted and are not called significant
+(Table~\ref{tab:deep}). Each deep baseline is tuned over four configurations, and the deep models are therefore tuned less widely than LEAF-LGN.
 
 \input{tables/tab_deep}
 
-\subsection{Controls and summary}\label{sec:res-controls}
+%RESULT-PENDING: matched-capacity DIN and SIM (embedding dimension 64, the same epochs and patience as the graph backbones) go here as rows of tab:deep, with their own DAX rows and the same Holm family.
 
-Do the signals depend on what they are supposed to capture? The lifelong channels of LEAF-LGN do, shuffling attractiveness across items removes the DAX gain, and the policy channel adds no measurable gain.
+\subsection{Controls}
+\label{sec:res-controls}
 
-Removing the lifelong channels from LEAF-LGN lowers the score from 0.4728 to 0.4614 (Table~\ref{tab:leafctl-lgn}), a difference of $+11.46$ [1.71] (split-level Nadeau-Bengio $p=0.018$). Shuffling the users' lifelong tables across users lowers it to 0.4624, a difference of $+10.65$ [1.77] ($p=0.002$), which is close to the model without lifelong channels. The gain therefore depends on each user's own lifelong history, not on lifelong features in general.
-
-Removing the policy channel does not lower the score. The variant without it reaches 0.4733, against 0.4728 for LEAF-LGN with independent tuning, a difference of $-0.55$ [0.33] in favour of the variant without it (per-user $p=1.13\times10^{-3}$, split-level Nadeau-Bengio $p=0.793$). The two give identical test scores in four of the five splits, and in the fifth split the variant without the channel is higher by $2.4\times10^{-3}$. The policy channel therefore brings no measurable gain on LEAF-LGN, and we do not credit it with any part of the LEAF-LGN result.
+We ask whether the signals depend on what they are meant to capture. The lifelong channels do. Removing them from LEAF-LGN lowers the score by $+11.46$ [1.71] (Table~\ref{tab:leafctl-lgn})
+(adjusted 0.036 over the three controls). Shuffling the users' lifelong tables across users lowers it by $+10.65$ [1.77] (adjusted 0.005), to a level
+close to the model without lifelong channels. The gain therefore depends on each user's own history rather than on lifelong features in general.
+Removing the policy channel does not lower the score. The variant without it is $-0.55$ [0.33] (adjusted 0.793), and it gives identical test scores in
+four of the five splits. These controls use the separately tuned LEAF-LGN, not LEAF-LGN+DAX. The controls on a closed-form scorer in \ref{app:leafctl} agree
+in direction.
 
 \input{tables/tab_leafctl_lgn}
 
-The closed-form variant LEAF-tied, from the LEAF development experiment, gives a secondary check (\ref{app:leafctl}). Shuffling its users' lifelong tables gives the largest loss, $+18.90$ [1.99], and removing all its lifelong channels gives $+17.88$ [2.04]. On that variant the policy channel contributes $+5.01$ [1.20] per user, but its split-level test is not significant after Holm adjustment, and on LEAF-LGN no gain is measured.
+\subsection{KuaiRand-1K replication}
+\label{sec:res-1k}
 
+We ask whether the result holds on the smaller release. The answer is yes in direction and size, with wider intervals. On 842 pooled test users,
+LEAF-LGN+DAX (0.4590) is $+37.58$ [11.10] above PW-LightGCN (0.4246, adjusted 0.0228) and $+25.82$ [9.66] above PW-LightGCN with DAX (0.4358, adjusted
+0.0218). The DAX increment on PW-LightGCN, $+11.76$ [8.54], is not significant (adjusted 0.160). The table is in \ref{app:counts}.
 
+\subsection{Training seeds}
+\label{sec:res-seeds}
 
-The lifelong gain of LEAF-LGN depends on the users' own histories, the DAX gain depends on item-level appeal beyond the tag mean, and the policy channel adds nothing measurable.
-The controls do not establish that the item-level estimate is unbiased. Section~\ref{sec:limits} lists what remains untested.
+We ask whether the result is specific to one training seed. The gain is positive in every seed tested, but the evidence is limited. The LEAF-LGN+DAX mean is
+0.4854 for seed 0, and 0.4858, 0.4856 and 0.4844 for seeds 1 to 3, a spread of $0.4853\pm0.0006$. Seeds 1 to 3 use a reduced backbone search, and their
+bases are lower (0.4714, 0.4708 and 0.4716), so their gains of $+14.67$, $+15.10$ and $+12.89$ are not comparable with the seed-0 gain of $+11.96$ [1.47].
+Their split-level p values are unadjusted, between 0.0009 and 0.0023. Table~\ref{tab:seeds} in \ref{app:supp} gives the seeds.
+%RESULT-PENDING: the PW-LightGCN re-trained under seeds 1 to 3 goes here, as a row of tab:seeds with its own gain.
+The baselines were not re-trained under other seeds.

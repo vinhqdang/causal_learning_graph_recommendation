@@ -10,10 +10,10 @@ Method & Mean & SD & Configurations \\
 \midrule
 LEAF-LGN+DAX & 0.4854 & 0.0009 & 3,840 \\
 LEAF-LGN & 0.4736 & 0.0002 & 12 \\
-LEAF-LGN (independent tuning) & 0.4728 & 0.0011 & 197 \\
-QP family & 0.4634 & 0.0031 & 20 \\
-QP family+DAX & 0.4733 & 0.0012 & 3,200 \\
-QP family, re-trained on its selected configurations & 0.4652 & 0.0017 & 10 \\
+LEAF-LGN (separate search) & 0.4728 & 0.0011 & 197 \\
+PW-LightGCN & 0.4634 & 0.0031 & 20 \\
+PW-LightGCN+DAX & 0.4733 & 0.0012 & 3,200 \\
+PW-LightGCN, re-trained on its selected configurations & 0.4652 & 0.0017 & 10 \\
 r-AdjNorm & 0.4620 & 0.0008 & 8 \\
 LightGCN & 0.4576 & 0.0031 & 4 \\
 LightGCN+DAX & 0.4709 & 0.0010 & 960 \\
@@ -31,5 +31,5 @@ MRDR & 0.3826 & 0.0008 & 4 \\
 \end{tabular}
 \end{adjustbox}
 \par\smallskip
-\begin{minipage}{\linewidth}\raggedright\footnotesize Configurations searched: backbone trainings times DAX configurations times values of $\gamma$. LEAF-LGN (independent tuning) is a separate search of the backbone alone, counted per training and epoch setting, and is not comparable. The QP family is, in each split, the best of its three variants on validation. \end{minipage}
+\begin{minipage}{\linewidth}\raggedright\footnotesize Mean and SD are taken over the five split means. Configurations searched: backbone trainings times DAX configurations times values of $\gamma$. LEAF-LGN (separate search) is a search of the backbone alone, counted per training and epoch setting, so its count is not in the same unit. PW-LightGCN is, in each split, the best of its three variants on validation. \end{minipage}
 \end{table}

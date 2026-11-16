@@ -1,0 +1,56 @@
+\section{Counts, baseline values and additional results}
+\label{app:counts}
+
+\paragraph{Counts} The KuaiRand-27K data contain 27,077 dataset users. In each split, 8,123 of them form the validation part and 18,954 the test
+part. A test user is scored only if a candidate was clicked, which gives 15,809 to 15,913 scored test users per split. Pooled over the five splits,
+22,612 distinct users are scored in at least one split. The headroom diagnostic of Section~\ref{sec:res-headroom} uses 22,661 users, all users with
+a click in some candidate list. The difference of 49 users consists of users with a click who were in the validation part of all five splits, and
+so are never scored.
+
+\paragraph{Baseline values} Table~\ref{tab:methods} gives the mean and standard deviation of each method over the five splits, with the configurations
+searched. The means are the means of the split means, as defined in Section~\ref{sec:protocol-stats}.
+
+\input{tables/tab_methods}
+
+\paragraph{KuaiRand-1K} Table~\ref{tab:1k} repeats the primary comparisons on KuaiRand-1K, with 842 test users pooled over the five splits. The
+PW-LightGCN with DAX searches 6,400 configurations on this release, against 3,200 at 27K, which favours the baseline. The results are summarised in
+Section~\ref{sec:res-1k}.
+
+\input{tables/tab_1k}
+
+\paragraph{Ablation gains} Figure~\ref{fig:ablate} shows the gains of Table~\ref{tab:ablate} with their 95\% half-widths and the five split values.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.8\linewidth]{figs/fig_ablate.pdf}
+\caption{DAX ablations on KuaiRand-27K: gain over the LEAF-LGN base of the ablation search, with the 95\% half-width. Dots are the five splits. The
+base is as in Table~\ref{tab:ablate}.}
+\label{fig:ablate}
+\end{figure}
+
+\paragraph{Closest works} Table~\ref{tab:positioning} collects the works closest to the present one and states the difference from each.
+
+\begin{table}[tbp]
+\caption{Closest works and the difference from the present work.}
+\label{tab:positioning}
+\centering
+\footnotesize
+\raggedright
+\begin{tabular}{p{3.4cm}p{4.2cm}p{5.4cm}}
+\toprule
+Work & What it estimates, and from which data & Difference from this work \\
+\midrule
+SIM \citep{pi2020sim}; TWIN \citep{chang2023twin} & CTR from lifelong sequences; policy logs; history and target share item ids & Exposure-conditional statistics; transfer to a disjoint pool through content keys; randomised test; SIM-hard is a baseline, TWIN is not \\
+DIN \citep{zhou2018din} & Attention over the last 200 lifelong events; policy logs & Same comparison with DAX added; DIN is a baseline \\
+Examination models \citep{richardson2007predicting,craswell2008cascade,chuklin2015clickmodels} & Click as examination times attractiveness; position or list scan & User and scenario examination; no position term; uniform-insertion target \\
+Dynamic Bayesian network \citep{chapelle2009dbn} & Perceived versus actual relevance with satisfaction & No satisfaction state \\
+Regression-EM \citep{wang2018regressionem,wang2016selection} & Position bias and relevance without randomisation; personal search & Item appeal under a uniform audience; generative fit by EM over user and scenario \\
+ExpoMF \citep{liang2016exposure} & Latent exposure fitted by EM & Impressions are observed; latent examination given an impression \\
+Unbiased learning to rank \citep{joachims2017unbiased} & Inverse-propensity weighted losses & Generative model instead of a weighted loss \\
+Occupancy \citep{mackenzie2002occupancy} & Presence and detection from repeated surveys & Same likelihood structure; no recommender use found \\
+Small-area estimation \citep{fay1979smallarea} & Small-area estimates & Used for one centre option of the DAX module \\
+NAVIP \citep{kim2022navip} & Propensity-weighted propagation in LightGCN & No lifelong data; no examination model \\
+KuaiRand evaluations \citep{gao2022kuairand,zhang2026categorymeans} & Random insertion as the test set & No out-of-pool lifelong history in the test \\
+\bottomrule
+\end{tabular}
+\end{table}

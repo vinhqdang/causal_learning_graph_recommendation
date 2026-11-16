@@ -50,7 +50,7 @@ NB p = Nadeau-Bengio test over the five split means (frac_val 0.3); Holm adjustm
     without scenario factors $\kappa_t$: +13.59 [1.43] p=2.456e-77 NB p=0.0115 splits +10.60 +14.40 +14.84 +11.91 +14.49 p_Holm=1.276e-76
     without lifelong prior on $\theta_u$: +13.31 [1.43] p=1.981e-73 NB p=0.0066 splits +11.09 +14.40 +14.71 +11.79 +13.10 p_Holm=7.925e-73
     without tag prior on $\alpha_i$: +11.68 [1.22] p=2.127e-77 NB p=0.0016 splits +10.24 +11.95 +12.26 +10.62 +12.12 p_Holm=1.276e-76
-    additive logit model with user and scenario effects: +9.01 [1.25] p=3.068e-45 NB p=0.0239 splits +7.21 +10.13 +10.67 +7.39 +8.74 p_Holm=9.204e-45
+    additive logit model: +9.01 [1.25] p=3.068e-45 NB p=0.0239 splits +7.21 +10.13 +10.67 +7.39 +8.74 p_Holm=9.204e-45
     $\alpha$ permuted across items: -0.27 [0.36] p=1.476e-01 NB p=0.7540 splits +0.08 -0.02 -0.54 +0.15 -0.79 p_Holm=1.476e-01
     $\alpha$ permuted within tags: +6.28 [1.10] p=6.166e-29 NB p=0.0010 splits +5.85 +6.56 +6.09 +5.67 +6.71 p_Holm=1.233e-28
     $\alpha$ permuted across items, permutation seed 0: -0.44 [0.50] p=7.903e-02 NB p=0.5102 splits -0.12 -0.26 -0.78 -0.09 -0.84
@@ -63,7 +63,7 @@ NB p = Nadeau-Bengio test over the five split means (frac_val 0.3); Holm adjustm
     without scenario factors $\kappa_t$: +1.51 [0.79] p=2.022e-04 NB p=0.0761 splits +1.81 +1.23 +1.79 +0.93 +1.72 p_Holm=2.022e-04
     without lifelong prior on $\theta_u$: +1.78 [0.61] p=1.078e-08 NB p=0.2630 splits +1.33 +1.23 +1.93 +1.06 +3.10 p_Holm=2.155e-08
     without tag prior on $\alpha_i$: +3.41 [0.99] p=1.596e-11 NB p=0.1163 splits +2.18 +3.69 +4.37 +2.23 +4.09 p_Holm=4.787e-11
-    additive logit model with user and scenario effects: +6.09 [0.96] p=1.358e-35 NB p=0.0147 splits +5.21 +5.51 +5.96 +5.45 +7.46 p_Holm=5.433e-35
+    additive logit model: +6.09 [0.96] p=1.358e-35 NB p=0.0147 splits +5.21 +5.51 +5.96 +5.45 +7.46 p_Holm=5.433e-35
     $\alpha$ permuted across items: +15.36 [1.40] p=5.878e-102 NB p=0.0155 splits +12.33 +15.65 +17.17 +12.69 +16.99 p_Holm=3.527e-101
     $\alpha$ permuted within tags: +8.81 [1.00] p=4.947e-66 NB p=0.0313 splits +6.57 +9.08 +10.54 +7.17 +9.49 p_Holm=2.473e-65
 
@@ -96,3 +96,28 @@ NB p = Nadeau-Bengio test over the five split means (frac_val 0.3); Holm adjustm
   LEAF-tied - LEAF-tied[lift_only]: +5.78 [1.11] p=2.032e-24 NB p=0.0008 splits +5.19 +5.61 +5.41 +5.83 +6.20 p_Holm=6.097e-24
   LEAF-tied - LEAF-tied[familiarity_only]: +10.26 [1.66] p=6.782e-34 NB p=0.0009 splits +9.66 +11.21 +11.04 +9.82 +11.02 p_Holm=4.069e-33
   LEAF-tied - LEAF-tied[no_music]: identical rankings (0.00 [0.00]) p_Holm=1.000e+00
+
+[family Holm values added in v8 revision: backbone increments (six), ablation gains (seven), ablation differences (six), LEAF-LGN controls (three)]
+  backbone EASE: NB p=0.000012 NB_Holm6=0.000071
+  backbone LightGCN (same-run base): NB p=0.000946 NB_Holm6=0.004729
+  backbone QP family: NB p=0.105500 NB_Holm6=0.105500
+  backbone LEAF-LGN: NB p=0.001369 NB_Holm6=0.005478
+  backbone DIN: NB p=0.010949 NB_Holm6=0.025169
+  backbone SIM: NB p=0.008390 NB_Holm6=0.025169
+  backbone LightGCN with four-configuration base: NB p=0.090828 NB_Holm6=0.181655
+  ablation gain full DAX: NB p=0.009296 NB_Holm7=0.037184
+  ablation gain without scenario factors $\kappa_t$: NB p=0.011520 NB_Holm7=0.037184
+  ablation gain without lifelong prior on $\theta_u$: NB p=0.006645 NB_Holm7=0.033226
+  ablation gain without tag prior on $\alpha_i$: NB p=0.001556 NB_Holm7=0.009334
+  ablation gain additive logit model: NB p=0.023885 NB_Holm7=0.047770
+  ablation gain $\alpha$ permuted across items: NB p=0.754011 NB_Holm7=0.754011
+  ablation gain $\alpha$ permuted within tags: NB p=0.000985 NB_Holm7=0.006893
+  ablation full minus without scenario factors $\kappa_t$: NB p=0.076123 NB_Holm6=0.228370
+  ablation full minus without lifelong prior on $\theta_u$: NB p=0.262973 NB_Holm6=0.262973
+  ablation full minus without tag prior on $\alpha_i$: NB p=0.116335 NB_Holm6=0.232670
+  ablation full minus additive logit model: NB p=0.014739 NB_Holm6=0.088437
+  ablation full minus $\alpha$ permuted across items: NB p=0.015509 NB_Holm6=0.088437
+  ablation full minus $\alpha$ permuted within tags: NB p=0.031260 NB_Holm6=0.125041
+  LEAF-LGN control no_lifelong: NB p=0.018094 NB_Holm3=0.036188
+  LEAF-LGN control shuffle_users: NB p=0.001668 NB_Holm3=0.005004
+  LEAF-LGN control no_policy: NB p=0.792664 NB_Holm3=0.792664

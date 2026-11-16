@@ -1,62 +1,66 @@
 \section{Supplementary methods, controls and tables}
 \label{app:supp}
 
-This appendix holds the material that is not needed to follow the argument: the run costs and algorithms of the DAX fit,
-the other DAX options, the detailed settings, the leakage checks, the search grids of the baselines, the LEAF controls,
-the sensitivity of the Holm adjustment and the training seeds.
+This appendix holds the material that the argument does not need: the other DAX options, the detailed settings, the policy-log channel and its
+control, run times, the algorithms, the checks of the pipeline, the search grids of the baselines, the closed-form controls, the sensitivity of the
+Holm adjustment and the training seeds.
 
 \subsection{Other DAX options}\label{app:fh}
 
-The variants of the DAX centre and of the user groups that the main experiment selects are defined in
-Section~\ref{sec:method-dax}. The remaining values of the search grid are a prior strength of 160, a lifelong strength of
-zero, the scenario factors switched off and no user groups. The main experiment did not select any of them in any split. The
+The main experiment uses the switches described in Section~\ref{sec:method-dax}. The remaining values of the search grid are a prior strength of 160, a
+lifelong strength of zero, the scenario factors switched off and no user groups. The main experiment did not select any of these in any split. The
 ablation without a tag prior replaces the centre by one global mean. The grid tables in \ref{app:grids} give the chosen values.
 
 \subsection{Detailed settings of LEAF, LEAF-LGN and DAX}\label{app:impl}
 
-\paragraph{Temporal boundary} The cut-off $T_0$ is 2022-04-22 00:00 (UTC+8), the start of the random-exposure period. The latest
-impression used for training precedes $T_0$ by about two seconds, and the earliest random impression used for evaluation follows it by
-about ten hours. The lifelong statistics, the DAX fit, the popularity offset and the negative sampler read only events before $T_0$.
+\paragraph{Temporal boundary} The cut-off $T_0$ is 22 April 2022, 00:00 (UTC+8), the start of the random-exposure period. The latest impression used for
+training precedes $T_0$ by about two seconds, and the earliest random impression used for evaluation follows it by about ten hours. The lifelong
+statistics, the DAX fit, the popularity offset and the negative sampler read only events before $T_0$.
 
-\paragraph{Counts} Counts of out-of-pool impressions differ by less than 0.02\% between the raw logs and the pooled tables.
+\paragraph{LEAF statistics} The shrinkage strength of the lift in Equation~\eqref{eq:lift} is $\eta=5$ pseudo-impressions. On KuaiRand-27K, 26,904 users
+have a lifelong history before $T_0$, and 44 tag values, 6,510 author values and 7,202 music values occur on pool videos. A missing key value, or a value
+that the user never saw, gives a channel of exactly zero.
 
-\paragraph{LEAF statistics} The shrinkage strength of the lift in Equation~\eqref{eq:lift} is $\eta=5$ pseudo-impressions. On
-KuaiRand-27K, 26,904 users have a lifelong history before $T_0$, and 44 tag values, 6,510 author values and 7,202 music values occur on
-pool videos. A missing key value or an unseen key value gives a channel of exactly zero.
+\paragraph{LEAF-LGN} The embedding dimension is $d=64$. The scoring embeddings mix the layer-zero embedding and the two propagated layers. The biases
+$b_u$, $b_i$ and $b_0$, the popularity weight $\beta$ and the channel weights $g$ are initialised at zero, and weight decay applies to the embeddings only.
+Training uses Adam with batches of 8,192 triples and at most 40 epochs. For each split, training stops after three epochs without an improvement of the
+best validation nDCG@10. A negative item that falls in the excluded set is redrawn once. The search covers the learning rate, the weight decay and the
+policy weight $w\in\{0,0.25,0.5\}$, which gives twelve trainings (\ref{app:grids}).
 
-\paragraph{LEAF-LGN} The embedding dimension is $d=64$. Training uses Adam with batches of 8,192 triples and at most 40 epochs; for each
-split, training stops after three epochs without an improvement of the best validation nDCG@10. A negative item that falls in the excluded
-set is redrawn once. The search covers the learning rate, $\rho$ and the policy weight $w\in\{0,0.25,0.5\}$, which gives twelve trainings
-(\ref{app:grids}). A closed-form variant with the same channels, LEAF-tied, is used only for the LEAF controls of \ref{app:leafctl}.
+\paragraph{DAX} The factors start at $\theta_u=0.7$, $\kappa_t=1$ and $\alpha_i=0.6$, and the EM runs for 40 iterations without a convergence test
+(\ref{app:em} gives the clamps). The scenario factors are relative to the evaluation scenario and may exceed one. Without the scenario factor,
+$\kappa_t=1$ for all $t$. The median number of policy-log impressions per pool item is 43. Of the pool items, 0.6\% have none and receive the centre of
+their tag.
 
-\paragraph{DAX} The factors start at $\theta_u=0.7$, $\kappa_t=1$ and $\alpha_i=0.6$, and the EM runs for 40 iterations without a
-convergence test (\ref{app:em} gives the clamps). The scenario factors are relative to the evaluation scenario and may exceed
-one. Without the scenario factor, $\kappa_t=1$ for all $t$. The median number of policy-log impressions per pool item is 43; 0.6\% of the
-pool items have none and receive the centre of their tag.
+\paragraph{Combination} The weight $\gamma$ takes the ten values of \ref{app:grids}. The early-stopping rule of a split uses the best validation
+value over all candidates of an epoch, the backbone and the combined scores alike.
 
-\paragraph{Combination} The weight $\gamma$ takes values in $\{0,0.05,0.1,0.15,0.2,0.3,0.4,0.5,0.7,1.0\}$, and a DAX configuration is one
-of 32 combinations of the prior strength $\nu\in\{80,160\}$, the centre (tag or content regression), the lifelong strength
-$\lambda\in\{0,100\}$, the scenario factor (on or off) and the user-group refinement (off, or on with strength 80). The early-stopping
-rule of a split uses the best validation value over all candidates of an epoch, the backbone and the combined scores alike.
+\subsection{Policy-log channel}\label{app:policy}
 
-\subsection{Cost and measured run times}\label{app:cost}
+For a pair $(u,i)$ let $N_{ui}=1$ if $u$ was shown $i$ before $T_0$ and never clicked it. The policy-log channel adds these shown but unclicked pairs to the
+BPR loss of Equation~\eqref{eq:bpr} as positives. In each epoch each such pair is used as a positive with probability $w\in[0,1]$, which sets how much the
+decision to show the item counts as weak evidence of relevance. Negatives are drawn uniformly from the items that $u$ was not shown before $T_0$ when
+$w>0$, and from the items that $u$ did not click when $w=0$.
 
-The LEAF tables are dense user by key-value arrays for the three key families, with one row per user. A pair is a gather,
-which costs a constant amount per pair. The tables are built in one streaming pass over the lifelong log.
-The LightGCN propagation costs $O(L|E|d)$ per epoch, where $|E|$ is the number of clicked pairs, and each sampled pair adds
-$O(6)$ for the channels.
+The selected weight differs between the models. The separately tuned LEAF-LGN selects $w=0$ in the first four splits and $w=0.25$ in the fifth. The
+LEAF-LGN of the main table selects $w=0$ in all five splits. The LEAF-LGN+DAX backbone selects $w=0.25$ in the first and fourth splits and $w=0.5$
+in the other three. In the separately tuned model, removing the channel gives identical test scores in four splits and, in the fifth, a score higher by
+$2.4\times10^{-3}$ (Table~\ref{tab:policy}). The control was not run on LEAF-LGN+DAX.
 
-Each DAX iteration is linear in the number of pre-cut impressions plus the numbers of users, items and scenarios, because all
-accumulations are index-add operations. The content-regression centre adds one ridge solve per iteration, whose size is the
-number of covariate levels. The main experiment measured the following on a machine with two CPU threads. It fitted 32 DAX tables in
-1.8 to 3.3 s each, which is 77.6 s in total. It trained the twelve LEAF-LGN backbones in 884 to 2,437 s each, which is 19,490 s in
-total. The run took 19,628 s of wall time with 86,400 validation evaluations and a peak resident memory of 6,032 MB.
+\input{tables/tab_policy}
+
+\subsection{Run times}\label{app:cost}
+
+The LEAF tables are dense user-by-key arrays for the three key families, with one row per user. A pair is a gather, which costs a constant amount per
+pair, and the tables are built in one streaming pass over the lifelong log. The LightGCN propagation costs $O(L|E|d)$ per epoch, where $|E|$ is the number
+of clicked pairs, and each sampled pair adds a constant amount for the channels. Each DAX iteration is linear in the number of pre-cut impressions plus
+the numbers of users, items and scenarios. The main search fitted 32 DAX tables in 1.8 to 3.3 seconds each, and trained the twelve LEAF-LGN backbones in 884
+to 2,437 seconds each, with a total wall time of about 19,600 seconds on two CPU threads.
 
 \subsection{Algorithms}
 \label{sec:method-algorithms}
 
-Algorithm~\ref{alg:dax} gives the DAX fit, and Algorithm~\ref{alg:leaflgn} gives the training and selection of
-LEAF-LGN+DAX.
+Algorithm~\ref{alg:dax} gives the DAX fit, and Algorithm~\ref{alg:leaflgn} gives the training and selection of LEAF-LGN+DAX.
 
 \begin{algorithm}[t]
 \caption{DAX-EM on the pre-cut log}
@@ -87,7 +91,7 @@ LEAF-LGN+DAX.
 \begin{algorithmic}[1]
 \Require pre-cut log, the twelve backbone settings $(\mathrm{lr},\rho,w)$, the 32 DAX configurations, the ten values of $\gamma$, five splits of the validation and test users
 \For{each backbone setting $(\mathrm{lr},\rho,w)$}
-  \State train LEAF-LGN (BPR, policy channel $w$) one epoch at a time, at most 40 epochs
+  \State train LEAF-LGN (BPR, policy weight $w$) one epoch at a time, at most 40 epochs
   \State fit DAX once per configuration (Algorithm~\ref{alg:dax}), giving $\operatorname{logit}\alpha$
   \For{each epoch}
     \State compute $s^{\mathrm{LEAF}}_{ui}$ on the candidates of every validation and test user
@@ -106,61 +110,41 @@ LEAF-LGN+DAX.
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Leakage checks and controls}\label{app:controls}
+\subsection{Checks of the pipeline and reproducibility}\label{app:controls}
 
-Table~\ref{tab:controls} lists the leakage checks and the checks of the estimators on simulated data, and
-Table~\ref{tab:controls-real} lists the controls on the real data. Differences are in units of $10^{-3}$ nDCG@10, with the 95\% half-width in brackets. The kinds of number are those of
-Section~\ref{sec:protocol-kinds}: main results, diagnostic quantities and preliminary analyses on fixed backbone scores.
+The temporal boundary was checked by construction and by test. No training input postdates $T_0$. The random-exposure labels enter only the scores:
+changing the labels of the validation and test users changes the reported nDCG@10 and nothing else. The lifelong tables and the DAX parameters do not change
+when rows from after the cut-off, or from the pool, are altered. The sequence models see only events before the cut-off that are not pool videos. The user
+identifiers of the two releases agree for 99.99\% of the joined events, and the counts of out-of-pool impressions differ by less than 0.02\% between the raw
+logs and the pooled tables.
 
-\begin{table}[p]
+On simulated data with known parameters, the lift and familiarity statistics reproduce their definitions, and the lifelong gain of a synthetic user population
+falls below 0.03 in absolute value when the users' tables are shuffled. With negligible priors the observed-data likelihood of the DAX fit does not decrease over the first 25
+iterations, for three starting seeds. The recovered attractiveness has a Spearman correlation above 0.8 with the true attractiveness, and the recovered
+examination propensity has one above 0.75 with the true propensity. The additive variant recovers item appeal with a correlation above 0.5. Within-tag
+permutation keeps less than 30\% of a synthetic gain, and the across-item permutation is a bijection of the items.
+
+Table~\ref{tab:controls-real} gives the preliminary controls on real data. They are computed on fixed backbone scores, and the values are diagnostic rather than
+the main results. All tables of the paper are generated from the recorded per-split results by one analysis, and each number in the text is copied from its output.
+
+\begin{table}[tbp]
 \centering
-\caption{Leakage checks and checks of the estimators on simulated data.}
-\label{tab:controls}
-\footnotesize
-\renewcommand{\arraystretch}{0.95}
-\begin{tabular}{p{0.44\textwidth}p{0.48\textwidth}}
-\toprule
-Check & Result \\
-\midrule
-\multicolumn{2}{l}{\emph{Leakage checks}} \\
-All training inputs precede the cut-off & The latest training event precedes $T_0$ and the earliest test event follows it \\
-The random-exposure log is never a training input & The fits read only the pre-cut log \\
-Lifelong tables and DAX fit are unchanged by post-cut data & The lifelong tables do not change when post-cut and pool rows are altered; the DAX parameters do not change after post-cut rows are added or every random label is flipped \\
-Validation and test labels enter only the scores & Flipping the validation and test labels changes the nDCG and nothing else \\
-Sequence models see only pre-cut events & Sequence events are kept only if they precede $T_0$ and are not pool videos \\
-Cached test lists match the loader & The test lists and users match those of the data loader \\
-User identifiers of the two releases & The identifiers agree for 0.9999 of the joined events \\
-\midrule
-\multicolumn{2}{l}{\emph{Checks of the estimators on simulated data}} \\
-LEAF statistics & The lift and familiarity tables equal Equations~\eqref{eq:lift} and \eqref{eq:familiarity}, up to scale, and rows of an unknown user identifier leave them unchanged \\
-Lifelong gain removed by shuffling & A synthetic gain above 0.10 falls below 0.03 in absolute value, and below a quarter of its size, after the users are shuffled \\
-EM likelihood without priors & The observed-data likelihood does not decrease over 25 iterations with negligible priors, for three seeds \\
-EM recovers the fitted quantities & Spearman correlation above 0.8 for $\alpha$ and 0.75 for $\theta$; scenario factors within 0.08 of the truth \\
-EM with the global scale removed & After the global scale is removed with the true mean (a test-only oracle), the error of $\theta$ is below 0.05 \\
-Additive variant & Its item appeal has a Spearman correlation above 0.5 with the truth \\
-Permutations & On simulated data the within-tag permutation keeps under 30\% of the gain; the within-tag permutation keeps every tag, and the all-item permutation is a bijection \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[p]
-\centering
-\caption{Controls on the real data (continued from Table~\ref{tab:controls}).}
+\caption{Preliminary controls on the real data, on fixed backbone scores unless stated otherwise. Differences are in units of $10^{-3}$ nDCG@10, with the 95\% half-width in brackets.}
 \label{tab:controls-real}
 \footnotesize
 \renewcommand{\arraystretch}{1.1}
 \begin{tabular}{p{0.44\textwidth}p{0.48\textwidth}}
 \toprule
-Check & Result \\
+Control & Result \\
 \midrule
-Users' lifelong tables shuffled & Full minus shuffled: $+18.90$ [1.99]; the shuffled variant and the variant without lifelong channels differ by $-1.02$, within a tolerance of $\pm2$ \\
-Users' lifelong tables shuffled, LEAF-LGN & On fixed LEAF-LGN scores (preliminary analysis), the lifelong channels on shuffled tables give $-0.93$ [0.45] \\
+Users' lifelong tables shuffled, closed-form scorer & Full minus shuffled: $+18.90$ [1.99]; the shuffled variant and the variant without lifelong channels differ by $-1.02$ \\
+Users' lifelong tables shuffled, LEAF-LGN & The lifelong channels on shuffled tables give $-0.93$ [0.45] \\
 Attractiveness permuted across items & Gain $-0.27$ [0.36]: the gain is removed \\
 Attractiveness permuted within tags & Gain $+6.28$ [1.10], that is 41.6\% of the full gain \\
-Tag mean alone; within-tag permutation; full DAX & $+4.31$ [1.07]; $+3.29$ [0.99]; $+9.45$ [1.36] (preliminary analysis on fixed scores) \\
-Permutation across items, selected weight & The selected policy weight is zero in all five splits (preliminary analysis on fixed scores) \\
-Full DAX in the ablation experiment & The same configurations are selected in all five splits, with the same test values \\
-LEAF-LGN reproduction & Main-experiment LEAF-LGN minus the independently tuned LEAF-LGN: $+0.73$ [0.52], NB $p=0.660$ \\
+Tag mean alone; within-tag permutation; full DAX & $+4.31$ [1.07]; $+3.29$ [0.99]; $+9.45$ [1.36] \\
+Permutation across items, selected policy weight & The selected policy weight is zero in all five splits in this analysis \\
+Full DAX in the ablation search & The same configurations are selected in all five splits, with the same test values \\
+LEAF-LGN reproduction & Main-search LEAF-LGN minus separately tuned LEAF-LGN: $+0.73$ [0.52], Nadeau-Bengio $p=0.660$ \\
 Off-protocol calibration & Adding the validation users' random-exposure rate to LEAF-LGN: $+36.62$ [1.79]. This uses post-cut labels and is a diagnostic, not a method \\
 \bottomrule
 \end{tabular}
@@ -168,13 +152,12 @@ Off-protocol calibration & Adding the validation users' random-exposure rate to 
 
 \subsection{Baselines and search grids}\label{app:baselines}
 
-All baselines are trained on the same pre-cut log with the same splits and the same selection rule. Every backbone with DAX gets the
-same DAX module and the same $\gamma$ grid as LEAF-LGN.
+All baselines are trained on the same pre-cut log with the same splits and the same selection rule, and Table~\ref{tab:baselines} lists their grids. Every backbone with DAX gets the same DAX module and the
+same $\gamma$ grid as LEAF-LGN.
 
 \begin{table}[t]
 \centering
-\caption{Baselines, search grids and configurations searched. SIM denotes SIM-hard; $\rho$ is the weight decay and $d$ the embedding
-dimension.}
+\caption{Baselines, search grids and configurations searched. SIM denotes SIM-hard; $\rho$ is the weight decay and $d$ the embedding dimension.}
 \label{tab:baselines}
 \footnotesize
 \begin{adjustbox}{max width=\textwidth}
@@ -184,9 +167,9 @@ Method & Search grid & Configurations \\
 \midrule
 \raggedright LightGCN \citep{he2020lightgcn} & \raggedright learning rate $\{10^{-2},3\cdot10^{-3}\}$, $\rho\in\{10^{-5},10^{-4}\}$; $d=64$, 2 layers, at most 40 epochs, patience 3 & 4 \\
 \raggedright r-AdjNorm \citep{zhao2022radjnorm} & \raggedright LightGCN grid with normalisation exponent $r\in\{0.3,0.7\}$ & 8 \\
-\raggedright iALS \citep{hu2008ials} (LEAF development experiment only) & \raggedright confidence weight in $\{3,10,30\}$, regularisation $\in\{1,10,100,1000\}$ & 12 \\
-\raggedright QP family (\ref{app:qp}) & \raggedright DR-BPR-LGN-1, -p2 and -p with their own grids; per split the best of the three & 20 \\
-\raggedright QP family + DAX & \raggedright the 10 distinct (method, configuration) trainings chosen by any split of the QP search, with the DAX grid & 3,200 \\
+\raggedright iALS \citep{hu2008ials} (development comparison only) & \raggedright confidence weight in $\{3,10,30\}$, regularisation $\in\{1,10,100,1000\}$ & 12 \\
+\raggedright PW-LightGCN (\ref{app:qp}) & \raggedright DR-BPR-LGN-1, -p2 and -p with their own grids; per split the best of the three & 20 \\
+\raggedright PW-LightGCN + DAX & \raggedright the 10 distinct (method, configuration) trainings chosen by any split of the PW-LightGCN search, with the DAX grid & 3,200 \\
 \raggedright EASE \citep{steck2019ease} & \raggedright closed form, $\lambda_{\mathrm{EASE}}\in\{1000,3000,10000\}$, $w\in\{0,0.25,0.5\}$, popularity weight $\beta\in\{0,0.25,0.5\}$ & 27 \\
 \raggedright EASE + DAX & \raggedright EASE with the DAX grid & 8,640 \\
 \raggedright LEAF-LGN & \raggedright 12 trainings (learning rate, $\rho$, $w$), no DAX & 12 \\
@@ -199,35 +182,33 @@ Method & Search grid & Configurations \\
 \raggedright IPS-MF \citep{schnabel2016} & \raggedright matrix factorisation with inverse-propensity weights; the same grid and propensity & 4 \\
 \raggedright DR-JL \citep{wang2019drjl} & \raggedright doubly robust joint learning; the same grid and propensity & 4 \\
 \raggedright MRDR \citep{guo2021mrdr} & \raggedright doubly robust matrix factorisation estimator; the same grid and propensity & 4 \\
-\raggedright LEAF-tied (closed form, LEAF development experiment only) & \raggedright closed-form grid over the ridge penalty, the policy weight and the channel weights & 3,456 \\
-\raggedright LightGCN + DAX & \raggedright the DAX grid and $\gamma$ on the re-trained LightGCN base (3 trainings) & 960 \\
+\raggedright Closed-form LEAF scorer (no graph training; controls only) & \raggedright closed-form grid over the ridge penalty, the policy weight and the channel weights & 3,456 \\
+\raggedright LightGCN + DAX & \raggedright the DAX grid and $\gamma$ on the same-run LightGCN base (3 trainings) & 960 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
 \end{table}
 
-\subsection{LEAF controls}\label{app:leafctl}
+\subsection{Closed-form LEAF scorer controls}\label{app:leafctl}
 
-These closed-form controls are secondary. They come from the LEAF development experiment on the LEAF-tied backbone
-(Table~\ref{tab:leafctl}). The primary controls, on LEAF-LGN, are in Section~\ref{sec:res-controls}. Shuffling the users' lifelong tables across users gives the largest loss, $+18.90$ [1.99]
-(Holm-adjusted $p=4.90\times10^{-76}$; Nadeau-Bengio Holm-adjusted $p=4.60\times10^{-3}$), and removing all lifelong channels gives
-$+17.88$ [2.04]. The control that compares the shuffled-user variant with the no-lifelong variant gives a difference of
-$-1.02\times10^{-3}$, within its $\pm2\times10^{-3}$ tolerance. The policy channel contributes $+5.01$ [1.20] (per-user t test Holm-adjusted
-$p=6.91\times10^{-16}$), but its split-level test is not significant after Holm adjustment (Nadeau-Bengio Holm-adjusted $p=0.132$).
-These controls were run on LEAF-tied.
+These controls use a closed-form LEAF scorer, with the same six channels and no graph training, from the development comparison (Table~\ref{tab:leafctl}). They are secondary to the
+controls on LEAF-LGN of Section~\ref{sec:res-controls}. Shuffling the users' lifelong tables across users gives the largest loss, $+18.90$ [1.99] (Holm
+adjusted over the eight arms $4.90\times10^{-76}$; Nadeau-Bengio adjusted $4.60\times10^{-3}$), and removing all lifelong channels gives $+17.88$ [2.04]. The
+policy channel contributes $+5.01$ [1.20] per user, but its split-level value is not significant after Holm adjustment (Nadeau-Bengio adjusted 0.132). The
+variant without music channels gives identical rankings.
 
 \input{tables/tab_leafctl}
 
 \subsection{Sensitivity of the Holm adjustment}\label{app:sens}
 
-Table~\ref{tab:sens} extends the thirteen-member main family by EASE and EASE+DAX, giving a family of fifteen. The conclusions at the 0.05 level are the same as in
-Table~\ref{tab:main}; the two split-level values that are closest to the threshold are unchanged at $4.56\times10^{-2}$.
+Table~\ref{tab:sens} extends the main family of thirteen by EASE and EASE+DAX, giving a family of fifteen. The per-user p values are given in the same table.
+The conclusions at the 0.05 level are unchanged, and the two split-level values closest to the threshold stay at $4.56\times10^{-2}$.
 
 \input{tables/tab_sens}
 
 \subsection{Training seeds}\label{app:seeds}
 
-Training seeds 1 to 3 for LEAF-LGN+DAX, with the reduced search described in Section~\ref{sec:res-seeds}.
+Training seeds 1 to 3 for LEAF-LGN+DAX, with the reduced search described in Section~\ref{sec:res-seeds}. Table~\ref{tab:seeds} and Figure~\ref{fig:seeds} give the seeds.
 
 \input{tables/tab_seeds}
 

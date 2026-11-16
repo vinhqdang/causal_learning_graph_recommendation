@@ -1,4 +1,4 @@
-\begin{thebibliography}{42}
+\begin{thebibliography}{36}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\href}[2]{#2}
@@ -147,24 +147,6 @@
   on Data Mining (ICDM)}, pp. \bibinfo{pages}{263--272}.
 \newblock \DOIprefix\doi{10.1109/ICDM.2008.22}.
 %Type = Inproceedings
-\bibitem[{Islam et~al.(2026)Islam, Zheleva and Wang}]{islam2026ppd}
-\bibinfo{author}{Islam, M.A.}, \bibinfo{author}{Zheleva, E.},
-  \bibinfo{author}{Wang, R.}, \bibinfo{year}{2026}.
-\newblock \bibinfo{title}{Post-hoc popularity bias correction in {GNN}-based
-  collaborative filtering}, in: \bibinfo{booktitle}{Proceedings of the ACM Web
-  Conference 2026 (WWW '26)}, \bibinfo{address}{Dubai, United Arab Emirates}.
-\newblock \DOIprefix\doi{10.1145/3774904.3792670},
-  \href{http://arxiv.org/abs/2510.12959}{{\tt arXiv:2510.12959}}.
-%Type = Inproceedings
-\bibitem[{Jeunen et~al.(2020)Jeunen, Balen and Goethals}]{jeunen2020cease}
-\bibinfo{author}{Jeunen, O.}, \bibinfo{author}{Balen, J.V.},
-  \bibinfo{author}{Goethals, B.}, \bibinfo{year}{2020}.
-\newblock \bibinfo{title}{Closed-form models for collaborative filtering with
-  side-information}, in: \bibinfo{booktitle}{Fourteenth ACM Conference on
-  Recommender Systems}, \bibinfo{publisher}{ACM}. pp.
-  \bibinfo{pages}{651--656}.
-\newblock \DOIprefix\doi{10.1145/3383313.3418480}.
-%Type = Inproceedings
 \bibitem[{Joachims et~al.(2017)Joachims, Swaminathan and
   Schnabel}]{joachims2017unbiased}
 \bibinfo{author}{Joachims, T.}, \bibinfo{author}{Swaminathan, A.},
@@ -183,17 +165,6 @@
   31st ACM International Conference on Information and Knowledge Management
   (CIKM)}, pp. \bibinfo{pages}{4128--4132}.
 \newblock \DOIprefix\doi{10.1145/3511808.3557576}.
-%Type = Misc
-\bibitem[{Krause et~al.(2024)Krause, Deriyeva, Beinke, Bartels and
-  Thomas}]{krause2024coexposure}
-\bibinfo{author}{Krause, T.}, \bibinfo{author}{Deriyeva, A.},
-  \bibinfo{author}{Beinke, J.H.}, \bibinfo{author}{Bartels, G.Y.},
-  \bibinfo{author}{Thomas, O.}, \bibinfo{year}{2024}.
-\newblock \bibinfo{title}{The relevance of item-co-exposure for exposure bias
-  mitigation}.
-\newblock \href{http://arxiv.org/abs/2409.12912}{{\tt arXiv:2409.12912}}.
-  \bibinfo{note}{cONSEQUENCES '24 workshop, co-located with ACM RecSys '24 (per
-  the arXiv comment)}.
 %Type = Inproceedings
 \bibitem[{Liang et~al.(2016)Liang, Charlin, McInerney and
   Blei}]{liang2016exposure}
@@ -204,16 +175,6 @@
   \bibinfo{booktitle}{Proceedings of the 25th International Conference on World
   Wide Web}, pp. \bibinfo{pages}{951--961}.
 \newblock \DOIprefix\doi{10.1145/2872427.2883090}.
-%Type = Inproceedings
-\bibitem[{Ma et~al.(2018)Ma, Zhao, Huang, Wang, Hu, Zhu and Gai}]{ma2018esmm}
-\bibinfo{author}{Ma, X.}, \bibinfo{author}{Zhao, L.}, \bibinfo{author}{Huang,
-  G.}, \bibinfo{author}{Wang, Z.}, \bibinfo{author}{Hu, Z.},
-  \bibinfo{author}{Zhu, X.}, \bibinfo{author}{Gai, K.}, \bibinfo{year}{2018}.
-\newblock \bibinfo{title}{Entire space multi-task model: An effective approach
-  for estimating post-click conversion rate}, in: \bibinfo{booktitle}{The 41st
-  International ACM SIGIR Conference on Research and Development in Information
-  Retrieval}, \bibinfo{publisher}{ACM}. pp. \bibinfo{pages}{1137--1140}.
-\newblock \DOIprefix\doi{10.1145/3209978.3210104}.
 %Type = Article
 \bibitem[{MacKenzie et~al.(2002)MacKenzie, Nichols, Lachman, Droege, Royle and
   Langtimm}]{mackenzie2002occupancy}
@@ -252,15 +213,6 @@
 \newblock \bibinfo{journal}{Machine Learning} \bibinfo{volume}{52},
   \bibinfo{pages}{239--281}.
 \newblock \DOIprefix\doi{10.1023/a:1024068626366}.
-%Type = Article
-\bibitem[{Park et~al.(2004)Park, Gelman and Bafumi}]{park2004mrp}
-\bibinfo{author}{Park, D.K.}, \bibinfo{author}{Gelman, A.},
-  \bibinfo{author}{Bafumi, J.}, \bibinfo{year}{2004}.
-\newblock \bibinfo{title}{Bayesian multilevel estimation with
-  poststratification: State-level estimates from national polls}.
-\newblock \bibinfo{journal}{Political Analysis} \bibinfo{volume}{12},
-  \bibinfo{pages}{375--385}.
-\newblock \DOIprefix\doi{10.1093/pan/mph024}.
 %Type = Inproceedings
 \bibitem[{Pi et~al.(2020)Pi, Zhou, Zhang, Wang, Ren, Fan, Zhu and
   Gai}]{pi2020sim}
@@ -371,16 +323,6 @@
   data missing not at random}, in: \bibinfo{booktitle}{Proceedings of the 36th
   International Conference on Machine Learning (ICML)}, pp.
   \bibinfo{pages}{6638--6647}.
-%Type = Inproceedings
-\bibitem[{Zhang et~al.(2024)Zhang, Ma, Wei, Sheng and Wang}]{zhang2024advdrop}
-\bibinfo{author}{Zhang, A.}, \bibinfo{author}{Ma, W.}, \bibinfo{author}{Wei,
-  P.}, \bibinfo{author}{Sheng, L.}, \bibinfo{author}{Wang, X.},
-  \bibinfo{year}{2024}.
-\newblock \bibinfo{title}{General debiasing for graph-based collaborative
-  filtering via adversarial graph dropout}, in: \bibinfo{booktitle}{Proceedings
-  of the ACM Web Conference 2024 (WWW '24)}, \bibinfo{address}{Singapore}.
-\newblock \DOIprefix\doi{10.1145/3589334.3645667},
-  \href{http://arxiv.org/abs/2402.13769}{{\tt arXiv:2402.13769}}.
 %Type = Inproceedings
 \bibitem[{Zhang et~al.(2021)Zhang, Feng, He, Wei, Song, Ling and
   Zhang}]{zhang2021pda}

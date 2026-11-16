@@ -1,29 +1,28 @@
 \section{Grids and chosen configurations}\label{app:grids}
 
-The search spaces are as follows. LEAF-LGN and the other graph backbones use learning rate $\{10^{-2}, 3\times10^{-3}\}$ and
-weight decay $\{10^{-4}, 10^{-5}\}$, with the backbone's own grid. LEAF-LGN uses $w\in\{0, 0.25, 0.5\}$ (its policy weight). EASE
-uses $w\in\{0,0.25,0.5\}$, $\lambda_{\mathrm{EASE}}\in\{10^{3},3\times10^{3},10^{4}\}$ and a popularity weight
-$\beta\in\{0,0.25,0.5\}$, which gives 27 configurations. The DAX grid has 32 configurations: prior strength $\nu\in\{80,160\}$, centre
-(tag mean or content regression), lifelong strength $\lambda\in\{0,100\}$, scenario factors on or off, and user groups off or on
-with strength 80. The values of $\gamma$ are $\{0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.7, 1.0\}$. A DAX search multiplies the
-backbone trainings by the 32 DAX configurations and the 10 values of $\gamma$, for example $12\times32\times10=3{,}840$ for LEAF-LGN+DAX
-and $27\times32\times10=8{,}640$ for EASE+DAX. The QP family with DAX searches 10 backbone trainings, or $10\times32\times10=3{,}200$,
-and the search on KuaiRand-1K covers 20 trainings, or 6,400 (\ref{app:qp}).
+The search spaces are as follows. The graph backbones use learning rate $\{10^{-2}, 3\times10^{-3}\}$ and weight decay $\{10^{-4}, 10^{-5}\}$, with
+their own grids. LEAF-LGN uses in addition the policy weight $w\in\{0, 0.25, 0.5\}$ (\ref{app:supp}), which gives twelve trainings,
+and the grid therefore includes $w=0$. EASE uses $w\in\{0,0.25,0.5\}$, $\lambda_{\mathrm{EASE}}\in\{10^{3},3\times10^{3},10^{4}\}$ and a popularity
+weight $\beta\in\{0,0.25,0.5\}$, which gives 27 configurations. The DAX grid has 32 configurations: prior strength $\nu\in\{80,160\}$, centre (tag
+mean or content regression), lifelong strength $\lambda\in\{0,100\}$, scenario factors on or off, and the user-group switch off or on with strength
+80. The values of $\gamma$ are $\{0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.7, 1.0\}$. A DAX search multiplies the backbone trainings by the 32 DAX
+configurations and the 10 values of $\gamma$, for example $12\times32\times10=3{,}840$ for LEAF-LGN+DAX and $27\times32\times10=8{,}640$ for EASE+DAX.
+PW-LightGCN with DAX searches 10 backbone trainings, or $10\times32\times10=3{,}200$, and the search on KuaiRand-1K covers 20 trainings, or 6,400
+(\ref{app:qp}).
 
 Table~\ref{tab:extgrid} repeats the comparison with a wider DAX grid: prior strength in $\{10,20,40,80,160\}$ and lifelong strength in
-$\{0,100,200,400,1000\}$, under the same reduced set of values of $\gamma$ and the same epoch window as the default grid. The wider grid
-gives 0.4860 against 0.4854, a paired per-user difference of $+0.55$ [0.52] ($\times10^{-3}$) with Nadeau-Bengio $p=0.367$. The five
-splits choose the pairs (10, 400), (20, 100), (20, 400), (40, 100) and (40, 400) for (prior strength, lifelong strength). The chosen
-lifelong strengths lie inside the wider grid, and the chosen prior strengths are below the default values, so the default choice
-was not limiting for the test score.
+$\{0,100,200,400,1000\}$, under the same reduced set of values of $\gamma$ and the same epoch window as the default grid. The wider grid gives 0.4860
+against 0.4854, a paired per-user difference of $+0.55$ [0.52] with Nadeau-Bengio p 0.367, unadjusted. The five splits choose the pairs (10, 400), (20,
+100), (20, 400), (40, 100) and (40, 400) for (prior strength, lifelong strength). The chosen lifelong strengths lie inside the wider grid, and the chosen
+prior strengths are below the default values, so the default choice was not limiting for the test score.
 
 \input{tables/tab_extgrid}
 
-Tables~\ref{tab:grid00} to~\ref{tab:grid17} give the configuration chosen on validation in each split, for every method. In the
-main experiment, LEAF-LGN+DAX chooses the scenario factors on, the user-group strength 80 and $\gamma=0.5$ in every split; the
-attractiveness centre is the tag mean in four splits and the content regression in split two; the lifelong strength is 100 in every
-split, the upper edge of the default grid, and the prior strength is 80 in every split, the lower edge (Section~\ref{sec:limits}; Table~\ref{tab:extgrid}). The
-backbone chooses learning rate $3\times10^{-3}$, weight decay $10^{-4}$ and $w\in\{0.25,0.5\}$, with 14 to 27 epochs.
+Tables~\ref{tab:grid00} to~\ref{tab:grid17} give the configuration chosen on validation in each split, for every method. In the main experiment,
+LEAF-LGN+DAX chooses the scenario factors on, the user-group switch on and $\gamma=0.5$ in every split. The attractiveness centre is the tag mean in four
+splits and the content regression in the second split. The lifelong strength is 100 in every split, the upper edge of the default grid, and the prior
+strength is 80 in every split, the lower edge (Section~\ref{sec:limits}). The backbone chooses learning rate $3\times10^{-3}$, weight decay $10^{-4}$ and
+$w\in\{0.25,0.5\}$, with 14 to 27 epochs.
 
 \input{tables/tab_grid_00}
 \input{tables/tab_grid_01}

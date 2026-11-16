@@ -57,7 +57,7 @@ def fig_forest(c):
                         elinewidth=1.2, capsize=2.5, zorder=3)
     ax.axvline(0, color=INK, lw=0.7, zorder=1)
     ax.set_yticks(y)
-    ax.set_yticklabels([T.DISPLAY.get(k, k) for k, _ in rows])
+    ax.set_yticklabels([T.public(T.DISPLAY.get(k, k)) for k, _ in rows])
     ax.set_xlabel(r"LEAF-LGN+DAX minus comparator, nDCG@10 $\times 10^{-3}$ (per-user mean, 95% half-width)")
     ax.grid(axis="x", color="#e5e5e5", lw=0.5, zorder=0)
     _save(fig, "fig_forest.pdf")
