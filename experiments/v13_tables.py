@@ -347,7 +347,8 @@ def table_backbone():
     rows = []
     defs = [("EASE", "EASE", "EASE+DAX"), ("LightGCN", "LightGCN", "LightGCN+DAX"),
             ("QP family (stored)", "QP family", "QP family+DAX"), ("LEAF-LGN (post-hoc run)", "LEAF-LGN", "LEAF-LGN+DAX"),
-            ("DIN", "DIN", "DIN+DAX")]
+            ("DIN", "DIN", "DIN+DAX"),
+            ("SIM", "SIM", "SIM+DAX")]
     for label, a, b in defs:
         r = P(M.get(b), M.get(a))
         base = mean_cell(M[a]) if M.get(a) else tbd(SRC[a] + " mean")
@@ -356,8 +357,6 @@ def table_backbone():
             rows.append([esc(label), base, withd, tbd(f"{SRC[b]} minus {SRC[a]} paired difference"), "", ""])
             continue
         rows.append([esc(label), base, withd, dif(r), sci(r["p"]), pnb(r["nb"])])
-    rows.append(["SIM", tbd(SRC["SIM"] + " mean"), tbd(SRC["SIM+DAX"] + " mean"),
-                 tbd("results/v12/sim_27k.json SIM+DAX minus SIM paired difference"), "", ""])
     write("tab_backbone.tex", table_env(
         "DAX is backbone-agnostic: nDCG@10 without and with the post-hoc DAX module on KuaiRand-27K, paired difference "
         "x1e-3 with the 95\\% half-width, two-sided t test and the Nadeau-Bengio test over the split means.",

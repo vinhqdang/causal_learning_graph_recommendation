@@ -1,14 +1,18 @@
 \begin{table}[tbp]
 \centering
 \footnotesize
-\caption{Chosen configurations, SIM (27K): not available.}
+\caption{Chosen configurations per split: SIM (27K) (nDCG@10 mean 0.4590).}
 \label{tab:grid10}
 \begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{l}
+\begin{tabular}{rp{0.82\linewidth}}
 \toprule
-Split \\
+Split & Chosen configuration \\
 \midrule
-\textnormal{\{TBD:SIM (27K) chosen configurations\}} \\
+1 & \texttt{lr=0.01, wd=0.0001, epoch=7} \\
+2 & \texttt{lr=0.01, wd=0.0001, epoch=9} \\
+3 & \texttt{lr=0.01, wd=1e-05, epoch=7} \\
+4 & \texttt{lr=0.01, wd=1e-05, epoch=7} \\
+5 & \texttt{lr=0.01, wd=0.0001, epoch=7} \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
