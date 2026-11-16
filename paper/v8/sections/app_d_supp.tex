@@ -15,6 +15,38 @@ weights are $\sqrt{n_i+1}$. The ablation without a tag prior replaces the centre
 follows the MRP idea of \citep{park2004mrp}: it keeps an attraction $\alpha_{i,s}$ for each stratum $s$ of users (five quantile
 groups of the lifelong click rate and one group without history), shrunk to $\alpha_i$ with strength 80.
 
+\subsection{Implementation details of LEAF, LEAF-LGN and DAX}\label{app:impl}
+
+\paragraph{Temporal boundary} The cut-off $T_0$ is 2022-04-22 00:00 (UTC+8), the start of the random-exposure period. The latest
+impression used for training precedes $T_0$ by about two seconds, and the earliest random impression used for evaluation follows it by
+about ten hours. The lifelong statistics, the DAX fit, the popularity offset and the negative sampler read only events before $T_0$.
+
+\paragraph{LEAF statistics} The shrinkage strength of the lift in Equation~\eqref{eq:lift} is $\eta=5$ pseudo-impressions. Each of the
+six channels is divided by the standard deviation of its non-zero entries over all user and pool-item cells and is not centred, so that a
+missing key value or an unseen key value gives a channel of exactly zero. On KuaiRand-27K, 26,904 users have a lifelong history before
+$T_0$, and 44 tag values, 6,510 author values and 7,202 music values occur on pool videos.
+
+\paragraph{LEAF-LGN} LightGCN uses symmetric normalisation, $d=64$ dimensions and two propagation layers; the scoring embeddings
+$\bar e_u,\bar e_i$ are the mean of the layer-zero and propagated embeddings. The biases, $\beta$ and the channel weights $g$ are
+initialised at zero, and the weight decay $\rho$ applies to the embeddings only. A negative item that falls in the excluded set is redrawn
+once. Training uses Adam with batches of 8,192 triples and at most 40 epochs; for each split, training stops after three epochs without an
+improvement of the best validation nDCG@10. The search covers the learning rate, $\rho$ and the policy weight
+$w\in\{0,0.25,0.5\}$, which gives twelve trainings (\ref{app:grids}). A closed-form variant with the same channels, LEAF-tied, is used only
+for the LEAF controls of \ref{app:leafctl}.
+
+\paragraph{DAX} The factors start at $\theta_u=0.7$, $\kappa_t=1$ and $\alpha_i=0.6$, and the EM runs for 40 iterations without a
+convergence test. The examination probability $\theta_u\kappa_t$ is clipped to $[10^{-6},1-10^{-6}]$ in the E-step, $\theta_u$ and the
+lifelong centre to $[10^{-3},1]$, and $\alpha_i$ to $[10^{-4},1-10^{-4}]$. With $\lambda=0$ the user update becomes
+$(\sum_{r:u_r=u}p_{E,r}+1)/(\sum_{r:u_r=u}\kappa_{t_r}+2)$, a weak uniform prior. The scenario factors are relative to the evaluation
+scenario and may exceed one. Without the scenario factor, $\kappa_t=1$ for all $t$. The median number of policy-log impressions per pool
+item is 43; 0.6\% of the pool items have none and receive the centre of their tag.
+
+\paragraph{Combination} The weight $\gamma$ takes values in $\{0,0.05,0.1,0.15,0.2,0.3,0.4,0.5,0.7,1.0\}$, and a DAX configuration is one
+of 32 combinations of the prior strength $\nu\in\{80,160\}$, the centre (tag or content regression), the lifelong strength
+$\lambda\in\{0,100\}$, the scenario factor (on or off) and the user-group refinement (off, or on with strength 80). The early-stopping
+rule of a split uses the best validation value over all candidates of an epoch, the backbone and the combined scores alike. A variant in
+which $\gamma$ is learned jointly with the backbone is possible but is not evaluated in this paper.
+
 \subsection{Cost and measured run times}\label{app:cost}
 
 The LEAF tables are dense user by key-value arrays for the three key families, with one row per user. A pair is a gather,

@@ -1,66 +1,91 @@
 \section{Introduction}
 \label{sec:intro}
 
-Recommenders are usually trained and evaluated on logs written by a production policy. Such a log records which
-items the policy chose to show to which users, and whether those users clicked. A model fitted to this record
-learns the response of the audiences that the policy selected, and a model that ranks well on a held-out part of
-the same record is rewarded partly for reproducing the policy. The question that matters for an item is different:
-how a user who was not selected for the item would respond to it. Randomised exposure measures this target
-directly. In the KuaiRand logs \citep{gao2022kuairand}, a feed slot is replaced with small probability by a video
-drawn uniformly from a pool of 7,583 videos, so the inserted candidates reach users whatever the policy would have
+A recommender on a short-video platform is trained on the platform's own logs. These logs record which videos the
+production recommender, the \emph{policy}, chose to show to which users, in which part of the application, and whether
+the users clicked. A model fitted to such a record learns how the audiences selected by the policy responded, and a
+model that ranks well on a held-out part of the same record is partly rewarded for reproducing the policy. Many decisions
+of a platform depend on a different question: how would a user respond to a video that the policy would not have chosen
+for that user? This question arises whenever the platform explores new items, promotes content beyond its usual audience,
+or changes its recommender. Some platforms measure it directly by occasionally filling a feed slot with a video drawn
+uniformly at random from a pool. The KuaiRand data \citep{gao2022kuairand} contain such random insertions for thousands of
+users, and they make it possible to evaluate a recommender on items that reach users regardless of what the policy
 predicted.
 
-We first ask where the remaining accuracy of a strong graph recommender lies on this target. The headroom is at the
-item level. A leave-one-user-out item oracle, which scores each candidate by the uniform click rate of the item among
-the other test users, reaches nDCG@10 of 0.5068 against 0.4735 for LEAF-LGN, a gap of $+33.31\times10^{-3}$. The
-oracle reads test labels, so it is a diagnostic and not a method. The post-cut log predicts the uniform click rate no
-better than the pre-cut log (item-level Spearman 0.405 against 0.431), so temporal drift is not the bottleneck. What
-the policy log lacks is a measurement of how appealing an item is to an audience the policy did not select
-(Section~\ref{sec:res-headroom}).
+\paragraph{Why logged clicks mislead} Consider a viewer who regularly watches cooking videos, and a short cooking clip by a
+little-known author that is inserted into her feed at random. Two facts make this clip hard to rank from the policy log.
+First, the clip's logged click rate may be low for reasons that have nothing to do with its appeal. If the policy showed it
+mostly to users who rarely click anything, or in a part of the application where people scroll quickly, many of its
+non-clicks come from viewers who never really looked at it. An item can stay unclicked because it was never examined, not
+because it is unappealing. Second, the viewer may never have been shown any video from the random pool, so the policy log
+says little about her taste for this clip. What she likes is recorded elsewhere, in her long history on the millions of
+videos outside the pool, but simply counting how many cooking videos she was shown would measure the policy's choices rather
+than her preferences.
 
-We address this with two signals that are estimated from the log alone and added to a graph backbone. The first is a
-lifelong, exposure-conditional affinity (LEAF). For each user, LEAF uses the impressions of videos outside the test
-pool before the cut-off, and summarises, for every content key of a pool video (tag, author, music), how often the
-user clicked after an impression. Because the statistics are conditioned on the impression, they measure the response
-of the user given exposure, not how often the policy chose the key. The second is detection-adjusted attractiveness
-(DAX). DAX models each logged impression as an examination event, whose probability depends on the user and the
-scenario, followed by a click that depends on the attractiveness of the item. A non-click is then weak evidence
-against an item when the user rarely examines, and strong evidence when examination is likely. The attractiveness is
-fitted by expectation-maximisation on the pre-cut log and shrunk towards the mean of its content tag.
+\paragraph{The gap} Existing work addresses each of these problems in a different setting. Lifelong behaviour models such as
+DIN, SIM and TWIN \citep{zhou2018din,pi2020sim,chang2023twin} exploit long user histories, but they are trained and evaluated on
+policy logs, where history and target share item identifiers. Debiasing methods reweight the training loss by estimated
+exposure propensities \citep{saito2020unbiased,joachims2017unbiased} or model exposure as a latent variable
+\citep{liang2016exposure}; they still treat a shown-but-unclicked item as evidence against the item, whatever the attention of the
+viewer. Click models for web search \citep{richardson2007predicting,craswell2008cascade,chuklin2015clickmodels} separate the
+examination of a result from its attractiveness, but examination there depends on the rank position in a result list, which a
+single feed slot does not have. Methods that learn from a small uniformly exposed sample \citep{chen2021autodebias} use the very data
+that should be reserved for evaluation. We found no method that estimates, from the policy log alone, how a randomly chosen user
+would respond to an item, and that is evaluated on randomly inserted items.
 
-We make four contributions, each stated with the number that supports it.
+\paragraph{Our approach} We propose two signals, one for each side of the mismatch, both computed from data that a platform logs
+anyway.
+\begin{itemize}
+\item \emph{A user's long-term behaviour outside the evaluated pool says what the user likes.} LEAF (lifelong exposure-conditional
+  affinities) computes, for every user and every tag, author and music track, how much more often the user clicked videos with that
+  key \emph{when they were shown} than her other videos, together with how familiar she is with the key. Because the statistics are
+  conditional on exposure, they describe the user's response rather than the policy's choices. Content keys carry them from videos
+  outside the pool to the candidates. LEAF-LGN adds these affinities to the graph recommender LightGCN \citep{he2020lightgcn}.
+\item \emph{A non-click should count against an item only if the item was examined.} DAX (detection-adjusted attractiveness) models
+  each logged impression as an examination, whose probability depends on the user and on the scenario, followed by an attraction,
+  whose probability depends on the item. The idea comes from two fields. Occupancy models in ecology \citep{mackenzie2002occupancy}
+  separate whether a species is present at a site from whether a survey detects it, and click models in information retrieval separate
+  whether a result is examined from whether it attracts a click. In DAX an impression plays the role of a survey and a click the role
+  of a detection. The item attractiveness is estimated by expectation-maximisation, with shrinkage towards the mean of the item's tag,
+  and is added to any trained recommender with a weight chosen on validation users.
+\end{itemize}
+The combined model, LEAF-LGN+DAX, ranks the randomly inserted candidates with the LEAF-LGN score corrected by the attractiveness
+that DAX assigns to each candidate.
 
-\begin{description}
-\item[C1 (headroom diagnosis).] On randomised insertions, the item oracle exceeds LEAF-LGN by
-  $+33.31\times10^{-3}$ nDCG@10. This is a diagnostic that uses test labels and is never a selection input.
-\item[C2 (LEAF).] Lifelong exposure-conditional channels built from out-of-pool videos transfer through content keys
-  to a disjoint, randomly exposed pool. Added to LightGCN they give $+15.46$ [1.53] $\times10^{-3}$ nDCG@10
-  (stage 1, 22,612 users), and shuffling the users' lifelong tables removes the lifelong gain. LEAF-LGN alone does not
-  pass the pre-declared stage 1 gate against the QP family: its difference is $+9.63$ [1.60] with a Nadeau-Bengio
-  Holm-adjusted p of 0.189. Its comparisons with LightGCN and with r-AdjNorm have split-level Holm p values of 0.049 and
-  0.047, which are borderline (Section~\ref{sec:results}).
-\item[C3 (DAX).] DAX is complementary to LEAF. On top of LEAF-LGN it gives $+11.96$ [1.47] $\times10^{-3}$ nDCG@10
-  (the post-hoc run, base 0.4736), and the same post-hoc module adds to six backbones. The DAX weight is selected on
-  validation together with the backbone epoch and the DAX configuration; it is not learned jointly.
-\item[C4 (main result).] Under a temporal protocol with five user-level splits, LEAF-LGN+DAX reaches nDCG@10 of
-  0.4854 against 0.4634 for the QP family, a paired difference of $+22.32$ [1.83] $\times10^{-3}$ with a positive
-  difference in every split. The QP family is an IPS- and DR-weighted BPR LightGCN baseline that is described in full
-  in \ref{app:qp}.
-\end{description}
+\paragraph{Evaluation design} The evaluation is built so that the random insertions are never seen during training. All
+training signals, including the lifelong statistics and the DAX fit, are computed from events before the start of the random
+period. The random insertions are used only to select hyperparameters on one group of users and to measure accuracy on another,
+over five user-level splits. Every comparison is tested twice, with a paired test over users and with a split-level test that
+accounts for the shared training run, and both are corrected for multiple comparisons. The baselines include graph recommenders, a
+debiased graph recommender, a closed-form recommender and two lifelong deep models, each also given the DAX module. Permutation
+controls check that the gains depend on the users' own histories and on item-specific attractiveness.
 
-The comparison in C4 is not budget-matched. LEAF-LGN+DAX searches 3,840 configurations per split, DIN with DAX
-1,280, and the QP family alone 20. The fair comparator QP family+DAX adds the same DAX module to the QP family and
-searches 3,200 configurations. LEAF-LGN+DAX still exceeds it, by $+12.04$ [1.63] $\times10^{-3}$ nDCG@10, and this is
-the closer comparison. Against the lifelong deep models that were run on the same splits, LEAF-LGN+DAX exceeds DIN with
-DAX by $+5.73$ [1.64] and SIM with DAX by $+14.72$ [1.77] $\times10^{-3}$. The deep baselines use four trainings each
-(Section~\ref{sec:protocol-baselines}).
+\paragraph{Main findings} On KuaiRand-27K, LEAF-LGN+DAX reaches an nDCG@10 of 0.4854, against 0.4634 for the strongest debiased
+graph baseline, a propensity-weighted LightGCN that we describe in
+\ref{app:qp}, and 0.4733 for the same baseline with DAX added. It is ahead of each of the nine baselines of the main
+comparison on both tests after Holm correction, although two of these comparisons are borderline on the split-level test. Adding DAX improves
+each of six backbones on the per-user test. Permuting the attractiveness across items removes the DAX gain, and shuffling the
+lifelong histories across users removes the gain of the lifelong channels. On the smaller KuaiRand-1K release, the advantage
+over the debiased graph baseline, with and without DAX, is repeated.
 
-DAX is not recovering an unbiased or causally identified item quality: its factors are identified only up to a scale,
-and the weight of DAX is not learned end to end. The scope of the claims is set out in Section~\ref{sec:limits}.
+\paragraph{Contributions}
+\begin{itemize}
+\item We formulate recommendation for randomly inserted items as a learning problem in which only the policy log may be used for
+  training, and show on KuaiRand that the remaining accuracy headroom of a strong graph recommender lies in item-level appeal, not in
+  temporal drift.
+\item We propose LEAF, exposure-conditional affinities computed from each user's history outside the evaluated pool and transferred
+  through content keys, and LEAF-LGN, which learns how much each affinity counts inside a graph recommender.
+\item We propose DAX, a generative model of logged clicks that separates user and scenario examination from item attractiveness,
+  borrowing the detection idea of occupancy models and click models, with an expectation-maximisation estimator and priors that pool
+  information over tags and over each user's lifelong history.
+\item We provide an evaluation in which the random insertions are reserved for selection and testing, with split-level tests,
+  baselines that receive the same DAX module, and permutation controls for both signals.
+\end{itemize}
+We do not claim that DAX recovers an unbiased or causally identified item quality, and all evidence comes from one platform family
+(Section~\ref{sec:limits}).
 
-Section~\ref{sec:related} places the work among lifelong behaviour models, click models, exposure-aware recommenders,
-occupancy and small-area estimators, and debiased graph recommenders. Section~\ref{sec:method} defines the LEAF
-channels, DAX and their combination. Section~\ref{sec:protocol} gives the temporal protocol, the splits and the tests.
-Section~\ref{sec:results} reports the headroom diagnosis, the main comparison, the backbone and ablation analyses and
-the robustness checks. Section~\ref{sec:discussion} discusses why the multiplicative combination and the lifelong
-channels help, Section~\ref{sec:limits} lists the limitations, and Section~\ref{sec:conclusion} concludes.
+\paragraph{Outline} Section~\ref{sec:related} relates the work to lifelong behaviour models, click models, exposure-aware
+recommendation, occupancy and small-area estimation, and debiased graph recommenders. Section~\ref{sec:method} defines the problem,
+LEAF, DAX and their combination. Section~\ref{sec:protocol} describes the data, the temporal protocol and the statistical tests.
+Section~\ref{sec:results} reports the results, Section~\ref{sec:discussion} discusses them, Section~\ref{sec:limits} states the
+limitations and Section~\ref{sec:conclusion} concludes.
