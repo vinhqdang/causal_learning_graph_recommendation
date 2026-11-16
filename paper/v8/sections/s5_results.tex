@@ -37,7 +37,7 @@ next subsections address.
 
 Table~\ref{tab:methods} gives the mean and standard deviation over the five splits. The search budgets differ by two
 orders of magnitude, so they are reported with every number. LEAF-LGN+DAX searches 3,840 configurations per split, DIN+DAX
-1,280, the QP family with DAX 3,200, and the QP family itself 20. The budgets are not matched in the strict sense.
+1,280, the QP family with DAX 3,200, the QP family itself 20, and each published estimator four. The budgets are not matched in the strict sense.
 
 \input{tables/tab_methods}
 
@@ -45,19 +45,17 @@ orders of magnitude, so they are reported with every number. LEAF-LGN+DAX search
 
 \FloatBarrier
 
-Is LEAF-LGN+DAX more accurate than each baseline? On the per-user test, the difference is positive against all nine
-comparators. On the split-level test, it is positive against all nine after Holm correction, with two borderline comparisons.
+Is LEAF-LGN+DAX more accurate than each baseline? On the per-user test, the difference is positive against all thirteen comparators. On the split-level test, it is significant against eleven of them after Holm correction and borderline against the other two.
 
-Table~\ref{tab:main} gives the paired comparisons of LEAF-LGN+DAX with each of the nine comparators of the main family: the
-QP family, the QP family with DAX, the LEAF-LGN backbone without DAX, r-AdjNorm, LightGCN, DIN, DIN+DAX, SIM and SIM+DAX.
+Table~\ref{tab:main} gives the paired comparisons of LEAF-LGN+DAX with each of the thirteen comparators of the main family: the QP family, the QP family with DAX, the LEAF-LGN backbone without DAX, r-AdjNorm, LightGCN, DIN, DIN+DAX, SIM and SIM+DAX, and the four published estimators NAVIP, IPS-MF, DR-JL and MRDR.
 Table~\ref{tab:sens} in \ref{app:sens} adds EASE and EASE+DAX to the family. The conclusions at the 0.05 level do not change.
 
-% RESULT-PENDING: rows for the published baselines (main family and the sensitivity table) go here, with the columns of tab:main.
+The four published estimators are below LEAF-LGN+DAX under both tests, after Holm correction over the thirteen comparators. NAVIP, at 0.4579, is close to the 0.4576 of LightGCN, with a split-level Holm value of $1.26\times10^{-2}$. The three matrix factorisation estimators are far lower, at 0.3765 for IPS-MF, 0.3823 for DR-JL and 0.3826 for MRDR, with split-level Holm values below $2\times10^{-5}$. Each was tuned over four configurations, so these values reflect that budget.
+
 \input{tables/tab_main}
 
 On the per-user test, every Holm-adjusted p value of the main family is below $10^{-11}$ (Table~\ref{tab:sens}). On the split-level test, the
-Holm-adjusted values lie between $3\times10^{-4}$ and $2.44\times10^{-2}$ for r-AdjNorm, LightGCN, DIN, SIM, SIM+DAX and
-LEAF-LGN, and at $2.23\times10^{-2}$ for the QP family with DAX. Two comparisons have a split-level value of $4.56\times10^{-2}$:
+Holm-adjusted values of eleven comparators lie between $2.8\times10^{-6}$ (IPS-MF) and $2.44\times10^{-2}$ (LightGCN). Two comparisons have a split-level value of $4.56\times10^{-2}$:
 the QP family and DIN+DAX. Both lie below 0.05 but are called borderline. With five splits the split-level test has low power.
 The sign of the difference is the same in every split (Figure~\ref{fig:forest}).
 
@@ -72,7 +70,7 @@ half-width. Positive values favour LEAF-LGN+DAX. SIM denotes SIM-hard.}
 
 The pre-specified criterion of the primary family, a margin of at least $15\times10^{-3}$ over the QP family with both
 Holm-adjusted p values below 0.05, is met ($+22.32$ [1.83]; split-level Holm-adjusted $p=0.023$ in the family of five). In the
-nine-member main family the split-level value is the borderline $4.56\times10^{-2}$.
+thirteen-member main family the split-level value is the borderline $4.56\times10^{-2}$.
 
 \subsection{Fair-baseline reading}\label{sec:res-fair}
 
@@ -179,7 +177,7 @@ Table~\ref{tab:deep} gives the comparisons. DIN attends over the last 200 lifelo
 0.4675, and LEAF-LGN+DAX is above it by $+18.26$ [1.97]. DIN+DAX reaches 0.4796, and LEAF-LGN+DAX is above it by $+5.73$ [1.64]
 (split-level Holm-adjusted $p=4.56\times10^{-2}$, borderline). SIM, which keeps the 50 most recent events that share the candidate's
 tag or author, reaches 0.4590 on KuaiRand-27K, and LEAF-LGN+DAX is above it by $+26.44$ [2.01]. SIM+DAX reaches 0.4706, and
-LEAF-LGN+DAX is above it by $+14.72$ [1.77] (split-level Holm-adjusted $p=5.36\times10^{-3}$). On KuaiRand-1K, LEAF-LGN+DAX (0.4590)
+LEAF-LGN+DAX is above it by $+14.72$ [1.77] (split-level Holm-adjusted $p=6.13\times10^{-3}$). On KuaiRand-1K, LEAF-LGN+DAX (0.4590)
 is above DIN+DAX (0.4228), SIM (0.4246) and SIM+DAX (0.4357). These 1K comparisons are not adjusted. For SIM+DAX the split-level p
 value is 0.095, so that difference is not supported at the split level. The deep models are tuned over four configurations each, so
 they are tuned less widely than LEAF-LGN.
@@ -188,13 +186,17 @@ they are tuned less widely than LEAF-LGN.
 
 \subsection{Controls and summary}\label{sec:res-controls}
 
-Do the signals depend on what they are supposed to capture? Shuffling users' histories removes the LEAF gain on the closed-form
-variant, and shuffling attractiveness across items removes the DAX gain on LEAF-LGN.
+Do the signals depend on what they are supposed to capture? The lifelong channels of LEAF-LGN do, shuffling attractiveness across items removes the DAX gain, and the policy channel adds no measurable gain.
 
-The LEAF controls come from the LEAF development experiment, which used the closed-form variant LEAF-tied (\ref{app:leafctl}).
-Shuffling the users' lifelong tables gives the largest loss, $+18.90$ [1.99], and removing all lifelong channels gives $+17.88$ [2.04].
+Removing the lifelong channels from LEAF-LGN lowers the score from 0.4728 to 0.4614 (Table~\ref{tab:leafctl-lgn}), a difference of $+11.46$ [1.71] (split-level Nadeau-Bengio $p=0.018$). Shuffling the users' lifelong tables across users lowers it to 0.4624, a difference of $+10.65$ [1.77] ($p=0.002$), which is close to the model without lifelong channels. The gain therefore depends on each user's own lifelong history, not on lifelong features in general.
 
-% RESULT-PENDING: the LEAF-LGN shuffle control (users' lifelong tables shuffled on the LEAF-LGN backbone) goes here.
+Removing the policy channel does not lower the score. The variant without it reaches 0.4733, against 0.4728 for LEAF-LGN with independent tuning, a difference of $-0.55$ [0.33] in favour of the variant without it (per-user $p=1.13\times10^{-3}$, split-level Nadeau-Bengio $p=0.793$). The two give identical test scores in four of the five splits, and in the fifth split the variant without the channel is higher by $2.4\times10^{-3}$. The policy channel therefore brings no measurable gain on LEAF-LGN, and we do not credit it with any part of the LEAF-LGN result.
 
-The LEAF gain depends on the users' own lifelong histories, and the DAX gain depends on item-level appeal beyond the tag mean.
+\input{tables/tab_leafctl_lgn}
+
+The closed-form variant LEAF-tied, from the LEAF development experiment, gives a secondary check (\ref{app:leafctl}). Shuffling its users' lifelong tables gives the largest loss, $+18.90$ [1.99], and removing all its lifelong channels gives $+17.88$ [2.04]. On that variant the policy channel contributes $+5.01$ [1.20] per user, but its split-level test is not significant after Holm adjustment, and on LEAF-LGN no gain is measured.
+
+
+
+The lifelong gain of LEAF-LGN depends on the users' own histories, the DAX gain depends on item-level appeal beyond the tag mean, and the policy channel adds nothing measurable.
 The controls do not establish that the item-level estimate is unbiased. Section~\ref{sec:limits} lists what remains untested.

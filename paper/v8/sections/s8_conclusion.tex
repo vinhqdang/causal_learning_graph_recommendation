@@ -5,12 +5,10 @@ strong graph recommender leaves its remaining error mostly in item-level appeal.
 problem. LEAF summarises each user's lifelong behaviour outside the evaluated pool as exposure-conditional affinities for
 content keys, and these affinities reach candidates from the pool through shared tags, authors and music tracks. DAX treats a
 logged click as an examination, which depends on the user and the scenario, followed by an attraction, which depends on the
-item; it estimates item attractiveness by expectation-maximisation and adds the estimate to any trained recommender. On the
-closed-form variant, the gain of LEAF disappears when the users' lifelong tables are shuffled, and the gain of DAX disappears when attractiveness is permuted
-across items.
+item; it estimates item attractiveness by expectation-maximisation and adds the estimate to any trained recommender. On LEAF-LGN, shuffling the users' lifelong tables removes the lifelong gain, and the gain of DAX disappears when attractiveness is permuted across items.
 
 On KuaiRand-27K, under a temporal protocol with five user-level splits, the combined model reaches an nDCG@10 of 0.4854, against
-0.4634 for the QP family. It ranks above each of the nine comparators of the main family, and the strength of each comparison is reported
+0.4634 for the QP family. It ranks above each of the thirteen comparators of the main family, four of them published debiased estimators, and the strength of each comparison is reported
 in Section~\ref{sec:results}. The evidence comes from one platform family, and it is a controlled
 ranking gain under the stated protocol. Open questions are whether the two signals hold on other platforms, whether joint
 training of DAX with the backbone adds to the increment, and whether richer content would close the remaining gap to an oracle

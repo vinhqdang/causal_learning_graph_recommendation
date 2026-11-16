@@ -1,0 +1,19 @@
+\begin{table}[tbp]
+\centering
+\footnotesize
+\caption{Extended DAX grid on KuaiRand-27K: LEAF-LGN+DAX with prior strength in $\{10,20,40,80,160\}$ and lifelong strength in $\{0,100,200,400,1000\}$, against the default grid (prior $\{80,160\}$, lifelong strength $\{0,100\}$), nDCG@10.}
+\label{tab:extgrid}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrrr}
+\toprule
+Grid & Configurations & Mean & Difference from default [95\% hw] & NB $p$ \\
+\midrule
+Default grid & 320 & 0.4854 & n/a & n/a \\
+Extended grid & 2,000 & 0.4860 & +0.55 [0.52] & 0.367 \\
+Main experiment (10 values of $\gamma$, all epochs) & 3,840 & 0.4854 & 0.00 [0.00] & 1.000 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize The extended and default grids share the same reduced set of values of $\gamma$ and the same epoch window. The difference is the paired per-user mean of the extended minus the default grid, in units of $10^{-3}$. NB $p$: Nadeau-Bengio test over the five split means, not adjusted. The main experiment is compared with the default grid for reference.\end{minipage}
+\end{table}

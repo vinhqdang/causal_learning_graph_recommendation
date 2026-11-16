@@ -2,29 +2,37 @@ Numbers computed by experiments/v13_tables.py from results/v10, results/v11 and 
 Differences: per-user paired mean x1e-3 nDCG@10 [95% half-width]; p = two-sided t test over pooled users;
 NB p = Nadeau-Bengio test over the five split means (frac_val 0.3); Holm adjustments within the family named.
 
-[main family, Holm over 9 comparators: table tab:main]
+[main family, Holm over 13 comparators: table tab:main]
   LEAF-LGN+DAX - QP family: +22.32 [1.83] p=3.637e-125 NB p=0.0228 splits +19.83 +22.21 +21.84 +17.81 +28.03 p_Holm=2.546e-124 NB_Holm=0.0456
   LEAF-LGN+DAX - QP family+DAX: +12.04 [1.63] p=3.960e-47 NB p=0.0056 splits +10.75 +12.95 +10.70 +11.79 +13.88 p_Holm=7.920e-47 NB_Holm=0.0223
-  LEAF-LGN+DAX - LEAF-LGN: +11.96 [1.47] p=6.551e-57 NB p=0.0014 splits +11.85 +12.43 +11.96 +10.16 +12.40 p_Holm=1.965e-56 NB_Holm=0.0068
-  LEAF-LGN+DAX - r-AdjNorm: +23.79 [1.96] p=2.431e-123 NB p=0.0000 splits +23.72 +23.21 +24.17 +22.17 +23.32 p_Holm=1.459e-122 NB_Holm=0.0003
-  LEAF-LGN+DAX - LightGCN: +28.15 [1.86] p=5.334e-190 NB p=0.0081 splits +25.07 +26.26 +30.45 +24.50 +32.63 p_Holm=4.800e-189 NB_Holm=0.0244
-  LEAF-LGN+DAX - DIN: +18.26 [1.97] p=1.406e-73 NB p=0.0011 splits +19.00 +18.04 +17.27 +15.89 +19.12 p_Holm=7.029e-73 NB_Holm=0.0066
+  LEAF-LGN+DAX - LEAF-LGN: +11.96 [1.47] p=6.551e-57 NB p=0.0014 splits +11.85 +12.43 +11.96 +10.16 +12.40 p_Holm=1.965e-56 NB_Holm=0.0082
+  LEAF-LGN+DAX - r-AdjNorm: +23.79 [1.96] p=2.431e-123 NB p=0.0000 splits +23.72 +23.21 +24.17 +22.17 +23.32 p_Holm=1.459e-122 NB_Holm=0.0004
+  LEAF-LGN+DAX - LightGCN: +28.15 [1.86] p=5.334e-190 NB p=0.0081 splits +25.07 +26.26 +30.45 +24.50 +32.63 p_Holm=5.334e-189 NB_Holm=0.0244
+  LEAF-LGN+DAX - DIN: +18.26 [1.97] p=1.406e-73 NB p=0.0011 splits +19.00 +18.04 +17.27 +15.89 +19.12 p_Holm=7.029e-73 NB_Holm=0.0077
   LEAF-LGN+DAX - DIN+DAX: +5.73 [1.64] p=7.947e-12 NB p=0.0429 splits +6.32 +4.62 +7.56 +4.76 +5.34 p_Holm=7.947e-12 NB_Holm=0.0456
   LEAF-LGN+DAX - SIM: +26.44 [2.01] p=3.553e-144 NB p=0.0000 splits +25.50 +26.01 +26.90 +25.88 +27.38 p_Holm=2.842e-143 NB_Holm=0.0003
-  LEAF-LGN+DAX - SIM+DAX: +14.72 [1.77] p=1.391e-59 NB p=0.0008 splits +15.30 +13.72 +13.80 +16.07 +14.67 p_Holm=5.563e-59 NB_Holm=0.0054
+  LEAF-LGN+DAX - SIM+DAX: +14.72 [1.77] p=1.391e-59 NB p=0.0008 splits +15.30 +13.72 +13.80 +16.07 +14.67 p_Holm=5.563e-59 NB_Holm=0.0061
+  LEAF-LGN+DAX - NAVIP: +27.80 [1.91] p=1.763e-175 NB p=0.0025 splits +27.31 +26.67 +26.38 +24.95 +31.70 p_Holm=1.586e-174 NB_Holm=0.0126
+  LEAF-LGN+DAX - IPS-MF: +108.09 [3.09] p=0.000e+00 NB p=0.0000 splits +109.96 +108.49 +108.44 +107.72 +109.72 p_Holm=0.000e+00 NB_Holm=0.0000
+  LEAF-LGN+DAX - DR-JL: +102.17 [3.05] p=0.000e+00 NB p=0.0000 splits +104.41 +101.82 +102.84 +101.80 +104.50 p_Holm=0.000e+00 NB_Holm=0.0000
+  LEAF-LGN+DAX - MRDR: +102.00 [3.01] p=0.000e+00 NB p=0.0000 splits +103.81 +102.29 +102.11 +101.59 +103.92 p_Holm=0.000e+00 NB_Holm=0.0000
 
-[sensitivity family, Holm over 11 comparators: table tab:sens]
+[sensitivity family, Holm over 15 comparators: table tab:sens]
   QP family: p_Holm=2.910e-124 NB_Holm=0.0456
   QP family+DAX: p_Holm=7.920e-47 NB_Holm=0.0223
-  LEAF-LGN: p_Holm=1.965e-56 NB_Holm=0.0068
+  LEAF-LGN: p_Holm=1.965e-56 NB_Holm=0.0082
   r-AdjNorm: p_Holm=1.702e-122 NB_Holm=0.0004
-  LightGCN: p_Holm=5.334e-189 NB_Holm=0.0244
-  DIN: p_Holm=7.029e-73 NB_Holm=0.0066
+  LightGCN: p_Holm=5.867e-189 NB_Holm=0.0244
+  DIN: p_Holm=7.029e-73 NB_Holm=0.0077
   DIN+DAX: p_Holm=7.947e-12 NB_Holm=0.0456
   SIM: p_Holm=3.198e-143 NB_Holm=0.0003
-  SIM+DAX: p_Holm=5.563e-59 NB_Holm=0.0061
-  EASE: p_Holm=7.185e-204 NB_Holm=0.0013
-  EASE+DAX: p_Holm=9.133e-115 NB_Holm=0.0061
+  SIM+DAX: p_Holm=5.563e-59 NB_Holm=0.0069
+  NAVIP: p_Holm=1.763e-174 NB_Holm=0.0126
+  IPS-MF: p_Holm=0.000e+00 NB_Holm=0.0000
+  DR-JL: p_Holm=0.000e+00 NB_Holm=0.0000
+  MRDR: p_Holm=0.000e+00 NB_Holm=0.0000
+  EASE: p_Holm=7.839e-204 NB_Holm=0.0015
+  EASE+DAX: p_Holm=9.133e-115 NB_Holm=0.0069
 
 [backbones, raw p values: table tab:backbone]
   EASE+DAX - EASE: +11.98 [1.64] p=2.265e-46 NB p=0.0000 splits +11.49 +11.54 +11.24 +11.83 +11.92

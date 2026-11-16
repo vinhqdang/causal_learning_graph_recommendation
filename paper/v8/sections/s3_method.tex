@@ -174,7 +174,7 @@ pairs. In addition, each shown-but-unclicked pair ($N_{ui}=1$) is used as a posi
 this the \emph{policy channel}: the decision of the policy to show $i$ to $u$ is itself weak evidence of relevance, and $w\in[0,1]$
 sets how much it counts. Negatives $j$ are drawn uniformly from the items that $u$ was never shown before $T_0$ (from the items that $u$
 never clicked when $w=0$). The learning rate,
-$\rho$, $w$ and the number of epochs are selected on the validation users.
+$\rho$, $w$ and the number of epochs are selected on the validation users. Its contribution is tested in Section~\ref{sec:res-controls}, where it gives no measurable gain on LEAF-LGN.
 
 \subsection{DAX: detection-adjusted attractiveness}
 \label{sec:method-dax}
@@ -291,7 +291,7 @@ suggests.
 \paragraph{Two variants of the main experiment} The main experiment selects two variants of the DAX module, which are
 defined here. Other options of the search are in \ref{app:fh}.
 
-\paragraph{Content-regression centre.} The tag centre can be replaced, from the sixth iteration on, by a regression on content attributes
+\paragraph{Content-regression centre} The tag centre can be replaced, from the sixth iteration on, by a regression on content attributes
 in the spirit of small-area estimation \citep{fay1979smallarea}:
 \begin{equation}
   c_i=\sigma\bigl(\mu_0+\mathbf x_i^{\top}\boldsymbol\beta\bigr),\qquad
@@ -303,7 +303,7 @@ of the pool videos (tag, upload type, video type, duration decile, aspect ratio,
 the author), $W=\operatorname{diag}(w_i)$ with $w_i=\sqrt{n_i+1}$, $\mu_0$ is the weighted mean of $\mathbf y$ with weights $w_i$, and
 $\xi$ is a fixed ridge penalty. The first five iterations use the tag centre.
 
-\paragraph{User-group attractiveness.} Users are divided into five quantile groups $s=1,\dots,5$ by their lifelong base rate $r_u$ of
+\paragraph{User-group attractiveness} Users are divided into five quantile groups $s=1,\dots,5$ by their lifelong base rate $r_u$ of
 Equation~\eqref{eq:base-rate}, computed on the pre-cut lifelong log, and users without lifelong history form a sixth group. We write
 $s(u)$ for the group of $u$. Each item then has an attractiveness in every group, shrunk towards its overall attractiveness $\alpha_i$:
 \begin{equation}

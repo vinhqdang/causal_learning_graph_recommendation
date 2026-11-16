@@ -4,41 +4,44 @@ The paper does not claim unbiasedness, causal identification of item quality, ge
 comparison with published numbers from other protocols, which use different binarisation, candidate sets and selection rules.
 The limitations below set the scope of the results.
 
-\paragraph{One platform family.} KuaiRand-27K and KuaiRand-1K come from one platform and one period, with overlapping users.
+\paragraph{One platform family} KuaiRand-27K and KuaiRand-1K come from one platform and one period, with overlapping users.
 The 1K users are a subset of the 27K users, so the 1K results are not an independent replication.
 
-\paragraph{Few splits and low power.} The main comparisons use five user-level splits, and the split-level test has low power.
+\paragraph{Few splits and low power} The main comparisons use five user-level splits, and the split-level test has low power.
 Its Holm-adjusted values against the QP family and against DIN+DAX are $4.56\times10^{-2}$ (Table~\ref{tab:main}). The per-user test
 gives far smaller values, but it treats users as independent across splits, which they are not.
 
-\paragraph{The novelty is a combination.} Each component has a precedent: lifelong behaviour models, examination models and
+\paragraph{The novelty is a combination} Each component has a precedent: lifelong behaviour models, examination models and
 shrinkage towards a group mean. The contribution is the combination on randomly inserted items. DAX applies the structure of
 examination-based click models to a feed without positions; its novelty lies in the user and scenario examination factors, the
 priors and the evaluation target, not in the factorisation itself.
 
-\paragraph{The combination is fitted after training.} The mixing weight $\gamma$ is selected on validation users, and DAX is not
+\paragraph{The combination is fitted after training} The mixing weight $\gamma$ is selected on validation users, and DAX is not
 trained jointly with the backbone in the reported results. We did not evaluate a variant in which $\gamma$ is learned jointly
 with the backbone.
 
-\paragraph{Unequal budgets and grid edges.} LEAF-LGN+DAX searches 3,840 configurations per split and the QP family 20. The QP family
+\paragraph{Unequal budgets and grid edges} LEAF-LGN+DAX searches 3,840 configurations per split and the QP family 20. The QP family
 with DAX searches only the QP backbones selected without DAX, which is conservative for the method, and on KuaiRand-1K it searches
-6,400 configurations, which favours the baseline. The prior strengths $\nu$ and $\lambda$ were selected at the edges of their
-grids (\ref{app:grids}), and we did not test whether a wider grid would select other values.
+6,400 configurations, which favours the baseline. The prior strength $\nu$ and the lifelong strength $\lambda$ were selected at the edges of the
+default grid (\ref{app:grids}). A wider grid, with $\nu$ in $\{10,20,40,80,160\}$ and $\lambda$ in $\{0,100,200,400,1000\}$, gives
+0.4860 against 0.4854, a difference of $+0.55$ [0.52] (split-level Nadeau-Bengio $p=0.367$, not significant). The default grid
+therefore does not limit the test score, although the selected prior strength depends on the grid (Table~\ref{tab:extgrid}).
 
-\paragraph{Identifiability up to scale.} The examination and attractiveness factors are identified only up to a scale shared by
+\paragraph{Identifiability up to scale} The examination and attractiveness factors are identified only up to a scale shared by
 $\theta_u$ and $\alpha_i$. The order of $\alpha_i$ is unaffected, but the logit used in the combination is not scale-invariant, so
 the prior strengths are validation hyperparameters. The factors $\theta_u$ and $\kappa_t$ are nuisance parameters.
 
-\paragraph{Reduced runs.} The ablations and the training seeds use reduced grids (Sections~\ref{sec:res-ablate} and
+\paragraph{Reduced runs} The ablations and the training seeds use reduced grids (Sections~\ref{sec:res-ablate} and
 \ref{sec:res-seeds}), so their gains are not compared with the main increment. The seed runs cover LEAF-LGN+DAX only, the QP
-family was not re-trained under other seeds, and the LEAF controls were run on LEAF-tied, not on LEAF-LGN.
+family was not re-trained under other seeds, the LEAF-LGN controls use 12, 12 and 4 configurations per variant against 197 for the reference, which favours the reference, and the closed-form controls were run on LEAF-tied.
 
-\paragraph{Deep baselines.} DIN and SIM-hard are each tuned over four configurations. A deeper search, or a sequence length other
+\paragraph{Deep and published baselines} DIN and SIM-hard are each tuned over four configurations, and the four published estimators
+over four configurations each. A deeper search, or a sequence length other
 than 200 for DIN, may close the gap. This was not tested.
 
-\paragraph{Click label only.} We used the click label only; we did not evaluate a long-view label or a protocol in which the training
+\paragraph{Click label only} We used the click label only; we did not evaluate a long-view label or a protocol in which the training
 log extends past $T_0$ for the full model.
 
-\paragraph{Remaining headroom and content.} The combination does not close the item-level gap to the uniform-rate oracle
+\paragraph{Remaining headroom and content} The combination does not close the item-level gap to the uniform-rate oracle
 (Section~\ref{sec:res-headroom}). The content keys are the tag, the author and the music track, and the evaluation
 scenario is the one with $\kappa_1=1$; the transfer of the scenario factors to other scenarios is not tested.

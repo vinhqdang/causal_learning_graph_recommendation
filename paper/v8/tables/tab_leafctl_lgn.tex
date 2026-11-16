@@ -1,0 +1,21 @@
+\begin{table}[tbp]
+\centering
+\footnotesize
+\caption{LEAF-LGN controls on KuaiRand-27K: the reference against the same model with the lifelong channels removed, with the lifelong tables shuffled across users, and with the policy channel removed (nDCG@10).}
+\label{tab:leafctl-lgn}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrrrr}
+\toprule
+Variant & Configurations & Mean & Difference [95\% hw] & Per-user $p$ & NB $p$ \\
+\midrule
+LEAF-LGN (independent tuning, reference) & 197 & 0.4728 & n/a & n/a & n/a \\
+\midrule
+without lifelong channels & 12 & 0.4614 & +11.46 [1.71] & $2.82\times10^{-39}$ & 0.018 \\
+lifelong tables shuffled across users & 12 & 0.4624 & +10.65 [1.77] & $4.04\times10^{-32}$ & 0.002 \\
+without policy channel & 4 & 0.4733 & -0.55 [0.33] & $1.13\times10^{-3}$ & 0.793 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize Difference: the reference minus the variant, so a positive value means the removed signal helps. Each variant is selected on validation users over its own grid (12, 12, 4 configurations), and the reference over 197 configurations, which favours the reference. Per-user $p$: two-sided paired t test over the pooled test users. NB $p$: Nadeau-Bengio test over the five split means. Neither is adjusted for the three variants.\end{minipage}
+\end{table}

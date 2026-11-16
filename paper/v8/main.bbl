@@ -1,4 +1,4 @@
-\begin{thebibliography}{40}
+\begin{thebibliography}{42}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\href}[2]{#2}
@@ -99,6 +99,18 @@
   \bibinfo{booktitle}{Proceedings of the 31st ACM International Conference on
   Information \& Knowledge Management (CIKM)}, pp. \bibinfo{pages}{3953--3957}.
 \newblock \DOIprefix\doi{10.1145/3511808.3557624}.
+%Type = Inproceedings
+\bibitem[{Guo et~al.(2021)Guo, Zou, Liu, Ye, Cheng, Wang, Chen, Yin and
+  Chang}]{guo2021mrdr}
+\bibinfo{author}{Guo, S.}, \bibinfo{author}{Zou, L.}, \bibinfo{author}{Liu,
+  Y.}, \bibinfo{author}{Ye, W.}, \bibinfo{author}{Cheng, S.},
+  \bibinfo{author}{Wang, S.}, \bibinfo{author}{Chen, H.}, \bibinfo{author}{Yin,
+  D.}, \bibinfo{author}{Chang, Y.}, \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{Enhanced doubly robust learning for debiasing
+  post-click conversion rate estimation}, in: \bibinfo{booktitle}{Proceedings
+  of the 44th International ACM SIGIR Conference on Research and Development in
+  Information Retrieval}, pp. \bibinfo{pages}{275--284}.
+\newblock \DOIprefix\doi{10.1145/3404835.3462917}.
 %Type = Inproceedings
 \bibitem[{He et~al.(2020)He, Deng, Wang, Li, Zhang and Wang}]{he2020lightgcn}
 \bibinfo{author}{He, X.}, \bibinfo{author}{Deng, K.}, \bibinfo{author}{Wang,
@@ -309,9 +321,8 @@
   \bibinfo{author}{Singh, A.}, \bibinfo{author}{Chandak, N.},
   \bibinfo{author}{Joachims, T.}, \bibinfo{year}{2016}.
 \newblock \bibinfo{title}{Recommendations as treatments: Debiasing learning and
-  evaluation [data set]}, in: \bibinfo{booktitle}{Proceedings of the 33rd
-  International Conference on Machine Learning (ICML)}, pp.
-  \bibinfo{pages}{1670--1679}.
+  evaluation}, in: \bibinfo{booktitle}{Proceedings of the 33rd International
+  Conference on Machine Learning (ICML)}, pp. \bibinfo{pages}{1670--1679}.
 %Type = Inproceedings
 \bibitem[{Steck(2019)}]{steck2019ease}
 \bibinfo{author}{Steck, H.}, \bibinfo{year}{2019}.
@@ -352,6 +363,14 @@
   ACM International Conference on Web Search and Data Mining},
   \bibinfo{publisher}{ACM}. pp. \bibinfo{pages}{610--618}.
 \newblock \DOIprefix\doi{10.1145/3159652.3159732}.
+%Type = Inproceedings
+\bibitem[{Wang et~al.(2019)Wang, Zhang, Sun and Qi}]{wang2019drjl}
+\bibinfo{author}{Wang, X.}, \bibinfo{author}{Zhang, R.}, \bibinfo{author}{Sun,
+  Y.}, \bibinfo{author}{Qi, J.}, \bibinfo{year}{2019}.
+\newblock \bibinfo{title}{Doubly robust joint learning for recommendation on
+  data missing not at random}, in: \bibinfo{booktitle}{Proceedings of the 36th
+  International Conference on Machine Learning (ICML)}, pp.
+  \bibinfo{pages}{6638--6647}.
 %Type = Inproceedings
 \bibitem[{Zhang et~al.(2024)Zhang, Ma, Wei, Sheng and Wang}]{zhang2024advdrop}
 \bibinfo{author}{Zhang, A.}, \bibinfo{author}{Ma, W.}, \bibinfo{author}{Wei,

@@ -8,45 +8,45 @@ Reallocated singl_function (elt_size=4) to 100 items from 50.
 Warning--empty pages in islam2026ppd
 Warning--empty pages in saito2021obd
 Warning--empty pages in zhang2024advdrop
-You've used 40 entries,
+You've used 42 entries,
             2990 wiz_defined-function locations,
-            891 strings with 15710 characters,
-and the built_in function-call counts, 35359 in all, are:
-= -- 2811
-> -- 1640
-< -- 33
-+ -- 634
-- -- 585
-* -- 3969
-:= -- 4922
-add.period$ -- 125
-call.type$ -- 40
-change.case$ -- 396
-chr.to.int$ -- 39
-cite$ -- 43
-duplicate$ -- 2485
-empty$ -- 2341
-format.name$ -- 709
-if$ -- 6835
+            901 strings with 16197 characters,
+and the built_in function-call counts, 37416 in all, are:
+= -- 2973
+> -- 1748
+< -- 35
++ -- 675
+- -- 624
+* -- 4198
+:= -- 5206
+add.period$ -- 130
+call.type$ -- 42
+change.case$ -- 419
+chr.to.int$ -- 41
+cite$ -- 45
+duplicate$ -- 2623
+empty$ -- 2469
+format.name$ -- 754
+if$ -- 7237
 int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 484
-newline$ -- 220
-num.names$ -- 160
-pop$ -- 855
+missing$ -- 511
+newline$ -- 229
+num.names$ -- 168
+pop$ -- 904
 preamble$ -- 1
-purify$ -- 355
+purify$ -- 376
 quote$ -- 0
-skip$ -- 953
+skip$ -- 1013
 stack$ -- 0
-substring$ -- 1482
-swap$ -- 2008
-text.length$ -- 27
+substring$ -- 1576
+swap$ -- 2125
+text.length$ -- 29
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 357
+type$ -- 375
 warning$ -- 3
-while$ -- 213
+while$ -- 225
 width$ -- 0
-write$ -- 631
+write$ -- 659
 (There were 3 warnings)

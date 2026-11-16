@@ -88,7 +88,7 @@ the same DAX module, and Section~\ref{sec:res-fair} discusses its search.
 Several user counts and several values of the same baseline appear in the results. Each comes from a different selection or
 search, and they are reconciled here.
 
-\paragraph{Users.} The KuaiRand-27K data contain 27,077 dataset users. In each split, 8,123 of them form the validation part and
+\paragraph{Users} The KuaiRand-27K data contain 27,077 dataset users. In each split, 8,123 of them form the validation part and
 18,954 the test part. A test user is scored only if a candidate was clicked, which gives 15,809 to 15,913 scored test users per split.
 Pooled over the five splits, 22,612 distinct users are scored in at least one split. The headroom diagnostic of
 Section~\ref{sec:res-headroom} uses 22,661 users, all users with a click in some candidate list. The difference of 49 users
@@ -96,12 +96,12 @@ consists of users with a click who were in the validation part of all five split
 of the same diagnostic used 22,847 users and a different definition of the item rate. It does not enter any comparison and is not
 reported further.
 
-\paragraph{LightGCN.} Two values of LightGCN appear. The value 0.4576 is the four-configuration LightGCN of the methods table and of the
+\paragraph{LightGCN} Two values of LightGCN appear. The value 0.4576 is the four-configuration LightGCN of the methods table and of the
 main comparison. The value 0.4597 is a LightGCN re-trained within the experiment that fits LightGCN+DAX, which has three base
 configurations. The DAX increment on LightGCN is measured against this re-trained base, because the base and its DAX variant must come
 from the same search.
 
-\paragraph{LEAF-LGN.} Four values of LEAF-LGN appear, each from a different search. The value 0.4736 is LEAF-LGN of the main experiment,
+\paragraph{LEAF-LGN} Four values of LEAF-LGN appear, each from a different search. The value 0.4736 is LEAF-LGN of the main experiment,
 with twelve trainings over the learning rate, the weight decay and the policy weight. The value 0.4728 is LEAF-LGN tuned
 independently: a separate search of 197 configurations of the backbone alone, in the LEAF development experiment (a first comparison of
 two LEAF variants with four baselines on the same splits). Its difference from the main experiment is $+0.73\times10^{-3}$ [0.52] (Appendix~D).
@@ -109,19 +109,19 @@ The value 0.4706 is the base of the ablation experiment, selected inside a restr
 therefore measured against it (Section~\ref{sec:res-ablate}). The value 0.4735 is LEAF-LGN in the headroom diagnostic, whose
 configuration is selected on the first split only.
 
-\paragraph{QP family.} The value 0.4634 is the QP family with its selected configurations. The value 0.4652 in the methods table is the
+\paragraph{QP family} The value 0.4634 is the QP family with its selected configurations. The value 0.4652 in the methods table is the
 QP family re-trained on the configurations that it selected.
 
 \subsection{Statistical tests and families}
 \label{sec:protocol-stats}
 
-\paragraph{Paired per-user differences.} For two methods $A$ and $B$, the difference of a user is the mean, over the splits in
+\paragraph{Paired per-user differences} For two methods $A$ and $B$, the difference of a user is the mean, over the splits in
 which the user is evaluated, of the difference of the two nDCG@10 values. The reported quantity is the mean of the user
 differences, multiplied by $10^{3}$, with a 95\% half-width from the two-sided t interval over users. The p value is that
 of a two-sided one-sample t test on the user differences. Users appear in several test parts and share one training run, so
 this test is approximate and is reported next to the split-level test.
 
-\paragraph{Split-level test.} The Nadeau-Bengio corrected resampled t test \citep{nadeau2003} is applied to the five split means
+\paragraph{Split-level test} The Nadeau-Bengio corrected resampled t test \citep{nadeau2003} is applied to the five split means
 $\bar d$ of the split differences $d_s$. With $J=5$ splits, the variance of the mean is estimated as
 $\widehat{\mathrm{Var}}=s_d^2\bigl(\tfrac1J+\tfrac{n_{\mathrm{test}}}{n_{\mathrm{val}}}\bigr)=s_d^2\bigl(\tfrac15+\tfrac73\bigr)$,
 where $s_d^2$ is the sample variance of the split differences and $n_{\mathrm{val}}$ and $n_{\mathrm{test}}$ are the numbers of
@@ -132,14 +132,16 @@ a two-sided test at 0.05 needs a mean-to-standard-deviation ratio of the split d
 $t_{0.975,4}\sqrt{1/5+7/3}\approx4.42$. Because the approximation matters most for p values near 0.05, the two split-level
 values of 0.0456 in Section~\ref{sec:results} are called borderline.
 
-\paragraph{Holm adjustment and the families.} The p values of each family are adjusted by the step-down procedure of
+\paragraph{Holm adjustment and the families} The p values of each family are adjusted by the step-down procedure of
 \citet{holm1979}, separately for the per-user and the split-level tests. The families are fixed as follows.
 \begin{itemize}
 \item \emph{Primary family}, fixed before the main experiment was run: five comparisons of LEAF-LGN+DAX against the QP
   family, the QP family with DAX, the LEAF-LGN backbone, r-AdjNorm and LightGCN.
-\item \emph{Main-table family}: nine comparisons, the five above plus DIN, DIN+DAX, SIM and SIM+DAX. It was defined after
-  the primary family, when the deep baselines were added.
-\item \emph{Sensitivity family}: the main nine plus EASE and EASE+DAX (eleven).
+\item \emph{Main-table family}: thirteen comparisons, the five above, DIN, DIN+DAX, SIM and SIM+DAX, and the four published
+  estimators NAVIP, IPS-MF, DR-JL and MRDR. It was defined after the primary family, when the deep baselines were added, and it
+  was extended by the published estimators afterwards. Extending a family can only raise its adjusted values, so every comparison
+  that is significant in the thirteen-member family was also significant in the nine-member family.
+\item \emph{Sensitivity family}: the main thirteen plus EASE and EASE+DAX (fifteen).
 \item \emph{KuaiRand-1K family}: three comparisons of Table~\ref{tab:1k}.
 \item \emph{Ablation families}: seven gains (full DAX and six variants, each against the ablation base) and six
   full-minus-variant differences.
@@ -149,7 +151,7 @@ values of 0.0456 in Section~\ref{sec:results} are called borderline.
 LightGCN+DAX (960 configurations on the re-trained LightGCN base) is in no family: it is a backbone increment, reported in
 Table~\ref{tab:backbone}.
 
-\paragraph{Pre-specified criteria.} The primary family was fixed before the main experiment was run, and its rule was written
+\paragraph{Pre-specified criteria} The primary family was fixed before the main experiment was run, and its rule was written
 down at that time. The rule requires that LEAF-LGN+DAX exceed the QP family by at least $15\times10^{-3}$ per user, and that
 both Holm-adjusted p values be below 0.05. The criteria for the ablations were also fixed in advance. The within-tag
 permutation must lower the gain by at least 30\%, the across-item permutation must remove at least 90\% of it, and the
@@ -160,18 +162,25 @@ of $0.0456$ is called borderline, not significant.
 \subsection{Baselines}
 \label{sec:protocol-baselines}
 
-The baselines are LightGCN, r-AdjNorm, EASE, the QP family, LEAF-LGN without DAX, and two lifelong deep models, DIN
-\citep{zhou2018din} and SIM-hard \citep{pi2020sim}. Every backbone with DAX gets the same DAX module and the same $\gamma$
+The baselines are LightGCN, r-AdjNorm, EASE, the QP family, LEAF-LGN without DAX, two lifelong deep models, DIN
+\citep{zhou2018din} and SIM-hard \citep{pi2020sim}, and four published debiased estimators. Every backbone with DAX gets the same DAX module and the same $\gamma$
 grid as LEAF-LGN. Table~\ref{tab:baselines} in \ref{app:baselines} gives the grids and the counts.
 
 The QP family is our own unpublished baseline, a propensity-weighted LightGCN. It is described in full in \ref{app:qp}, which
 allows it to be reproduced, and it is never cited or called our previous work. In the main comparison it searches 20 configurations.
 
+\paragraph{Published debiased estimators} NAVIP \citep{kim2022navip} is a propensity-weighted graph model with two propagation
+layers. IPS-MF \citep{schnabel2016} is matrix factorisation with inverse-propensity weights, DR-JL \citep{wang2019drjl} is doubly
+robust joint learning, and MRDR \citep{guo2021mrdr} is a doubly robust matrix factorisation estimator. All four use the temporal
+protocol, a propensity estimated from item popularity, dimension 64, at most 40 epochs with patience 3, and the same four
+configurations: learning rate in $\{10^{-2},3\times10^{-3}\}$ and weight decay in $\{10^{-5},10^{-4}\}$. Their search is much narrower
+than that of LEAF-LGN+DAX, and their values are conditional on it.
+
+
 DIN attends over the last $L=200$ pre-cut events of the user on videos outside the pool. SIM-hard keeps the $K=50$ most recent
 of these events that share the tag or author of the candidate, and attends over them. Both use identifier embeddings and the
 BPR loss. Their grids are smaller than those of the graph backbones: four trainings, dimension 16, at most 12 epochs and
-patience 2. The results on them are conditional on that budget. TWIN \citep{chang2023twin} and NAVIP \citep{kim2022navip}
-are not used as baselines.
+patience 2. The results on them are conditional on that budget. TWIN \citep{chang2023twin} is not used as a baseline.
 
 \subsection{Ablation design}
 \label{sec:protocol-ablation}

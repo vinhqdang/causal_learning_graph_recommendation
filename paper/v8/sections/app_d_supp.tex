@@ -195,6 +195,10 @@ Method & Search grid & Configurations \\
 \raggedright DIN + DAX & \raggedright 4 trainings with the DAX grid and $\gamma$ & 1,280 \\
 \raggedright SIM-hard \citep{pi2020sim} & \raggedright as DIN, with the $K=50$ most recent events sharing the tag or author of the candidate & 4 \\
 \raggedright SIM-hard + DAX & \raggedright as DIN + DAX & 1,280 \\
+\raggedright NAVIP \citep{kim2022navip} & \raggedright propensity-weighted graph model with two propagation layers; learning rate $\{10^{-2},3\cdot10^{-3}\}$, $\rho\in\{10^{-5},10^{-4}\}$; $d=64$, at most 40 epochs, patience 3; propensity from item popularity & 4 \\
+\raggedright IPS-MF \citep{schnabel2016} & \raggedright matrix factorisation with inverse-propensity weights; the same grid and propensity & 4 \\
+\raggedright DR-JL \citep{wang2019drjl} & \raggedright doubly robust joint learning; the same grid and propensity & 4 \\
+\raggedright MRDR \citep{guo2021mrdr} & \raggedright doubly robust matrix factorisation estimator; the same grid and propensity & 4 \\
 \raggedright LEAF-tied (closed form, LEAF development experiment only) & \raggedright closed-form grid over the ridge penalty, the policy weight and the channel weights & 3,456 \\
 \raggedright LightGCN + DAX & \raggedright the DAX grid and $\gamma$ on the re-trained LightGCN base (3 trainings) & 960 \\
 \bottomrule
@@ -204,8 +208,8 @@ Method & Search grid & Configurations \\
 
 \subsection{LEAF controls}\label{app:leafctl}
 
-The LEAF controls come from the LEAF development experiment on the LEAF-tied backbone, the closed-form variant on which these controls
-were run (Table~\ref{tab:leafctl}). Shuffling the users' lifelong tables across users gives the largest loss, $+18.90$ [1.99]
+These closed-form controls are secondary. They come from the LEAF development experiment on the LEAF-tied backbone
+(Table~\ref{tab:leafctl}). The primary controls, on LEAF-LGN, are in Section~\ref{sec:res-controls}. Shuffling the users' lifelong tables across users gives the largest loss, $+18.90$ [1.99]
 (Holm-adjusted $p=4.90\times10^{-76}$; Nadeau-Bengio Holm-adjusted $p=4.60\times10^{-3}$), and removing all lifelong channels gives
 $+17.88$ [2.04]. The control that compares the shuffled-user variant with the no-lifelong variant gives a difference of
 $-1.02\times10^{-3}$, within its $\pm2\times10^{-3}$ tolerance. The policy channel contributes $+5.01$ [1.20] (per-user t test Holm-adjusted
@@ -216,7 +220,7 @@ These controls were run on LEAF-tied.
 
 \subsection{Sensitivity of the Holm adjustment}\label{app:sens}
 
-Table~\ref{tab:sens} extends the main family by EASE and EASE+DAX. The conclusions at the 0.05 level are the same as in
+Table~\ref{tab:sens} extends the thirteen-member main family by EASE and EASE+DAX, giving a family of fifteen. The conclusions at the 0.05 level are the same as in
 Table~\ref{tab:main}; the two split-level values that are closest to the threshold are unchanged at $4.56\times10^{-2}$.
 
 \input{tables/tab_sens}

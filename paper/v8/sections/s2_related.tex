@@ -35,7 +35,7 @@ A line of work learns from impressions and not only from clicks. Impression-awar
 items as evidence and use the impression set as features or as negative samples \citep{perezmaurera2025iars}. ExpoMF
 \citep{liang2016exposure} models exposure as a latent variable that is fitted by EM. Inverse-propensity estimators for
 missing-not-at-random implicit feedback \citep{saito2020unbiased} weight the loss by estimated exposure propensities, and
-\citet{joachims2017unbiased} apply the same idea to clicks with examination propensities. \citet{wang2018regressionem}
+\citet{joachims2017unbiased} apply the same idea to clicks with examination propensities. Three matrix factorisation estimators of this kind, IPS-MF \citep{schnabel2016}, DR-JL \citep{wang2019drjl} and MRDR \citep{guo2021mrdr}, are published baselines in our comparison (Section~\ref{sec:protocol-baselines}). \citet{wang2018regressionem}
 and \citet{wang2016selection} estimate position bias and relevance jointly, without randomisation, in personal search.
 ESMM \citep{ma2018esmm} models the entire impression space, and \citet{krause2024coexposure} use multinomial-logit
 choice with item co-exposure. cEASE \citep{jeunen2020cease} adds item side information to a closed-form model.
@@ -61,7 +61,7 @@ however, is item appeal under a uniform audience. An additive alternative of the
 \label{sec:rel-graph}
 
 Graph collaborative filtering spreads signals over the user-item graph, and bias corrections have been applied to that
-spreading. NAVIP \citep{kim2022navip} debiases neighbour aggregation in a graph neural network for recommendation.
+spreading. NAVIP \citep{kim2022navip} debiases neighbour aggregation in a graph neural network for recommendation, and it is a published baseline here.
 Popularity-bias work \citep{zhang2021pda} applies a causal intervention to the popularity effect. AutoDebias
 \citep{chen2021autodebias} learns debiasing parameters from a small uniform sample, which is not admissible under our
 protocol because the randomly exposed data serve only for validation and test. Two further graph methods, adversarial

@@ -56,8 +56,7 @@ that DAX assigns to each candidate.
 training signals, including the lifelong statistics and the DAX fit, are computed from events before the start of the random
 period. The random insertions are used only to select hyperparameters on one group of users and to measure accuracy on another,
 over five user-level splits. Every comparison is tested twice, with a paired test over users and with a split-level test that
-accounts for the shared training run, and both are corrected for multiple comparisons. The baselines include graph recommenders, a
-debiased graph recommender, a closed-form recommender and two lifelong deep models, each also given the DAX module. Permutation
+accounts for the shared training run, and both are corrected for multiple comparisons. The baselines include graph recommenders, debiased recommenders (one tuned by us and four published estimators), a closed-form recommender and two lifelong deep models; the backbones among them are also given the DAX module. Permutation
 controls check that the gains depend on the users' own histories and on item-specific attractiveness.
 
 \paragraph{Main findings} On KuaiRand-27K, LEAF-LGN+DAX reaches an nDCG@10 of 0.4854, against 0.4634 for the strongest debiased

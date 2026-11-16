@@ -62,7 +62,18 @@ SRC = {
     "DIN+DAX": "results/v12/din_27k.json DIN+DAX",
     "SIM": "results/v12/sim_27k.json SIM",
     "SIM+DAX": "results/v12/sim_27k.json SIM+DAX",
+    "NAVIP": "results/v14/learned_kuairand_t_pub.json NAVIP",
+    "IPS-MF": "results/v14/learned_kuairand_t_pub.json IPS-MF",
+    "DR-JL": "results/v14/learned_kuairand_t_pub.json DR-JL",
+    "MRDR": "results/v14/learned_kuairand_t_pub.json MRDR",
 }
+# published debiased estimators (learned_kuairand_t_pub.json, four configurations each)
+PUB_METHODS = ["NAVIP", "IPS-MF", "DR-JL", "MRDR"]
+# LEAF-LGN controls (leaf_lgn_ablate.json), reported against the independently tuned LEAF-LGN
+LGN_ARMS = ["no_lifelong", "shuffle_users", "no_policy"]
+LGN_ARM_LABEL = {"no_lifelong": "without lifelong channels",
+                 "shuffle_users": "lifelong tables shuffled across users",
+                 "no_policy": "without policy channel"}
 DISPLAY = {"LEAF-LGN(stored)": "LEAF-LGN (independent tuning)", "LEAF-LGN": "LEAF-LGN",
            "QP family (retrained)": "QP family, re-trained on its selected configurations", "QP family+DAX": "QP family+DAX"}
 ABL_NAME = {"full": "LEAF-LGN+DAX", "no_tab": "LEAF-LGN+DAX[no_tab]", "no_life_prior": "LEAF-LGN+DAX[no_life_prior]",
@@ -106,6 +117,10 @@ def context():
         "SIM": mf(H["SIM_27K"], "SIM"),
         "SIM+DAX": mf(H["SIM_27K"], "SIM+DAX", "SIM + DAX"),
     }
+    for name in PUB_METHODS:
+        M[name] = mf(H["PUB"], name)
+    for arm in LGN_ARMS:
+        M[f"LEAF-LGN[{arm}]"] = mf(H["LGN_ABLATE"], f"LEAF-LGN[{arm}]", f"LEAF-LGN[{arm}]")
     N = None
     if M["LEAF-LGN(stored)"] is not None:
         N = len(H["pooled_users"](M["LEAF-LGN(stored)"]))
@@ -155,6 +170,8 @@ def sci(p):
     """p in the form of the source files: mantissa with two decimals, exponent (x 10^e)."""
     if p == 1.0:
         return "1"
+    if p == 0:
+        return r"$<10^{-300}$"
     m, e = f"{p:.2e}".split("e")
     return f"${m}\\times10^{{{int(e)}}}$"
 
@@ -224,7 +241,7 @@ def table_methods():
     H, M = c["H"], c["M"]
     rows = []
     for k in ["LEAF-LGN+DAX", "LEAF-LGN", "LEAF-LGN(stored)", "QP family", "QP family+DAX", "QP family (retrained)",
-              "r-AdjNorm", "LightGCN", "LightGCN+DAX", "EASE", "EASE+DAX", "DIN", "DIN+DAX", "SIM", "SIM+DAX"]:
+              "r-AdjNorm", "LightGCN", "LightGCN+DAX", "EASE", "EASE+DAX", "DIN", "DIN+DAX", "SIM", "SIM+DAX"] + PUB_METHODS:
         m = M.get(k)
         name = DISPLAY.get(k, k)
         if m is None:
@@ -282,9 +299,10 @@ def table_main():
             rows.append([esc(k), mean_cell(M[k]), dif(r), pnb(r["nb"]), "n/a"])
     note = (f"Diff.: paired per-user mean of the nDCG@10 difference, in units of $10^{{-3}}$, with the 95\\% half-width of the "
             f"t interval over the pooled test users (n = {c['N']:,}). NB: Nadeau-Bengio corrected resampled t test over the five "
-            "split means. NB $p_{\\mathrm{Holm}}$: Holm adjustment over the nine comparators of the main family. LightGCN is the "
+            "split means. NB $p_{\\mathrm{Holm}}$: Holm adjustment over the %d comparators of the main family. NAVIP, IPS-MF, DR-JL and MRDR are published debiased estimators, each tuned over four configurations. LightGCN is the "
             "four-configuration LightGCN baseline (a LightGCN re-trained within the DAX experiment appears in "
             "Table~\\ref{tab:backbone}). SIM denotes SIM-hard. Per-user p values are in Table~\\ref{tab:sens}.")
+    note = note.replace("%d", str(len(keys)))
     if missing:
         note += " Not available: " + ", ".join(missing) + "."
     write("tab_main.tex", table_env(
@@ -599,7 +617,7 @@ def table_leafctl():
             "means. The variant without music channels gives identical rankings in every split. These controls were "
             "run on the closed-form LEAF-tied backbone.")
     write("tab_leafctl.tex", table_env(
-        "LEAF controls on KuaiRand-27K (closed-form LEAF-tied backbone): variant means and full minus variant.",
+        "LEAF controls on KuaiRand-27K, secondary: closed-form LEAF-tied backbone, variant means and full minus variant.",
         "tab:leafctl", "lrccccc",
         ["Variant", "Configs", "Mean", r"Full minus variant [95\% hw]", r"$p_{\mathrm{Holm}}$", r"NB $p$",
          r"NB $p_{\mathrm{Holm}}$"], rows, note))
@@ -809,6 +827,72 @@ def numbers_file(c, res, ph, nh, gain_minus, leaf_minus):
     return path
 
 
+# ---------------------------------------------------------------------------------------------
+# Table 10: extended DAX grid (default grid against the extended grid, same gammas and epoch window)
+# ---------------------------------------------------------------------------------------------
+def table_extgrid():
+    c = context()
+    H, M = c["H"], c["M"]
+    ref = H["method_from"](H["DAXREF_LGN"], "LEAF-LGN+DAX", "LEAF-LGN+DAX (default grid)")
+    wide = H["method_from"](H["DAXWIDE_LGN"], "LEAF-LGN+DAX", "LEAF-LGN+DAX (extended grid)")
+    full = M.get("LEAF-LGN+DAX")
+    if ref is None or wide is None:
+        write("tab_extgrid.tex", table_env("Extended DAX grid: not available.", "tab:extgrid", "l", ["Grid"],
+                                          [[tbd("results/v12 daxref_lgn.json, daxwide_lgn.json LEAF-LGN+DAX")]]))
+        return
+    rows = [["Default grid", f"{ref['n_configs']:,}", f"{H['mean_sd'](ref)[0]:.4f}", "n/a", "n/a"],
+            ["Extended grid", f"{wide['n_configs']:,}", f"{H['mean_sd'](wide)[0]:.4f}", dif(P(wide, ref)),
+             pnb(P(wide, ref)["nb"])]]
+    if full is not None:
+        rows.append(["Main experiment (10 values of $\\gamma$, all epochs)", f"{full['n_configs']:,}",
+                     mean_cell(full), dif(P(full, ref)), pnb(P(full, ref)["nb"])])
+    write("tab_extgrid.tex", table_env(
+        "Extended DAX grid on KuaiRand-27K: LEAF-LGN+DAX with prior strength in $\\{10,20,40,80,160\\}$ and lifelong "
+        "strength in $\\{0,100,200,400,1000\\}$, against the default grid (prior $\\{80,160\\}$, lifelong strength "
+        "$\\{0,100\\}$), nDCG@10.",
+        "tab:extgrid", "lrrrr",
+        ["Grid", "Configurations", "Mean", r"Difference from default [95\% hw]", r"NB $p$"], rows,
+        "The extended and default grids share the same reduced set of values of $\\gamma$ and the same epoch window. "
+        "The difference is the paired per-user mean of the extended minus the default grid, in units of $10^{-3}$. "
+        "NB $p$: Nadeau-Bengio test over the five split means, not adjusted. The main experiment is compared with the "
+        "default grid for reference."))
+
+
+# ---------------------------------------------------------------------------------------------
+# Table 11: LEAF-LGN controls (primary): the independently tuned LEAF-LGN against three variants
+# ---------------------------------------------------------------------------------------------
+def table_leafctl_lgn():
+    c = context()
+    H, M = c["H"], c["M"]
+    ref = M.get("LEAF-LGN(stored)")
+    if ref is None:
+        write("tab_leafctl_lgn.tex", table_env("LEAF-LGN controls: not available.", "tab:leafctl-lgn", "l",
+                                              ["Variant"], [[tbd("results/v10/leaf_lgn.json LEAF-LGN")]]))
+        return {}
+    rows = [[esc("LEAF-LGN (independent tuning, reference)"), f"{ref['n_configs']}", mean_cell(ref), "n/a", "n/a", "n/a"],
+            "MIDRULE"]
+    res = {}
+    for arm in LGN_ARMS:
+        m = M.get(f"LEAF-LGN[{arm}]")
+        if m is None:
+            rows.append([esc(LGN_ARM_LABEL[arm]), tbd(f"results/v10/leaf_lgn_ablate.json LEAF-LGN[{arm}]"), "", "", "", ""])
+            continue
+        r = P(ref, m)
+        res[arm] = r
+        rows.append([esc(LGN_ARM_LABEL[arm]), f"{m['n_configs']}", mean_cell(m), dif(r), sci(r["p"]), pnb(r["nb"])])
+    note = (f"Difference: the reference minus the variant, so a positive value means the removed signal helps. Each variant "
+            f"is selected on validation users over its own grid ({', '.join(str(M[f'LEAF-LGN[{a}]']['n_configs']) for a in LGN_ARMS if M.get(f'LEAF-LGN[{a}]') is not None)} "
+            f"configurations), and the reference over {ref['n_configs']} configurations, which favours the reference. "
+            "Per-user $p$: two-sided paired t test over the pooled test users. NB $p$: Nadeau-Bengio test over the five split "
+            "means. Neither is adjusted for the three variants.")
+    write("tab_leafctl_lgn.tex", table_env(
+        "LEAF-LGN controls on KuaiRand-27K: the reference against the same model with the lifelong channels removed, with "
+        "the lifelong tables shuffled across users, and with the policy channel removed (nDCG@10).",
+        "tab:leafctl-lgn", "lrrrrr",
+        ["Variant", "Configurations", "Mean", r"Difference [95\% hw]", r"Per-user $p$", r"NB $p$"], rows, note))
+    return res
+
+
 def main():
     c = context()
     H = c["H"]
@@ -821,6 +905,8 @@ def main():
     table_seeds()
     table_deep()
     minus = table_leafctl()
+    table_extgrid()
+    table_leafctl_lgn()
     grids = table_grids()
     bpath = numbers_file(c, res, ph, nh, gain_minus[1] if gain_minus else None, minus or {})
     print("NUMBERS written to", bpath)

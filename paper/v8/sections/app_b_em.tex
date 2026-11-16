@@ -2,7 +2,7 @@
 
 This appendix gives the complete model and updates. Only rows with time before the cut-off $T_0$ are read.
 
-\paragraph{Model.} A logged impression of user $u$, item $i$ and scenario $t$ has an examination indicator $E$ and an attraction
+\paragraph{Model} A logged impression of user $u$, item $i$ and scenario $t$ has an examination indicator $E$ and an attraction
 indicator $R$,
 \[
 E\sim\mathrm{Bernoulli}(\theta_u\kappa_t),\qquad R\sim\mathrm{Bernoulli}(\alpha_i),\qquad y=ER,
@@ -10,7 +10,7 @@ E\sim\mathrm{Bernoulli}(\theta_u\kappa_t),\qquad R\sim\mathrm{Bernoulli}(\alpha_
 where $y$ is the click. The factors are in $[0,1]$, except that the scenario factors are relative to the evaluation scenario, with
 $\kappa_1=1$ for the evaluation scenario.
 
-\paragraph{Priors.} The priors are $\alpha_i\sim\mathrm{Beta}\bigl(\nu c_{g(i)},\,\nu(1-c_{g(i)})\bigr)$ with $\nu$ the prior strength
+\paragraph{Priors} The priors are $\alpha_i\sim\mathrm{Beta}\bigl(\nu c_{g(i)},\,\nu(1-c_{g(i)})\bigr)$ with $\nu$ the prior strength
 (80 in the main experiment), $\theta_u\sim\mathrm{Beta}\bigl(\lambda\tilde c_u,\,\lambda(1-\tilde c_u)\bigr)$ with $\lambda$ the
 lifelong strength (100 in the main experiment), and $\kappa_t$ free. The lifelong centre $\tilde c_u$ is the rescaled lifelong rate of
 Equation~\eqref{eq:life-centre}, clipped to $[10^{-3},1]$. With $\lambda=0$ we use $\mathrm{Beta}(2,2)$ on $\theta_u$. The tag centre
@@ -18,16 +18,16 @@ $c_g$ is the pooled attraction of the items of tag $g$ with a $\mathrm{Beta}(1,1
 $c_{g(i)}$ is replaced, after five iterations, by a weighted ridge regression (penalty 10) of $\operatorname{logit}\alpha$ on one-hot
 content codes with weights $\sqrt{n_i+1}$.
 
-\paragraph{Initialisation and iterations.} $\theta_u=0.7$, $\kappa_t=1$, $\alpha_i=0.6$. There are 40 EM iterations, and no convergence
+\paragraph{Initialisation and iterations} $\theta_u=0.7$, $\kappa_t=1$, $\alpha_i=0.6$. There are 40 EM iterations, and no convergence
 test is applied.
 
-\paragraph{E-step.} Let $\tau=\theta_u\kappa_t$. A click gives $P(E=1)=P(R=1)=1$. A non-click gives
+\paragraph{E-step} Let $\tau=\theta_u\kappa_t$. A click gives $P(E=1)=P(R=1)=1$. A non-click gives
 \[
 P(E=1\mid y=0)=\frac{\tau(1-\alpha_i)}{1-\tau\alpha_i},\qquad
 P(R=1\mid y=0)=\frac{(1-\tau)\alpha_i}{1-\tau\alpha_i}.
 \]
 
-\paragraph{M-step.} Let $S^E_u=\sum P(E=1)$ over the rows of $u$ and $K_u=\sum\kappa_t$ over the same rows. Then
+\paragraph{M-step} Let $S^E_u=\sum P(E=1)$ over the rows of $u$ and $K_u=\sum\kappa_t$ over the same rows. Then
 \[
 \theta_u=\frac{S^E_u+\lambda\,\tilde c_u}{K_u+\lambda}\quad(\lambda>0),\qquad \theta_u=\frac{S^E_u+1}{K_u+2}\quad(\lambda=0),
 \]
@@ -42,7 +42,7 @@ one in the numerator and denominator is part of the reported model. The attracti
 \]
 clipped to $[10^{-4},1-10^{-4}]$, where $n_i$ is the number of pre-cut rows of item $i$.
 
-\paragraph{Approximation and clamps.} The updates for $\theta_u$ and $\kappa_t$ are the maximisers under the Poisson approximation
+\paragraph{Approximation and clamps} The updates for $\theta_u$ and $\kappa_t$ are the maximisers under the Poisson approximation
 described in Section~\ref{sec:method-dax}. They are not the exact maximisers of the expected complete-data log-likelihood under the
 stated priors. The exact stationarity condition has $(1-P(E=1\mid y))\kappa_t/(1-\tau)$ in place of $\kappa_t$ in the denominator, and
 the update counts every row, so the $\theta_u$ update is an approximate closed form and not the MAP estimate of the Beta prior. The
@@ -50,8 +50,8 @@ updates also clamp the values: the E-step product $\tau=\theta_u\kappa_t$ to $[1
 $1-\tau\alpha_i$ from below at $10^{-9}$, $\theta_u$ and $\kappa_t$ to $[10^{-3},1]$ (the lifelong centre to the same range), and
 $\alpha_i$ to $[10^{-4},1-10^{-4}]$.
 
-\paragraph{Strata.} The optional user-group cells $\alpha_{i,s}$ of the main experiment use the same update with $\alpha_i$ as the
+\paragraph{Strata} The optional user-group cells $\alpha_{i,s}$ of the main experiment use the same update with $\alpha_i$ as the
 centre and the cell prior strength 80, the value selected in every split.
 
-\paragraph{Output.} The fit returns $\operatorname{logit}\alpha_i$, $\theta_u$ and $\kappa_t$. The combined score of the method section
+\paragraph{Output} The fit returns $\operatorname{logit}\alpha_i$, $\theta_u$ and $\kappa_t$. The combined score of the method section
 uses $\operatorname{logit}\alpha_i$ standardised over the pool, as in Equation~\eqref{eq:zeta}.

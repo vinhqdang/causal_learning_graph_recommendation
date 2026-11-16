@@ -10,11 +10,19 @@ backbone trainings by the 32 DAX configurations and the 10 values of $\gamma$, f
 and $27\times32\times10=8{,}640$ for EASE+DAX. The QP family with DAX searches 10 backbone trainings, or $10\times32\times10=3{,}200$,
 and the search on KuaiRand-1K covers 20 trainings, or 6,400 (\ref{app:qp}).
 
-% RESULT-PENDING: the extended DAX grid (prior strength below 80 and lifelong strength above 100) goes here, as a grid row.
+Table~\ref{tab:extgrid} repeats the comparison with a wider DAX grid: prior strength in $\{10,20,40,80,160\}$ and lifelong strength in
+$\{0,100,200,400,1000\}$, under the same reduced set of values of $\gamma$ and the same epoch window as the default grid. The wider grid
+gives 0.4860 against 0.4854, a paired per-user difference of $+0.55$ [0.52] ($\times10^{-3}$) with Nadeau-Bengio $p=0.367$. The five
+splits choose the pairs (10, 400), (20, 100), (20, 400), (40, 100) and (40, 400) for (prior strength, lifelong strength). The chosen
+lifelong strengths lie inside the wider grid, and the chosen prior strengths are below the default values, so the default choice
+was not limiting for the test score.
+
+\input{tables/tab_extgrid}
+
 Tables~\ref{tab:grid00} to~\ref{tab:grid17} give the configuration chosen on validation in each split, for every method. In the
 main experiment, LEAF-LGN+DAX chooses the scenario factors on, the user-group strength 80 and $\gamma=0.5$ in every split; the
 attractiveness centre is the tag mean in four splits and the content regression in split two; the lifelong strength is 100 in every
-split, the upper edge of its grid, and the prior strength is 80 in every split, the lower edge (Section~\ref{sec:limits}). The
+split, the upper edge of the default grid, and the prior strength is 80 in every split, the lower edge (Section~\ref{sec:limits}; Table~\ref{tab:extgrid}). The
 backbone chooses learning rate $3\times10^{-3}$, weight decay $10^{-4}$ and $w\in\{0.25,0.5\}$, with 14 to 27 epochs.
 
 \input{tables/tab_grid_00}
