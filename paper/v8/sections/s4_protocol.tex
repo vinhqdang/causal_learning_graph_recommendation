@@ -2,7 +2,7 @@
 \label{sec:protocol}
 
 This section defines the temporal split, the data, the selection rule, the tests and the baselines. The leakage controls,
-the search grids of the baselines and the stage 1 controls are in \ref{app:supp}.
+the search grids of the baselines and the LEAF controls are in \ref{app:supp}.
 
 \subsection{Temporal protocol and the role of the random-exposure data}
 \label{sec:protocol-temporal}
@@ -34,29 +34,23 @@ results are a replication at a smaller scale and not an independent sample. Tabl
 \caption{Sizes of the two KuaiRand settings under the temporal protocol.}
 \label{tab:data}
 \footnotesize
-\begin{tabular}{p{0.36\textwidth}p{0.15\textwidth}p{0.15\textwidth}p{0.32\textwidth}}
+\begin{tabular}{p{0.5\textwidth}p{0.22\textwidth}p{0.22\textwidth}}
 \toprule
-Quantity & KuaiRand-27K & KuaiRand-1K & Source \\
+Quantity & KuaiRand-27K & KuaiRand-1K \\
 \midrule
-Users in both logs (dataset users) & 27,077 & 993 & run logs (\texttt{din\_27k.log}; \texttt{din\_1k.log}) \\
-Pool items & 7,583 & 7,388 & same \\
-Pre-cut training clicks & 523,176 & 18,873 & \texttt{din\_27k.log}; \texttt{din\_1k.log} \\
-Pre-cut training impressions & 1,141,300 & 40,738 & \texttt{v13\_data\_stats.txt} (CSV count) \\
-Users with a pre-cut lifelong history & 26,904 (tables); 26,723 (DIN and SIM sequences) & 983 (tables); 977 (sequences) & \texttt{lifelong\_27k\_summary.txt}; \texttt{din\_27k.log}; \texttt{v13\_data\_stats.txt}; \texttt{din\_1k.log} \\
-Out-of-pool impressions before $T_0$ & 135,219,168 & 5,016,818 & \texttt{lifelong\_27k\_summary.txt}; \texttt{v13\_data\_stats.txt} (1K, CSV count) \\
-Random-exposure rows & 1,186,059 & 42,944 & \texttt{link\_users.txt}; \texttt{stats\_1k.txt} \\
-Test users (candidate lists) & 27,077 & 993 & run logs \\
-Test users with a click, pooled & 22,612 & 842 & \texttt{stageB.txt} Section 2; \texttt{stats\_1k.txt} \\
-Test users with a click, per split & 15,809 to 15,913 & 579 to 591 & \texttt{v13\_data\_stats.txt} \\
-Candidates per user (temporal), mean (median) & 43.6 (22) & 43.2 (22) & \texttt{v13\_data\_stats.txt} \\
+Users in both logs (dataset users) & 27,077 & 993 \\
+Pool items & 7,583 & 7,388 \\
+Pre-cut training clicks & 523,176 & 18,873 \\
+Pre-cut training impressions & 1,141,300 & 40,738 \\
+Users with a pre-cut lifelong history & 26,904 (LEAF statistics); 26,723 (sequence models) & 983 (LEAF statistics); 977 (sequence models) \\
+Out-of-pool impressions before $T_0$ & 135,219,168 & 5,016,818 \\
+Random-exposure rows & 1,186,059 & 42,944 \\
+Test users (candidate lists) & 27,077 & 993 \\
+Test users with a click, pooled & 22,612 & 842 \\
+Test users with a click, per split & 15,809 to 15,913 & 579 to 591 \\
+Candidates per user (temporal), mean (median) & 43.6 (22) & 43.2 (22) \\
 \bottomrule
 \end{tabular}
-\vspace{2pt}
-
-\raggedright\scriptsize
-The 1K out-of-pool value counts the 993 users in the CSV logs; the lifelong table of the 983 users with history gives
-5,017,598, and the 780 difference is not traced. The 27K value is the release summary, and the lifelong tables sum to
-135,219,176 (8 more). The 42,944 and 1,186,059 random rows do not depend on the protocol.
 \end{table}
 
 Coat \citep{schnabel2016} and Yahoo! R3 \citep{marlin2009collaborative} record ratings and a randomly chosen test set, with
@@ -64,17 +58,17 @@ no impressions that were shown and left unrated and no history on other items. D
 click in each scenario, and LEAF needs a user's history on videos outside the test pool, so neither component can be run
 on these data. KuaiRec \citep{gao2022kuairec} has no scenario field and no history outside its own matrix. The Open
 Bandit Dataset \citep{saito2021obd} has no persistent user identifiers. The classic benchmarks also leave little headroom
-for a test of this kind: on KuaiRec, a training-free log-fitted prior alone reaches nDCG@20 0.6367 on 1,410 evaluated
-users, against 0.6378 for DRUP (\texttt{results/v13\_saturation\_kuairec.txt}).
+for a test of this kind: on KuaiRec, a training-free prior fitted to the log already reaches an nDCG@20 of 0.6367 on 1,410
+users, close to that of learned recommenders, which leaves little room to detect an improvement.
 
 \subsection{Splits, users and per-split selection}
 \label{sec:protocol-splits}
 
 Each split partitions the test users by user, not by impression. Split $s\in\{0,\dots,4\}$ takes a random permutation of the
-users with seed $s$ and puts the first $\operatorname{round}(0.3\,m)$ users into validation. For KuaiRand-27K this is 8,123
-validation users and 18,954 test users in each split. For KuaiRand-1K the first split has 298 validation and 695 test users
-(\texttt{results/v9\_probes/stats\_1k.txt}). The two parts share no user. Users with no click among their random impressions
-have no defined nDCG and are not evaluated, so the evaluated test users per split are those of Table~\ref{tab:data}.
+users with seed $s$, and the first 30\% of the permuted users (rounded to the nearest integer) form the validation set.
+For KuaiRand-27K this is 8,123 validation users and 18,954 test users in each split. For KuaiRand-1K the first split has
+298 validation and 695 test users. The two parts share no user. Users with no click among their random impressions have no
+defined nDCG and are not evaluated, so the evaluated test users per split are those of Table~\ref{tab:data}.
 
 The backbones are trained once for each hyperparameter setting on the whole pre-cut log, and every split reads the same
 training trajectory. The splits change only which users select the epoch, the configuration and $\gamma$, and which users
@@ -82,11 +76,11 @@ are scored. This is why a split-level test is reported next to the per-user test
 
 For each split the selected configuration is the one with the largest validation nDCG@10. The test labels are read only for
 the configuration that is the best on validation so far, and no test label influences the choice of any configuration.
-The configuration count $n_{\mathrm{configs}}$ is the number of backbone trainings times the number of DAX configurations
-times the number of $\gamma$ values. Epochs are selected inside each training and are counted as evaluations, not as
-configurations. LEAF-LGN+DAX has $12\times32\times10=3{,}840$ configurations and 86,400 evaluations. QP family+DAX has
-$10\times32\times10=3{,}200$, DIN+DAX has 1,280 and the QP family alone has 20. The budgets are therefore not matched. The
-fair comparator is the QP family with the same DAX module, and Section~\ref{sec:res-fair} discusses its search.
+The configurations searched are the backbone trainings, times the DAX configurations, times the values of $\gamma$.
+Epochs are selected inside each training and are counted as evaluations, not as configurations. LEAF-LGN+DAX has
+$12\times32\times10=3{,}840$ configurations and 86,400 evaluations. QP family+DAX has $10\times32\times10=3{,}200$, DIN+DAX
+has 1,280 and the QP family alone has 20. The budgets are therefore not matched. The fair comparator is the QP family with
+the same DAX module, and Section~\ref{sec:res-fair} discusses its search.
 
 \subsection{Statistical tests and families}
 \label{sec:protocol-stats}
@@ -100,68 +94,75 @@ this test is approximate and is reported next to the split-level test.
 \paragraph{Split-level test.} The Nadeau-Bengio corrected resampled t test \citep{nadeau2003} is applied to the five split means
 $\bar d$ of the split differences $d_s$. With $J=5$ splits, the variance of the mean is estimated as
 $\widehat{\mathrm{Var}}=s_d^2\bigl(\tfrac1J+\tfrac{n_{\mathrm{test}}}{n_{\mathrm{val}}}\bigr)=s_d^2\bigl(\tfrac15+\tfrac73\bigr)$,
-where $s_d^2$ is the sample variance of the split differences. The statistic $t=\bar d/\sqrt{\widehat{\mathrm{Var}}}$ is compared with
-a t distribution with $J-1=4$ degrees of freedom. The correction assumes resampled training sets. Here all splits share one
-training run and differ only in the users who select and are scored, so the split-level p values are approximate. With
-4 degrees of freedom, a two-sided test at 0.05 needs a mean-to-standard-deviation ratio of the split differences of at least
-$t_{0.975,4}\sqrt{1/5+7/3}\approx4.42$. Because the approximation matters most for p values near 0.05, the two split-level values of
-0.0456 in Section~\ref{sec:results} are called borderline.
+where $s_d^2$ is the sample variance of the split differences and $n_{\mathrm{val}}$ and $n_{\mathrm{test}}$ are the numbers of
+validation and test users in a split. The statistic $t=\bar d/\sqrt{\widehat{\mathrm{Var}}}$ is compared with a t distribution
+with $J-1=4$ degrees of freedom. The correction assumes resampled training sets. Here all splits share one training run and
+differ only in the users who select and are scored, so the split-level p values are approximate. With 4 degrees of freedom,
+a two-sided test at 0.05 needs a mean-to-standard-deviation ratio of the split differences of at least
+$t_{0.975,4}\sqrt{1/5+7/3}\approx4.42$. Because the approximation matters most for p values near 0.05, the two split-level
+values of 0.0456 in Section~\ref{sec:results} are called borderline.
 
 \paragraph{Holm adjustment and the families.} The p values of each family are adjusted by the step-down procedure of
 \citet{holm1979}, separately for the per-user and the split-level tests. The families are fixed as follows.
-(i) Gate B1, the primary family: five comparisons of LEAF-LGN+DAX against the QP family, the QP family with DAX, the LEAF-LGN
-backbone, r-AdjNorm and LightGCN. It was fixed before the stage B runs.
-(ii) The main table: nine comparisons, the five above plus DIN, DIN with DAX, SIM and SIM with DAX. It was defined after the
-stage B results, when the deep baselines were added.
-(iii) The sensitivity family: the main nine plus EASE and EASE+DAX (eleven).
-(iv) KuaiRand-1K: three comparisons of Table~\ref{tab:1k}.
-(v) The ablations: seven gains (the full arm and six arms, against the ablation base) and six full-minus-arm differences.
-(vi) The stage 1 comparison: two LEAF variants against four baselines (eight). The LEAF controls of \ref{app:leafctl} are
-a family of eight arms.
-LightGCN+DAX (960 configurations on the retrained LightGCN base) is in no family: it is a backbone increment, reported in
-Table~\ref{tab:backbone}. The ablation and control families are computed by \texttt{experiments/v13\_tables.py}, which also writes
-all generated numbers and their family sizes to \texttt{results/v13\_tables\_numbers.txt}.
+\begin{itemize}
+\item \emph{Primary family}, fixed before the main experiment was run: five comparisons of LEAF-LGN+DAX against the QP
+  family, the QP family with DAX, the LEAF-LGN backbone, r-AdjNorm and LightGCN.
+\item \emph{Main-table family}: nine comparisons, the five above plus DIN, DIN+DAX, SIM and SIM+DAX. It was defined after
+  the primary family, when the deep baselines were added.
+\item \emph{Sensitivity family}: the main nine plus EASE and EASE+DAX (eleven).
+\item \emph{KuaiRand-1K family}: three comparisons of Table~\ref{tab:1k}.
+\item \emph{Ablation families}: seven gains (full DAX and six variants, each against the ablation base) and six
+  full-minus-variant differences.
+\item \emph{LEAF development family}: eight comparisons. The LEAF development experiment is a first comparison of two LEAF
+  variants with four baselines on the same splits.
+\item \emph{LEAF controls}: eight variants (Appendix~\ref{app:leafctl}).
+\end{itemize}
+LightGCN+DAX (960 configurations on the re-trained LightGCN base) is in no family: it is a backbone increment, reported in
+Table~\ref{tab:backbone}.
 
-\paragraph{Gate and reading.} The gate B1 rule was written in \texttt{paper/v7/DESIGN.md} (Section 7) before the stage B runs.
-It requires that LEAF-LGN+DAX exceed the QP family by at least $15\times10^{-3}$ per user, and that both Holm-adjusted
-p values be below 0.05. The gate B2 conditions require that the within-tag permutation lower the gain by at least 30\%, the
-across-item permutation remove at least 90\% of it, and the additive arm stay at least $4\times10^{-3}$ below the full DAX
-arm. The comparison with the fair baseline has no pre-set margin. A comparison is called significant only when its
-Holm-adjusted p value is below 0.05 for the named test. A value of $0.0456$ is called borderline, not significant.
+\paragraph{Pre-specified criteria.} The primary family was fixed before the main experiment was run, and its rule was written
+down at that time. The rule requires that LEAF-LGN+DAX exceed the QP family by at least $15\times10^{-3}$ per user, and that
+both Holm-adjusted p values be below 0.05. The criteria for the ablations were also fixed in advance. The within-tag
+permutation must lower the gain by at least 30\%, the across-item permutation must remove at least 90\% of it, and the
+additive variant must stay at least $4\times10^{-3}$ below full DAX. The comparison with the fair baseline has no pre-set
+margin. A comparison is called significant only when its Holm-adjusted p value is below 0.05 for the named test. A value
+of $0.0456$ is called borderline, not significant.
 
 \subsection{Baselines}
 \label{sec:protocol-baselines}
 
 The baselines are LightGCN, r-AdjNorm, EASE, the QP family, LEAF-LGN without DAX, and two lifelong deep models, DIN
-\citep{zhou2018din} and SIM-hard \citep{pi2020sim}. Every backbone with DAX gets the same post-hoc DAX module and the same
-$\gamma$ grid as LEAF-LGN. Table~\ref{tab:baselines} in \ref{app:baselines} gives the grids and the counts.
+\citep{zhou2018din} and SIM-hard \citep{pi2020sim}. Every backbone with DAX gets the same DAX module and the same $\gamma$
+grid as LEAF-LGN. Table~\ref{tab:baselines} in \ref{app:baselines} gives the grids and the counts.
 
-The QP family is the authors' own earlier method, not published and not cited as a publication. Its description is in
-\ref{app:qp}, and it searches 20 configurations in total.
+The QP family is the authors' own earlier method, not published. Its description is in \ref{app:qp}, and it searches 20
+configurations in total.
 
-DIN attends over the last $L=200$ pre-cut events of the user on videos outside the pool. SIM-hard keeps the $K=50$ most recent of
-these events that share the tag or author of the candidate, and attends over them. Both use identifier embeddings and the BPR
-loss. Their grids are smaller than those of the graph backbones: four trainings, dimension 16, at most 12 epochs and patience 2.
-The results on them are conditional on that budget. TWIN \citep{chang2023twin} and NAVIP \citep{kim2022navip} are not run.
+DIN attends over the last $L=200$ pre-cut events of the user on videos outside the pool. SIM-hard keeps the $K=50$ most recent
+of these events that share the tag or author of the candidate, and attends over them. Both use identifier embeddings and the
+BPR loss. Their grids are smaller than those of the graph backbones: four trainings, dimension 16, at most 12 epochs and
+patience 2. The results on them are conditional on that budget. TWIN \citep{chang2023twin} and NAVIP \citep{kim2022navip}
+are not used as baselines.
 
 \subsection{Ablation design}
 \label{sec:protocol-ablation}
 
-The ablations of DAX are a reduced version of the main search. Each arm is a separate method selected per split in the same
-way as the full arm. The arms use the two backbone trainings and the epoch window of three around the chosen epoch that the
-main run selected, and five values of $\gamma$, $\{0.1,0.25,0.5,0.7,1.0\}$. The arms are the three DAX switches (no tab factor,
-no lifelong prior, no tag prior; 16 configurations each), the additive logit with tab effects (32 configurations) and the two
-permutations of the attractiveness: within tag and across all items, each with three permutation seeds.
+The ablations of DAX are a reduced version of the main search, chosen to keep the cost manageable. Each variant is selected per
+split in the same way as full DAX. The variants use the two backbone trainings and the epoch window of three around the epoch
+chosen in the main experiment, and five values of $\gamma$, $\{0.1,0.25,0.5,0.7,1.0\}$. The variants are the three DAX
+switches (without scenario factors, without lifelong prior, without tag prior; 16 configurations each), the additive logit
+model with user and scenario effects (32 configurations), and the two permutations of the attractiveness, within tags and
+across all items, each with three permutation seeds.
 
-The base of the ablation run is its own LEAF-LGN, selected inside the restricted window. It is lower than the main-run LEAF-LGN,
-and the ablation gains are paired differences against that base, so they are not the main-table increment. The full arm of the
-ablation run selects the same configurations as the main run on all five splits and reproduces its test values exactly.
-Comparisons between arms are therefore made through the full-minus-arm differences, which do not use the base.
+The base of the ablation experiment is its own LEAF-LGN, selected inside the restricted window. It is lower than the LEAF-LGN
+of the main experiment, and the ablation gains are paired differences against that base, so they are not the main-table
+increment. Full DAX in the ablation experiment selects the same configurations as the main experiment on all five splits and
+reproduces its test values exactly. Comparisons between variants are therefore made through the differences ``full DAX minus
+variant'', which do not use the base.
 
 \subsection{Kinds of number}
 \label{sec:protocol-kinds}
 
-A main number is a validation-selected result of the main setting, from the files in \texttt{results/v10/}, \texttt{results/v11/}
-and \texttt{results/v12/}. A probe number is a post-hoc computation on stored scores, from \texttt{results/v11\_probes/} and
-\texttt{results/v9\_probes/}. A diagnostic number uses random-exposure labels of the validation users and is never a method or
-a selection input. Numbers without a result file are not reported.
+We report three kinds of number. Main results are selected on validation users and measured on test users. Diagnostic
+quantities use random-exposure labels to locate headroom; they are never used to select or train a method and are marked as
+diagnostic. Preliminary analyses on fixed backbone scores appear only in the appendix.

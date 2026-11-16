@@ -1,19 +1,21 @@
 \begin{table}[tbp]
 \centering
 \footnotesize
-\caption{Chosen configurations per split: EASE (nDCG@10 mean 0.4507).}
+\caption{Chosen configurations per split: EASE. Mean nDCG@10 0.4507.}
 \label{tab:grid04}
 \begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{rp{0.82\linewidth}}
+\begin{tabular}{lccc}
 \toprule
-Split & Chosen configuration \\
+Split & $\beta$ (popularity) & $w$ & $\lambda_{\mathrm{EASE}}$ \\
 \midrule
-1 & \texttt{w=0.5, epoch=0, lam=10000.0, beta=0.0} \\
-2 & \texttt{w=0.5, epoch=0, lam=10000.0, beta=0.0} \\
-3 & \texttt{w=0.5, epoch=0, lam=10000.0, beta=0.0} \\
-4 & \texttt{w=0.5, epoch=0, lam=10000.0, beta=0.0} \\
-5 & \texttt{w=0.5, epoch=0, lam=10000.0, beta=0.0} \\
+1 & 0 & 0.5 & $10^{4}$ \\
+2 & 0 & 0.5 & $10^{4}$ \\
+3 & 0 & 0.5 & $10^{4}$ \\
+4 & 0 & 0.5 & $10^{4}$ \\
+5 & 0 & 0.5 & $10^{4}$ \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize Columns that a method does not use are not shown. The centre is the tag mean or the content regression of Appendix~\ref{app:fh}; user groups are none or a strength.\end{minipage}
 \end{table}

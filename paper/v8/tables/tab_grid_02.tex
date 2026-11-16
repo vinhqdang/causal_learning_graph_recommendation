@@ -1,19 +1,21 @@
 \begin{table}[tbp]
 \centering
 \footnotesize
-\caption{Chosen configurations per split: QP family (stored, per-split best variant) (nDCG@10 mean 0.4634).}
+\caption{Chosen configurations per split: QP family (best of its three variants per split). Mean nDCG@10 0.4634.}
 \label{tab:grid02}
 \begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{rp{0.82\linewidth}}
+\begin{tabular}{lccc}
 \toprule
-Split & Chosen configuration \\
+Split & $\mathrm{lr}$ & $\rho$ & epoch \\
 \midrule
-1 & \texttt{lr=0.003, wd=0.0001, dim=64, layers=2, fn=1, epoch=38} \\
-2 & \texttt{lr=0.01, wd=0.0001, dim=64, layers=2, fn=1, epoch=12} \\
-3 & \texttt{lr=0.01, wd=0.0001, dim=64, layers=2, fn=1, epoch=11} \\
-4 & \texttt{lr=0.003, wd=0.0001, dim=64, layers=2, fn=1, epoch=39} \\
-5 & \texttt{lr=0.01, wd=1e-05, dim=64, layers=2, fn=1, epoch=3} \\
+1 & $3\times10^{-3}$ & $10^{-4}$ & 38 \\
+2 & $10^{-2}$ & $10^{-4}$ & 12 \\
+3 & $10^{-2}$ & $10^{-4}$ & 11 \\
+4 & $3\times10^{-3}$ & $10^{-4}$ & 39 \\
+5 & $10^{-2}$ & $10^{-5}$ & 3 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize Columns that a method does not use are not shown. The centre is the tag mean or the content regression of Appendix~\ref{app:fh}; user groups are none or a strength.\end{minipage}
 \end{table}

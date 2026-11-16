@@ -8,22 +8,22 @@ The limitations below set the scope of the results.
 The 1K users are a subset of the 27K users, so the 1K results are not an independent replication.
 
 \paragraph{Few splits and low power.} The main comparisons use five user-level splits, and the split-level test has low power.
-Its Holm-adjusted values against the QP family and against DIN with DAX are $4.56\times10^{-2}$ (Table~\ref{tab:main}). The
-per-user test gives far smaller values, but it treats users as independent across splits, which they are not.
+Its Holm-adjusted values against the QP family and against DIN+DAX are $4.56\times10^{-2}$ (Table~\ref{tab:main}). The per-user test
+gives far smaller values, but it treats users as independent across splits, which they are not.
 
 \paragraph{The novelty is a combination.} Each component has a precedent: lifelong behaviour models, examination models and
-shrinkage towards a group mean. The contribution is the combination on randomly inserted items. A reviewer may describe DAX as a
-click model applied to items.
+shrinkage towards a group mean. The contribution is the combination on randomly inserted items. DAX applies the structure of
+examination-based click models to a feed without positions; its novelty lies in the user and scenario examination factors, the
+priors and the evaluation target, not in the factorisation itself.
 
-\paragraph{The combination is post hoc.} The mixing weight $\gamma$ is validation-selected, and DAX is not trained jointly with the
-backbone in the reported results. The jointly trained variant has no result file (\texttt{dax\_lgn\_joint.json} and
-\texttt{dax\_lgn\_joint\_small.json} in \texttt{results/v11/} are missing).
+\paragraph{The combination is fitted after training.} The mixing weight $\gamma$ is selected on validation users, and DAX is not
+trained jointly with the backbone in the reported results. We did not evaluate a variant in which $\gamma$ is learned jointly
+with the backbone.
 
 \paragraph{Unequal budgets and grid edges.} LEAF-LGN+DAX searches 3,840 configurations per split and the QP family 20. The QP family
 with DAX searches only the QP backbones selected without DAX, which is conservative for the method, and on KuaiRand-1K it searches
-6,400 configurations, which favours the baseline. The prior strength and the lifelong strength are selected at the edges of their
-default grids (\ref{app:grids}). The extended grid that would show whether the optimum lies outside it
-(\texttt{results/v12/daxwide\_lgn.json}) is missing, so this question is open.
+6,400 configurations, which favours the baseline. The prior strengths $\nu$ and $\lambda$ were selected at the edges of their
+grids (Appendix~\ref{app:grids}), and we did not test whether a wider grid would select other values.
 
 \paragraph{Identifiability up to scale.} The examination and attractiveness factors are identified only up to a scale shared by
 $\theta_u$ and $\alpha_i$. The order of $\alpha_i$ is unaffected, but the logit used in the combination is not scale-invariant, so
@@ -31,15 +31,14 @@ the prior strengths are validation hyperparameters. The factors $\theta_u$ and $
 
 \paragraph{Reduced runs.} The ablations and the training seeds use reduced grids (Sections~\ref{sec:res-ablate} and
 \ref{sec:res-seeds}), so their gains are not compared with the main increment. The seed runs cover LEAF-LGN+DAX only, the QP
-family was not re-trained under other seeds, and the LEAF-LGN ablations have no result file.
+family was not re-trained under other seeds, and the LEAF controls were run on LEAF-tied, not on LEAF-LGN.
 
 \paragraph{Deep baselines.} DIN and SIM-hard are each tuned over four configurations. A deeper search, or a sequence length other
 than 200 for DIN, may close the gap. This was not tested.
 
-\paragraph{Click label only.} Only the click label is used. The long-view result file (\texttt{results/v11/c\_longview*.json}) and
-the concurrent-protocol result for the full model (\texttt{results/v11/c\_concurrent.json}) are missing, so the concurrent protocol
-is not claimed here.
+\paragraph{Click label only.} We used the click label only; we did not evaluate a long-view label or a protocol in which the training
+log extends past $T_0$ for the full model.
 
 \paragraph{Remaining headroom and content.} The combination does not close the item-level gap to the uniform-rate oracle
-(Section~\ref{sec:res-headroom}). KuaiRand has no titles, covers or frames, so the tag is the main content key, and the test
-scenario is tab 1; the transfer of the tab factors to other scenarios is not tested.
+(Section~\ref{sec:res-headroom}). KuaiRand has no titles, covers or frames, so the tag is the main content key, and the evaluation
+scenario is the one with $\kappa_1=1$; the transfer of the scenario factors to other scenarios is not tested.

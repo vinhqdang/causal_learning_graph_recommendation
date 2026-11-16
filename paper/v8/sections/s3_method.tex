@@ -38,7 +38,7 @@ for learning from the data used for evaluation.
 
 \paragraph{Content keys} Each video carries content keys from three families,
 $\mathcal K=\{\mathrm{tag},\mathrm{author},\mathrm{music}\}$. For a family $k\in\mathcal K$, $v_k(i)$ denotes the key value
-of video $i$ (its first tag, its author or its music track), or $\varnothing$ when the value is missing. Content keys are
+of video $i$ (its first tag, its author or its music track), or $\varnothing$ when the value is absent. Content keys are
 the only link between the lifelong log and the pool: a pool video never appears in the lifelong log, but its author or
 tag usually does.
 
@@ -98,7 +98,7 @@ of $i$. This gives the channel vector
   \label{eq:channels}
 \end{equation}
 where a tilde denotes a statistic divided by its standard deviation over the non-zero entries, so that the six channels are on a
-comparable scale. A channel is zero when the key value of $i$ is missing or when $u$ has no lifelong impression with that value. In
+comparable scale. A channel is zero when the key value of $i$ is absent or when $u$ has no lifelong impression with that value. In
 the running example, the tag channels of the cooking clip are the viewer's lift and familiarity for cooking videos, and the author
 channels are close to zero because she has rarely or never been shown that author. The channels are computed once from the
 lifelong log; scoring a pair is a table lookup.

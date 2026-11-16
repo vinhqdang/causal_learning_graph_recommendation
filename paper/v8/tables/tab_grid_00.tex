@@ -1,19 +1,21 @@
 \begin{table}[tbp]
 \centering
 \footnotesize
-\caption{Chosen configurations per split: LEAF-LGN+DAX (main, post-hoc) (nDCG@10 mean 0.4854).}
+\caption{Chosen configurations per split: LEAF-LGN+DAX. Mean nDCG@10 0.4854.}
 \label{tab:grid00}
 \begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{rp{0.82\linewidth}}
+\begin{tabular}{lcccccccccc}
 \toprule
-Split & Chosen configuration \\
+Split & $\mathrm{lr}$ & $\rho$ & $w$ & epoch & $\gamma$ & $\nu$ & centre & $\lambda$ & scenario factors & user groups \\
 \midrule
-1 & \texttt{lr=0.003, wd=0.0001, w=0.25, epoch=23, gamma=0.5, prior=80, centre=tag, k\_life=100, tab=True, prior\_s=80} \\
-2 & \texttt{lr=0.003, wd=0.0001, w=0.5, epoch=25, gamma=0.5, prior=80, centre=content, k\_life=100, tab=True, prior\_s=80} \\
-3 & \texttt{lr=0.003, wd=0.0001, w=0.5, epoch=27, gamma=0.5, prior=80, centre=tag, k\_life=100, tab=True, prior\_s=80} \\
-4 & \texttt{lr=0.003, wd=0.0001, w=0.25, epoch=14, gamma=0.5, prior=80, centre=tag, k\_life=100, tab=True, prior\_s=80} \\
-5 & \texttt{lr=0.003, wd=0.0001, w=0.5, epoch=27, gamma=0.5, prior=80, centre=tag, k\_life=100, tab=True, prior\_s=80} \\
+1 & $3\times10^{-3}$ & $10^{-4}$ & 0.25 & 23 & 0.5 & 80 & tag & 100 & on & 80 \\
+2 & $3\times10^{-3}$ & $10^{-4}$ & 0.5 & 25 & 0.5 & 80 & content & 100 & on & 80 \\
+3 & $3\times10^{-3}$ & $10^{-4}$ & 0.5 & 27 & 0.5 & 80 & tag & 100 & on & 80 \\
+4 & $3\times10^{-3}$ & $10^{-4}$ & 0.25 & 14 & 0.5 & 80 & tag & 100 & on & 80 \\
+5 & $3\times10^{-3}$ & $10^{-4}$ & 0.5 & 27 & 0.5 & 80 & tag & 100 & on & 80 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize Columns that a method does not use are not shown. The centre is the tag mean or the content regression of Appendix~\ref{app:fh}; user groups are none or a strength.\end{minipage}
 \end{table}

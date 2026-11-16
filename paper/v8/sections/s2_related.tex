@@ -24,9 +24,9 @@ hypothesis and its position-based form \citep{richardson2007predicting} make the
 position of the item. \citet{craswell2008cascade} compare cascade and position-bias models on search logs, and the
 monograph of \citet{chuklin2015clickmodels} summarises this family. The dynamic Bayesian network model
 \citep{chapelle2009dbn} separates perceived relevance from actual relevance through a satisfaction state.
-\textit{Difference.} DAX conditions examination on the user, through a lifelong prior, and on the scenario, through a tab
-factor; it has no position term and no satisfaction state, and it targets item appeal under uniform insertion, which
-we check on randomised exposure.
+\textit{Difference.} DAX conditions examination on the user, through a lifelong prior, and on the scenario, through a
+scenario factor. It has no position term and no satisfaction state, and it targets item appeal under uniform insertion,
+which we check on randomised exposure.
 
 \subsection{Exposure-aware recommendation}
 \label{sec:rel-exposure}
@@ -53,8 +53,10 @@ Small-area estimation shrinks noisy direct estimates for many small areas toward
 non-representative samples \citep{park2004mrp}. We found no recommendation paper that uses the occupancy likelihood to
 estimate item appeal from a policy log.
 \textit{Difference.} The likelihood of DAX has the same structure as the occupancy model, with an impression playing the
-role of a survey and a click the role of a detection, but its estimand is item appeal under a uniform audience, and the
-borrowed MRP and Fay-Herriot forms, which we tested on this target, are weaker than the multiplicative form.
+role of a survey, a click the role of a detection, and the attractiveness of an item the role of presence. Its estimand,
+however, is item appeal under a uniform audience. An additive alternative of the MRP kind is weaker in our ablations
+(Section~\ref{sec:res-ablate}). A regression on content codes is one option for the centre of the attractiveness prior
+(Appendix~\ref{app:fh}), and we do not claim it is weaker than the tag centre.
 
 \subsection{Debiasing for graph recommenders}
 \label{sec:rel-graph}
@@ -65,7 +67,7 @@ Popularity-bias work \citep{zhang2021pda} applies a causal intervention to the p
 \citep{chen2021autodebias} learns debiasing parameters from a small uniform sample, which is not admissible under our
 protocol because the randomly exposed data serve only for validation and test. Two further graph methods, adversarial
 edge dropout and the removal of a popularity direction from the embeddings after training, are relevant here
-\citep{zhang2024advdrop,islam2026ppd}; neither is re-run in this paper.
+\citep{zhang2024advdrop,islam2026ppd}; neither is a baseline here.
 The backbones in our experiments are LightGCN \citep{he2020lightgcn}, EASE \citep{steck2019ease}, the r-AdjNorm
 normalisation \citep{zhao2022radjnorm}, DIN and SIM (Section~\ref{sec:protocol-baselines}).
 \textit{Difference.} The graph methods above act on propagation or on the embeddings and use no impressions and no
@@ -98,23 +100,23 @@ random test, which is the source of the LEAF channels here.
 \toprule
 Work & What it estimates, and from which data & Difference from this work \\
 \midrule
-SIM \citep{pi2020sim}; TWIN \citep{chang2023twin} & CTR from lifelong sequences; policy logs; history and target share item ids & Exposure-conditional statistics; transfer to a disjoint pool through content keys; randomised test; SIM run here (SIM-hard, 27K and 1K); TWIN not run \\
-DIN \citep{zhou2018din} & Attention over the last 200 lifelong events; policy logs & Same comparison with DAX added; DIN run here on 27K and 1K \\
+SIM \citep{pi2020sim}; TWIN \citep{chang2023twin} & CTR from lifelong sequences; policy logs; history and target share item ids & Exposure-conditional statistics; transfer to a disjoint pool through content keys; randomised test; SIM-hard is a baseline in our experiments; TWIN is not a baseline here \\
+DIN \citep{zhou2018din} & Attention over the last 200 lifelong events; policy logs & Same comparison with DAX added; DIN is a baseline in our experiments \\
 Examination models \citep{richardson2007predicting,craswell2008cascade,chuklin2015clickmodels} & Click as examination times attractiveness; position or list scan & User and scenario examination; no position term; uniform-insertion target \\
 Dynamic Bayesian network \citep{chapelle2009dbn} & Perceived versus actual relevance with satisfaction & No satisfaction state \\
-Regression-EM \citep{wang2018regressionem,wang2016selection} & Position bias and relevance without randomisation; personal search & Item appeal under a uniform audience; generative fit by EM over user and tab \\
+Regression-EM \citep{wang2018regressionem,wang2016selection} & Position bias and relevance without randomisation; personal search & Item appeal under a uniform audience; generative fit by EM over user and scenario \\
 ExpoMF \citep{liang2016exposure} & Latent exposure fitted by EM & Impressions are observed; latent examination given an impression \\
 Unbiased LTR \citep{joachims2017unbiased} & Inverse-propensity weighted losses & Generative model instead of a weighted loss \\
 Occupancy \citep{mackenzie2002occupancy} & Presence and detection from repeated surveys & Same likelihood structure; no recommender use found \\
-MRP, Fay-Herriot \citep{park2004mrp,fay1979smallarea} & Population and small-area estimates & Borrowed and tested on this target; weaker than DAX \\
+Small-area estimation \citep{fay1979smallarea}; MRP & Small-area and population estimates & Additive alternative of the MRP kind is weaker in our ablations; Fay-Herriot form is a centre option \\
 NAVIP \citep{kim2022navip} & Propensity-weighted propagation in LightGCN & No lifelong data; no examination model \\
 KuaiRand evaluations \citep{gao2022kuairand,zhang2026categorymeans} & Random insertion as the test set & No out-of-pool lifelong history in the test \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The novelty claim is therefore a combination and its controlled evidence, not any single ingredient. Each ingredient has
-a precedent: lifelong behaviour statistics, examination multiplied by attractiveness, and Beta shrinkage towards a group
-mean. As far as our searches went, none of the works in Table~\ref{tab:positioning} evaluates the combination in the form
-used here, which has lifelong channels built from other pools, examination factors for the user and the scenario, and
-randomly inserted items as the test target.
+The contribution is the combination rather than any single ingredient. Each ingredient has a precedent: lifelong
+behaviour statistics, examination multiplied by attractiveness, and Beta shrinkage towards a group mean. As far as our
+searches went, none of the works in Table~\ref{tab:positioning} evaluates the combination in the form used here, with
+lifelong channels built from other pools, examination factors for the user and the scenario, and randomly inserted items
+as the test target.

@@ -1,31 +1,31 @@
 \begin{table}[tbp]
 \centering
 \footnotesize
-\caption{DAX ablations on KuaiRand-27K (post-hoc): gain over the backbone of the ablation run, the difference to full DAX, and the shuffle controls.}
+\caption{DAX ablations on KuaiRand-27K: gain over the LEAF-LGN base of the ablation experiment, the difference to full DAX, and the permutation controls.}
 \label{tab:ablate}
 \begin{adjustbox}{max width=\linewidth}
 \begin{tabular}{lrcccccc}
 \toprule
-Arm & Configs & Mean & Gain [95\% hw] & $p_{\mathrm{Holm}}$ & Kept (\%) & Full minus arm & $p_{\mathrm{Holm}}$ \\
+Variant & Configs & Mean & Gain [95\% hw] & $p_{\mathrm{Holm}}$ & Kept (\%) & Full minus variant & $p_{\mathrm{Holm}}$ \\
 \midrule
 full DAX & 320 & 0.4854 & +15.10 [1.42] & $8.82\times10^{-95}$ & 100.0 & n/a & n/a \\
-no examination factor kappa\_t & 160 & 0.4839 & +13.59 [1.43] & $1.28\times10^{-76}$ & 90.0 & +1.51 [0.79] & $2.02\times10^{-4}$ \\
-no lifelong prior on theta\_u & 160 & 0.4836 & +13.31 [1.43] & $7.92\times10^{-73}$ & 88.2 & +1.78 [0.61] & $2.16\times10^{-8}$ \\
-no tag prior on alpha\_i & 160 & 0.4820 & +11.68 [1.22] & $1.28\times10^{-76}$ & 77.4 & +3.41 [0.99] & $4.79\times10^{-11}$ \\
-additive logit (MRP-style), tab effects & 320 & 0.4794 & +9.01 [1.25] & $9.20\times10^{-45}$ & 59.7 & +6.09 [0.96] & $5.43\times10^{-35}$ \\
-alpha shuffled across items & 960 & 0.4704 & -0.27 [0.36] & $1.48\times10^{-1}$ & -1.8 & +15.36 [1.40] & $3.53\times10^{-101}$ \\
-alpha shuffled within tag & 960 & 0.4768 & +6.28 [1.10] & $1.23\times10^{-28}$ & 41.6 & +8.81 [1.00] & $2.47\times10^{-65}$ \\
+without scenario factors $\kappa_t$ & 160 & 0.4839 & +13.59 [1.43] & $1.28\times10^{-76}$ & 90.0 & +1.51 [0.79] & $2.02\times10^{-4}$ \\
+without lifelong prior on $\theta_u$ & 160 & 0.4836 & +13.31 [1.43] & $7.92\times10^{-73}$ & 88.2 & +1.78 [0.61] & $2.16\times10^{-8}$ \\
+without tag prior on $\alpha_i$ & 160 & 0.4820 & +11.68 [1.22] & $1.28\times10^{-76}$ & 77.4 & +3.41 [0.99] & $4.79\times10^{-11}$ \\
+additive logit model with user and scenario effects & 320 & 0.4794 & +9.01 [1.25] & $9.20\times10^{-45}$ & 59.7 & +6.09 [0.96] & $5.43\times10^{-35}$ \\
+$\alpha$ permuted across items & 960 & 0.4704 & -0.27 [0.36] & $1.48\times10^{-1}$ & -1.8 & +15.36 [1.40] & $3.53\times10^{-101}$ \\
+$\alpha$ permuted within tags & 960 & 0.4768 & +6.28 [1.10] & $1.23\times10^{-28}$ & 41.6 & +8.81 [1.00] & $2.47\times10^{-65}$ \\
 \midrule
-\multicolumn{8}{l}{Permutation seeds (pooled arm above selects over seeds; separate runs below)} \\
-alpha shuffled across items, seed 0 &  &  & -0.44 [0.50] & NB 0.510 & -2.9 &  &  \\
-alpha shuffled across items, seed 1 &  &  & -0.16 [0.53] & NB 0.986 & -1.0 &  &  \\
-alpha shuffled across items, seed 2 &  &  & -0.20 [0.51] & NB 0.775 & -1.3 &  &  \\
-alpha shuffled within tag, seed 0 &  &  & +5.66 [1.14] & NB 0.010 & 37.5 &  &  \\
-alpha shuffled within tag, seed 1 &  &  & +6.84 [1.13] & NB 0.002 & 45.3 &  &  \\
-alpha shuffled within tag, seed 2 &  &  & +6.35 [1.24] & NB 0.001 & 42.1 &  &  \\
+\multicolumn{8}{l}{Separate permutation seeds (the variants above select over the three seeds)} \\
+$\alpha$ permuted across items, seed 0 &  &  & -0.44 [0.50] & NB 0.510 & -2.9 &  &  \\
+$\alpha$ permuted across items, seed 1 &  &  & -0.16 [0.53] & NB 0.986 & -1.0 &  &  \\
+$\alpha$ permuted across items, seed 2 &  &  & -0.20 [0.51] & NB 0.775 & -1.3 &  &  \\
+$\alpha$ permuted within tags, seed 0 &  &  & +5.66 [1.14] & NB 0.010 & 37.5 &  &  \\
+$\alpha$ permuted within tags, seed 1 &  &  & +6.84 [1.13] & NB 0.002 & 45.3 &  &  \\
+$\alpha$ permuted within tags, seed 2 &  &  & +6.35 [1.24] & NB 0.001 & 42.1 &  &  \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
 \par\smallskip
-\begin{minipage}{\linewidth}\raggedright\footnotesize Source: results/v11/dax\_ablate.json. Gain: arm minus the LEAF-LGN base of the ablation run (mean 0.4706, two backbone trainings, five gammas, epoch window of 3 around the main selection). Its base is lower than the main-run LEAF-LGN (0.4736), so the full gain here (+15.10) exceeds the main increment by 3.14; the arms are compared through the full-minus-arm columns, which do not use the base. Holm: p Holm of the gains is adjusted within the seven gains, and of full minus arm within the six ablated arms (family sizes computed here, not in final12.txt). Kept: the gain as a percentage of the full gain of this run, so the percentages inherit the inflated base and are approximate. Permutation seeds (lower block): one run per seed, selected on validation for the pooled arm.\end{minipage}
+\begin{minipage}{\linewidth}\raggedright\footnotesize Gain: variant minus the LEAF-LGN base of the ablation experiment (mean 0.4706, two backbone trainings, five values of $\gamma$, epoch window of three around the selection of the main experiment). This base is lower than the LEAF-LGN of Table~\ref{tab:main} (0.4736), so the full gain here (+15.10) exceeds the main increment by 3.14; the variants are compared through the full-minus-variant columns, which do not use the base. Holm: the p values of the gains are adjusted within the seven gains, and those of full minus variant within the six ablated variants. Kept: the gain as a percentage of the full gain of this experiment, so the percentages inherit the base and are approximate. Permutation seeds are separate runs, one per seed.\end{minipage}
 \end{table}

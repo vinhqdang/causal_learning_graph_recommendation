@@ -1,19 +1,21 @@
 \begin{table}[tbp]
 \centering
 \footnotesize
-\caption{Chosen configurations per split: EASE+DAX (nDCG@10 mean 0.4623).}
+\caption{Chosen configurations per split: EASE+DAX. Mean nDCG@10 0.4623.}
 \label{tab:grid05}
 \begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{rp{0.82\linewidth}}
+\begin{tabular}{lccccccccc}
 \toprule
-Split & Chosen configuration \\
+Split & $\beta$ (popularity) & $w$ & $\gamma$ & $\lambda_{\mathrm{EASE}}$ & $\nu$ & centre & $\lambda$ & scenario factors & user groups \\
 \midrule
-1 & \texttt{w=0.5, epoch=0, gamma=0.15, prior=80, centre=tag, k\_life=100, tab=True, prior\_s=None, lam=10000.0, beta=0.0} \\
-2 & \texttt{w=0.5, epoch=0, gamma=0.15, prior=80, centre=tag, k\_life=100, tab=True, prior\_s=80, lam=10000.0, beta=0.0} \\
-3 & \texttt{w=0.5, epoch=0, gamma=0.2, prior=80, centre=tag, k\_life=100, tab=True, prior\_s=None, lam=10000.0, beta=0.0} \\
-4 & \texttt{w=0.5, epoch=0, gamma=0.15, prior=80, centre=tag, k\_life=100, tab=True, prior\_s=None, lam=10000.0, beta=0.0} \\
-5 & \texttt{w=0.5, epoch=0, gamma=0.15, prior=80, centre=tag, k\_life=100, tab=True, prior\_s=None, lam=10000.0, beta=0.0} \\
+1 & 0 & 0.5 & 0.15 & $10^{4}$ & 80 & tag & 100 & on & none \\
+2 & 0 & 0.5 & 0.15 & $10^{4}$ & 80 & tag & 100 & on & 80 \\
+3 & 0 & 0.5 & 0.2 & $10^{4}$ & 80 & tag & 100 & on & none \\
+4 & 0 & 0.5 & 0.15 & $10^{4}$ & 80 & tag & 100 & on & none \\
+5 & 0 & 0.5 & 0.15 & $10^{4}$ & 80 & tag & 100 & on & none \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize Columns that a method does not use are not shown. The centre is the tag mean or the content regression of Appendix~\ref{app:fh}; user groups are none or a strength.\end{minipage}
 \end{table}

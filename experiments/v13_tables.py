@@ -63,20 +63,22 @@ SRC = {
     "SIM": "results/v12/sim_27k.json SIM",
     "SIM+DAX": "results/v12/sim_27k.json SIM+DAX",
 }
-DISPLAY = {"LEAF-LGN(stored)": "LEAF-LGN (stored, v10)", "LEAF-LGN": "LEAF-LGN (post-hoc run)",
-           "QP family (retrained)": "QP family (retrained)", "QP family+DAX": "QP family+DAX"}
+DISPLAY = {"LEAF-LGN(stored)": "LEAF-LGN (independent tuning)", "LEAF-LGN": "LEAF-LGN",
+           "QP family (retrained)": "QP family, re-trained on its selected configurations", "QP family+DAX": "QP family+DAX"}
 ABL_NAME = {"full": "LEAF-LGN+DAX", "no_tab": "LEAF-LGN+DAX[no_tab]", "no_life_prior": "LEAF-LGN+DAX[no_life_prior]",
             "no_tag_prior": "LEAF-LGN+DAX[no_tag_prior]", "additive": "LEAF-LGN+DAX[additive]",
             "shuffle_tags": "LEAF-LGN+DAX[shuffle_tags]", "shuffle_items": "LEAF-LGN+DAX[shuffle_items]"}
-ABL_LABEL = {"full": "full DAX", "no_tab": "no examination factor kappa_t", "no_life_prior": "no lifelong prior on theta_u",
-             "no_tag_prior": "no tag prior on alpha_i", "additive": "additive logit (MRP-style), tab effects",
-             "shuffle_tags": "alpha shuffled across items", "shuffle_items": "alpha shuffled within tag"}
+ABL_LABEL = {"full": "full DAX", "no_tab": r"without scenario factors $\kappa_t$",
+             "no_life_prior": r"without lifelong prior on $\theta_u$", "no_tag_prior": r"without tag prior on $\alpha_i$",
+             "additive": "additive logit model with user and scenario effects",
+             "shuffle_tags": r"$\alpha$ permuted across items", "shuffle_items": r"$\alpha$ permuted within tags"}
 ABL_ARMS = ["no_tab", "no_life_prior", "no_tag_prior", "additive", "shuffle_tags", "shuffle_items"]
 V10_ARMS = ["shuffle_users", "no_tag", "no_author", "no_lifelong", "no_policy", "lift_only", "familiarity_only",
             "no_music"]
-V10_LABEL = {"shuffle_users": "shuffle users", "no_tag": "no tag channels", "no_author": "no author channels",
-             "no_lifelong": "no lifelong channels", "no_policy": "no policy channel", "lift_only": "lift only",
-             "familiarity_only": "familiarity only", "no_music": "no music channels"}
+V10_LABEL = {"shuffle_users": "users' lifelong statistics shuffled", "no_tag": "without tag channels",
+             "no_author": "without author channels", "no_lifelong": "without lifelong channels",
+             "no_policy": "without policy channel", "lift_only": "lift only", "familiarity_only": "familiarity only",
+             "no_music": "without music channels"}
 
 
 def context():
@@ -226,21 +228,22 @@ def table_methods():
         m = M.get(k)
         name = DISPLAY.get(k, k)
         if m is None:
-            rows.append([esc(name), tbd(SRC[k] + " mean"), tbd(SRC[k] + " sd"), tbd(SRC[k] + " n_configs"),
-                         tbd(SRC[k])])
+            rows.append([esc(name), tbd(SRC[k] + " mean"), tbd(SRC[k] + " sd"), tbd(SRC[k] + " configurations")])
             continue
         mu, sd = H["mean_sd"](m)
-        rows.append([esc(name), f"{mu:.4f}", f"{sd:.4f}", f"{m['n_configs']}", esc(m["file"])])
+        rows.append([esc(name), f"{mu:.4f}", f"{sd:.4f}", f"{m['n_configs']:,}"])
     write("tab_methods.tex", table_env(
-        "Methods on KuaiRand-27K (temporal, all users): mean and standard deviation of nDCG@10 over the five splits, "
-        "configurations searched per split, and the source file.",
-        "tab:methods", "lrrrr", ["Method", "Mean", "SD", "Configurations", "Source"], rows,
-        "Configurations: post-hoc runs count backbone trainings times DAX configurations times gammas. "
-        "The stored LEAF-LGN counts another unit (not comparable). QP family is the per-split best of the three "
-        "stored QP variants on validation."))
+        "Methods on KuaiRand-27K (temporal protocol, all users): mean and standard deviation of nDCG@10 over the five "
+        "splits, and the configurations searched per split.",
+        "tab:methods", "lrrr", ["Method", "Mean", "SD", "Configurations"], rows,
+        "Configurations searched: backbone trainings times DAX configurations times values of $\\gamma$. "
+        "LEAF-LGN (independent tuning) is a separate search of the backbone alone, counted per training and epoch "
+        "setting, and is not comparable. The QP family is, in each split, the best of its three variants on validation. "
+        "The diagnostic value of Section~\\ref{sec:res-headroom} is a different computation."))
 
 
 # ---------------------------------------------------------------------------------------------
+
 # Table 2: main paired comparisons (Holm family of the main table), with per-user and NB columns
 # ---------------------------------------------------------------------------------------------
 def main_family(c, keys):
@@ -279,12 +282,13 @@ def table_main():
                          tbd(SRC[k]), "n/a"])
         else:
             rows.append([esc(k), mean_cell(M[k]), dif(r), sci(r["p"]), "n/a", pnb(r["nb"]), "n/a"])
-    note = (f"Sources: results/v11/dax\\_lgn\\_post.json, results/v11/dax\\_qp.json, results/v10/learned\\_kuairand\\_t\\_base.json, results/v10/learned\\_kuairand\\_t\\_qp.json, results/v12/din\\_27k.json, results/v12/sim\\_27k.json. Per-user columns: paired t test over the pooled test users (n = {c['N']}); Holm within the family, "
-            f"over the {len(keys) - len(missing)} comparators present; NB: Nadeau-Bengio corrected resampled t test over "
-            f"the five split means (fraction of validation users 0.3); Holm over the same family. "
-            f"Missing family members: {', '.join(missing) if missing else 'none'}. "
-            "LightGCN is the stored four-configuration run of the stage 1 file (the retrained base is in Table~\\ref{tab:backbone}). "
-            "Differences are per-user means x1e-3 nDCG@10 with the 95\\% half-width.")
+    note = (f"Per-user columns: paired t test over the pooled test users (n = {c['N']:,}). Holm adjustment within the "
+            f"family, over the {len(keys) - len(missing)} comparators present. NB: Nadeau-Bengio corrected resampled t test "
+            "over the five split means, with Holm over the same family. LightGCN is the four-configuration LightGCN "
+            "baseline (a LightGCN re-trained with DAX appears in Table~\\ref{tab:backbone}). SIM denotes SIM-hard. "
+            "Differences are per-user means of nDCG@10 in units of $10^{-3}$, with the 95\\% half-width.")
+    if missing:
+        note += " Not available: " + ", ".join(missing) + "."
     write("tab_main.tex", table_env(
         "Main results on KuaiRand-27K: LEAF-LGN+DAX against every comparator of the main family, with per-user and "
         "split-level (Nadeau-Bengio) tests.",
@@ -303,7 +307,7 @@ def table_main():
         rows9.append([esc(DISPLAY.get(k, k)), sci(res9[k]["p"]), sci(ph9[k]), pnb(res9[k]["nb"]), sci(nh9[k])])
     write("tab_sens.tex", table_env(
         "Sensitivity of the Holm adjustment: the main family extended by EASE and EASE+DAX (the family size is given "
-        "in the column header and counts the comparators whose files exist).",
+        "in the column header and counts the comparators in the family).",
         "tab:sens", "lrccc", ["Comparator", r"$p$", r"$p_{\mathrm{Holm}}$ (family of $%d$)" % len(present9),
                               r"NB $p$", r"NB $p_{\mathrm{Holm}}$"], rows9,
         "The Holm values differ from Table~\\ref{tab:main} only through the family size."))
@@ -321,37 +325,37 @@ def table_fair():
         ("LEAF-LGN+DAX minus QP family+DAX (fair baseline)", "LEAF-LGN+DAX", "QP family+DAX", "main family"),
         ("QP family+DAX minus QP family (DAX on the QP backbone)", "QP family+DAX", "QP family", "raw"),
         ("LEAF-LGN+DAX minus LEAF-LGN (DAX on the LEAF backbone)", "LEAF-LGN+DAX", "LEAF-LGN", "main family"),
-        ("LEAF-LGN (stored, v10) minus QP family", "LEAF-LGN(stored)", "QP family", "raw"),
+        ("LEAF-LGN (independent tuning) minus QP family", "LEAF-LGN(stored)", "QP family", "raw"),
     ]
     rows = []
     for label, a, b, kind in rows_def:
         r = P(M.get(a), M.get(b))
-        ca = f"{M[a]['n_configs']}" if M.get(a) else tbd(SRC[a] + " n_configs")
-        cb = f"{M[b]['n_configs']}" if M.get(b) else tbd(SRC[b] + " n_configs")
+        ca = f"{M[a]['n_configs']:,}" if M.get(a) else tbd(SRC[a] + " configurations")
+        cb = f"{M[b]['n_configs']:,}" if M.get(b) else tbd(SRC[b] + " configurations")
         if r is None:
             rows.append([esc(label), ca + " / " + cb, tbd(f"{SRC[a]} vs {SRC[b]} paired difference"), "", "", ""])
             continue
         rows.append([esc(label), f"{ca} / {cb}", dif(r), sci(r["p"]), pnb(r["nb"]), kind])
     write("tab_fair.tex", table_env(
-        "Fair-baseline reading: the DAX increments and the stored LEAF-LGN against the QP family, with their search "
-        "budgets (configurations of the first and second method).",
+        "Fair-baseline reading: the DAX increments, and LEAF-LGN without DAX against the QP family, with the "
+        "configurations searched by each method (first and second method).",
         "tab:fair", "lccccl", ["Comparison", "Configurations", r"Diff.\ [95\% hw]", r"$p$", r"NB $p$", "Test family"],
         rows,
-        "Rows marked raw are not Holm-adjusted: the stored v10 comparison is part of a different family (eight "
-        "comparisons in the stage 1 run), and the DAX increments are reported beside the main family. The QP family "
-        "+ DAX search uses only the QP backbone configurations selected without DAX."))
+        "Rows marked raw are not Holm-adjusted. The LEAF-LGN (independent tuning) comparison belongs to the LEAF "
+        "development family of eight comparisons, and the DAX increments are reported beside the main family. "
+        "The QP family with DAX searches only the QP backbone configurations selected without DAX."))
 
 
 def table_backbone():
     c = context()
     H, M = c["H"], c["M"]
-    # LightGCN: the retrained base of dax_lightgcn.json, the same run that fits LightGCN+DAX (3 configurations)
-    lgn_ret = H["method_from"](H["LGN_GCN"], "LightGCN", "LightGCN (retrained run)")
+    # LightGCN: the re-trained base of the run that also fits LightGCN+DAX (3 configurations)
+    lgn_ret = H["method_from"](H["LGN_GCN"], "LightGCN", "LightGCN (re-trained)")
     rows = []
     defs = [("EASE", M.get("EASE"), M.get("EASE+DAX")),
-            ("LightGCN (retrained run)", lgn_ret, M.get("LightGCN+DAX")),
-            ("QP family (stored)", M.get("QP family"), M.get("QP family+DAX")),
-            ("LEAF-LGN (post-hoc run)", M.get("LEAF-LGN"), M.get("LEAF-LGN+DAX")),
+            ("LightGCN (re-trained)", lgn_ret, M.get("LightGCN+DAX")),
+            ("QP family", M.get("QP family"), M.get("QP family+DAX")),
+            ("LEAF-LGN", M.get("LEAF-LGN"), M.get("LEAF-LGN+DAX")),
             ("DIN", M.get("DIN"), M.get("DIN+DAX")),
             ("SIM", M.get("SIM"), M.get("SIM+DAX"))]
     for label, a, b in defs:
@@ -364,13 +368,13 @@ def table_backbone():
         rows.append([esc(label), base, withd, dif(r), sci(r["p"]), pnb(r["nb"])])
     stored = P(M["LightGCN+DAX"], M["LightGCN"])
     write("tab_backbone.tex", table_env(
-        "DAX on six backbones: nDCG@10 without and with the post-hoc DAX module on KuaiRand-27K, paired difference "
-        "x1e-3 with the 95\\% half-width, two-sided t test and the Nadeau-Bengio test over the split means.",
+        "DAX on six backbones on KuaiRand-27K: nDCG@10 without and with the DAX module, paired difference in units of "
+        "$10^{-3}$ with the 95\\% half-width, two-sided t test and Nadeau-Bengio test over the split means. SIM denotes SIM-hard.",
         "tab:backbone", "lrcccc", ["Backbone", "Without DAX", "With DAX", r"Diff.\ [95\% hw]", r"$p$", r"NB $p$"],
-        rows, "Raw p values (no family). LightGCN: the base and the DAX arm come from the same run in "
-        "\\texttt{dax\\_lightgcn.json} (3 base configurations; LightGCN+DAX searches 960). Against the stored "
-        f"four-configuration LightGCN of the main table the increment is {stored['diff']:+.2f} [{stored['half']:.2f}] "
-        f"(NB $p$ {stored['nb']:.3f}). The QP row uses the stored QP family as the base."))
+        rows, "Raw p values (no family). LightGCN: the base and the DAX variant come from the same experiment "
+        "(3 base configurations; 960 with DAX). "
+        f"Against the four-configuration LightGCN of Table~\\ref{{tab:main}} the increment is {stored['diff']:+.2f} "
+        f"[{stored['half']:.2f}] (NB $p$ {stored['nb']:.3f})."))
     return {"lgn_retrained": lgn_ret, "lgn_stored_increment": stored}
 
 
@@ -393,7 +397,7 @@ def table_ablate():
     N = c["N"]
     if base is None or arms["full"] is None:
         write("tab_ablate.tex", table_env("DAX ablations: not available.", "tab:ablate", "l",
-                                          ["Arm"], [[tbd("results/v11/dax_ablate.json full arm and base")]]))
+                                          ["Variant"], [[tbd("results/v11/dax_ablate.json full DAX and base")]]))
         return
     gain = {k: P(arms[k], base) for k in arms if arms[k] is not None}
     keys = [k for k in gain]
@@ -405,7 +409,7 @@ def table_ablate():
     rows = []
     for k in ["full"] + ABL_ARMS:
         if arms.get(k) is None:
-            rows.append([esc(ABL_LABEL[k]), tbd(f"results/v11/dax_ablate.json {ABL_NAME[k]} mean"), "", "", "", "", "", ""])
+            rows.append([ABL_LABEL[k], tbd(f"results/v11/dax_ablate.json {ABL_NAME[k]} mean"), "", "", "", "", "", ""])
             continue
         g = gain[k]
         kept = f"{100 * g['diff'] / g_full:.1f}" if k != "full" else "100.0"
@@ -415,34 +419,34 @@ def table_ablate():
         else:
             mi = dif(minus[k])
             pm = sci(ph_m[k])
-        rows.append([esc(ABL_LABEL[k]), f"{arms[k]['n_configs']}", mean_cell(arms[k]), dif(g), sci(ph_g[k]),
+        rows.append([ABL_LABEL[k], f"{arms[k]['n_configs']}", mean_cell(arms[k]), dif(g), sci(ph_g[k]),
                      kept, mi, pm])
     rows.append("MIDRULE")
-    rows.append(span(8, r"Permutation seeds (pooled arm above selects over seeds; separate runs below)"))
+    rows.append(span(8, r"Separate permutation seeds (the variants above select over the three seeds)"))
     for k in ["shuffle_tags", "shuffle_items"]:
         for s in (0, 1, 2):
             name = f"LEAF-LGN+DAX[{k}|p{s}]"
             r = P(H["method_from"](H["ABLATE"], name, name), base)
             if r is None:
-                rows.append([esc(f"{ABL_LABEL[k]}, seed {s}"), "", tbd(f"results/v11/dax_ablate.json {name} gain"), "", "",
+                rows.append([f"{ABL_LABEL[k]}, seed {s}", "", tbd(f"results/v11/dax_ablate.json {name} gain"), "", "",
                              "", "", ""])
             else:
                 kept = f"{100 * r['diff'] / g_full:.1f}"
-                rows.append([esc(f"{ABL_LABEL[k]}, seed {s}"), "", "", dif(r), f"NB {pnb(r['nb'])}", kept, "", ""])
+                rows.append([f"{ABL_LABEL[k]}, seed {s}", "", "", dif(r), f"NB {pnb(r['nb'])}", kept, "", ""])
     lift = gain["full"]["diff"] - P(c["M"]["LEAF-LGN+DAX"], c["M"]["LEAF-LGN"])["diff"]
-    note = (f"Source: results/v11/dax\\_ablate.json. Gain: arm minus the LEAF-LGN base of the ablation run (mean {H['mean_sd'](base)[0]:.4f}, two backbone trainings, "
-            "five gammas, epoch window of 3 around the main selection). Its base is lower than the main-run LEAF-LGN "
-            "(0.4736), so the full gain here ("
-            f"{gain['full']['diff']:+.2f}) exceeds the main increment by {lift:.2f}; the arms are compared through the "
-            "full-minus-arm columns, which do not use the base. Holm: p Holm of the gains is adjusted within the seven gains, "
-            "and of full minus arm within the six ablated arms (family sizes computed here, not in final12.txt). "
-            "Kept: the gain as a percentage of the full gain of this run, so the percentages inherit the inflated base and "
-            "are approximate. Permutation seeds (lower block): one run per seed, selected on validation for the pooled arm.")
+    note = (f"Gain: variant minus the LEAF-LGN base of the ablation experiment (mean {H['mean_sd'](base)[0]:.4f}, two "
+            "backbone trainings, five values of $\\gamma$, epoch window of three around the selection of the main "
+            "experiment). This base is lower than the LEAF-LGN of Table~\\ref{tab:main} (0.4736), so the full gain here ("
+            f"{gain['full']['diff']:+.2f}) exceeds the main increment by {lift:.2f}; the variants are compared through the "
+            "full-minus-variant columns, which do not use the base. Holm: the p values of the gains are adjusted within "
+            "the seven gains, and those of full minus variant within the six ablated variants. Kept: the gain as a "
+            "percentage of the full gain of this experiment, so the percentages inherit the base and are approximate. "
+            "Permutation seeds are separate runs, one per seed.")
     write("tab_ablate.tex", table_env(
-        "DAX ablations on KuaiRand-27K (post-hoc): gain over the backbone of the ablation run, the difference to full DAX, "
-        "and the shuffle controls.",
+        "DAX ablations on KuaiRand-27K: gain over the LEAF-LGN base of the ablation experiment, the difference to full "
+        "DAX, and the permutation controls.",
         "tab:ablate", "lrcccccc",
-        ["Arm", "Configs", "Mean", r"Gain [95\% hw]", r"$p_{\mathrm{Holm}}$", "Kept (\\%)", r"Full minus arm",
+        ["Variant", "Configs", "Mean", r"Gain [95\% hw]", r"$p_{\mathrm{Holm}}$", r"Kept (\%)", r"Full minus variant",
          r"$p_{\mathrm{Holm}}$"], rows, note))
     return gain, minus
 
@@ -482,12 +486,12 @@ def table_1k():
     n1k = len(H["pooled_users"](lg)) if lg is not None else None
     n_txt = str(n1k) if n1k is not None else tbd("results/v11/c_1k_lgn.json users")
     cfg_qp = qd["n_configs"] if qd is not None else None
-    note = (f"Sources: results/v11/c\\_1k\\_lgn.json, results/v11/c\\_1k\\_base.json, results/v11/c\\_1k\\_qp.json. KuaiRand-1K: {n_txt} test users pooled over five splits "
-            "(each split 30\\% validation, 70\\% test); 1K users are a subset of the 27K users, a lower-power "
-            "replication. The 1K QP family + DAX arm searches all 20 QP configurations ("
-            f"{cfg_qp} configurations in total) whereas the 27K arm searches the 10 selected ones (3200); this favours "
-            "the baseline and is stated as such. Holm over the three comparisons of this table; NB over the split "
-            "means. Split differences (x1e-3): " + "; ".join(split_notes) + ".")
+    cfg_txt = f"{cfg_qp:,}" if cfg_qp else "n/a"
+    note = (f"KuaiRand-1K: {n_txt} test users pooled over five splits (each split 30\\% validation, 70\\% test). The users "
+            "are a subset of the 27K users, so this is a lower-power replication. The QP family with DAX searches all 20 "
+            f"QP configurations on this release ({cfg_txt} configurations in total), whereas at 27K it searches the 10 "
+            "selected ones (3,200); this favours the baseline. Holm over the three comparisons of this table; NB over "
+            "the split means. Split differences ($\\times10^{-3}$): " + "; ".join(split_notes) + ".")
     write("tab_1k.tex", table_env(
         "KuaiRand-1K replication: LEAF-LGN+DAX against the QP family with and without DAX (nDCG@10).",
         "tab:1k", "lrrrccccc",
@@ -517,25 +521,23 @@ def table_seeds():
         mu = H["mean_sd"](dax)[0]
         gains.append(r["diff"])
         means.append(mu)
-        rows.append([f"{s}" + (" (main run)" if s == 0 else ""), f"{mu:.4f}", f"{H['mean_sd'](base)[0]:.4f}",
+        rows.append([f"{s}" + (" (main experiment)" if s == 0 else ""), f"{mu:.4f}", f"{H['mean_sd'](base)[0]:.4f}",
                      f"{dax['n_configs']}", dif(r), sci(r["p"]), pnb(r["nb"])])
     rows.append("MIDRULE")
     if len(means) > 1:
         rows.append([r"Spread over seeds", f"{np.mean(means):.4f} $\\pm$ {np.std(means, ddof=1):.4f}", "", "",
                      f"{np.mean(gains):+.2f} $\\pm$ {np.std(gains, ddof=1):.2f}", "", ""])
-    rows.append([r"QP family: seeds 1 to 3 not run (partial file incomplete)", "", "", "", "", "", ""])
     write("tab_seeds.tex", table_env(
-        "Training seeds on KuaiRand-27K: LEAF-LGN+DAX and its within-seed gain over LEAF-LGN (same seed), seeds 0 to 3.",
+        "Training seeds on KuaiRand-27K: LEAF-LGN+DAX and its within-seed gain over LEAF-LGN, for seeds 0 to 3.",
         "tab:seeds", "lrrrccc",
         ["Seed", "LEAF-LGN+DAX", "LEAF-LGN", "Configs", r"Gain [95\% hw]", r"$p$", r"NB $p$"], rows,
-        "Sources: results/v11/dax\\_lgn\\_post.json (seed 0) and results/v11/c\\_seeds/lgn\\_s1.json to lgn\\_s3.json. Seed 0 is the main run with the full backbone grid (12 trainings). Seeds 1 to 3 re-train with the training seed "
-        "changed and a reduced backbone grid: lr 3e-3 and wd 1e-4 in every split, w in {0.25, 0.5} for the DAX arm (2 "
-        "trainings) and w 0.25 for the base. The epoch, the DAX configuration and gamma are selected on validation per "
-        "split. Raw p values, not Holm-adjusted. The QP family was not re-trained under seeds 1 to 3, so no seed "
-        "comparison with it is reported."))
+        "Seed 0 is the main experiment with the full backbone search (12 trainings). Seeds 1 to 3 re-train with the "
+        "training seed changed and a reduced backbone search: $\\mathrm{lr}=3\\times10^{-3}$ and $\\rho=10^{-4}$ in every "
+        "split, $w\\in\\{0.25,0.5\\}$ for the DAX variant (two trainings) and $w=0.25$ for the base. The epoch, the DAX "
+        "configuration and $\\gamma$ are selected on validation in each split. Raw p values, not Holm-adjusted. The QP "
+        "family was not re-trained under seeds 1 to 3, so no seed comparison with it is reported."))
 
 
-# ---------------------------------------------------------------------------------------------
 # Table 7: lifelong deep baselines (DIN, SIM) at 1K and 27K
 # ---------------------------------------------------------------------------------------------
 def table_deep():
@@ -546,7 +548,7 @@ def table_deep():
         m = M.get(k)
         r = P(M["LEAF-LGN+DAX"], m)
         if m is None:
-            rows.append([esc(k), tbd(SRC[k] + " mean"), tbd(SRC[k] + " configs"), tbd(SRC[k] + " difference"),
+            rows.append([esc(k), tbd(SRC[k] + " mean"), tbd(SRC[k] + " configurations"), tbd(SRC[k] + " difference"),
                          "", ""])
         else:
             rows.append([esc(k), mean_cell(m), f"{m['n_configs']}", dif(r), sci(r["p"]), pnb(r["nb"])])
@@ -556,7 +558,7 @@ def table_deep():
     for k in ["DIN", "DIN+DAX", "SIM", "SIM+DAX"]:
         m = K.get(k)
         if m is None or lg is None:
-            rows.append([esc(k) + " (1K)", tbd(f"results/v12 1K {k} mean"), "", tbd(f"1K {k} difference"), "", ""])
+            rows.append([esc(k), tbd(f"results/v12 1K {k} mean"), "", tbd(f"1K {k} difference"), "", ""])
             continue
         r = P1k(lg, m)
         rows.append([esc(k), mean_cell(m), f"{m['n_configs']}", dif(r), sci(r["p"]), pnb(r["nb"])])
@@ -564,12 +566,13 @@ def table_deep():
     rows.append(span(6, r"Lifelong sequence models: DIN attends over the last 200 lifelong events; SIM-hard keeps the 50 "
                         r"most recent events sharing the candidate's tag or author."))
     write("tab_deep.tex", table_env(
-        "Lifelong deep baselines (DIN and SIM-hard) with and without DAX, and their paired difference to LEAF-LGN+DAX "
-        "(LEAF-LGN+DAX minus the comparator, x1e-3 nDCG@10).",
+        "Lifelong deep baselines (DIN and SIM-hard) with and without DAX on KuaiRand-27K and KuaiRand-1K, with the "
+        "paired difference of LEAF-LGN+DAX minus each comparator (in units of $10^{-3}$ nDCG@10). SIM denotes SIM-hard.",
         "tab:deep", "lrccccc",
         ["Comparator", "Mean", "Configs", r"Diff.\ [95\% hw]", r"$p$", r"NB $p$"], rows,
-        "Sources: results/v12/din\\_27k.json, sim\\_27k.json, din\\_1k.json, sim\\_1k.json. Raw p values. DIN and SIM are tuned over four configurations (lr {1e-2, 3e-3} times wd {1e-4, 1e-5}) with "
-        "patience 2; their +DAX arms use the post-hoc DAX grid. The 1K rows use the 842 KuaiRand-1K test users."))
+        "Raw p values. DIN and SIM are each tuned over four configurations (learning rate $\\{10^{-2},3\\times10^{-3}\\}$ "
+        "times weight decay $\\{10^{-4},10^{-5}\\}$), and their +DAX variants use the DAX grid. The 1K rows use the 842 "
+        "KuaiRand-1K test users."))
 
 
 # ---------------------------------------------------------------------------------------------
@@ -582,7 +585,7 @@ def table_leafctl():
     arms = {k: H["method_from"]("results/v10/leaf_tied_ablate.json", f"LEAF-tied[{k}]", k) for k in V10_ARMS}
     rows = []
     if full is None:
-        write("tab_leafctl.tex", table_env("LEAF controls: not available.", "tab:leafctl", "l", ["Arm"],
+        write("tab_leafctl.tex", table_env("LEAF controls: not available.", "tab:leafctl", "l", ["Variant"],
                                           [[tbd("results/v10/leaf_tied.json LEAF-tied")]]))
         return
     fm = [k for k in V10_ARMS if arms[k] is not None]
@@ -598,70 +601,100 @@ def table_leafctl():
         r = minus[k]
         rows.append([esc(V10_LABEL[k]), f"{arms[k]['n_configs']}", mean_cell(arms[k]), dif(r), sci(ph[k]), pnb(r["nb"]),
                      sci(nh[k])])
-    note = ("Source: results/v10/leaf\\_tied.json and leaf\\_tied\\_ablate.json. Full minus arm: positive means the channel helps. Holm within the eight arms; NB over the split means. "
-            "The no-music arm gives identical rankings in every split. The LEAF-LGN ablations are not run "
-            "(results/v10/leaf\\_lgn\\_ablate.json is missing); these controls use the closed-form LEAF-tied backbone. "
-            "The shuffle-users control removes the lifelong gain (design check on the difference between the shuffled "
-            "and the no-lifelong arm).")
+    note = ("Full minus variant: positive means the channel helps. Holm within the eight variants; NB over the split "
+            "means. The variant without music channels gives identical rankings in every split. These controls were "
+            "run on the closed-form LEAF-tied backbone.")
     write("tab_leafctl.tex", table_env(
-        "LEAF controls on KuaiRand-27K (stage 1 stored run, LEAF-tied backbone): arm means and full minus arm.",
+        "LEAF controls on KuaiRand-27K (closed-form LEAF-tied backbone): variant means and full minus variant.",
         "tab:leafctl", "lrccccc",
-        ["Arm", "Configs", "Mean", r"Full minus arm [95\% hw]", r"$p_{\mathrm{Holm}}$", r"NB $p$", r"NB $p_{\mathrm{Holm}}$"],
-        rows, note))
+        ["Variant", "Configs", "Mean", r"Full minus variant [95\% hw]", r"$p_{\mathrm{Holm}}$", r"NB $p$",
+         r"NB $p_{\mathrm{Holm}}$"], rows, note))
     return minus
 
 
 # ---------------------------------------------------------------------------------------------
-# Table 9: permutation seeds and KuaiRand-1K are above; appendix C: chosen configurations per split
+# Table 9: chosen configurations per split (appendix C)
 # ---------------------------------------------------------------------------------------------
-CFG_ORDER = ["method", "lr", "wd", "dim", "layers", "r", "fn", "pbeta", "w", "epoch", "gamma"]
-DAX_ORDER = ["prior", "centre", "k_life", "tab", "prior_s"]
+def sci_small(v):
+    """A power of ten in LaTeX, with the mantissa shown only when it is not one."""
+    m, e = f"{v:.0e}".split("e")
+    e = int(e)
+    return f"$10^{{{e}}}$" if m == "1" else f"${m}\\times10^{{{e}}}$"
 
 
-def fmt_cfg(ch):
-    parts = []
-    for k in CFG_ORDER:
-        if k in ch:
-            v = ch[k]
-            parts.append(f"{k}={v:g}" if isinstance(v, float) else f"{k}={v}")
-    if "dax" in ch and ch["dax"] is not None:
-        d = ch["dax"]
-        for k in DAX_ORDER:
-            if k in d:
-                v = d[k]
-                parts.append(f"{k}={v:g}" if isinstance(v, float) else f"{k}={v}")
-    for k in ch:
-        if k not in CFG_ORDER and k not in ("dax",) and k not in DAX_ORDER:
-            parts.append(f"{k}={ch[k]}")
-    return ", ".join(parts)
+def _onoff(v):
+    return "on" if v else "off"
+
+
+# parameter key -> (column header, value formatter); keys of the chosen configurations as stored in the run files
+GRID_COLS = {
+    "method": ("QP variant", lambda v: esc(str(v))),
+    "pbeta": (r"$\beta$ (offset)", lambda v: f"{v:g}"),
+    "beta": (r"$\beta$ (popularity)", lambda v: f"{v:g}"),
+    "lr": (r"$\mathrm{lr}$", sci_small),
+    "wd": (r"$\rho$", sci_small),
+    "w": (r"$w$", lambda v: f"{v:g}"),
+    "r": ("normalisation exponent", lambda v: f"{v:g}"),
+    "epoch": ("epoch", lambda v: f"{int(v)}"),
+    "gamma": (r"$\gamma$", lambda v: f"{v:g}"),
+    "lam": (r"$\lambda_{\mathrm{EASE}}$", sci_small),
+    "prior": (r"$\nu$", lambda v: f"{v:g}"),
+    "centre": ("centre", lambda v: esc(str(v))),
+    "k_life": (r"$\lambda$", lambda v: f"{v:g}"),
+    "tab": ("scenario factors", _onoff),
+    "prior_s": ("user groups", lambda v: "none" if v is None else f"{v:g}"),
+}
+CFG_KEYS = ["method", "pbeta", "beta", "lr", "wd", "w", "r", "epoch", "gamma", "lam"]
+DAX_KEYS = ["prior", "centre", "k_life", "tab", "prior_s"]
+GRID_NOTE = ("Columns that a method does not use are not shown. The centre is the tag mean or the content regression "
+             "of Appendix~\\ref{app:fh}; user groups are none or a strength.")
+
+
+def grid_columns(chosen):
+    keys = []
+    for k in CFG_KEYS:
+        if any(k in ch for ch in chosen):
+            if k == "epoch" and all(ch["epoch"] == 0 for ch in chosen):
+                continue
+            keys.append(k)
+    keys += [k for k in DAX_KEYS if any(k in (ch.get("dax") or {}) for ch in chosen)]
+    return keys
+
+
+def grid_cell(ch, k):
+    if k in DAX_KEYS:
+        d = ch.get("dax") or {}
+        return GRID_COLS[k][1](d[k]) if k in d else "--"
+    return GRID_COLS[k][1](ch[k]) if k in ch else "--"
 
 
 def table_grids():
     c = context()
     H, M, K = c["H"], c["M"], c["K"]
-    blocks = []
-    specs = [("LEAF-LGN+DAX (main, post-hoc)", M["LEAF-LGN+DAX"]),
-             ("LEAF-LGN (post-hoc base)", M["LEAF-LGN"]),
-             ("QP family (stored, per-split best variant)", M["QP family"]),
+    specs = [("LEAF-LGN+DAX", M["LEAF-LGN+DAX"]),
+             ("LEAF-LGN", M["LEAF-LGN"]),
+             ("QP family (best of its three variants per split)", M["QP family"]),
              ("QP family+DAX", M["QP family+DAX"]),
              ("EASE", M["EASE"]), ("EASE+DAX", M["EASE+DAX"]),
              ("LightGCN", M["LightGCN"]), ("r-AdjNorm", M["r-AdjNorm"]),
-             ("DIN (27K)", M["DIN"]), ("DIN+DAX (27K)", M["DIN+DAX"]),
-             ("SIM (27K)", M["SIM"]), ("SIM+DAX (27K)", M["SIM+DAX"]),
-             ("LEAF-LGN+DAX (1K)", K["LEAF-LGN+DAX"]), ("QP family+DAX (1K)", K["QP family+DAX"]),
-             ("DIN (1K)", K["DIN"]), ("DIN+DAX (1K)", K["DIN+DAX"]), ("SIM (1K)", K["SIM"]), ("SIM+DAX (1K)", K["SIM+DAX"])]
+             ("DIN", M["DIN"]), ("DIN+DAX", M["DIN+DAX"]),
+             ("SIM (SIM-hard)", M["SIM"]), ("SIM+DAX (SIM-hard)", M["SIM+DAX"]),
+             ("LEAF-LGN+DAX, KuaiRand-1K", K["LEAF-LGN+DAX"]), ("QP family+DAX, KuaiRand-1K", K["QP family+DAX"]),
+             ("DIN, KuaiRand-1K", K["DIN"]), ("DIN+DAX, KuaiRand-1K", K["DIN+DAX"]),
+             ("SIM (SIM-hard), KuaiRand-1K", K["SIM"]), ("SIM+DAX (SIM-hard), KuaiRand-1K", K["SIM+DAX"])]
     index = []
     for i, (label, m) in enumerate(specs):
         name = f"tab_grid_{i:02d}.tex"
+        lab = f"tab:grid{i:02d}"
         if m is None:
-            text = table_env(f"Chosen configurations, {esc(label)}: not available.", f"tab:grid{i:02d}", "l", ["Split"],
+            text = table_env(f"Chosen configurations, {esc(label)}: not available.", lab, "l", ["Split"],
                              [[tbd(f"{label} chosen configurations")]])
         else:
-            rows = []
-            for s, ch in enumerate(m["chosen"]):
-                rows.append([f"{s + 1}", r"\texttt{" + esc(fmt_cfg(ch)) + "}"])
-            text = table_env(f"Chosen configurations per split: {esc(label)} (nDCG@10 mean {H['mean_sd'](m)[0]:.4f}).",
-                             f"tab:grid{i:02d}", "rp{0.82\\linewidth}", ["Split", "Chosen configuration"], rows)
+            keys = grid_columns(m["chosen"])
+            header = ["Split"] + [GRID_COLS[k][0] for k in keys]
+            rows = [[f"{s + 1}"] + [grid_cell(ch, k) for k in keys] for s, ch in enumerate(m["chosen"])]
+            text = table_env(f"Chosen configurations per split: {esc(label)}. Mean nDCG@10 "
+                             f"{H['mean_sd'](m)[0]:.4f}.", lab, "l" + "c" * len(keys), header, rows, GRID_NOTE)
         write(name, text)
         index.append((name, label))
     return index

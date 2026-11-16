@@ -49,7 +49,7 @@ def fig_forest(c):
     y = np.arange(len(rows))[::-1]
     for yi, (k, r) in zip(y, rows):
         if r is None:
-            ax.text(1.0, yi, "no result file", color=MUTED, va="center", ha="left", fontsize=7.5)
+            ax.text(1.0, yi, "not available", color=MUTED, va="center", ha="left", fontsize=7.5)
         else:
             for d in r["split_diffs"]:
                 ax.plot(d, yi, "o", ms=3.2, color=MUTED, mec="none", zorder=2)
@@ -58,7 +58,7 @@ def fig_forest(c):
     ax.axvline(0, color=INK, lw=0.7, zorder=1)
     ax.set_yticks(y)
     ax.set_yticklabels([T.DISPLAY.get(k, k) for k, _ in rows])
-    ax.set_xlabel(r"LEAF-LGN+DAX minus comparator, nDCG@10 $\times 10^{-3}$ (per-user mean, 95\% half-width)")
+    ax.set_xlabel(r"LEAF-LGN+DAX minus comparator, nDCG@10 $\times 10^{-3}$ (per-user mean, 95% half-width)")
     ax.grid(axis="x", color="#e5e5e5", lw=0.5, zorder=0)
     _save(fig, "fig_forest.pdf")
 
@@ -66,7 +66,7 @@ def fig_forest(c):
 def fig_ablate(c):
     base, arms = T.ablation_records()
     if base is None or arms.get("full") is None:
-        print("fig_ablate: skipped (dax_ablate.json incomplete)")
+        print("fig_ablate: skipped (ablation inputs incomplete)")
         return
     order = ["full", "no_tab", "no_life_prior", "no_tag_prior", "additive", "shuffle_tags", "shuffle_items"]
     gains = []
@@ -79,7 +79,7 @@ def fig_ablate(c):
     x = np.arange(len(order))
     for xi, (k, r) in zip(x, gains):
         if r is None:
-            ax.text(xi, 0, "TBD", ha="center", va="bottom", color=MUTED, fontsize=7.5)
+            ax.text(xi, 0, "not available", ha="center", va="bottom", color=MUTED, fontsize=7.5)
             continue
         col = ACCENT if k == "full" else MUTED
         ax.bar(xi, r["diff"], width=0.62, color=col, alpha=0.85, zorder=2)
@@ -87,10 +87,11 @@ def fig_ablate(c):
         ax.plot([xi] * len(r["split_diffs"]), r["split_diffs"], "o", ms=2.6, color=INK, mec="none", zorder=4)
     ax.axhline(0, color=INK, lw=0.7)
     ax.set_xticks(x)
-    short = {"full": "full", "no_tab": "no kappa", "no_life_prior": "no life\nprior", "no_tag_prior": "no tag\nprior",
-             "additive": "additive", "shuffle_tags": "shuffle\nacross", "shuffle_items": "shuffle\nwithin tag"}
+    short = {"full": "full DAX", "no_tab": r"without $\kappa_t$", "no_life_prior": "without lifelong\nprior",
+             "no_tag_prior": "without tag\nprior", "additive": "additive\nlogit",
+             "shuffle_tags": "permuted\nacross items", "shuffle_items": "permuted\nwithin tags"}
     ax.set_xticklabels([short[k] for k in order], fontsize=7)
-    ax.set_ylabel(r"gain over LEAF-LGN base, nDCG@10 $\times 10^{-3}$")
+    ax.set_ylabel(r"gain over the ablation base, nDCG@10 $\times 10^{-3}$")
     ax.grid(axis="y", color="#e5e5e5", lw=0.5, zorder=0)
     _save(fig, "fig_ablate.pdf")
 
@@ -104,7 +105,7 @@ def fig_seeds(c):
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(6.0, 2.6))
     for s, dax, base in entries:
         if dax is None or base is None:
-            a1.text(s, 0.476, "TBD", ha="center", color=MUTED, fontsize=7.5)
+            a1.text(s, 0.476, "not available", ha="center", color=MUTED, fontsize=7.5)
             continue
         mu, sd = H["mean_sd"](dax)
         a1.errorbar(s, mu, yerr=sd, fmt="o", ms=4, color=ACCENT, ecolor=INK, elinewidth=0.9, capsize=2.5)
@@ -117,7 +118,7 @@ def fig_seeds(c):
     a2.axhline(0, color=INK, lw=0.7)
     a2.set_xticks([0, 1, 2, 3])
     a2.set_xlabel("training seed")
-    a2.set_ylabel(r"gain over LEAF-LGN, $\times 10^{-3}$ (95\% hw)")
+    a2.set_ylabel(r"gain over LEAF-LGN, $\times 10^{-3}$ (95% half-width)")
     a2.grid(axis="y", color="#e5e5e5", lw=0.5)
     fig.tight_layout()
     _save(fig, "fig_seeds.pdf")

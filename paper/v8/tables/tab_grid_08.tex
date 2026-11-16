@@ -1,19 +1,21 @@
 \begin{table}[tbp]
 \centering
 \footnotesize
-\caption{Chosen configurations per split: DIN (27K) (nDCG@10 mean 0.4675).}
+\caption{Chosen configurations per split: DIN. Mean nDCG@10 0.4675.}
 \label{tab:grid08}
 \begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{rp{0.82\linewidth}}
+\begin{tabular}{lccc}
 \toprule
-Split & Chosen configuration \\
+Split & $\mathrm{lr}$ & $\rho$ & epoch \\
 \midrule
-1 & \texttt{lr=0.01, wd=1e-05, epoch=9} \\
-2 & \texttt{lr=0.01, wd=1e-05, epoch=9} \\
-3 & \texttt{lr=0.01, wd=0.0001, epoch=7} \\
-4 & \texttt{lr=0.01, wd=0.0001, epoch=7} \\
-5 & \texttt{lr=0.01, wd=1e-05, epoch=8} \\
+1 & $10^{-2}$ & $10^{-5}$ & 9 \\
+2 & $10^{-2}$ & $10^{-5}$ & 9 \\
+3 & $10^{-2}$ & $10^{-4}$ & 7 \\
+4 & $10^{-2}$ & $10^{-4}$ & 7 \\
+5 & $10^{-2}$ & $10^{-5}$ & 8 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize Columns that a method does not use are not shown. The centre is the tag mean or the content regression of Appendix~\ref{app:fh}; user groups are none or a strength.\end{minipage}
 \end{table}

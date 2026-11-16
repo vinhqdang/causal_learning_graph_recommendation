@@ -1,19 +1,21 @@
 \begin{table}[tbp]
 \centering
 \footnotesize
-\caption{Chosen configurations per split: DIN (1K) (nDCG@10 mean 0.4189).}
+\caption{Chosen configurations per split: DIN, KuaiRand-1K. Mean nDCG@10 0.4189.}
 \label{tab:grid14}
 \begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{rp{0.82\linewidth}}
+\begin{tabular}{lccc}
 \toprule
-Split & Chosen configuration \\
+Split & $\mathrm{lr}$ & $\rho$ & epoch \\
 \midrule
-1 & \texttt{lr=0.003, wd=0.0001, epoch=0} \\
-2 & \texttt{lr=0.003, wd=0.0001, epoch=0} \\
-3 & \texttt{lr=0.003, wd=0.0001, epoch=0} \\
-4 & \texttt{lr=0.01, wd=1e-05, epoch=1} \\
-5 & \texttt{lr=0.003, wd=0.0001, epoch=0} \\
+1 & $3\times10^{-3}$ & $10^{-4}$ & 0 \\
+2 & $3\times10^{-3}$ & $10^{-4}$ & 0 \\
+3 & $3\times10^{-3}$ & $10^{-4}$ & 0 \\
+4 & $10^{-2}$ & $10^{-5}$ & 1 \\
+5 & $3\times10^{-3}$ & $10^{-4}$ & 0 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize Columns that a method does not use are not shown. The centre is the tag mean or the content regression of Appendix~\ref{app:fh}; user groups are none or a strength.\end{minipage}
 \end{table}

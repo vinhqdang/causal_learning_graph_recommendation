@@ -1,11 +1,13 @@
 \section{Discussion}\label{sec:discussion}
 
-\paragraph{Why the multiplicative form.} The additive alternative keeps the same covariates and tab effects, but replaces the
-product of user examination and item attractiveness by an additive logit. Its loss against the full arm is the largest of the
-structural comparisons in Section~\ref{sec:res-ablate}. Under the generative model, a non-click is weak evidence against an item
-for a user who rarely clicks anything, and weak evidence in a scenario that rarely yields clicks. The multiplicative form encodes
-this dependence, while the additive form, once the user effect is absorbed, treats the two cases alike. This is a fit comparison
-under one protocol. It does not show that the multiplicative form is correct in an absolute sense.
+\paragraph{Why the multiplicative form.} The additive alternative keeps the same covariates and scenario effects, but replaces
+the product of user examination and item attractiveness by an additive logit. Its loss against full DAX is the largest of the
+structural comparisons in Section~\ref{sec:res-ablate}. The difference is easiest to see for the cooking clip. Under the
+multiplicative model, a non-click from a viewer who rarely examines videos, or in a scenario where few videos are examined,
+barely lowers the estimated attractiveness of the clip, because such a non-click is weak evidence against the clip. Under the
+additive model, once the user effect is absorbed, the same non-click lowers the item effect as much as any other non-click,
+and the two cases are treated alike. This is a fit comparison under one protocol. It does not show that the multiplicative form
+is correct in an absolute sense.
 
 \paragraph{Item-level and tag-level parts.} Permuting attractiveness within tags keeps part of the gain, and permuting it across
 items removes all of it. A tag mean alone would therefore capture part of the signal, and the remainder is carried by item
@@ -13,15 +15,16 @@ deviations from that mean. The permutations keep the marginal distribution of $\
 strong as these controls.
 
 \paragraph{Lifelong channels.} Shuffling the lifelong tables across users removes the LEAF gain. The policy channel adds less on
-top of it, and its split-level test is not significant after Holm adjustment (\ref{app:leafctl}). The signal that
-transfers to randomly exposed items is therefore mainly the users' own lifelong affinities for content keys.
+top of it, and its split-level test is not significant after Holm adjustment (\ref{app:leafctl}). The signal that transfers to
+randomly exposed items is therefore mainly the users' own lifelong affinities for content keys.
 
-\paragraph{Complementarity.} DAX is used as an increment on top of a backbone, and the tables report only that increment. Under the
-post-hoc rule, its score carries information that the backbone scores do not. DAX is not reported as a stand-alone ranker.
+\paragraph{Complementarity.} DAX is used as an increment on top of a backbone, and the tables report only that increment. Under
+the combination rule of Section~\ref{sec:method-combine}, its score carries information that the backbone scores do not. DAX is
+not reported as a stand-alone ranker.
 
-\paragraph{Lifelong deep models.} DIN with DAX is the closest comparator of the main family, and LEAF-LGN+DAX is above it with a
-borderline split-level value (Section~\ref{sec:res-deep}). The deep baselines are tuned over four configurations each, so whether a
-wider search would change the ordering is open.
+\paragraph{Lifelong deep models.} DIN+DAX is the closest comparator of the main family, and LEAF-LGN+DAX is above it with a
+borderline split-level value (Section~\ref{sec:res-deep}). The deep baselines are tuned over four configurations each, so whether
+a wider search would change the ordering is open.
 
 \paragraph{Remaining headroom.} The gains come from the item-level appeal estimate and from the lifelong user channels. Further
 gains would need a different source of information about item quality for random viewers, such as richer content or a direct
