@@ -41,7 +41,8 @@ B2_ADDITIVE = 4.0     # x1e-3
 GRID_SIZE = {"full": 32, "no_tab": 16, "no_life_prior": 16, "no_tag_prior": 16, "additive": 32,
              "shuffle_items": 32, "shuffle_tags": 32}
 V12 = os.environ.get("V12_OUT", "results/v12/").rstrip("/") + "/"
-OUT = V12 + "final12.txt"
+OUT = os.environ.get("FINAL_OUT", V12 + "final12.txt")
+PUB = "results/v14/learned_kuairand_t_pub.json"  # NAVIP, IPS-MF, DR-JL, MRDR (run_learned_t, 4 configurations each)
 DIN_27K = V12 + "din_27k.json"       # DIN and DIN + DAX (run_din.py --arch din)
 SIM_27K = V12 + "sim_27k.json"        # SIM and SIM + DAX (run_din.py --arch sim)
 DIN_1K = V12 + "din_1k.json"
@@ -236,13 +237,16 @@ M["DIN"] = method_from(DIN_27K, "DIN")
 M["DIN+DAX"] = method_from(DIN_27K, "DIN+DAX", "DIN + DAX")
 M["SIM"] = method_from(SIM_27K, "SIM")
 M["SIM+DAX"] = method_from(SIM_27K, "SIM+DAX", "SIM + DAX")
+for _m in ("NAVIP", "IPS-MF", "DR-JL", "MRDR"):
+    if os.path.exists(PUB):
+        M[_m] = method_from(PUB, _m)
 M = {k: v for k, v in M.items() if v is not None}
 
 # expected pooled user count: the stored v10 LEAF-LGN (same splits, same loader); the other stored files must agree
 EXPECTED_N = None
 if M.get("LEAF-LGN(stored)") is not None:
     EXPECTED_N = len(pooled_users(M["LEAF-LGN(stored)"]))
-    for k in ("r-AdjNorm", "LightGCN", "QP family"):
+    for k in ("r-AdjNorm", "LightGCN", "QP family", "NAVIP", "IPS-MF", "DR-JL", "MRDR"):
         if k in M and len(pooled_users(M[k])) != EXPECTED_N:
             note(f"stored {k} pools a different user count than the stored LEAF-LGN")
 else:
@@ -318,7 +322,8 @@ out()
 # ---------------------------------------------------------------------------------------------
 # Section 3b: Holm family of the main table (v12)
 # ---------------------------------------------------------------------------------------------
-FAMILY_V12 = ("QP family", "QP family+DAX", "LEAF-LGN", "r-AdjNorm", "LightGCN", "DIN", "DIN+DAX", "SIM", "SIM+DAX")
+FAMILY_V12 = ("QP family", "QP family+DAX", "LEAF-LGN", "r-AdjNorm", "LightGCN", "DIN", "DIN+DAX", "SIM", "SIM+DAX",
+              "NAVIP", "IPS-MF", "DR-JL", "MRDR")
 out("3b. Main-table family (v12): LEAF-LGN + DAX against every comparator of the table, Holm over the family")
 out("   per-user paired difference x1e-3 nDCG@10 [95% half-width], two-sided t p, Nadeau-Bengio p over split means")
 fam12 = []
