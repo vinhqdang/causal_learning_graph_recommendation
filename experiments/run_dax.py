@@ -1,6 +1,10 @@
 """DAX on KuaiRand (paper/v7/DESIGN.md, Sections 5 and 6, item 2): detection-adjusted item appeal added to a backbone.
 
 Backbones (--backbone):
+  none          no backbone, no training: the backbone score is 0 for every candidate, so the score is the DAX term alone
+                (method "DAX alone"; with gamma 0 every candidate ties and the stable sort keeps the candidate-list order,
+                ascending item row). Also reports "Popularity": the number of pre-cut clicks of the item in the training
+                log (drup.dax.pre_cut), one configuration, the same splits and candidate lists. posthoc only.
   leaf_lgn      LEAF-LGN (the lr, wd, w grid of experiments/run_leaf.py --variant lgn)
   ease          EASE(click + w shown) + beta * popularity (E0 of the probes); DAX post hoc on top (E1)
   lightgcn      LightGCN, retrained at the stored configurations of results/v10/learned_kuairand_t_base.json
@@ -16,9 +20,11 @@ Modes (--mode, leaf_lgn and lightgcn; qp_posthoc and ease are posthoc):
 --dax_grid: posthoc full = the 32 configurations of the probe P3* (prior {80, 160} x centre {tag, content} x k_life
 {0, 100} x tab {off, on} x stratum cells {off, 80}); posthoc small = prior 80, tag centre, k_life 100, tab on.
 joint full = prior {40, 80, 160} x k_life {0, 100}, tab on; joint small = prior 80, k_life 100, tab on.
---ablate (leaf_lgn posthoc only; the full arm is always run): each arm is its own method, selected like the full arm.
+--ablate (leaf_lgn and none, posthoc only; the full arm is always run): each arm is its own method, selected like the full arm.
   no_tab, no_life_prior, no_tag_prior   the DAX grid with that switch at its off value (drup.dax.dax_variant), duplicates
                                         removed (16 configurations each on the full grid)
+  no_exam                               examination off (exam False: theta = kappa = 1, alpha = tag-shrunk click rate);
+                                        8 configurations on the full grid (prior x centre x stratum cells)
   additive      MRP-style logistic with tab effects (drup.dax.fit_additive), 32 configurations matched to the DAX
                 grid (additive_grid): item ridge lam_e, tag-effect ridge lam_g, tab on / off
   shuffle_items alpha permuted within tag (the tag mean kept); shuffle_tags alpha permuted across all items
@@ -84,7 +90,7 @@ SIG_EXCLUDE = ("out", "threads", "device")
 KEY = "ndcg@10"
 GAMMAS = (0.0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.7, 1.0)
 GAMMAS_SMALL = (0.1, 0.25, 0.5, 0.7, 1.0)          # the gamma grid of the ablation setting (--gammas)
-ABLATIONS = ("no_tab", "no_life_prior", "no_tag_prior", "additive", "shuffle_items", "shuffle_tags")
+ABLATIONS = ("no_tab", "no_life_prior", "no_tag_prior", "no_exam", "additive", "shuffle_items", "shuffle_tags")
 ADD_LAM_E = (5.0, 20.0, 80.0, 320.0)
 ADD_LAM_G = (0.1, 1.0, 10.0, 100.0)
 QP_METHODS = ("DR-BPR-LGN-1", "DR-BPR-LGN-p2", "DR-BPR-LGN-p")
@@ -252,7 +258,7 @@ def dax_arms(d, dax_name, grid, ablate, life, strata, content, tags, perm_seeds)
 
     arms = [(dax_name, [(c, channel(c)) for c in grid])]
     for ab in ablate:
-        if ab in ("no_tab", "no_life_prior", "no_tag_prior"):
+        if ab in ("no_tab", "no_life_prior", "no_tag_prior", "no_exam"):
             kws = []
             for c in grid:
                 kw = dax_variant(c, ab)
@@ -433,6 +439,26 @@ def run_leaf_joint(a, d, sel, state, save, layout, pop, m, n, grid, npz, life, s
             save()
 
 
+def run_none(a, d, post, state, save, layout, n):
+    """No backbone: the DAX arms on a zero backbone score (one evaluation over every configuration and gamma; the
+    selection is over DAX x gamma per split), and the popularity method, the pre-cut clicks of each item (the log of
+    fit_dax_dataset, drup.dax.pre_cut), one configuration."""
+    S = post.n_splits
+    if "none" not in state["done"]:
+        zeros = [torch.zeros(bk["cand"].shape, dtype=torch.float64) for bk in layout.buckets]
+        post.add_epoch(zeros, dict(backbone="none"), 0, active=[True] * S)
+        state["done"].append("none")
+        save()
+    if "popularity" not in state["done"]:
+        log = pre_cut(d["log"])
+        clicks = np.bincount(log.i.values[log.is_click.values > 0], minlength=n).astype(np.float64)
+        clicks = torch.as_tensor(clicks)
+        post.sels["Popularity"].add([clicks[bk["cand"]] for bk in layout.buckets], dict(method="Popularity"),
+                                    new_config=True)
+        state["done"].append("popularity")
+        save()
+
+
 def run_ease(a, d, post, state, save, layout, pop, n):
     """EASE(click + w shown) + beta * popularity (E0), with the DAX arm post hoc (E1). The base is the closed-form
     score of drup.leaf.compact_base (row-standardised over all items), as in the probes."""
@@ -528,7 +554,7 @@ def result_of(r):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--backbone", required=True, choices=["leaf_lgn", "ease", "lightgcn", "qp_posthoc"])
+    ap.add_argument("--backbone", required=True, choices=["none", "leaf_lgn", "ease", "lightgcn", "qp_posthoc"])
     ap.add_argument("--mode", default="posthoc", choices=["posthoc", "joint"])
     ap.add_argument("--dataset", default="kuairand27k", choices=sorted(DATASETS))
     ap.add_argument("--dax_grid", default="full", choices=["full", "small"])
@@ -567,15 +593,17 @@ def main():
                     help="device of the backbone computations (leaf_lgn posthoc and qp_posthoc only)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
-    if a.backbone in ("qp_posthoc", "ease"):
+    if a.backbone in ("qp_posthoc", "ease", "none"):
         a.mode = "posthoc"
     if a.device == "cuda" and (a.mode == "joint" or a.backbone not in ("leaf_lgn", "qp_posthoc")):
         ap.error("--device cuda is for leaf_lgn and qp_posthoc in posthoc mode")
     get_device(a.device)                 # fails here, before any data is read, when cuda is not available
-    if a.backbone in ("ease", "qp_posthoc", "lightgcn") and a.mode == "joint":
+    if a.backbone in ("ease", "qp_posthoc", "lightgcn", "none") and a.mode == "joint":
         ap.error("--mode joint is for leaf_lgn")
-    if a.backbone not in ("leaf_lgn", "qp_posthoc") and (a.ablate or a.select_from):
-        ap.error("--ablate is for leaf_lgn; --select_from is for leaf_lgn and qp_posthoc")
+    if a.backbone not in ("leaf_lgn", "qp_posthoc", "none") and a.ablate:
+        ap.error("--ablate is for leaf_lgn and none")
+    if a.backbone not in ("leaf_lgn", "qp_posthoc") and a.select_from:
+        ap.error("--select_from is for leaf_lgn and qp_posthoc")
     if a.backbone == "qp_posthoc" and a.ablate:
         ap.error("--ablate is for leaf_lgn")
     if a.backbone == "qp_posthoc" and a.select_from and a.epoch_window < 0:
@@ -614,9 +642,12 @@ def main():
     life = lifelong_rate(d["users_raw"], ds["lifelong"])
     strata = user_strata(d["users_raw"], ds["lifelong"])
     tags = tag_codes(d["item_feat"])
-    dax_name = {"leaf_lgn": "LEAF-LGN", "ease": "EASE", "lightgcn": "LightGCN", "qp_posthoc": "QP family"}[a.backbone]
-    dax_name += "+DAX" if a.mode == "posthoc" else "+DAX (joint)"
-    base_name = dax_name.split("+DAX")[0]
+    if a.backbone == "none":
+        dax_name, base_name = "DAX alone", "none"          # internal name of the zero-score base selector
+    else:
+        dax_name = {"leaf_lgn": "LEAF-LGN", "ease": "EASE", "lightgcn": "LightGCN", "qp_posthoc": "QP family"}[a.backbone]
+        dax_name += "+DAX" if a.mode == "posthoc" else "+DAX (joint)"
+        base_name = dax_name.split("+DAX")[0]
 
     sig = json.loads(json.dumps({k: v for k, v in vars(a).items() if k not in SIG_EXCLUDE}))
     state = {"done": []}
@@ -628,7 +659,9 @@ def main():
             arms = arms[:1]
         post = Posthoc(layout, splits, row_ids, lengths, base_name, arms, base_std=(a.backbone != "ease"),
                        gammas=a.gammas, cache_z=not a.no_zcache)
-        names = list(post.sels)
+        if a.backbone == "none":
+            post.sels["Popularity"] = BucketSelector(layout, splits, (10,), KEY, row_ids)
+        names = [nm for nm in post.sels if a.backbone != "none" or nm != base_name]
         sels = post.sels
     else:
         grid = joint_grid(a.dax_grid == "small")
@@ -659,7 +692,9 @@ def main():
             json.dump({"sig": sig, "state": state, "sel": sel}, f)
         os.replace(path + ".tmp", path)
 
-    if plans is not None:
+    if a.backbone == "none":
+        run_none(a, d, post, state, save, layout, n)
+    elif plans is not None:
         run_leaf_posthoc(a, d, post, state, save, layout, plans, npz, pop, m, n)
     elif a.backbone == "leaf_lgn":
         run_leaf_joint(a, d, post, state, save, layout, pop, m, n, grid, npz, life, strata)

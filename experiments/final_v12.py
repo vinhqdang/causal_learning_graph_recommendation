@@ -39,7 +39,7 @@ B2_ADDITIVE = 4.0     # x1e-3
 # are the full grid with one switch off (16 distinct configurations); additive is matched to 32 (additive_grid);
 # the shuffles run 32 configurations once per permutation seed
 GRID_SIZE = {"full": 32, "no_tab": 16, "no_life_prior": 16, "no_tag_prior": 16, "additive": 32,
-             "shuffle_items": 32, "shuffle_tags": 32}
+             "shuffle_items": 32, "shuffle_tags": 32, "no_exam": 8}
 V12 = os.environ.get("V12_OUT", "results/v12/").rstrip("/") + "/"
 OUT = os.environ.get("FINAL_OUT", V12 + "final12.txt")
 PUB = "results/v14/learned_kuairand_t_pub.json"  # NAVIP, IPS-MF, DR-JL, MRDR (run_learned_t, 4 configurations each)

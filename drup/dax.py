@@ -55,7 +55,7 @@ def pre_cut(log, cut=CUT_MS):
 
 
 def fit_dax(log, n_users, n_items, tag_codes, life_rate=None, prior=80.0, k_life=100.0, tab=True, centre="tag",
-            content_codes=None, strata=None, prior_s=None, iters=40):
+            content_codes=None, strata=None, prior_s=None, iters=40, exam=True):
     """EM of the detection x attractiveness model on the training impressions `log` (columns u, i, tab, is_click;
     already restricted to the pre-cut period by the caller, see fit_dax_dataset).
 
@@ -66,6 +66,8 @@ def fit_dax(log, n_users, n_items, tag_codes, life_rate=None, prior=80.0, k_life
                mean examination); 0 = no lifelong prior, theta_u gets a Beta(2, 2) pseudo-count prior
     tab        tab-specific examination kappa_t (kappa of the first tab with impressions, 1, is the reference)
     strata     optional (n_users,) user strata and prior_s: item x stratum alpha_{i,s} shrunk to alpha_i (MRP cells)
+    exam       False = examination off (ablation no_exam): theta_u = kappa_t = 1 for all users and tabs, no updates, so
+               P(E=1) = 1, P(R=1) = y and alpha_i = (clicks_i + prior c_i) / (n_i + prior), a tag-shrunk click rate
 
     Returns (logit_alpha (n,), theta (m,), kappa (T,), logit_alpha_strata (n, S) or None), float32 except kappa.
     The M-steps are closed form: theta_u = (sum P(E=1) + k c_u) / (sum kappa + k), kappa_t = sum P(E=1) over tab t
@@ -92,7 +94,7 @@ def fit_dax(log, n_users, n_items, tag_codes, life_rate=None, prior=80.0, k_life
     if use_s:
         S = int(strata.max()) + 1
         su = torch.as_tensor(np.asarray(strata), dtype=torch.long)[u]
-    th = torch.full((m,), 0.7, dtype=torch.float64)
+    th = torch.full((m,), 0.7 if exam else 1.0, dtype=torch.float64)
     ka = torch.ones(T, dtype=torch.float64)
     al = torch.full((n,), 0.6, dtype=torch.float64)
     als = torch.full((n, S), 0.6, dtype=torch.float64) if use_s else None
@@ -101,23 +103,27 @@ def fit_dax(log, n_users, n_items, tag_codes, life_rate=None, prior=80.0, k_life
         nis = torch.zeros(n * S, dtype=torch.float64).index_add_(0, i * S + su,
                                                                torch.ones(len(i), dtype=torch.float64)).view(n, S)
     for it in range(iters):
-        a = als[i, su] if use_s else al[i]
-        t = (th[u] * ka[tb]).clamp(1e-6, 1 - 1e-6)
-        den = (1 - t * a).clamp_min(1e-9)
-        pE = torch.where(y > 0, torch.ones_like(t), t * (1 - a) / den)
-        pR = torch.where(y > 0, torch.ones_like(t), (1 - t) * a / den)
-        sE = torch.zeros(m, dtype=torch.float64).index_add_(0, u, pE)
-        sK = torch.zeros(m, dtype=torch.float64).index_add_(0, u, ka[tb])
-        if k_life > 0:
-            c0 = (lr * (sE.sum() / sK.sum())).clamp(1e-3, 1.0)
-            th = ((sE + k_life * c0) / (sK + k_life)).clamp(1e-3, 1.0)
+        if exam:
+            a = als[i, su] if use_s else al[i]
+            t = (th[u] * ka[tb]).clamp(1e-6, 1 - 1e-6)
+            den = (1 - t * a).clamp_min(1e-9)
+            pE = torch.where(y > 0, torch.ones_like(t), t * (1 - a) / den)
+            pR = torch.where(y > 0, torch.ones_like(t), (1 - t) * a / den)
+            sE = torch.zeros(m, dtype=torch.float64).index_add_(0, u, pE)
+            sK = torch.zeros(m, dtype=torch.float64).index_add_(0, u, ka[tb])
+            if k_life > 0:
+                c0 = (lr * (sE.sum() / sK.sum())).clamp(1e-3, 1.0)
+                th = ((sE + k_life * c0) / (sK + k_life)).clamp(1e-3, 1.0)
+            else:
+                th = ((sE + 1.0) / (sK + 2.0)).clamp(1e-3, 1.0)
+            if tab:
+                kE = torch.zeros(T, dtype=torch.float64).index_add_(0, tb, pE)
+                kN = torch.zeros(T, dtype=torch.float64).index_add_(0, tb, th[u])
+                ka = (kE + 1.0) / (kN + 1.0)
+                ka = ka / ka[1]                                        # tab 1 (the test scenario) is the reference
         else:
-            th = ((sE + 1.0) / (sK + 2.0)).clamp(1e-3, 1.0)
-        if tab:
-            kE = torch.zeros(T, dtype=torch.float64).index_add_(0, tb, pE)
-            kN = torch.zeros(T, dtype=torch.float64).index_add_(0, tb, th[u])
-            ka = (kE + 1.0) / (kN + 1.0)
-            ka = ka / ka[1]                                            # tab 1 (the test scenario) is the reference
+            pE = torch.ones_like(y)                                    # no examination: every impression is seen
+            pR = y.clone()                                             # so a click is the attraction itself
         sR = torch.zeros(n, dtype=torch.float64).index_add_(0, i, pR)
         if centre == "global":
             c = torch.full((n,), float((sR.sum() + 1.0) / (ni.sum() + 2.0)), dtype=torch.float64)
@@ -227,7 +233,8 @@ def dax_variant(cfg, ablation=None):
     """Configuration of one DAX ablation arm (gate B2, DESIGN.md Section 6). ablation None is the switch off: the
     configuration is returned unchanged, so the arm is the full DAX arm. Otherwise the named switch takes its off value:
     no_tab (no examination factor kappa_t), no_life_prior (k_life = 0, no lifelong prior on theta_u), no_tag_prior
-    (alpha_i centred on the global mean, not on its tag)."""
+    (alpha_i centred on the global mean, not on its tag), no_exam (no examination at all: exam False, which implies
+    tab False and k_life 0; the arm is the tag-shrunk click rate). Only no_exam adds a key to the configuration."""
     if ablation is None:
         return dict(cfg)
     if ablation == "no_tab":
@@ -236,6 +243,8 @@ def dax_variant(cfg, ablation=None):
         return dict(cfg, k_life=0.0)
     if ablation == "no_tag_prior":
         return dict(cfg, centre="global")
+    if ablation == "no_exam":
+        return dict(cfg, exam=False, tab=False, k_life=0.0)
     raise ValueError(f"unknown DAX ablation {ablation!r}")
 
 
