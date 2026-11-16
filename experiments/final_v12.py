@@ -537,6 +537,23 @@ out()
 # ---------------------------------------------------------------------------------------------
 # Reproduction checks and information (not gates)
 # ---------------------------------------------------------------------------------------------
+LGN_ABLATE = V10 + "leaf_lgn_ablate.json"
+out("5c. LEAF-LGN controls (v14): the trained LEAF-LGN against the same model with the lifelong channels removed,")
+out("   with the lifelong tables assigned to shuffled users, and with the policy channel removed (each arm selected on")
+out("   validation over its own grid); per-user paired difference x1e-3 nDCG@10, Nadeau-Bengio p over split means")
+if os.path.exists(LGN_ABLATE) and "LEAF-LGN(stored)" in M:
+    for arm in ("no_lifelong", "shuffle_users", "no_policy"):
+        a = method_from(LGN_ABLATE, f"LEAF-LGN[{arm}]")
+        if a is None:
+            continue
+        mu, sd = mean_sd(a)
+        r = pair(M["LEAF-LGN(stored)"], a, EXPECTED_N)
+        out(f"  LEAF-LGN[{arm}] {mu:.4f} +- {sd:.4f} ({a['n_configs']} configurations)")
+        out(line(f"LEAF-LGN - LEAF-LGN[{arm}]", r))
+else:
+    out("  not run (results/v10/leaf_lgn_ablate.json missing)")
+out()
+
 out("6. Checks and information (not gates)")
 if "LEAF-LGN" in M and "LEAF-LGN(stored)" in M:
     out(line("info: LEAF-LGN (posthoc run) - LEAF-LGN (stored)", pair(M["LEAF-LGN"], M["LEAF-LGN(stored)"], EXPECTED_N)))

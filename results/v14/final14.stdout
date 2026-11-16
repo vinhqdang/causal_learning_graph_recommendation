@@ -130,6 +130,16 @@ Inputs missing or not used:
     chosen (prior, k_life) over the 5 splits, extended grid: (10, 400) x1, (20, 100) x1, (20, 400) x1, (40, 100) x1, (40, 400) x1
   QP family + DAX: not run (daxref / daxwide file missing or incomplete)
 
+5c. LEAF-LGN controls (v14): the trained LEAF-LGN against the same model with the lifelong channels removed,
+   with the lifelong tables assigned to shuffled users, and with the policy channel removed (each arm selected on
+   validation over its own grid); per-user paired difference x1e-3 nDCG@10, Nadeau-Bengio p over split means
+  LEAF-LGN[no_lifelong] 0.4614 +- 0.0018 (12 configurations)
+  LEAF-LGN - LEAF-LGN[no_lifelong]               +11.46 [ 1.71]  p=2.82e-39  NB p=0.018  (splits +11.2 +13.7 +12.7 +9.8 +9.3)
+  LEAF-LGN[shuffle_users] 0.4624 +- 0.0015 (12 configurations)
+  LEAF-LGN - LEAF-LGN[shuffle_users]             +10.65 [ 1.77]  p=4.04e-32  NB p=0.002  (splits +11.4 +9.0 +10.7 +10.4 +10.4)
+  LEAF-LGN[no_policy] 0.4733 +- 0.0008 (4 configurations)
+  LEAF-LGN - LEAF-LGN[no_policy]                  -0.55 [ 0.33]  p=1.13e-03  NB p=0.793  (splits +0.0 +0.0 +0.0 +0.0 -2.4)
+
 6. Checks and information (not gates)
   info: LEAF-LGN (posthoc run) - LEAF-LGN (stored)    +0.73 [ 0.52]  p=5.38e-03  NB p=0.660  (splits +0.1 +0.0 +1.4 +0.2 +2.4)
   QP family (retrained) - QP family (stored)      +1.70 [ 0.70]  p=1.89e-06  NB p=0.803  (splits -0.0 +2.2 +2.9 -3.8 +7.6)
