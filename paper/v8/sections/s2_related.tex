@@ -1,9 +1,8 @@
 \section{Related work}
 \label{sec:related}
 
-We organise the related work by the question that each line of work answers. Each subsection ends with the
-difference from the present work. Table~\ref{tab:positioning} collects the closest works, and the paragraph after
-it states the novelty claim.
+Each subsection ends with the difference from the present work. Table~\ref{tab:positioning} collects the closest
+works.
 
 \subsection{Lifelong behaviour models}
 \label{sec:rel-lifelong}
@@ -67,8 +66,8 @@ Popularity-bias work \citep{zhang2021pda} applies a causal intervention to the p
 protocol because the randomly exposed data serve only for validation and test. Two further graph methods, adversarial
 edge dropout and the removal of a popularity direction from the embeddings after training, are relevant here
 \citep{zhang2024advdrop,islam2026ppd}; neither is re-run in this paper.
-The backbones used in our experiments are LightGCN \citep{he2020lightgcn}, EASE \citep{steck2019ease} and the
-r-AdjNorm normalisation \citep{zhao2022radjnorm}.
+The backbones in our experiments are LightGCN \citep{he2020lightgcn}, EASE \citep{steck2019ease}, the r-AdjNorm
+normalisation \citep{zhao2022radjnorm}, DIN and SIM (Section~\ref{sec:protocol-baselines}).
 \textit{Difference.} The graph methods above act on propagation or on the embeddings and use no impressions and no
 lifelong data, whereas DAX re-estimates item appeal from the impressions under a different audience, and LEAF adds
 user-side behaviour on other items.
@@ -99,7 +98,8 @@ random test, which is the source of the LEAF channels here.
 \toprule
 Work & What it estimates, and from which data & Difference from this work \\
 \midrule
-SIM \citep{pi2020sim}; TWIN \citep{chang2023twin} & CTR from lifelong sequences; policy logs; history and target share item ids & Exposure-conditional statistics; transfer to a disjoint pool through content keys; randomised test; SIM and TWIN not run on the main setting \\
+SIM \citep{pi2020sim}; TWIN \citep{chang2023twin} & CTR from lifelong sequences; policy logs; history and target share item ids & Exposure-conditional statistics; transfer to a disjoint pool through content keys; randomised test; SIM run here (SIM-hard, 27K and 1K); TWIN not run \\
+DIN \citep{zhou2018din} & Attention over the last 200 lifelong events; policy logs & Same comparison with DAX added; DIN run here on 27K and 1K \\
 Examination models \citep{richardson2007predicting,craswell2008cascade,chuklin2015clickmodels} & Click as examination times attractiveness; position or list scan & User and scenario examination; no position term; uniform-insertion target \\
 Dynamic Bayesian network \citep{chapelle2009dbn} & Perceived versus actual relevance with satisfaction & No satisfaction state \\
 Regression-EM \citep{wang2018regressionem,wang2016selection} & Position bias and relevance without randomisation; personal search & Item appeal under a uniform audience; generative fit by EM over user and tab \\
@@ -116,5 +116,5 @@ KuaiRand evaluations \citep{gao2022kuairand,zhang2026categorymeans} & Random ins
 The novelty claim is therefore a combination and its controlled evidence, not any single ingredient. Each ingredient has
 a precedent: lifelong behaviour statistics, examination multiplied by attractiveness, and Beta shrinkage towards a group
 mean. As far as our searches went, none of the works in Table~\ref{tab:positioning} evaluates the combination in the form
-used here, which has lifelong channels built from other pools, examination factors for the user and the scenario, and a
-temporal protocol on randomly inserted items, with tuned baselines and split-level inference.
+used here, which has lifelong channels built from other pools, examination factors for the user and the scenario, and
+randomly inserted items as the test target.

@@ -1,0 +1,90 @@
+Numbers computed by experiments/v13_tables.py from results/v10, results/v11 and results/v12 (JSON).
+Differences: per-user paired mean x1e-3 nDCG@10 [95% half-width]; p = two-sided t test over pooled users;
+NB p = Nadeau-Bengio test over the five split means (frac_val 0.3); Holm adjustments within the family named.
+
+[main family, Holm over 9 comparators: table tab:main]
+  LEAF-LGN+DAX - QP family: +22.32 [1.83] p=3.637e-125 NB p=0.0228 splits +19.83 +22.21 +21.84 +17.81 +28.03 p_Holm=2.546e-124 NB_Holm=0.0456
+  LEAF-LGN+DAX - QP family+DAX: +12.04 [1.63] p=3.960e-47 NB p=0.0056 splits +10.75 +12.95 +10.70 +11.79 +13.88 p_Holm=7.920e-47 NB_Holm=0.0223
+  LEAF-LGN+DAX - LEAF-LGN: +11.96 [1.47] p=6.551e-57 NB p=0.0014 splits +11.85 +12.43 +11.96 +10.16 +12.40 p_Holm=1.965e-56 NB_Holm=0.0068
+  LEAF-LGN+DAX - r-AdjNorm: +23.79 [1.96] p=2.431e-123 NB p=0.0000 splits +23.72 +23.21 +24.17 +22.17 +23.32 p_Holm=1.459e-122 NB_Holm=0.0003
+  LEAF-LGN+DAX - LightGCN: +28.15 [1.86] p=5.334e-190 NB p=0.0081 splits +25.07 +26.26 +30.45 +24.50 +32.63 p_Holm=4.800e-189 NB_Holm=0.0244
+  LEAF-LGN+DAX - DIN: +18.26 [1.97] p=1.406e-73 NB p=0.0011 splits +19.00 +18.04 +17.27 +15.89 +19.12 p_Holm=7.029e-73 NB_Holm=0.0066
+  LEAF-LGN+DAX - DIN+DAX: +5.73 [1.64] p=7.947e-12 NB p=0.0429 splits +6.32 +4.62 +7.56 +4.76 +5.34 p_Holm=7.947e-12 NB_Holm=0.0456
+  LEAF-LGN+DAX - SIM: +26.44 [2.01] p=3.553e-144 NB p=0.0000 splits +25.50 +26.01 +26.90 +25.88 +27.38 p_Holm=2.842e-143 NB_Holm=0.0003
+  LEAF-LGN+DAX - SIM+DAX: +14.72 [1.77] p=1.391e-59 NB p=0.0008 splits +15.30 +13.72 +13.80 +16.07 +14.67 p_Holm=5.563e-59 NB_Holm=0.0054
+
+[sensitivity family, Holm over 11 comparators: table tab:sens]
+  QP family: p_Holm=2.910e-124 NB_Holm=0.0456
+  QP family+DAX: p_Holm=7.920e-47 NB_Holm=0.0223
+  LEAF-LGN: p_Holm=1.965e-56 NB_Holm=0.0068
+  r-AdjNorm: p_Holm=1.702e-122 NB_Holm=0.0004
+  LightGCN: p_Holm=5.334e-189 NB_Holm=0.0244
+  DIN: p_Holm=7.029e-73 NB_Holm=0.0066
+  DIN+DAX: p_Holm=7.947e-12 NB_Holm=0.0456
+  SIM: p_Holm=3.198e-143 NB_Holm=0.0003
+  SIM+DAX: p_Holm=5.563e-59 NB_Holm=0.0061
+  EASE: p_Holm=7.185e-204 NB_Holm=0.0013
+  EASE+DAX: p_Holm=9.133e-115 NB_Holm=0.0061
+
+[backbones, raw p values: table tab:backbone]
+  EASE+DAX - EASE: +11.98 [1.64] p=2.265e-46 NB p=0.0000 splits +11.49 +11.54 +11.24 +11.83 +11.92
+  LightGCN+DAX - LightGCN (retrained run, dax_lightgcn.json): +11.60 [1.51] p=4.229e-51 NB p=0.0009 splits +9.97 +10.93 +12.14 +11.18 +11.53
+  LightGCN+DAX - LightGCN (stored, learned_kuairand_t_base.json): +13.73 [1.46] p=9.098e-76 NB p=0.0908 splits +9.33 +11.77 +15.74 +11.18 +18.63
+  QP family+DAX - QP family (stored): +10.28 [1.37] p=1.086e-48 NB p=0.1055 splits +9.08 +9.26 +11.14 +6.02 +14.16
+  LEAF-LGN+DAX - LEAF-LGN (post-hoc run): +11.96 [1.47] p=6.551e-57 NB p=0.0014 splits +11.85 +12.43 +11.96 +10.16 +12.40
+  DIN+DAX - DIN: +12.53 [1.41] p=1.300e-67 NB p=0.0109 splits +12.67 +13.41 +9.71 +11.12 +13.78
+  SIM+DAX - SIM: +11.72 [1.46] p=3.307e-55 NB p=0.0084 splits +10.20 +12.29 +13.10 +9.82 +12.70
+
+[ablations, KuaiRand-27K, base = LEAF-LGN of the ablation run: table tab:ablate]
+  base mean 0.4706 (n_configs 2: backbone trainings of the ablation run)
+  gains (Holm within these 7):
+    full DAX: +15.10 [1.42] p=1.260e-95 NB p=0.0093 splits +12.41 +15.63 +16.63 +12.84 +16.20 p_Holm=8.820e-95
+    no examination factor kappa_t: +13.59 [1.43] p=2.456e-77 NB p=0.0115 splits +10.60 +14.40 +14.84 +11.91 +14.49 p_Holm=1.276e-76
+    no lifelong prior on theta_u: +13.31 [1.43] p=1.981e-73 NB p=0.0066 splits +11.09 +14.40 +14.71 +11.79 +13.10 p_Holm=7.925e-73
+    no tag prior on alpha_i: +11.68 [1.22] p=2.127e-77 NB p=0.0016 splits +10.24 +11.95 +12.26 +10.62 +12.12 p_Holm=1.276e-76
+    additive logit (MRP-style), tab effects: +9.01 [1.25] p=3.068e-45 NB p=0.0239 splits +7.21 +10.13 +10.67 +7.39 +8.74 p_Holm=9.204e-45
+    alpha shuffled across items: -0.27 [0.36] p=1.476e-01 NB p=0.7540 splits +0.08 -0.02 -0.54 +0.15 -0.79 p_Holm=1.476e-01
+    alpha shuffled within tag: +6.28 [1.10] p=6.166e-29 NB p=0.0010 splits +5.85 +6.56 +6.09 +5.67 +6.71 p_Holm=1.233e-28
+    alpha shuffled across items, permutation seed 0: -0.44 [0.50] p=7.903e-02 NB p=0.5102 splits -0.12 -0.26 -0.78 -0.09 -0.84
+    alpha shuffled within tag, permutation seed 0: +5.66 [1.14] p=1.877e-22 NB p=0.0098 splits +5.23 +5.89 +5.50 +4.61 +6.63
+    alpha shuffled across items, permutation seed 1: -0.16 [0.53] p=5.555e-01 NB p=0.9859 splits +0.34 -0.10 -0.23 +0.58 -0.65
+    alpha shuffled within tag, permutation seed 1: +6.84 [1.13] p=1.497e-32 NB p=0.0023 splits +6.29 +6.77 +6.98 +6.06 +7.62
+    alpha shuffled across items, permutation seed 2: -0.20 [0.51] p=4.545e-01 NB p=0.7750 splits +0.04 +0.30 -0.62 -0.03 -0.89
+    alpha shuffled within tag, permutation seed 2: +6.35 [1.24] p=1.144e-23 NB p=0.0014 splits +6.02 +7.01 +5.79 +6.34 +5.89
+  full minus arm (Holm within these 6):
+    no examination factor kappa_t: +1.51 [0.79] p=2.022e-04 NB p=0.0761 splits +1.81 +1.23 +1.79 +0.93 +1.72 p_Holm=2.022e-04
+    no lifelong prior on theta_u: +1.78 [0.61] p=1.078e-08 NB p=0.2630 splits +1.33 +1.23 +1.93 +1.06 +3.10 p_Holm=2.155e-08
+    no tag prior on alpha_i: +3.41 [0.99] p=1.596e-11 NB p=0.1163 splits +2.18 +3.69 +4.37 +2.23 +4.09 p_Holm=4.787e-11
+    additive logit (MRP-style), tab effects: +6.09 [0.96] p=1.358e-35 NB p=0.0147 splits +5.21 +5.51 +5.96 +5.45 +7.46 p_Holm=5.433e-35
+    alpha shuffled across items: +15.36 [1.40] p=5.878e-102 NB p=0.0155 splits +12.33 +15.65 +17.17 +12.69 +16.99 p_Holm=3.527e-101
+    alpha shuffled within tag: +8.81 [1.00] p=4.947e-66 NB p=0.0313 splits +6.57 +9.08 +10.54 +7.17 +9.49 p_Holm=2.473e-65
+
+[seeds, KuaiRand-27K: table tab:seeds; raw p values]
+  seed 1: LEAF-LGN+DAX 0.4858, LEAF-LGN 0.4714; +14.67 [1.42] p=1.628e-90 NB p=0.0009 splits +15.59 +13.08 +14.63 +15.01 +13.70
+  seed 2: LEAF-LGN+DAX 0.4856, LEAF-LGN 0.4708; +15.10 [1.46] p=1.872e-90 NB p=0.0021 splits +13.36 +14.42 +16.92 +14.39 +14.87
+  seed 3: LEAF-LGN+DAX 0.4844, LEAF-LGN 0.4716; +12.89 [1.44] p=1.904e-68 NB p=0.0023 splits +12.95 +11.23 +14.39 +13.17 +12.24
+
+[deep baselines: table tab:deep; raw p values]
+  27K LEAF-LGN+DAX - DIN: +18.26 [1.97] p=1.406e-73 NB p=0.0011 splits +19.00 +18.04 +17.27 +15.89 +19.12 (mean 0.4675)
+  27K LEAF-LGN+DAX - DIN+DAX: +5.73 [1.64] p=7.947e-12 NB p=0.0429 splits +6.32 +4.62 +7.56 +4.76 +5.34 (mean 0.4796)
+  27K LEAF-LGN+DAX - SIM: +26.44 [2.01] p=3.553e-144 NB p=0.0000 splits +25.50 +26.01 +26.90 +25.88 +27.38 (mean 0.4590)
+  27K LEAF-LGN+DAX - SIM+DAX: +14.72 [1.77] p=1.391e-59 NB p=0.0008 splits +15.30 +13.72 +13.80 +16.07 +14.67 (mean 0.4706)
+  1K LEAF-LGN+DAX - DIN: +39.26 [10.37] p=2.633e-13 NB p=0.0020 splits +37.06 +37.69 +43.45 +44.37 +37.96 (mean 0.4189)
+  1K LEAF-LGN+DAX - DIN+DAX: +35.89 [9.25] p=7.102e-14 NB p=0.0017 splits +33.17 +39.96 +35.17 +38.83 +33.92 (mean 0.4228)
+  1K LEAF-LGN+DAX - SIM: +35.26 [9.24] p=1.697e-13 NB p=0.0073 splits +37.59 +31.03 +39.67 +29.55 +33.83 (mean 0.4246)
+  1K LEAF-LGN+DAX - SIM+DAX: +23.29 [8.69] p=1.809e-07 NB p=0.0950 splits +33.75 +24.82 +20.74 +21.66 +15.54 (mean 0.4357)
+
+[KuaiRand-1K: table tab:1k; Holm over the three comparisons]
+  LEAF-LGN+DAX - QP family: +37.58 [11.10] p=5.375e-11 NB p=0.0114 splits +36.67 +25.69 +35.61 +37.18 +36.55 p_Holm=1.612e-10 NB_Holm=0.0228
+  LEAF-LGN+DAX - QP family+DAX: +25.82 [9.66] p=1.956e-07 NB p=0.0073 splits +21.25 +20.29 +23.71 +23.11 +27.77 p_Holm=3.911e-07 NB_Holm=0.0218
+  QP family+DAX - QP family: +11.76 [8.54] p=7.036e-03 NB p=0.1605 splits +15.42 +5.41 +11.91 +14.06 +8.78 p_Holm=7.036e-03 NB_Holm=0.1605
+
+[LEAF controls, LEAF-tied, stage 1: table tab:leafctl; Holm over the eight arms]
+  LEAF-tied - LEAF-tied[shuffle_users]: +18.90 [1.99] p=6.130e-77 NB p=0.0008 splits +18.67 +19.80 +20.08 +17.18 +20.36 p_Holm=4.904e-76
+  LEAF-tied - LEAF-tied[no_tag]: +9.38 [1.63] p=2.344e-29 NB p=0.0022 splits +8.71 +10.81 +9.91 +8.89 +9.99 p_Holm=1.172e-28
+  LEAF-tied - LEAF-tied[no_author]: +6.45 [1.17] p=5.259e-27 NB p=0.0006 splits +5.82 +6.40 +6.01 +6.38 +6.88 p_Holm=2.104e-26
+  LEAF-tied - LEAF-tied[no_lifelong]: +17.88 [2.04] p=1.373e-65 NB p=0.0003 splits +16.73 +18.18 +18.20 +17.18 +19.20 p_Holm=9.609e-65
+  LEAF-tied - LEAF-tied[no_policy]: +5.01 [1.20] p=3.455e-16 NB p=0.0662 splits +3.92 +3.86 +5.04 +4.37 +6.76 p_Holm=6.910e-16
+  LEAF-tied - LEAF-tied[lift_only]: +5.78 [1.11] p=2.032e-24 NB p=0.0008 splits +5.19 +5.61 +5.41 +5.83 +6.20 p_Holm=6.097e-24
+  LEAF-tied - LEAF-tied[familiarity_only]: +10.26 [1.66] p=6.782e-34 NB p=0.0009 splits +9.66 +11.21 +11.04 +9.82 +11.02 p_Holm=4.069e-33
+  LEAF-tied - LEAF-tied[no_music]: identical rankings (0.00 [0.00]) p_Holm=1.000e+00

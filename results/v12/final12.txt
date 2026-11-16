@@ -120,5 +120,5 @@ Inputs missing or not used:
   info: LEAF-LGN (posthoc run) - LEAF-LGN (stored)    +0.73 [ 0.52]  p=5.38e-03  NB p=0.660  (splits +0.1 +0.0 +1.4 +0.2 +2.4)
   QP family (retrained) - QP family (stored)      +1.70 [ 0.70]  p=1.89e-06  NB p=0.803  (splits -0.0 +2.2 +2.9 -3.8 +7.6)
   EASE + DAX - EASE (E1 - E0)                    +11.98 [ 1.64]  p=2.27e-46  NB p=0.000  (splits +11.5 +11.5 +11.2 +11.8 +11.9)
-  LightGCN + DAX - LightGCN (retrained)          +13.73 [ 1.46]  p=9.10e-76  NB p=0.091  (splits +9.3 +11.8 +15.7 +11.2 +18.6)
+  LightGCN + DAX - LightGCN (stored, 4 configurations)   +13.73 [ 1.46]  p=9.10e-76  NB p=0.091  (splits +9.3 +11.8 +15.7 +11.2 +18.6)
 

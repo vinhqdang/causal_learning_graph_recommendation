@@ -49,7 +49,7 @@ def fig_forest(c):
     y = np.arange(len(rows))[::-1]
     for yi, (k, r) in zip(y, rows):
         if r is None:
-            ax.text(1.0, yi, "not run yet (TBD)", color=MUTED, va="center", ha="left", fontsize=7.5)
+            ax.text(1.0, yi, "no result file", color=MUTED, va="center", ha="left", fontsize=7.5)
         else:
             for d in r["split_diffs"]:
                 ax.plot(d, yi, "o", ms=3.2, color=MUTED, mec="none", zorder=2)

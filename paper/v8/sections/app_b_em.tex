@@ -32,6 +32,13 @@ and all $\kappa_t$ are divided by the value of the reference tab (code 1) after 
 \]
 clipped to $[10^{-4},1-10^{-4}]$, where $n_i$ is the number of pre-cut rows of item $i$.
 
+\paragraph{Approximation and clamps.} The updates for $\theta_u$ and $\kappa_t$ are closed forms, not the exact maximisers of the
+expected complete-data log-likelihood under the stated priors. The exact stationarity condition has $(1-P(E=1\mid y))\kappa_t/(1-\tau)$
+in place of $\kappa_t$ in the denominator, and the implemented sum counts every row, so the $\theta_u$ update is an approximate closed form
+and not the MAP estimate of the Beta prior. The implementation also clamps the values: the E-step product $\tau=\theta_u\kappa_t$ to
+$[10^{-6},1-10^{-6}]$, the E-step denominator $1-\tau\alpha_i$ from below at $10^{-9}$, $\theta_u$ and $\kappa_t$ to $[10^{-3},1]$ (the lifelong
+centre to the same range), and $\alpha_i$ to $[10^{-4},1-10^{-4}]$ (\texttt{drup/dax.py}, lines 105 to 133).
+
 \paragraph{Strata.} The optional user-stratum cells $\alpha_{i,s}$ of the main run use the same update with $\alpha_i$ as the centre and the cell prior strength $\texttt{prior\_s}=80$ (\texttt{results/v11/dax\_lgn\_post.json}, chosen configurations).
 
 \paragraph{Output.} The fit returns $\operatorname{logit}\alpha_i$, $\theta_u$ and $\kappa_t$. The combined score of the method section uses $\operatorname{logit}\alpha_i$ standardised over each user's candidate list.

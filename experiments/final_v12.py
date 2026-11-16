@@ -544,7 +544,7 @@ if "LEAF-LGN+DAX (joint)" in M and "LEAF-LGN+DAX" in M:
 if "EASE+DAX" in M and "EASE" in M:
     out(line("EASE + DAX - EASE (E1 - E0)", pair(M["EASE+DAX"], M["EASE"], EXPECTED_N)))
 if "LightGCN+DAX" in M and "LightGCN" in M:
-    out(line("LightGCN + DAX - LightGCN (retrained)", pair(M["LightGCN+DAX"], M["LightGCN"], EXPECTED_N)))
+    out(line("LightGCN + DAX - LightGCN (stored, 4 configurations)", pair(M["LightGCN+DAX"], M["LightGCN"], EXPECTED_N)))
 out()
 
 header = ["Final analysis (v12): DAX, lifelong-aware deep baselines, extended grid; KuaiRand-27K unless stated, nDCG@10",

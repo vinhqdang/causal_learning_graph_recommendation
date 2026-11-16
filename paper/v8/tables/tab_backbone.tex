@@ -1,7 +1,7 @@
 \begin{table}[tbp]
 \centering
 \footnotesize
-\caption{DAX is backbone-agnostic: nDCG@10 without and with the post-hoc DAX module on KuaiRand-27K, paired difference x1e-3 with the 95\% half-width, two-sided t test and the Nadeau-Bengio test over the split means.}
+\caption{DAX on six backbones: nDCG@10 without and with the post-hoc DAX module on KuaiRand-27K, paired difference x1e-3 with the 95\% half-width, two-sided t test and the Nadeau-Bengio test over the split means.}
 \label{tab:backbone}
 \begin{adjustbox}{max width=\linewidth}
 \begin{tabular}{lrcccc}
@@ -9,7 +9,7 @@
 Backbone & Without DAX & With DAX & Diff.\ [95\% hw] & $p$ & NB $p$ \\
 \midrule
 EASE & 0.4507 & 0.4623 & +11.98 [1.64] & $2.27\times10^{-46}$ & 0.000 \\
-LightGCN & 0.4576 & 0.4709 & +13.73 [1.46] & $9.10\times10^{-76}$ & 0.091 \\
+LightGCN (retrained run) & 0.4597 & 0.4709 & +11.60 [1.51] & $4.23\times10^{-51}$ & 0.001 \\
 QP family (stored) & 0.4634 & 0.4733 & +10.28 [1.37] & $1.09\times10^{-48}$ & 0.105 \\
 LEAF-LGN (post-hoc run) & 0.4736 & 0.4854 & +11.96 [1.47] & $6.55\times10^{-57}$ & 0.001 \\
 DIN & 0.4675 & 0.4796 & +12.53 [1.41] & $1.30\times10^{-67}$ & 0.011 \\
@@ -18,5 +18,5 @@ SIM & 0.4590 & 0.4706 & +11.72 [1.46] & $3.31\times10^{-55}$ & 0.008 \\
 \end{tabular}
 \end{adjustbox}
 \par\smallskip
-\begin{minipage}{\linewidth}\raggedright\footnotesize Raw p values (no family). The QP row uses the stored QP family as the reference, as in the fair-baseline reading.\end{minipage}
+\begin{minipage}{\linewidth}\raggedright\footnotesize Raw p values (no family). LightGCN: the base and the DAX arm come from the same run in \texttt{dax\_lightgcn.json} (3 base configurations; LightGCN+DAX searches 960). Against the stored four-configuration LightGCN of the main table the increment is +13.73 [1.46] (NB $p$ 0.091). The QP row uses the stored QP family as the base.\end{minipage}
 \end{table}
