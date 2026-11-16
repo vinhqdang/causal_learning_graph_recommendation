@@ -7,6 +7,9 @@
 \usepackage{hyperref}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\usepackage[section]{placeins}
 \begin{document}
 \begin{frontmatter}
 \title{Examination before attraction: lifelong affinities and detection-adjusted item appeal for recommendation under randomised exposure}
@@ -27,8 +30,7 @@ recommender systems \sep exposure bias \sep click models \sep lifelong user beha
 \input{sections/s7_limitations}
 \input{sections/s8_conclusion}
 \section*{Data and code availability}
-KuaiRand is publicly available \citep{gao2022kuairand}. The code that builds the lifelong statistics, fits DAX,
-trains all models and produces every table will be released upon publication.
+The KuaiRand data are publicly available \citep{gao2022kuairand}. The code will be made available upon publication.
 \bibliographystyle{elsarticle-harv}
 \bibliography{../refs,refs_new}
 \appendix

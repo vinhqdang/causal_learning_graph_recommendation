@@ -2,49 +2,42 @@
 \label{app:supp}
 
 This appendix holds the material that is not needed to follow the argument: the run costs and algorithms of the DAX fit,
-the alternative DAX centres, the leakage checks, the search grids of the baselines, the LEAF controls and the sensitivity of
-the Holm adjustment.
+the other DAX options, the detailed settings, the leakage checks, the search grids of the baselines, the LEAF controls,
+the sensitivity of the Holm adjustment and the training seeds.
 
-\subsection{Fay-Herriot and user-group alternatives of the DAX centre}\label{app:fh}
+\subsection{Other DAX options}\label{app:fh}
 
-The DAX grid of Section~\ref{sec:method-combine} also contains a Fay-Herriot style alternative \citep{fay1979smallarea}: after the
-first five iterations, $c_i=\sigma(\mu+x_i^\top\beta)$, where $x_i$ is a set of one-hot content codes (tag, upload type, video type,
-duration decile, aspect ratio, music type, and three bins of the out-of-pool author history), the ridge penalty is 10, and the
-weights are $\sqrt{n_i+1}$. The ablation without a tag prior replaces the centre by one global mean. A user-group option follows the
-idea of multilevel regression with poststratification: it keeps an attraction $\alpha_{i,s}$ for each group $s$ of users (five
-quantile groups of the lifelong click rate and one group without history), shrunk to $\alpha_i$ with strength 80.
+The variants of the DAX centre and of the user groups that the main experiment selects are defined in
+Section~\ref{sec:method-dax}. The remaining values of the search grid are a prior strength of 160, a lifelong strength of
+zero, the scenario factors switched off and no user groups. The main experiment did not select any of them in any split. The
+ablation without a tag prior replaces the centre by one global mean. The grid tables in \ref{app:grids} give the chosen values.
 
-\subsection{Implementation details of LEAF, LEAF-LGN and DAX}\label{app:impl}
+\subsection{Detailed settings of LEAF, LEAF-LGN and DAX}\label{app:impl}
 
 \paragraph{Temporal boundary} The cut-off $T_0$ is 2022-04-22 00:00 (UTC+8), the start of the random-exposure period. The latest
 impression used for training precedes $T_0$ by about two seconds, and the earliest random impression used for evaluation follows it by
 about ten hours. The lifelong statistics, the DAX fit, the popularity offset and the negative sampler read only events before $T_0$.
 
-\paragraph{Counts} Counts of out-of-pool impressions differ by less than 0.02\% between the raw logs and the aggregated tables.
+\paragraph{Counts} Counts of out-of-pool impressions differ by less than 0.02\% between the raw logs and the pooled tables.
 
-\paragraph{LEAF statistics} The shrinkage strength of the lift in Equation~\eqref{eq:lift} is $\eta=5$ pseudo-impressions. Each of the
-six channels is divided by the standard deviation of its non-zero entries over all user and pool-item cells and is not centred, so that a
-missing key value or an unseen key value gives a channel of exactly zero. On KuaiRand-27K, 26,904 users have a lifelong history before
-$T_0$, and 44 tag values, 6,510 author values and 7,202 music values occur on pool videos.
+\paragraph{LEAF statistics} The shrinkage strength of the lift in Equation~\eqref{eq:lift} is $\eta=5$ pseudo-impressions. On
+KuaiRand-27K, 26,904 users have a lifelong history before $T_0$, and 44 tag values, 6,510 author values and 7,202 music values occur on
+pool videos. A missing key value or an unseen key value gives a channel of exactly zero.
 
-\paragraph{LEAF-LGN} LightGCN uses symmetric normalisation, $d=64$ dimensions and two propagation layers; the scoring embeddings
-$\bar e_u,\bar e_i$ are the mean of the layer-zero and propagated embeddings. The biases, $\beta$ and the channel weights $g$ are
-initialised at zero, and the weight decay $\rho$ applies to the embeddings only. A negative item that falls in the excluded set is redrawn
-once. Training uses Adam with batches of 8,192 triples and at most 40 epochs; for each split, training stops after three epochs without an
-improvement of the best validation nDCG@10. The search covers the learning rate, $\rho$ and the policy weight
-$w\in\{0,0.25,0.5\}$, which gives twelve trainings (\ref{app:grids}). A closed-form variant with the same channels, LEAF-tied, is used only
-for the LEAF controls of \ref{app:leafctl}.
+\paragraph{LEAF-LGN} The embedding dimension is $d=64$. Training uses Adam with batches of 8,192 triples and at most 40 epochs; for each
+split, training stops after three epochs without an improvement of the best validation nDCG@10. A negative item that falls in the excluded
+set is redrawn once. The search covers the learning rate, $\rho$ and the policy weight $w\in\{0,0.25,0.5\}$, which gives twelve trainings
+(\ref{app:grids}). A closed-form variant with the same channels, LEAF-tied, is used only for the LEAF controls of \ref{app:leafctl}.
 
 \paragraph{DAX} The factors start at $\theta_u=0.7$, $\kappa_t=1$ and $\alpha_i=0.6$, and the EM runs for 40 iterations without a
-convergence test (Appendix~\ref{app:em} gives the clamps). The scenario factors are relative to the evaluation scenario and may exceed
+convergence test (\ref{app:em} gives the clamps). The scenario factors are relative to the evaluation scenario and may exceed
 one. Without the scenario factor, $\kappa_t=1$ for all $t$. The median number of policy-log impressions per pool item is 43; 0.6\% of the
 pool items have none and receive the centre of their tag.
 
 \paragraph{Combination} The weight $\gamma$ takes values in $\{0,0.05,0.1,0.15,0.2,0.3,0.4,0.5,0.7,1.0\}$, and a DAX configuration is one
 of 32 combinations of the prior strength $\nu\in\{80,160\}$, the centre (tag or content regression), the lifelong strength
 $\lambda\in\{0,100\}$, the scenario factor (on or off) and the user-group refinement (off, or on with strength 80). The early-stopping
-rule of a split uses the best validation value over all candidates of an epoch, the backbone and the combined scores alike. A variant in
-which $\gamma$ is learned jointly with the backbone is possible but is not evaluated in this paper.
+rule of a split uses the best validation value over all candidates of an epoch, the backbone and the combined scores alike.
 
 \subsection{Cost and measured run times}\label{app:cost}
 
@@ -54,7 +47,7 @@ The LightGCN propagation costs $O(L|E|d)$ per epoch, where $|E|$ is the number o
 $O(6)$ for the channels.
 
 Each DAX iteration is linear in the number of pre-cut impressions plus the numbers of users, items and scenarios, because all
-accumulations are index-add operations. The Fay-Herriot alternative adds one ridge solve per iteration, whose size is the
+accumulations are index-add operations. The content-regression centre adds one ridge solve per iteration, whose size is the
 number of covariate levels. The main experiment measured the following on a machine with two CPU threads. It fitted 32 DAX tables in
 1.8 to 3.3 s each, which is 77.6 s in total. It trained the twelve LEAF-LGN backbones in 884 to 2,437 s each, which is 19,490 s in
 total. The run took 19,628 s of wall time with 86,400 validation evaluations and a peak resident memory of 6,032 MB.
@@ -167,7 +160,7 @@ Attractiveness permuted within tags & Gain $+6.28$ [1.10], that is 41.6\% of the
 Tag mean alone; within-tag permutation; full DAX & $+4.31$ [1.07]; $+3.29$ [0.99]; $+9.45$ [1.36] (preliminary analysis on fixed scores) \\
 Permutation across items, selected weight & The selected policy weight is zero in all five splits (preliminary analysis on fixed scores) \\
 Full DAX in the ablation experiment & The same configurations are selected in all five splits, with the same test values \\
-LEAF-LGN reproduction & Main-experiment LEAF-LGN minus the independently tuned LEAF-LGN: $+0.73$ [0.52], NB $p=0.660$; the split values agree to five decimals \\
+LEAF-LGN reproduction & Main-experiment LEAF-LGN minus the independently tuned LEAF-LGN: $+0.73$ [0.52], NB $p=0.660$ \\
 Off-protocol calibration & Adding the validation users' random-exposure rate to LEAF-LGN: $+36.62$ [1.79]. This uses post-cut labels and is a diagnostic, not a method \\
 \bottomrule
 \end{tabular}
@@ -192,7 +185,7 @@ Method & Search grid & Configurations \\
 \raggedright LightGCN \citep{he2020lightgcn} & \raggedright learning rate $\{10^{-2},3\cdot10^{-3}\}$, $\rho\in\{10^{-5},10^{-4}\}$; $d=64$, 2 layers, at most 40 epochs, patience 3 & 4 \\
 \raggedright r-AdjNorm \citep{zhao2022radjnorm} & \raggedright LightGCN grid with normalisation exponent $r\in\{0.3,0.7\}$ & 8 \\
 \raggedright iALS \citep{hu2008ials} (LEAF development experiment only) & \raggedright confidence weight in $\{3,10,30\}$, regularisation $\in\{1,10,100,1000\}$ & 12 \\
-\raggedright QP family (Appendix~\ref{app:qp}) & \raggedright DR-BPR-LGN-1, -p2 and -p with their own grids; per split the best of the three & 20 \\
+\raggedright QP family (\ref{app:qp}) & \raggedright DR-BPR-LGN-1, -p2 and -p with their own grids; per split the best of the three & 20 \\
 \raggedright QP family + DAX & \raggedright the 10 distinct (method, configuration) trainings chosen by any split of the QP search, with the DAX grid & 3,200 \\
 \raggedright EASE \citep{steck2019ease} & \raggedright closed form, $\lambda_{\mathrm{EASE}}\in\{1000,3000,10000\}$, $w\in\{0,0.25,0.5\}$, popularity weight $\beta\in\{0,0.25,0.5\}$ & 27 \\
 \raggedright EASE + DAX & \raggedright EASE with the DAX grid & 8,640 \\
@@ -227,3 +220,17 @@ Table~\ref{tab:sens} extends the main family by EASE and EASE+DAX. The conclusio
 Table~\ref{tab:main}; the two split-level values that are closest to the threshold are unchanged at $4.56\times10^{-2}$.
 
 \input{tables/tab_sens}
+
+\subsection{Training seeds}\label{app:seeds}
+
+Training seeds 1 to 3 for LEAF-LGN+DAX, with the reduced search described in Section~\ref{sec:res-seeds}.
+
+\input{tables/tab_seeds}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/fig_seeds.pdf}
+\caption{Training seeds 0 to 3 on KuaiRand-27K. Left: LEAF-LGN+DAX mean nDCG@10 with the standard deviation over splits. Right:
+within-seed gain over LEAF-LGN, in units of $10^{-3}$, with the 95\% half-width.}
+\label{fig:seeds}
+\end{figure}

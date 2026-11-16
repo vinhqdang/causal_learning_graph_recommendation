@@ -1,29 +1,29 @@
 \begin{table}[tbp]
 \centering
 \footnotesize
-\caption{Lifelong deep baselines (DIN and SIM-hard) with and without DAX on KuaiRand-27K and KuaiRand-1K, with the paired difference of LEAF-LGN+DAX minus each comparator (in units of $10^{-3}$ nDCG@10). SIM denotes SIM-hard.}
+\caption{Lifelong deep baselines (DIN and SIM-hard) with and without DAX on KuaiRand-27K and KuaiRand-1K: the paired difference of LEAF-LGN+DAX minus each comparator, in units of $10^{-3}$ nDCG@10. SIM denotes SIM-hard.}
 \label{tab:deep}
 \begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{lrccccc}
+\begin{tabular}{lrrcc}
 \toprule
-Comparator & Mean & Configs & Diff.\ [95\% hw] & $p$ & NB $p$ \\
+Comparator & Mean & Configs & Diff.\ [95\% hw] & NB $p$ \\
 \midrule
-\multicolumn{6}{l}{KuaiRand-27K} \\
-DIN & 0.4675 & 4 & +18.26 [1.97] & $1.41\times10^{-73}$ & 0.001 \\
-DIN+DAX & 0.4796 & 1280 & +5.73 [1.64] & $7.95\times10^{-12}$ & 0.043 \\
-SIM & 0.4590 & 4 & +26.44 [2.01] & $3.55\times10^{-144}$ & 0.000 \\
-SIM+DAX & 0.4706 & 1280 & +14.72 [1.77] & $1.39\times10^{-59}$ & 0.001 \\
+\multicolumn{5}{l}{KuaiRand-27K} \\
+DIN & 0.4675 & 4 & +18.26 [1.97] & 0.001 \\
+DIN+DAX & 0.4796 & 1280 & +5.73 [1.64] & 0.043 \\
+SIM & 0.4590 & 4 & +26.44 [2.01] & 0.000 \\
+SIM+DAX & 0.4706 & 1280 & +14.72 [1.77] & 0.001 \\
 \midrule
-\multicolumn{6}{l}{KuaiRand-1K} \\
-DIN & 0.4189 & 4 & +39.26 [10.37] & $2.63\times10^{-13}$ & 0.002 \\
-DIN+DAX & 0.4228 & 1280 & +35.89 [9.25] & $7.10\times10^{-14}$ & 0.002 \\
-SIM & 0.4246 & 4 & +35.26 [9.24] & $1.70\times10^{-13}$ & 0.007 \\
-SIM+DAX & 0.4357 & 1280 & +23.29 [8.69] & $1.81\times10^{-7}$ & 0.095 \\
+\multicolumn{5}{l}{KuaiRand-1K} \\
+DIN & 0.4189 & 4 & +39.26 [10.37] & 0.002 \\
+DIN+DAX & 0.4228 & 1280 & +35.89 [9.25] & 0.002 \\
+SIM & 0.4246 & 4 & +35.26 [9.24] & 0.007 \\
+SIM+DAX & 0.4357 & 1280 & +23.29 [8.69] & 0.095 \\
 \midrule
-\multicolumn{6}{l}{Lifelong sequence models: DIN attends over the last 200 lifelong events; SIM-hard keeps the 50 most recent events sharing the candidate's tag or author.} \\
+\multicolumn{5}{l}{Lifelong sequence models: DIN attends over the last 200 lifelong events; SIM-hard keeps the 50 most recent events sharing the candidate's tag or author.} \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
 \par\smallskip
-\begin{minipage}{\linewidth}\raggedright\footnotesize Raw p values. DIN and SIM are each tuned over four configurations (learning rate $\{10^{-2},3\times10^{-3}\}$ times weight decay $\{10^{-4},10^{-5}\}$), and their +DAX variants use the DAX grid. The 1K rows use the 842 KuaiRand-1K test users.\end{minipage}
+\begin{minipage}{\linewidth}\raggedright\footnotesize NB $p$ values are not adjusted. DIN and SIM are each tuned over four configurations (learning rate $\{10^{-2},3\times10^{-3}\}$ times weight decay $\{10^{-4},10^{-5}\}$), and their +DAX variants use the DAX grid. The 1K rows use the 842 KuaiRand-1K test users.\end{minipage}
 \end{table}

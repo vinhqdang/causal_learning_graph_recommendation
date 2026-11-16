@@ -61,18 +61,16 @@ debiased graph recommender, a closed-form recommender and two lifelong deep mode
 controls check that the gains depend on the users' own histories and on item-specific attractiveness.
 
 \paragraph{Main findings} On KuaiRand-27K, LEAF-LGN+DAX reaches an nDCG@10 of 0.4854, against 0.4634 for the strongest debiased
-graph baseline, a propensity-weighted LightGCN that we describe in
-\ref{app:qp}, and 0.4733 for the same baseline with DAX added. It is ahead of each of the nine baselines of the main
-comparison on both tests after Holm correction, although two of these comparisons are borderline on the split-level test. Adding DAX improves
-each of six backbones on the per-user test. Permuting the attractiveness across items removes the DAX gain, and shuffling the
-lifelong histories across users removes the gain of the lifelong channels. On the smaller KuaiRand-1K release, the advantage
-over the debiased graph baseline, with and without DAX, is repeated.
+graph baseline that we tuned, a propensity-weighted LightGCN described in \ref{app:qp}. DAX improves each of the six backbones
+tested. Permuting the attractiveness across items removes the DAX gain. The statistical tests, the other baselines and the
+controls are reported in Section~\ref{sec:results}, and the same comparison on the smaller KuaiRand-1K release is repeated
+in Section~\ref{sec:res-1k}.
 
 \paragraph{Contributions}
 \begin{itemize}
 \item We formulate recommendation for randomly inserted items as a learning problem in which only the policy log may be used for
-  training, and show on KuaiRand that the remaining accuracy headroom of a strong graph recommender lies in item-level appeal, not in
-  temporal drift.
+  training, and show on KuaiRand, with a diagnostic analysis, that the remaining headroom of a strong graph recommender lies mainly at
+  the item level.
 \item We propose LEAF, exposure-conditional affinities computed from each user's history outside the evaluated pool and transferred
   through content keys, and LEAF-LGN, which learns how much each affinity counts inside a graph recommender.
 \item We propose DAX, a generative model of logged clicks that separates user and scenario examination from item attractiveness,
@@ -86,6 +84,6 @@ We do not claim that DAX recovers an unbiased or causally identified item qualit
 
 \paragraph{Outline} Section~\ref{sec:related} relates the work to lifelong behaviour models, click models, exposure-aware
 recommendation, occupancy and small-area estimation, and debiased graph recommenders. Section~\ref{sec:method} defines the problem,
-LEAF, DAX and their combination. Section~\ref{sec:protocol} describes the data, the temporal protocol and the statistical tests.
-Section~\ref{sec:results} reports the results, Section~\ref{sec:discussion} discusses them, Section~\ref{sec:limits} states the
+LEAF, DAX and their combination. Section~\ref{sec:protocol} describes the data, the temporal protocol, the counts and the statistical
+tests. Section~\ref{sec:results} reports the results, Section~\ref{sec:discussion} discusses them, Section~\ref{sec:limits} states the
 limitations and Section~\ref{sec:conclusion} concludes.

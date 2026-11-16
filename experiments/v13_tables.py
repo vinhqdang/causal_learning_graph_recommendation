@@ -239,7 +239,7 @@ def table_methods():
         "Configurations searched: backbone trainings times DAX configurations times values of $\\gamma$. "
         "LEAF-LGN (independent tuning) is a separate search of the backbone alone, counted per training and epoch "
         "setting, and is not comparable. The QP family is, in each split, the best of its three variants on validation. "
-        "The diagnostic value of Section~\\ref{sec:res-headroom} is a different computation."))
+       ))
 
 
 # ---------------------------------------------------------------------------------------------
@@ -262,40 +262,37 @@ def table_main():
     keys = list(H["FAMILY_V12"])
     res, ph, nh = main_family(c, keys)
     rows = [["LEAF-LGN+DAX (reference)", mean_cell(M["LEAF-LGN+DAX"]) if M["LEAF-LGN+DAX"] else tbd(SRC["LEAF-LGN+DAX"]),
-             "n/a", "n/a", "n/a", "n/a", "n/a"], "MIDRULE", span(7, r"Holm family: LEAF-LGN+DAX minus each comparator")]
+             "n/a", "n/a", "n/a"], "MIDRULE", span(5, r"Holm family: LEAF-LGN+DAX minus each comparator")]
     missing = []
     for k in keys:
         name = esc(DISPLAY.get(k, k))
         r = res[k]
         if r is None:
             missing.append(k)
-            rows.append([name, tbd(SRC[k] + " mean"), tbd(SRC[k] + " paired difference"), tbd(SRC[k]),
-                         tbd(SRC[k]), tbd(SRC[k]), tbd(SRC[k])])
+            rows.append([name, tbd(SRC[k] + " mean"), tbd(SRC[k] + " paired difference"), tbd(SRC[k]), tbd(SRC[k])])
             continue
-        rows.append([name, mean_cell(M[k]), dif(r), sci(r["p"]), sci(ph[k]), pnb(r["nb"]), sci(nh[k])])
+        rows.append([name, mean_cell(M[k]), dif(r), pnb(r["nb"]), sci(nh[k])])
     rows.append("MIDRULE")
-    rows.append(span(7, r"Outside the family (raw p values only; not Holm-adjusted)"))
+    rows.append(span(5, r"Outside the main family (split-level values not adjusted)"))
     for k in ["EASE", "EASE+DAX"]:
         r = P(M["LEAF-LGN+DAX"], M.get(k))
         if r is None:
-            rows.append([esc(k), tbd(SRC[k] + " mean"), tbd(SRC[k] + " paired difference"), tbd(SRC[k]), "n/a",
-                         tbd(SRC[k]), "n/a"])
+            rows.append([esc(k), tbd(SRC[k] + " mean"), tbd(SRC[k] + " paired difference"), tbd(SRC[k]), "n/a"])
         else:
-            rows.append([esc(k), mean_cell(M[k]), dif(r), sci(r["p"]), "n/a", pnb(r["nb"]), "n/a"])
-    note = (f"Per-user columns: paired t test over the pooled test users (n = {c['N']:,}). Holm adjustment within the "
-            f"family, over the {len(keys) - len(missing)} comparators present. NB: Nadeau-Bengio corrected resampled t test "
-            "over the five split means, with Holm over the same family. LightGCN is the four-configuration LightGCN "
-            "baseline (a LightGCN re-trained with DAX appears in Table~\\ref{tab:backbone}). SIM denotes SIM-hard. "
-            "Differences are per-user means of nDCG@10 in units of $10^{-3}$, with the 95\\% half-width.")
+            rows.append([esc(k), mean_cell(M[k]), dif(r), pnb(r["nb"]), "n/a"])
+    note = (f"Diff.: paired per-user mean of the nDCG@10 difference, in units of $10^{{-3}}$, with the 95\\% half-width of the "
+            f"t interval over the pooled test users (n = {c['N']:,}). NB: Nadeau-Bengio corrected resampled t test over the five "
+            "split means. NB $p_{\\mathrm{Holm}}$: Holm adjustment over the nine comparators of the main family. LightGCN is the "
+            "four-configuration LightGCN baseline (a LightGCN re-trained within the DAX experiment appears in "
+            "Table~\\ref{tab:backbone}). SIM denotes SIM-hard. Per-user p values are in Table~\\ref{tab:sens}.")
     if missing:
         note += " Not available: " + ", ".join(missing) + "."
     write("tab_main.tex", table_env(
-        "Main results on KuaiRand-27K: LEAF-LGN+DAX against every comparator of the main family, with per-user and "
-        "split-level (Nadeau-Bengio) tests.",
-        "tab:main", "lrccccc",
-        ["Comparator", "Mean", r"Diff.\ [95\% hw]", r"$p$", r"$p_{\mathrm{Holm}}$", r"NB $p$",
-         r"NB $p_{\mathrm{Holm}}$"], rows, note))
-    # sensitivity: the same comparisons with EASE and EASE+DAX inside the family
+        "Main results on KuaiRand-27K: LEAF-LGN+DAX against every comparator of the main family, with the paired per-user "
+        "difference and the split-level (Nadeau-Bengio) test.",
+        "tab:main", "lrccc",
+        ["Comparator", "Mean", r"Diff.\ [95\% hw]", r"NB $p$", r"NB $p_{\mathrm{Holm}}$"], rows, note))
+    # sensitivity (appendix): the same comparisons with EASE and EASE+DAX inside the family, with per-user values
     keys9 = keys + ["EASE", "EASE+DAX"]
     res9, ph9, nh9 = main_family(c, keys9)
     present9 = [k for k in keys9 if res9[k] is not None]
@@ -306,13 +303,15 @@ def table_main():
             continue
         rows9.append([esc(DISPLAY.get(k, k)), sci(res9[k]["p"]), sci(ph9[k]), pnb(res9[k]["nb"]), sci(nh9[k])])
     write("tab_sens.tex", table_env(
-        "Sensitivity of the Holm adjustment: the main family extended by EASE and EASE+DAX (the family size is given "
-        "in the column header and counts the comparators in the family).",
-        "tab:sens", "lrccc", ["Comparator", r"$p$", r"$p_{\mathrm{Holm}}$ (family of $%d$)" % len(present9),
+        "Sensitivity of the Holm adjustment: the main family extended by EASE and EASE+DAX, with per-user and split-level "
+        "values (the family size is given in the column header).",
+        "tab:sens", "lrccc", ["Comparator", r"Per-user $p$", r"Per-user $p_{\mathrm{Holm}}$ (family of $%d$)" % len(present9),
                               r"NB $p$", r"NB $p_{\mathrm{Holm}}$"], rows9,
-        "The Holm values differ from Table~\\ref{tab:main} only through the family size."))
+        "The Holm values differ from Table~\\ref{tab:main} only through the family size. Per-user p values are paired t tests "
+        "over the pooled test users."))
     c["fam_missing"] = missing
     return res, ph, nh
+
 
 
 # ---------------------------------------------------------------------------------------------
@@ -320,30 +319,32 @@ def table_main():
 # ---------------------------------------------------------------------------------------------
 def table_fair():
     c = context()
-    M = c["M"]
+    M, H = c["M"], c["H"]
+    _, _, nh = main_family(c, list(H["FAMILY_V12"]))
     rows_def = [
-        ("LEAF-LGN+DAX minus QP family+DAX (fair baseline)", "LEAF-LGN+DAX", "QP family+DAX", "main family"),
-        ("QP family+DAX minus QP family (DAX on the QP backbone)", "QP family+DAX", "QP family", "raw"),
-        ("LEAF-LGN+DAX minus LEAF-LGN (DAX on the LEAF backbone)", "LEAF-LGN+DAX", "LEAF-LGN", "main family"),
-        ("LEAF-LGN (independent tuning) minus QP family", "LEAF-LGN(stored)", "QP family", "raw"),
+        ("LEAF-LGN+DAX minus QP family+DAX (fair baseline)", "LEAF-LGN+DAX", "QP family+DAX", nh.get("QP family+DAX")),
+        ("QP family+DAX minus QP family (DAX on the QP backbone)", "QP family+DAX", "QP family", None),
+        ("LEAF-LGN+DAX minus LEAF-LGN (DAX on the LEAF backbone)", "LEAF-LGN+DAX", "LEAF-LGN", nh.get("LEAF-LGN")),
+        ("LEAF-LGN (independent tuning) minus QP family", "LEAF-LGN(stored)", "QP family", None),
     ]
     rows = []
-    for label, a, b, kind in rows_def:
+    for label, a, b, hol in rows_def:
         r = P(M.get(a), M.get(b))
         ca = f"{M[a]['n_configs']:,}" if M.get(a) else tbd(SRC[a] + " configurations")
         cb = f"{M[b]['n_configs']:,}" if M.get(b) else tbd(SRC[b] + " configurations")
         if r is None:
-            rows.append([esc(label), ca + " / " + cb, tbd(f"{SRC[a]} vs {SRC[b]} paired difference"), "", "", ""])
+            rows.append([esc(label), ca + " / " + cb, tbd(f"{SRC[a]} vs {SRC[b]} paired difference"), "", ""])
             continue
-        rows.append([esc(label), f"{ca} / {cb}", dif(r), sci(r["p"]), pnb(r["nb"]), kind])
+        rows.append([esc(label), f"{ca} / {cb}", dif(r), pnb(r["nb"]), sci(hol) if hol is not None else "n/a"])
     write("tab_fair.tex", table_env(
         "Fair-baseline reading: the DAX increments, and LEAF-LGN without DAX against the QP family, with the "
-        "configurations searched by each method (first and second method).",
-        "tab:fair", "lccccl", ["Comparison", "Configurations", r"Diff.\ [95\% hw]", r"$p$", r"NB $p$", "Test family"],
+        "configurations searched by each method (first and second method in the second column).",
+        "tab:fair", "lcccc", ["Comparison", "Configurations", r"Diff.\ [95\% hw]", r"NB $p$", r"NB $p_{\mathrm{Holm}}$"],
         rows,
-        "Rows marked raw are not Holm-adjusted. The LEAF-LGN (independent tuning) comparison belongs to the LEAF "
-        "development family of eight comparisons, and the DAX increments are reported beside the main family. "
-        "The QP family with DAX searches only the QP backbone configurations selected without DAX."))
+        "Diff. and NB $p$ are defined as in Table~\\ref{tab:main}. NB $p_{\\mathrm{Holm}}$ is given for the two comparisons "
+        "of the main family; the other two values are not adjusted. The QP family with DAX searches only the QP backbone "
+        "configurations selected without DAX."))
+
 
 
 def table_backbone():
@@ -363,19 +364,20 @@ def table_backbone():
         base = mean_cell(a) if a else tbd(label + " base mean")
         withd = mean_cell(b) if b else tbd(label + " with DAX mean")
         if r is None:
-            rows.append([esc(label), base, withd, tbd(label + " paired difference"), "", ""])
+            rows.append([esc(label), base, withd, tbd(label + " paired difference"), ""])
             continue
-        rows.append([esc(label), base, withd, dif(r), sci(r["p"]), pnb(r["nb"])])
+        rows.append([esc(label), base, withd, dif(r), pnb(r["nb"])])
     stored = P(M["LightGCN+DAX"], M["LightGCN"])
     write("tab_backbone.tex", table_env(
-        "DAX on six backbones on KuaiRand-27K: nDCG@10 without and with the DAX module, paired difference in units of "
-        "$10^{-3}$ with the 95\\% half-width, two-sided t test and Nadeau-Bengio test over the split means. SIM denotes SIM-hard.",
-        "tab:backbone", "lrcccc", ["Backbone", "Without DAX", "With DAX", r"Diff.\ [95\% hw]", r"$p$", r"NB $p$"],
-        rows, "Raw p values (no family). LightGCN: the base and the DAX variant come from the same experiment "
-        "(3 base configurations; 960 with DAX). "
+        "DAX on six backbones on KuaiRand-27K: nDCG@10 without and with the DAX module, the paired per-user difference "
+        "in units of $10^{-3}$ with its 95\\% half-width, and the split-level Nadeau-Bengio test. SIM denotes SIM-hard.",
+        "tab:backbone", "lrrcc", ["Backbone", "Without DAX", "With DAX", r"Diff.\ [95\% hw]", r"NB $p$"],
+        rows, "NB $p$ values are not adjusted (no family). LightGCN: the base and the DAX variant come from the same "
+        "experiment (3 base configurations; 960 with DAX). "
         f"Against the four-configuration LightGCN of Table~\\ref{{tab:main}} the increment is {stored['diff']:+.2f} "
         f"[{stored['half']:.2f}] (NB $p$ {stored['nb']:.3f})."))
     return {"lgn_retrained": lgn_ret, "lgn_stored_increment": stored}
+
 
 
 # ---------------------------------------------------------------------------------------------
@@ -394,61 +396,53 @@ def table_ablate():
     c = context()
     H = c["H"]
     base, arms = ablation_records()
-    N = c["N"]
     if base is None or arms["full"] is None:
         write("tab_ablate.tex", table_env("DAX ablations: not available.", "tab:ablate", "l",
                                           ["Variant"], [[tbd("results/v11/dax_ablate.json full DAX and base")]]))
         return
     gain = {k: P(arms[k], base) for k in arms if arms[k] is not None}
-    keys = [k for k in gain]
-    ph_g = dict(zip(keys, H["holm"]([gain[k]["p"] for k in keys])))
     fm = [k for k in ABL_ARMS if arms.get(k) is not None]
     minus = {k: P(arms["full"], arms[k]) for k in fm}
-    ph_m = dict(zip(fm, H["holm"]([minus[k]["p"] for k in fm]))) if fm else {}
     g_full = gain["full"]["diff"]
     rows = []
     for k in ["full"] + ABL_ARMS:
         if arms.get(k) is None:
-            rows.append([ABL_LABEL[k], tbd(f"results/v11/dax_ablate.json {ABL_NAME[k]} mean"), "", "", "", "", "", ""])
+            rows.append([ABL_LABEL[k], tbd(f"results/v11/dax_ablate.json {ABL_NAME[k]} mean"), "", "", "", "", ""])
             continue
         g = gain[k]
         kept = f"{100 * g['diff'] / g_full:.1f}" if k != "full" else "100.0"
         if k == "full":
-            mi = "n/a"
-            pm = "n/a"
+            rows.append([ABL_LABEL[k], f"{arms[k]['n_configs']}", mean_cell(arms[k]), dif(g), kept, "n/a", "n/a"])
         else:
-            mi = dif(minus[k])
-            pm = sci(ph_m[k])
-        rows.append([ABL_LABEL[k], f"{arms[k]['n_configs']}", mean_cell(arms[k]), dif(g), sci(ph_g[k]),
-                     kept, mi, pm])
+            rows.append([ABL_LABEL[k], f"{arms[k]['n_configs']}", mean_cell(arms[k]), dif(g), kept,
+                         dif(minus[k]), pnb(minus[k]["nb"])])
     rows.append("MIDRULE")
-    rows.append(span(8, r"Separate permutation seeds (the variants above select over the three seeds)"))
+    rows.append(span(7, r"Permutation seeds 0 to 2 (each a separate run)"))
     for k in ["shuffle_tags", "shuffle_items"]:
         for s in (0, 1, 2):
             name = f"LEAF-LGN+DAX[{k}|p{s}]"
             r = P(H["method_from"](H["ABLATE"], name, name), base)
             if r is None:
-                rows.append([f"{ABL_LABEL[k]}, seed {s}", "", tbd(f"results/v11/dax_ablate.json {name} gain"), "", "",
-                             "", "", ""])
+                rows.append([f"{ABL_LABEL[k]}, seed {s}", "", "", tbd(f"results/v11/dax_ablate.json {name} gain"), "", "", ""])
             else:
                 kept = f"{100 * r['diff'] / g_full:.1f}"
-                rows.append([f"{ABL_LABEL[k]}, seed {s}", "", "", dif(r), f"NB {pnb(r['nb'])}", kept, "", ""])
-    lift = gain["full"]["diff"] - P(c["M"]["LEAF-LGN+DAX"], c["M"]["LEAF-LGN"])["diff"]
-    note = (f"Gain: variant minus the LEAF-LGN base of the ablation experiment (mean {H['mean_sd'](base)[0]:.4f}, two "
-            "backbone trainings, five values of $\\gamma$, epoch window of three around the selection of the main "
-            "experiment). This base is lower than the LEAF-LGN of Table~\\ref{tab:main} (0.4736), so the full gain here ("
-            f"{gain['full']['diff']:+.2f}) exceeds the main increment by {lift:.2f}; the variants are compared through the "
-            "full-minus-variant columns, which do not use the base. Holm: the p values of the gains are adjusted within "
-            "the seven gains, and those of full minus variant within the six ablated variants. Kept: the gain as a "
-            "percentage of the full gain of this experiment, so the percentages inherit the base and are approximate. "
-            "Permutation seeds are separate runs, one per seed.")
+                rows.append([f"{ABL_LABEL[k]}, seed {s}", "", "", dif(r), kept, "", ""])
+    lift = g_full - P(c["M"]["LEAF-LGN+DAX"], c["M"]["LEAF-LGN"])["diff"]
+    note = (f"Gain: variant minus the LEAF-LGN base of the ablation experiment (mean {H['mean_sd'](base)[0]:.4f}; two "
+            "backbone trainings, an epoch window of three around the epoch selected in the main experiment, and five values "
+            "of $\\gamma$). That base is lower than the LEAF-LGN of Table~\\ref{tab:main} (0.4736), so the gain of full DAX "
+            f"here ({g_full:+.2f}) exceeds the main increment by {lift:.2f}. Variants are therefore compared through the "
+            "full-minus-variant columns, which do not use the base. Share of full gain: the gain as a percentage of the full "
+            "gain of this experiment; it inherits the base and is approximate. NB $p$: split-level Nadeau-Bengio test of the "
+            "full-minus-variant difference, not adjusted.")
     write("tab_ablate.tex", table_env(
-        "DAX ablations on KuaiRand-27K: gain over the LEAF-LGN base of the ablation experiment, the difference to full "
-        "DAX, and the permutation controls.",
-        "tab:ablate", "lrcccccc",
-        ["Variant", "Configs", "Mean", r"Gain [95\% hw]", r"$p_{\mathrm{Holm}}$", r"Kept (\%)", r"Full minus variant",
-         r"$p_{\mathrm{Holm}}$"], rows, note))
+        "DAX ablations on KuaiRand-27K: gain over the LEAF-LGN base of the ablation experiment, the difference of full DAX "
+        "to each variant, and the permutation controls.",
+        "tab:ablate", "lrrrrrr",
+        ["Variant", "Configs", "Mean", r"Gain [95\% hw]", r"Share of full gain (\%)", r"Full minus variant [95\% hw]",
+         r"NB $p$"], rows, note))
     return gain, minus
+
 
 
 # ---------------------------------------------------------------------------------------------
@@ -463,24 +457,23 @@ def table_1k():
                           ("QP family", qp, "results/v11/c_1k_base.json QP methods"),
                           ("QP family+DAX", qd, "results/v11/c_1k_qp.json QP family+DAX")]:
         if m is None:
-            rows.append([esc(label), tbd(src + " mean"), "", "", "", "", "", "", ""])
+            rows.append([esc(label), tbd(src + " mean"), "", "", "", "", ""])
         else:
             mu, sd = H["mean_sd"](m)
-            rows.append([esc(label), f"{mu:.4f}", f"{sd:.4f}", f"{m['n_configs']}", "", "", "", "", ""])
+            rows.append([esc(label), f"{mu:.4f}", f"{sd:.4f}", f"{m['n_configs']}", "", "", ""])
     cmp_defs = [("LEAF-LGN+DAX minus QP family", lg, qp), ("LEAF-LGN+DAX minus QP family+DAX", lg, qd),
                 ("QP family+DAX minus QP family", qd, qp)]
     res = [P1k(a, b) for _, a, b in cmp_defs]
     present = [r for r in res if r is not None]
-    ph = H["holm"]([r["p"] for r in present]) if present else []
     nh = H["holm"]([r["nb"] for r in present]) if present else []
     rows.append("MIDRULE")
     j = 0
     split_notes = []
     for (label, _, _), r in zip(cmp_defs, res):
         if r is None:
-            rows.append([esc(label), "", "", "", tbd("results/v11 KuaiRand-1K paired difference"), "", "", "", ""])
+            rows.append([esc(label), "", "", "", tbd("results/v11 KuaiRand-1K paired difference"), "", ""])
             continue
-        rows.append([esc(label), "", "", "", dif(r), sci(r["p"]), sci(ph[j]), pnb(r["nb"]), sci(nh[j])])
+        rows.append([esc(label), "", "", "", dif(r), pnb(r["nb"]), sci(nh[j])])
         split_notes.append(f"{label}: " + " ".join(f"{x:+.1f}" for x in r["split_diffs"]))
         j += 1
     n1k = len(H["pooled_users"](lg)) if lg is not None else None
@@ -490,14 +483,15 @@ def table_1k():
     note = (f"KuaiRand-1K: {n_txt} test users pooled over five splits (each split 30\\% validation, 70\\% test). The users "
             "are a subset of the 27K users, so this is a lower-power replication. The QP family with DAX searches all 20 "
             f"QP configurations on this release ({cfg_txt} configurations in total), whereas at 27K it searches the 10 "
-            "selected ones (3,200); this favours the baseline. Holm over the three comparisons of this table; NB over "
-            "the split means. Split differences ($\\times10^{-3}$): " + "; ".join(split_notes) + ".")
+            "selected ones (3,200); this favours the baseline. NB $p_{\\mathrm{Holm}}$ is the Holm adjustment over the three "
+            "comparisons of this table. Split differences ($\\times10^{-3}$): " + "; ".join(split_notes) + ".")
     write("tab_1k.tex", table_env(
         "KuaiRand-1K replication: LEAF-LGN+DAX against the QP family with and without DAX (nDCG@10).",
-        "tab:1k", "lrrrccccc",
-        ["Method or comparison", "Mean", "SD", "Configs", r"Diff.\ [95\% hw]", r"$p$", r"$p_{\mathrm{Holm}}$", r"NB $p$",
-         r"NB $p_{\mathrm{Holm}}$"], rows, note))
+        "tab:1k", "lrrrcrr",
+        ["Method or comparison", "Mean", "SD", "Configs", r"Diff.\ [95\% hw]", r"NB $p$", r"NB $p_{\mathrm{Holm}}$"],
+        rows, note))
     return split_notes
+
 
 
 # ---------------------------------------------------------------------------------------------
@@ -515,27 +509,27 @@ def table_seeds():
                         H["method_from"](path, "LEAF-LGN", f"seed {s} LEAF-LGN"), path))
     for s, dax, base, path in entries:
         if dax is None or base is None:
-            rows.append([f"{s}", tbd(f"{path} LEAF-LGN+DAX mean"), "", "", "", "", ""])
+            rows.append([f"{s}", tbd(f"{path} LEAF-LGN+DAX mean"), "", "", "", ""])
             continue
         r = H["pair"](dax, base, N)
         mu = H["mean_sd"](dax)[0]
         gains.append(r["diff"])
         means.append(mu)
         rows.append([f"{s}" + (" (main experiment)" if s == 0 else ""), f"{mu:.4f}", f"{H['mean_sd'](base)[0]:.4f}",
-                     f"{dax['n_configs']}", dif(r), sci(r["p"]), pnb(r["nb"])])
+                     f"{dax['n_configs']}", dif(r), pnb(r["nb"])])
     rows.append("MIDRULE")
     if len(means) > 1:
         rows.append([r"Spread over seeds", f"{np.mean(means):.4f} $\\pm$ {np.std(means, ddof=1):.4f}", "", "",
-                     f"{np.mean(gains):+.2f} $\\pm$ {np.std(gains, ddof=1):.2f}", "", ""])
+                     f"{np.mean(gains):+.2f} $\\pm$ {np.std(gains, ddof=1):.2f}", ""])
     write("tab_seeds.tex", table_env(
         "Training seeds on KuaiRand-27K: LEAF-LGN+DAX and its within-seed gain over LEAF-LGN, for seeds 0 to 3.",
-        "tab:seeds", "lrrrccc",
-        ["Seed", "LEAF-LGN+DAX", "LEAF-LGN", "Configs", r"Gain [95\% hw]", r"$p$", r"NB $p$"], rows,
+        "tab:seeds", "lrrrcc",
+        ["Seed", "LEAF-LGN+DAX", "LEAF-LGN", "Configs", r"Gain [95\% hw]", r"NB $p$"], rows,
         "Seed 0 is the main experiment with the full backbone search (12 trainings). Seeds 1 to 3 re-train with the "
         "training seed changed and a reduced backbone search: $\\mathrm{lr}=3\\times10^{-3}$ and $\\rho=10^{-4}$ in every "
         "split, $w\\in\\{0.25,0.5\\}$ for the DAX variant (two trainings) and $w=0.25$ for the base. The epoch, the DAX "
-        "configuration and $\\gamma$ are selected on validation in each split. Raw p values, not Holm-adjusted. The QP "
-        "family was not re-trained under seeds 1 to 3, so no seed comparison with it is reported."))
+        "configuration and $\\gamma$ are selected on validation in each split. NB $p$ values are not adjusted."))
+
 
 
 # Table 7: lifelong deep baselines (DIN, SIM) at 1K and 27K
@@ -543,36 +537,36 @@ def table_seeds():
 def table_deep():
     c = context()
     H, M, K = c["H"], c["M"], c["K"]
-    rows = [span(6, r"KuaiRand-27K")]
+    rows = [span(5, r"KuaiRand-27K")]
     for k in ["DIN", "DIN+DAX", "SIM", "SIM+DAX"]:
         m = M.get(k)
         r = P(M["LEAF-LGN+DAX"], m)
         if m is None:
-            rows.append([esc(k), tbd(SRC[k] + " mean"), tbd(SRC[k] + " configurations"), tbd(SRC[k] + " difference"),
-                         "", ""])
+            rows.append([esc(k), tbd(SRC[k] + " mean"), tbd(SRC[k] + " configurations"), tbd(SRC[k] + " difference"), ""])
         else:
-            rows.append([esc(k), mean_cell(m), f"{m['n_configs']}", dif(r), sci(r["p"]), pnb(r["nb"])])
+            rows.append([esc(k), mean_cell(m), f"{m['n_configs']}", dif(r), pnb(r["nb"])])
     rows.append("MIDRULE")
-    rows.append(span(6, r"KuaiRand-1K"))
+    rows.append(span(5, r"KuaiRand-1K"))
     lg = K["LEAF-LGN+DAX"]
     for k in ["DIN", "DIN+DAX", "SIM", "SIM+DAX"]:
         m = K.get(k)
         if m is None or lg is None:
-            rows.append([esc(k), tbd(f"results/v12 1K {k} mean"), "", tbd(f"1K {k} difference"), "", ""])
+            rows.append([esc(k), tbd(f"results/v12 1K {k} mean"), "", tbd(f"1K {k} difference"), ""])
             continue
         r = P1k(lg, m)
-        rows.append([esc(k), mean_cell(m), f"{m['n_configs']}", dif(r), sci(r["p"]), pnb(r["nb"])])
+        rows.append([esc(k), mean_cell(m), f"{m['n_configs']}", dif(r), pnb(r["nb"])])
     rows.append("MIDRULE")
-    rows.append(span(6, r"Lifelong sequence models: DIN attends over the last 200 lifelong events; SIM-hard keeps the 50 "
+    rows.append(span(5, r"Lifelong sequence models: DIN attends over the last 200 lifelong events; SIM-hard keeps the 50 "
                         r"most recent events sharing the candidate's tag or author."))
     write("tab_deep.tex", table_env(
-        "Lifelong deep baselines (DIN and SIM-hard) with and without DAX on KuaiRand-27K and KuaiRand-1K, with the "
-        "paired difference of LEAF-LGN+DAX minus each comparator (in units of $10^{-3}$ nDCG@10). SIM denotes SIM-hard.",
-        "tab:deep", "lrccccc",
-        ["Comparator", "Mean", "Configs", r"Diff.\ [95\% hw]", r"$p$", r"NB $p$"], rows,
-        "Raw p values. DIN and SIM are each tuned over four configurations (learning rate $\\{10^{-2},3\\times10^{-3}\\}$ "
-        "times weight decay $\\{10^{-4},10^{-5}\\}$), and their +DAX variants use the DAX grid. The 1K rows use the 842 "
-        "KuaiRand-1K test users."))
+        "Lifelong deep baselines (DIN and SIM-hard) with and without DAX on KuaiRand-27K and KuaiRand-1K: the paired "
+        "difference of LEAF-LGN+DAX minus each comparator, in units of $10^{-3}$ nDCG@10. SIM denotes SIM-hard.",
+        "tab:deep", "lrrcc",
+        ["Comparator", "Mean", "Configs", r"Diff.\ [95\% hw]", r"NB $p$"], rows,
+        "NB $p$ values are not adjusted. DIN and SIM are each tuned over four configurations (learning rate "
+        "$\\{10^{-2},3\\times10^{-3}\\}$ times weight decay $\\{10^{-4},10^{-5}\\}$), and their +DAX variants use the DAX "
+        "grid. The 1K rows use the 842 KuaiRand-1K test users."))
+
 
 
 # ---------------------------------------------------------------------------------------------
@@ -647,7 +641,7 @@ GRID_COLS = {
 CFG_KEYS = ["method", "pbeta", "beta", "lr", "wd", "w", "r", "epoch", "gamma", "lam"]
 DAX_KEYS = ["prior", "centre", "k_life", "tab", "prior_s"]
 GRID_NOTE = ("Columns that a method does not use are not shown. The centre is the tag mean or the content regression "
-             "of Appendix~\\ref{app:fh}; user groups are none or a strength.")
+             "defined in Section~\\ref{sec:method-dax}; user groups are none or a strength.")
 
 
 def grid_columns(chosen):
@@ -664,8 +658,8 @@ def grid_columns(chosen):
 def grid_cell(ch, k):
     if k in DAX_KEYS:
         d = ch.get("dax") or {}
-        return GRID_COLS[k][1](d[k]) if k in d else "--"
-    return GRID_COLS[k][1](ch[k]) if k in ch else "--"
+        return GRID_COLS[k][1](d[k]) if k in d else "n/a"
+    return GRID_COLS[k][1](ch[k]) if k in ch else "n/a"
 
 
 def table_grids():

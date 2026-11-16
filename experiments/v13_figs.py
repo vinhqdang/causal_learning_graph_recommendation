@@ -75,7 +75,7 @@ def fig_ablate(c):
             gains.append((k, None))
         else:
             gains.append((k, T.P(arms[k], base)))
-    fig, ax = plt.subplots(figsize=(5.6, 3.0))
+    fig, ax = plt.subplots(figsize=(6.2, 3.4))
     x = np.arange(len(order))
     for xi, (k, r) in zip(x, gains):
         if r is None:
@@ -87,10 +87,10 @@ def fig_ablate(c):
         ax.plot([xi] * len(r["split_diffs"]), r["split_diffs"], "o", ms=2.6, color=INK, mec="none", zorder=4)
     ax.axhline(0, color=INK, lw=0.7)
     ax.set_xticks(x)
-    short = {"full": "full DAX", "no_tab": r"without $\kappa_t$", "no_life_prior": "without lifelong\nprior",
-             "no_tag_prior": "without tag\nprior", "additive": "additive\nlogit",
-             "shuffle_tags": "permuted\nacross items", "shuffle_items": "permuted\nwithin tags"}
-    ax.set_xticklabels([short[k] for k in order], fontsize=7)
+    short = {"full": "full DAX", "no_tab": r"without $\kappa_t$", "no_life_prior": "without lifelong prior",
+             "no_tag_prior": "without tag prior", "additive": "additive logit",
+             "shuffle_tags": "permuted across items", "shuffle_items": "permuted within tags"}
+    ax.set_xticklabels([short[k] for k in order], fontsize=7.2, rotation=30, ha="right", rotation_mode="anchor")
     ax.set_ylabel(r"gain over the ablation base, nDCG@10 $\times 10^{-3}$")
     ax.grid(axis="y", color="#e5e5e5", lw=0.5, zorder=0)
     _save(fig, "fig_ablate.pdf")

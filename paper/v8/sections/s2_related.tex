@@ -9,7 +9,7 @@ works.
 
 Lifelong behaviour models in click-through prediction retrieve information from long user histories. SIM
 \citep{pi2020sim} selects behaviours from a lifelong sequence that match the category of the target item, and passes
-them to a deep CTR model. TWIN \citep{chang2023twin} applies a two-stage target attention over a lifelong sequence on
+them to a deep CTR model. TWIN \citep{chang2023twin} applies a two-step target attention over a lifelong sequence on
 the Kuaishou platform, which belongs to the same platform family as KuaiRand. Both learn from policy logs and rely on
 item identifiers that the history shares with the target.
 \textit{Difference.} LEAF uses exposure-conditional statistics in which non-clicks enter the denominator, transfers to
@@ -55,14 +55,13 @@ estimate item appeal from a policy log.
 \textit{Difference.} The likelihood of DAX has the same structure as the occupancy model, with an impression playing the
 role of a survey, a click the role of a detection, and the attractiveness of an item the role of presence. Its estimand,
 however, is item appeal under a uniform audience. An additive alternative of the MRP kind is weaker in our ablations
-(Section~\ref{sec:res-ablate}). A regression on content codes is one option for the centre of the attractiveness prior
-(Appendix~\ref{app:fh}), and we do not claim it is weaker than the tag centre.
+(Section~\ref{sec:res-ablate}). A regression on content codes is the centre of one of the DAX variants of Section~\ref{sec:method-dax}, and we do not claim it is weaker than the tag centre.
 
 \subsection{Debiasing for graph recommenders}
 \label{sec:rel-graph}
 
-Graph collaborative filtering propagates signals over the user-item graph, and bias corrections have been applied to that
-propagation. NAVIP \citep{kim2022navip} debiases neighbour aggregation in a graph neural network for recommendation.
+Graph collaborative filtering spreads signals over the user-item graph, and bias corrections have been applied to that
+spreading. NAVIP \citep{kim2022navip} debiases neighbour aggregation in a graph neural network for recommendation.
 Popularity-bias work \citep{zhang2021pda} applies a causal intervention to the popularity effect. AutoDebias
 \citep{chen2021autodebias} learns debiasing parameters from a small uniform sample, which is not admissible under our
 protocol because the randomly exposed data serve only for validation and test. Two further graph methods, adversarial
@@ -87,10 +86,11 @@ small randomly exposed sample from Coat and Yahoo! R3 \citep{schnabel2016, marli
 \textit{Difference.} As far as our searches went, none of these works uses the out-of-pool history of each user in the
 random test, which is the source of the LEAF channels here.
 
+\FloatBarrier
 \subsection{Positioning and novelty}
 \label{sec:rel-position}
 
-\begin{table}[t]
+\begin{table}[tbp]
 \caption{Closest works and the difference from the present work.}
 \label{tab:positioning}
 \centering

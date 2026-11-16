@@ -23,7 +23,7 @@ with the backbone.
 \paragraph{Unequal budgets and grid edges.} LEAF-LGN+DAX searches 3,840 configurations per split and the QP family 20. The QP family
 with DAX searches only the QP backbones selected without DAX, which is conservative for the method, and on KuaiRand-1K it searches
 6,400 configurations, which favours the baseline. The prior strengths $\nu$ and $\lambda$ were selected at the edges of their
-grids (Appendix~\ref{app:grids}), and we did not test whether a wider grid would select other values.
+grids (\ref{app:grids}), and we did not test whether a wider grid would select other values.
 
 \paragraph{Identifiability up to scale.} The examination and attractiveness factors are identified only up to a scale shared by
 $\theta_u$ and $\alpha_i$. The order of $\alpha_i$ is unaffected, but the logit used in the combination is not scale-invariant, so
@@ -40,5 +40,5 @@ than 200 for DIN, may close the gap. This was not tested.
 log extends past $T_0$ for the full model.
 
 \paragraph{Remaining headroom and content.} The combination does not close the item-level gap to the uniform-rate oracle
-(Section~\ref{sec:res-headroom}). KuaiRand has no titles, covers or frames, so the tag is the main content key, and the evaluation
+(Section~\ref{sec:res-headroom}). The content keys are the tag, the author and the music track, and the evaluation
 scenario is the one with $\kappa_1=1$; the transfer of the scenario factors to other scenarios is not tested.

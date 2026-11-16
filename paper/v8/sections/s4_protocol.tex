@@ -1,8 +1,8 @@
 \section{Experimental protocol}
 \label{sec:protocol}
 
-This section defines the temporal split, the data, the selection rule, the tests and the baselines. The leakage controls,
-the search grids of the baselines and the LEAF controls are in \ref{app:supp}.
+This section defines the temporal split, the data, the selection rule, the counts, the tests and the baselines. The leakage
+controls, the search grids of the baselines and the LEAF controls are in \ref{app:supp}.
 
 \subsection{Temporal protocol and the role of the random-exposure data}
 \label{sec:protocol-temporal}
@@ -29,7 +29,7 @@ and the random log, and its pool is the set of random-log videos. The secondary 
 release, with 1,000 users of whom 993 appear in both logs. Its user identifiers are those of the 27K release, so the 1K
 results are a replication at a smaller scale and not an independent sample. Table~\ref{tab:data} gives the sizes.
 
-\begin{table}[t]
+\begin{table}[tbp]
 \centering
 \caption{Sizes of the two KuaiRand settings under the temporal protocol.}
 \label{tab:data}
@@ -82,6 +82,36 @@ $12\times32\times10=3{,}840$ configurations and 86,400 evaluations. QP family+DA
 has 1,280 and the QP family alone has 20. The budgets are therefore not matched. The fair comparator is the QP family with
 the same DAX module, and Section~\ref{sec:res-fair} discusses its search.
 
+\subsection{Counts and baseline runs}
+\label{sec:protocol-counts}
+
+Several user counts and several values of the same baseline appear in the results. Each comes from a different selection or
+search, and they are reconciled here.
+
+\paragraph{Users.} The KuaiRand-27K data contain 27,077 dataset users. In each split, 8,123 of them form the validation part and
+18,954 the test part. A test user is scored only if a candidate was clicked, which gives 15,809 to 15,913 scored test users per split.
+Pooled over the five splits, 22,612 distinct users are scored in at least one split. The headroom diagnostic of
+Section~\ref{sec:res-headroom} uses 22,661 users, all users with a click in some candidate list. The difference of 49 users
+consists of users with a click who were in the validation part of all five splits and so are never scored. An earlier computation
+of the same diagnostic used 22,847 users and a different definition of the item rate. It does not enter any comparison and is not
+reported further.
+
+\paragraph{LightGCN.} Two values of LightGCN appear. The value 0.4576 is the four-configuration LightGCN of the methods table and of the
+main comparison. The value 0.4597 is a LightGCN re-trained within the experiment that fits LightGCN+DAX, which has three base
+configurations. The DAX increment on LightGCN is measured against this re-trained base, because the base and its DAX variant must come
+from the same search.
+
+\paragraph{LEAF-LGN.} Four values of LEAF-LGN appear, each from a different search. The value 0.4736 is LEAF-LGN of the main experiment,
+with twelve trainings over the learning rate, the weight decay and the policy weight. The value 0.4728 is LEAF-LGN tuned
+independently: a separate search of 197 configurations of the backbone alone, in the LEAF development experiment (a first comparison of
+two LEAF variants with four baselines on the same splits). Its difference from the main experiment is $+0.73\times10^{-3}$ [0.52] (Appendix~D).
+The value 0.4706 is the base of the ablation experiment, selected inside a restricted window of two trainings; the ablation gains are
+therefore measured against it (Section~\ref{sec:res-ablate}). The value 0.4735 is LEAF-LGN in the headroom diagnostic, whose
+configuration is selected on the first split only.
+
+\paragraph{QP family.} The value 0.4634 is the QP family with its selected configurations. The value 0.4652 in the methods table is the
+QP family re-trained on the configurations that it selected.
+
 \subsection{Statistical tests and families}
 \label{sec:protocol-stats}
 
@@ -113,9 +143,8 @@ values of 0.0456 in Section~\ref{sec:results} are called borderline.
 \item \emph{KuaiRand-1K family}: three comparisons of Table~\ref{tab:1k}.
 \item \emph{Ablation families}: seven gains (full DAX and six variants, each against the ablation base) and six
   full-minus-variant differences.
-\item \emph{LEAF development family}: eight comparisons. The LEAF development experiment is a first comparison of two LEAF
-  variants with four baselines on the same splits.
-\item \emph{LEAF controls}: eight variants (Appendix~\ref{app:leafctl}).
+\item \emph{LEAF development family}: eight comparisons, from the LEAF development experiment.
+\item \emph{LEAF controls}: eight variants (\ref{app:leafctl}).
 \end{itemize}
 LightGCN+DAX (960 configurations on the re-trained LightGCN base) is in no family: it is a backbone increment, reported in
 Table~\ref{tab:backbone}.
@@ -135,8 +164,8 @@ The baselines are LightGCN, r-AdjNorm, EASE, the QP family, LEAF-LGN without DAX
 \citep{zhou2018din} and SIM-hard \citep{pi2020sim}. Every backbone with DAX gets the same DAX module and the same $\gamma$
 grid as LEAF-LGN. Table~\ref{tab:baselines} in \ref{app:baselines} gives the grids and the counts.
 
-The QP family is the authors' own earlier method, not published. Its description is in \ref{app:qp}, and it searches 20
-configurations in total.
+The QP family is our own unpublished baseline, a propensity-weighted LightGCN. It is described in full in \ref{app:qp}, which
+allows it to be reproduced, and it is never cited or called our previous work. In the main comparison it searches 20 configurations.
 
 DIN attends over the last $L=200$ pre-cut events of the user on videos outside the pool. SIM-hard keeps the $K=50$ most recent
 of these events that share the tag or author of the candidate, and attends over them. Both use identifier embeddings and the
