@@ -154,6 +154,21 @@ Inputs missing or not used:
   DAX alone - DAX alone[no_exam]                 +48.56 [ 2.48]  p=0.00e+00  NB p=0.000  (splits +48.5 +47.4 +48.6 +49.8 +48.8)
   DAX alone - Popularity                          +1.40 [ 2.84]  p=3.36e-01  NB p=0.620  (splits +1.5 -1.1 +1.1 +1.9 +2.5)
 
+5e. Matched-capacity deep baselines (dimension 64, hidden 64, 20 epochs, patience 2; v15) and seed replicates
+  DIN (d64)                0.4624 +- 0.0013 (2 configurations)
+  LEAF-LGN+DAX - DIN (d64)                       +23.35 [ 1.97]  p=2.36e-118  NB p=0.002  (splits +23.2 +24.3 +24.5 +19.6 +23.0)
+  DIN+DAX (d64)            0.4759 +- 0.0011 (640 configurations)
+  LEAF-LGN+DAX - DIN+DAX (d64)                    +9.67 [ 1.83]  p=4.48e-25  NB p=0.007  (splits +10.5 +8.3 +8.9 +8.5 +10.9)
+  SIM (d64)                0.4573 +- 0.0008 (2 configurations)
+  LEAF-LGN+DAX - SIM (d64)                       +28.17 [ 2.24]  p=6.76e-133  NB p=0.000  (splits +27.6 +28.2 +28.3 +27.8 +28.6)
+  SIM+DAX (d64)            0.4688 +- 0.0006 (640 configurations)
+  LEAF-LGN+DAX - SIM+DAX (d64)                   +16.86 [ 1.88]  p=8.90e-69  NB p=0.001  (splits +16.7 +16.4 +16.1 +15.1 +18.2)
+  training-seed replicates: LEAF-LGN+DAX seed s against DIN+DAX seed s (same splits)
+  seed 1: LEAF-LGN+DAX 0.4858, DIN+DAX 0.4756
+  LEAF-LGN+DAX - DIN+DAX (seed 1)                 +9.99 [ 1.66]  p=6.62e-32  NB p=0.011  (splits +12.1 +10.1 +9.4 +10.8 +8.4)
+  seed 2: LEAF-LGN+DAX 0.4856, DIN+DAX 0.4785
+  LEAF-LGN+DAX - DIN+DAX (seed 2)                 +6.76 [ 1.79]  p=1.49e-13  NB p=0.004  (splits +7.9 +7.2 +6.8 +5.9 +7.5)
+
 6. Checks and information (not gates)
   info: LEAF-LGN (posthoc run) - LEAF-LGN (stored)    +0.73 [ 0.52]  p=5.38e-03  NB p=0.660  (splits +0.1 +0.0 +1.4 +0.2 +2.4)
   QP family (retrained) - QP family (stored)      +1.70 [ 0.70]  p=1.89e-06  NB p=0.803  (splits -0.0 +2.2 +2.9 -3.8 +7.6)

@@ -578,6 +578,25 @@ if os.path.exists(NONE):
     out(line("DAX alone - Popularity", pair(ms[0], ms[2], EXPECTED_N)))
 out()
 
+out("5e. Matched-capacity deep baselines (dimension 64, hidden 64, 20 epochs, patience 2; v15) and seed replicates")
+for arch, lab in (("din", "DIN"), ("sim", "SIM")):
+    f = V15 + f"{arch}_27k_d64.json"
+    if os.path.exists(f) and "LEAF-LGN+DAX" in M:
+        for k in (lab, lab + "+DAX"):
+            m = method_from(f, k, k + " (d64)")
+            mu, sd = mean_sd(m)
+            out(f"  {m['name']:<24s} {mu:.4f} +- {sd:.4f} ({m['n_configs']} configurations)")
+            out(line(f"LEAF-LGN+DAX - {m['name']}", pair(M["LEAF-LGN+DAX"], m, EXPECTED_N)))
+out("  training-seed replicates: LEAF-LGN+DAX seed s against DIN+DAX seed s (same splits)")
+for sd_ in (1, 2):
+    fl, fd = f"{V11}c_seeds/lgn_s{sd_}.json", V15 + f"din_27k_s{sd_}.json"
+    if os.path.exists(fl) and os.path.exists(fd):
+        a = method_from(fl, "LEAF-LGN+DAX", f"LEAF-LGN+DAX s{sd_}")
+        b = method_from(fd, "DIN+DAX", f"DIN+DAX s{sd_}")
+        out(f"  seed {sd_}: LEAF-LGN+DAX {mean_sd(a)[0]:.4f}, DIN+DAX {mean_sd(b)[0]:.4f}")
+        out(line(f"LEAF-LGN+DAX - DIN+DAX (seed {sd_})", pair(a, b, EXPECTED_N)))
+out()
+
 out("6. Checks and information (not gates)")
 if "LEAF-LGN" in M and "LEAF-LGN(stored)" in M:
     out(line("info: LEAF-LGN (posthoc run) - LEAF-LGN (stored)", pair(M["LEAF-LGN"], M["LEAF-LGN(stored)"], EXPECTED_N)))
