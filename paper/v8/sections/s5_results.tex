@@ -22,7 +22,8 @@ We ask whether LEAF-LGN+DAX is more accurate than each baseline. The answer is y
 split-level test against all thirteen after Holm correction. Two of these margins are significant but narrow. Table~\ref{tab:main} gives the paired
 comparisons, and Figure~\ref{fig:forest} shows that the sign of each difference is positive in every split.
 
-The closest comparator is DIN+DAX (0.4796), with a difference of $+5.73$ [1.64] and an adjusted split-level p value of 0.0456. The second narrow
+The closest comparator is DIN+DAX (0.4796), with a difference of $+5.73$ [1.64] and an adjusted split-level p value of 0.0456. The margin
+is larger under matched capacity (Section~\ref{sec:res-deep}) and under two further training seeds (Section~\ref{sec:res-seeds}). The second narrow
 comparison is PW-LightGCN (0.4634), with a difference of $+22.32$ [1.83] and the same adjusted value of 0.0456 in the family of thirteen. The
 pre-specified criterion of the primary family of five, a margin of at least $15\times10^{-3}$ with both adjusted values below 0.05, is met, with an
 adjusted split-level value of 0.023 in that family. The four published estimators are far below LEAF-LGN+DAX. NAVIP (0.4579) is close to LightGCN
@@ -76,9 +77,26 @@ model from full DAX.
 
 \input{tables/tab_ablate}
 
-%RESULT-PENDING: the examination-off control (DAX with theta = kappa = 1, a shrunk tag-pooled click rate with the same selection) and the stand-alone rankers (popularity, and DAX alone) go here, as rows of tab:ablate under the same protocol and Holm family.
+The examination structure is tested against a shrunk click rate in Section~\ref{sec:res-exam}.
 
-These variants do not test the examination structure against a shrunk click rate, so the title's claim is not yet isolated (Section~\ref{sec:limits}).
+\subsection{Examination control and stand-alone item scores}
+\label{sec:res-exam}
+
+We ask whether the examination model contributes to DAX, and what the item score does without the rest of the model. The answer is that
+the examination model contributes, and that the item score is useful only once click rates are corrected for examination. Used alone, DAX
+does no better than popularity, so its value lies in complementing a personalised backbone.
+
+The control sets the user and scenario examination factors to one, so that the item score becomes the tag-shrunk click rate of the pre-cut
+log, with the same prior strengths, post-hoc combination and validation selection (Table~\ref{tab:exam}). Its search has 80 configurations
+against 320, because the examination settings collapse. Setting the factors to one lowers the score by $+8.80$ [1.10] against full DAX (NB
+$p$ 0.008, adjusted 0.025). The control is still $+6.30$ [0.95] above LEAF-LGN trained on the same runs (adjusted 0.045, significant but
+narrow). The adjusted values are Holm corrections over the four difference rows of the table.
+
+As stand-alone item scores on the same candidate lists, DAX reaches 0.4206, the tag-shrunk click rate 0.3720 and popularity, the pre-cut click
+count, 0.4194. DAX alone is $+48.56$ [2.48] above the click rate (NB $p$ below 0.001). Against popularity the difference is $+1.40$ [2.84],
+which is not significant (NB $p$ 0.620).
+
+\input{tables/tab_exam}
 
 \subsection{Lifelong deep baselines}
 \label{sec:res-deep}
@@ -86,11 +104,16 @@ These variants do not test the examination structure against a shrunk click rate
 We ask whether lifelong deep models do as well. The answer is no on the main family. DIN is $+18.26$ [1.97] below LEAF-LGN+DAX (adjusted 0.0077) and SIM-hard is
 $+26.44$ [2.01] below it (adjusted 0.0003). With DAX, DIN+DAX (0.4796) is $+5.73$ [1.64] below (adjusted 0.0456, significant but narrow), and SIM+DAX (0.4706)
 is $+14.72$ [1.77] below (adjusted 0.0061). On KuaiRand-1K the same order holds. Those differences are not adjusted and are not called significant
-(Table~\ref{tab:deep}). Each deep baseline is tuned over four configurations, and the deep models are therefore tuned less widely than LEAF-LGN.
+(Table~\ref{tab:deep}). Each default deep baseline is tuned over four configurations, so the deep models are tuned less widely than LEAF-LGN.
+
+With matched capacity the deep models still fall short. We ran DIN and SIM-hard with embedding and hidden dimension 64, at most 20 epochs
+with patience 2, a learning rate of $10^{-2}$ and two weight decays, with and without DAX. DIN reaches 0.4624 and SIM-hard 0.4573, and their
++DAX variants reach 0.4759 and 0.4688. LEAF-LGN+DAX is $+23.35$ [1.97] above DIN, $+9.67$ [1.83] above DIN+DAX, $+28.17$ [2.24] above SIM-hard
+and $+16.86$ [1.88] above SIM+DAX. The split-level p values in Table~\ref{tab:deep} are unadjusted, and Holm correction over these four
+comparisons keeps every one below 0.05. Larger capacity therefore does not close the gap, and the margin over DIN with DAX is larger than under
+the default search.
 
 \input{tables/tab_deep}
-
-%RESULT-PENDING: matched-capacity DIN and SIM (embedding dimension 64, the same epochs and patience as the graph backbones) go here as rows of tab:deep, with their own DAX rows and the same Holm family.
 
 \subsection{Controls}
 \label{sec:res-controls}
@@ -119,4 +142,10 @@ We ask whether the result is specific to one training seed. The gain is positive
 bases are lower (0.4714, 0.4708 and 0.4716), so their gains of $+14.67$, $+15.10$ and $+12.89$ are not comparable with the seed-0 gain of $+11.96$ [1.47].
 Their split-level p values are unadjusted, between 0.0009 and 0.0023. Table~\ref{tab:seeds} in \ref{app:supp} gives the seeds.
 %RESULT-PENDING: the PW-LightGCN re-trained under seeds 1 to 3 goes here, as a row of tab:seeds with its own gain.
-The baselines were not re-trained under other seeds.
+The closest comparator was also re-trained under seeds 1 and 2, with its default configuration grid, and compared with LEAF-LGN+DAX under
+the same seed (Table~\ref{tab:seeds-din}). LEAF-LGN+DAX, with its reduced backbone search of Table~\ref{tab:seeds}, is higher in both: by $+9.99$ [1.66] under seed 1 (0.4858 against 0.4756, NB $p$
+0.011) and by $+6.76$ [1.79] under seed 2 (0.4856 against 0.4785, NB $p$ 0.004). Both split-level values are below 0.05 unadjusted and after
+Holm correction over the two seeds, so the margin over DIN with DAX is not specific to seed 0. Apart from DIN+DAX, the baselines were not
+re-trained under other seeds.
+
+\input{tables/tab_seeds_din}

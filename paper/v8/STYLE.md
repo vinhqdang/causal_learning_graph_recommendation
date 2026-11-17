@@ -40,9 +40,13 @@ A reviewer has never seen the repository. Nothing in the PDF may point to it.
   one or two sentences of words, then gives the numbers and the table.
 - Paired differences: per-user mean difference of nDCG@10 times 10^3, with the 95% half-width in brackets,
   defined once in Section 4 and then used without re-explanation. Copy numbers exactly; do not re-round.
-- "significant" only when the Holm-adjusted p value of the named test is below 0.05. A Holm-adjusted value
-  between 0.04 and 0.05 on the split-level test is called "borderline". Never "state of the art", "remarkable",
-  "substantial" without a number, "clearly", "dramatically".
+- Significance follows the rule of Section 4 of the manuscript: the primary test is the split-level
+  Nadeau-Bengio test over the five split means, Holm-adjusted over the family named in the table, at alpha 0.05.
+  The per-user test is secondary and is reported only where the text says so. "significant" only when the
+  Holm-adjusted split-level value is below 0.05. A value between 0.04 and 0.05 is called "significant but narrow"
+  (not "borderline"), and is not rounded in either direction. Comparisons outside a stated family are reported
+  unadjusted and are not called significant. Never "state of the art", "remarkable", "substantial" without a
+  number, "clearly", "dramatically".
 
 ## 3. Names and symbols
 

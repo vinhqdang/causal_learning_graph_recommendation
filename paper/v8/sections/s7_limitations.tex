@@ -11,11 +11,10 @@ subset of the 27K users, so the 1K results are not an independent replication.
 are 0.0456, so the two narrow comparisons would need more splits to be firmly established. The per-user test gives far smaller values, but it treats users
 as independent across splits, which they are not.
 
-\paragraph{The examination structure is not isolated} The title's claim concerns examination before attraction, and the present variants do not test
-it against a shrunk click rate. The examination factors are not significant at split level after Holm correction, and no control sets examination
-to one (theta equal to kappa equal to one) with the same tag prior and selection. Examination and user taste are also confounded by construction,
-because the centre of the examination prior is the user's lifelong click rate. The attractiveness is therefore a model-based quantity under
-strong assumptions, and the gains may partly reflect a shrunk item click rate combined with user activity.
+\paragraph{Examination and user taste} The examination control sets the examination factors to one in a single setting, on one platform,
+and its comparison is one of four in its family. Examination and user taste are also confounded by construction, because the centre of
+the examination prior is the user's lifelong click rate. The attractiveness is therefore a model-based quantity under strong assumptions,
+and part of the gain may reflect user activity rather than examination.
 
 \paragraph{The combination is fitted after training} The mixing weight $\gamma$ is selected on validation users, and DAX is not trained jointly with
 the backbone in the reported results. We did not evaluate a variant in which $\gamma$ is learned jointly with the backbone.
@@ -30,15 +29,15 @@ limit the test score, although the selected prior strength depends on the grid (
 $\alpha_i$. The order of $\alpha_i$ is unaffected, but the logit used in the combination is not scale-invariant, so the prior strengths are
 validation hyperparameters.
 
-\paragraph{Reduced runs and separate searches} The ablations and the training seeds use reduced grids (Sections~\ref{sec:res-ablate}
-and~\ref{sec:res-seeds}), so their gains are not compared with the main increment. The seed runs cover LEAF-LGN+DAX only, and PW-LightGCN was not
-re-trained under other seeds. The LEAF-LGN controls use the separately tuned model, with 12, 12 and 4 configurations against 197 for the
+\paragraph{Reduced runs and separate searches} The ablations and the seeds of LEAF-LGN+DAX use reduced grids (Sections~\ref{sec:res-ablate}
+and~\ref{sec:res-seeds}), so their gains are not compared with the main increment. Two further seeds were run for DIN+DAX as well, and PW-LightGCN
+was not re-trained under other seeds. The LEAF-LGN controls use the separately tuned model, with 12, 12 and 4 configurations against 197 for the
 reference, which favours the reference. The closed-form controls were run on the closed-form LEAF scorer, not on a graph model. The headline
 LEAF-LGN+DAX backbone selects a policy weight of 0.25 or 0.5, and the DAX increment on LEAF-LGN compares it with a backbone that selects 0.
 
 \paragraph{Deep and published baselines} DIN and SIM-hard are each tuned over four configurations, and the four published estimators over four
-configurations each. A deeper search, or a sequence length other than 200 for DIN, may close the gap. This was not tested, and the matched-capacity
-comparison is still to be run.
+configurations each. The matched-capacity runs of the deep models use two configurations for each plain model and 640 for each +DAX variant. A
+deeper search, or a sequence length other than 200 for DIN, may close the gap; we did not test either.
 
 \paragraph{Click label only} We used the click label only. We did not evaluate a long-view label, or a protocol in which the training log extends
 past $T_0$ for the full model.

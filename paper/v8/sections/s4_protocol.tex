@@ -94,6 +94,8 @@ Holm's step-down procedure \citep{holm1979} adjusts each family. The families ar
   SIM, SIM+DAX, NAVIP, IPS-MF, DR-JL and MRDR.
 \item Sensitivity family, fifteen comparisons: the main family plus EASE and EASE+DAX (\ref{app:sens}).
 \item The six DAX increments of Table~\ref{tab:backbone}.
+\item The four matched-capacity comparisons of Table~\ref{tab:deep}, the four comparisons of the examination control of
+  Table~\ref{tab:exam}, and the two seed comparisons of Table~\ref{tab:seeds-din}, each adjusted over its own family.
 \item Seven gains and six full-minus-variant differences of the ablations (Section~\ref{sec:res-ablate}).
 \item Three LEAF-LGN controls (Section~\ref{sec:res-controls}), and three comparisons on KuaiRand-1K.
 \end{itemize}
@@ -113,7 +115,8 @@ events of the user on videos outside the pool. SIM-hard \citep{pi2020sim} keeps 
 of the candidate, and attends over them. Both use identifier embeddings and the BPR loss, and both are searched over four trainings, of dimension
 16, at most 12 epochs and patience 2. The published estimators are NAVIP \citep{kim2022navip}, IPS-MF \citep{schnabel2016}, DR-JL \citep{wang2019drjl}
 and MRDR \citep{guo2021mrdr}. All four use a propensity estimated from item popularity, dimension 64, at most 40 epochs and four configurations.
-Their search is much narrower than that of LEAF-LGN+DAX, and their values are conditional on it. TWIN \citep{chang2023twin} is not used as a
+Their search is much narrower than that of LEAF-LGN+DAX, and their values are conditional on it. Matched-capacity runs of the same two
+lifelong models, with dimension 64, are described in Section~\ref{sec:res-deep}. TWIN \citep{chang2023twin} is not used as a
 baseline. Every backbone with DAX gets the same DAX module and the same $\gamma$ grid as LEAF-LGN. \ref{app:grids} gives the grids.
 
 Several values of LightGCN and LEAF-LGN appear, each from its own search. The main table uses the four-configuration LightGCN (0.4576). The DAX increment on
@@ -133,7 +136,8 @@ configurations each), the additive logit model with user and scenario effects (3
 within tags and across all items, each with three permutation seeds. The ablation base is its own LEAF-LGN, selected inside the restricted window.
 It is lower than the main LEAF-LGN, so gains against it are not the main-table increment, and comparisons between variants use the full-minus-variant
 differences, which do not use the base. Full DAX in the ablation search selects the same configurations as in the main experiment on all five
-splits and reproduces its test values.
+splits and reproduces its test values. The examination control of Section~\ref{sec:res-exam} uses the same search with the
+examination factors fixed to one.
 
 \subsection{Kinds of number}
 \label{sec:protocol-kinds}

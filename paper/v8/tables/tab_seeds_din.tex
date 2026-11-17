@@ -1,0 +1,18 @@
+\begin{table}[tbp]
+\centering
+\footnotesize
+\caption{Training seeds 1 and 2 on KuaiRand-27K: LEAF-LGN+DAX against DIN+DAX, each re-trained with the same seed.}
+\label{tab:seeds-din}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrrcc}
+\toprule
+Seed & LEAF-LGN+DAX & DIN+DAX & Difference [95\% hw] & NB $p$ & NB $p_{\mathrm{Holm}}$ \\
+\midrule
+1 & 0.4858 & 0.4756 & +9.99 [1.66] & 0.011 & 0.011 \\
+2 & 0.4856 & 0.4785 & +6.76 [1.79] & 0.004 & 0.009 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize Difference: LEAF-LGN+DAX minus DIN+DAX, in units of $10^{-3}$ nDCG@10 per user, with the 95\% half-width. The LEAF-LGN+DAX values are those of Table~\ref{tab:seeds}; DIN+DAX is searched over its default configuration grid in each seed. NB $p$ is split-level. Holm correction runs over the two seeds.\end{minipage}
+\end{table}

@@ -1,0 +1,29 @@
+\begin{table}[tbp]
+\centering
+\footnotesize
+\caption{Examination control and stand-alone item scores on KuaiRand-27K.}
+\label{tab:exam}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrrcc}
+\toprule
+Setting or comparison & Configs & Mean & Difference [95\% hw] & NB $p$ & NB $p_{\mathrm{Holm}}$ \\
+\midrule
+LEAF-LGN+DAX, examination on & 320 & 0.4854 &  &  &  \\
+LEAF-LGN+DAX, examination off & 80 & 0.4767 &  &  &  \\
+LEAF-LGN, same trainings & 2 & 0.4706 &  &  &  \\
+\midrule
+Examination on minus off &  &  & +8.80 [1.10] & 0.008 & 0.025 \\
+Examination off minus LEAF-LGN &  &  & +6.30 [0.95] & 0.023 & 0.045 \\
+\midrule
+DAX alone & 320 & 0.4206 &  &  &  \\
+Tag-shrunk click rate alone (examination off) & 80 & 0.3720 &  &  &  \\
+Popularity (pre-cut click count) & 1 & 0.4194 &  &  &  \\
+\midrule
+DAX alone minus tag-shrunk click rate &  &  & +48.56 [2.48] & $<0.001$ & $<0.001$ \\
+DAX alone minus popularity &  &  & +1.40 [2.84] & 0.620 & 0.620 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize Examination on is the full DAX of the ablation search, which reproduces the main test values. Examination off sets the user and scenario examination factors to one, so the item score is the tag-shrunk click rate of the pre-cut log. Both settings use the same prior strengths, the same post-hoc combination and the same validation selection; the examination-off search has fewer configurations because the examination settings collapse. The bottom block scores the same candidate lists with the item score alone. Mean: mean of the five split means. Difference: mean over the pooled test users of the paired per-user difference, times $10^{3}$, with the 95\% half-width. NB $p$ is the split-level Nadeau-Bengio value; NB $p_{\mathrm{Holm}}$ is Holm correction over the four difference rows.\end{minipage}
+\end{table}

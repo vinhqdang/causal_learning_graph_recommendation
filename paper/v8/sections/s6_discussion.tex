@@ -17,8 +17,14 @@ does not lower its score. Whether the policy channel adds to LEAF-LGN+DAX was no
 is therefore the users' own lifelong affinities for content keys.
 
 \paragraph{Published and deep baselines} The published estimators were each tuned over four configurations, and NAVIP is close to LightGCN, so
-the comparison says little about these estimators in general. The closest comparator is DIN+DAX, with a narrow margin and a smaller search
-budget. Whether a wider search would change the order of the deep and published baselines is open.
+the comparison says little about these estimators in general. The closest comparator is DIN+DAX. Its margin is narrow under the default
+search, but it is larger under matched capacity and under two further training seeds, so the default margin is not the whole picture.
+Whether a wider search for the deep models would change the order of the deep and published baselines is open.
+
+\paragraph{Examination and item appeal} The examination control shows that the examination model adds to the item score, and that the
+tag-shrunk click rate is a weaker item score than DAX. Used alone, DAX matches popularity, so the corrected item score does not on its own
+outrank popularity. Its value in these results lies in complementing a personalised backbone. This is a reading of one platform
+and one protocol, and it does not show that the item score recovers item quality.
 
 \paragraph{Remaining headroom} LEAF-LGN+DAX closes about 36\% of the gap to the item oracle (Section~\ref{sec:res-headroom}). The lifelong user
 channels and the item-level attractiveness both contribute to the gains reported here. Further gains would need a different source of

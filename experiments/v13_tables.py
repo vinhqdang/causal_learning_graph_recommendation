@@ -134,7 +134,11 @@ def context():
     K["DIN+DAX"] = mf(H["DIN_1K"], "DIN+DAX", "DIN + DAX 1K")
     K["SIM"] = mf(H["SIM_1K"], "SIM", "SIM 1K")
     K["SIM+DAX"] = mf(H["SIM_1K"], "SIM+DAX", "SIM + DAX 1K")
-    _CTX = {"H": H, "M": M, "N": N, "K": K}
+    D64 = {}
+    for arch in ("DIN", "SIM"):
+        for k in (arch, arch + "+DAX"):
+            D64[k] = H["method_from"](D64_FILE[arch], k, k + " (dimension 64)")
+    _CTX = {"H": H, "M": M, "N": N, "K": K, "D64": D64}
     return _CTX
 
 
@@ -676,6 +680,7 @@ def table_seeds():
 def table_deep():
     c = context()
     H, M, K = c["H"], c["M"], c["K"]
+    D64 = c["D64"]
     rows = [span(5, r"KuaiRand-27K")]
     for k in ["DIN", "DIN+DAX", "SIM", "SIM+DAX"]:
         m = M.get(k)
@@ -684,6 +689,16 @@ def table_deep():
             rows.append([esc(k), tbd(SRC[k] + " mean"), tbd(SRC[k] + " configurations"), tbd(SRC[k] + " difference"), ""])
         else:
             rows.append([esc(k), mean_cell(m), f"{m['n_configs']}", dif(r), pnb(r["nb"])])
+    rows.append("MIDRULE")
+    rows.append(span(5, r"KuaiRand-27K, matched capacity (embedding and hidden dimension 64)"))
+    for k in ["DIN", "DIN+DAX", "SIM", "SIM+DAX"]:
+        m = D64.get(k)
+        if m is None:
+            rows.append([esc(k), tbd(f"{D64_FILE[k[:3] if k.startswith('SIM') else 'DIN']} {k} mean"), "",
+                         tbd(f"{k} difference"), ""])
+            continue
+        r = P(M["LEAF-LGN+DAX"], m)
+        rows.append([esc(k), mean_cell(m), f"{m['n_configs']}", dif(r), pnb(r["nb"])])
     rows.append("MIDRULE")
     rows.append(span(5, r"KuaiRand-1K"))
     lg = K["LEAF-LGN+DAX"]
@@ -695,7 +710,6 @@ def table_deep():
         r = P1k(lg, m)
         rows.append([esc(k), mean_cell(m), f"{m['n_configs']}", dif(r), pnb(r["nb"])])
     rows.append("MIDRULE")
-    rows.append(span(5, r"Lifelong sequence models"))
     write("tab_deep.tex", table_env(
         "Lifelong deep baselines (DIN and SIM-hard) with and without DAX on KuaiRand-27K and KuaiRand-1K: the paired "
         "difference of LEAF-LGN+DAX minus each comparator, in units of $10^{-3}$ nDCG@10. SIM denotes SIM-hard.",
@@ -703,7 +717,10 @@ def table_deep():
         ["Comparator", "Mean", "Configs", r"Diff.\ [95\% hw]", r"NB $p$"], rows,
         "NB $p$ values are not adjusted. DIN and SIM are each tuned over four configurations (learning rate "
         "$\\{10^{-2},3\\times10^{-3}\\}$ times weight decay $\\{10^{-4},10^{-5}\\}$), and their +DAX variants use the DAX "
-        "grid. The 1K rows use the 842 KuaiRand-1K test users."))
+        "grid. The matched-capacity rows use embedding and hidden dimension 64, at most 20 epochs with patience 2, a learning "
+        "rate of $10^{-2}$ and two weight decays (two configurations for each plain model, 640 for each +DAX variant). "
+        "Their NB $p$ values are not adjusted; Holm correction over the four matched-capacity rows is in the text. "
+        "The 1K rows use the 842 KuaiRand-1K test users."))
 
 
 
@@ -1002,6 +1019,123 @@ def table_extgrid():
 
 
 # ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------
+# Runs of the final experiment round: examination control and stand-alone item scores, matched-capacity
+# deep baselines, and training seeds of DIN+DAX against LEAF-LGN+DAX (the same sources as the v15 section of
+# the analysis report; each number is computed here from the result files, never typed)
+# ---------------------------------------------------------------------------------------------
+NOEXAM_FILE = "results/v15/dax_ablate_noexam.json"
+NOEXAM_ALONE_FILE = "results/v15/none_noexam.json"
+D64_FILE = {"DIN": "results/v15/din_27k_d64.json", "SIM": "results/v15/sim_27k_d64.json"}
+SEED_LGN_FILE = "results/v11/c_seeds/lgn_s{s}.json"
+SEED_DIN_FILE = "results/v15/din_27k_s{s}.json"
+
+
+def v15_records():
+    """Method records of the final experiment round, keyed as in the result files (None when missing)."""
+    c = context()
+    H = c["H"]
+    mf = H["method_from"]
+    exam = {
+        "on": mf(NOEXAM_FILE, "LEAF-LGN+DAX", "LEAF-LGN+DAX (examination on)"),
+        "off": mf(NOEXAM_FILE, "LEAF-LGN+DAX[no_exam]", "LEAF-LGN+DAX (examination off)"),
+        "base": mf(NOEXAM_FILE, "LEAF-LGN", "LEAF-LGN (same trainings)"),
+        "alone": mf(NOEXAM_ALONE_FILE, "DAX alone", "DAX alone"),
+        "alone_off": mf(NOEXAM_ALONE_FILE, "DAX alone[no_exam]", "tag-shrunk click rate alone"),
+        "pop": mf(NOEXAM_ALONE_FILE, "Popularity", "popularity"),
+    }
+    d64 = {}
+    for arch in ("DIN", "SIM"):
+        for k in (arch, arch + "+DAX"):
+            d64[k] = mf(D64_FILE[arch], k, k + " (dimension 64)")
+    seeds = {}
+    for s in (1, 2):
+        seeds[s] = (mf(SEED_LGN_FILE.format(s=s), "LEAF-LGN+DAX", f"LEAF-LGN+DAX seed {s}"),
+                    mf(SEED_DIN_FILE.format(s=s), "DIN+DAX", f"DIN+DAX seed {s}"))
+    return exam, d64, seeds
+
+
+def holm_of(recs):
+    """Holm adjustment of the split-level NB p values of the records that are present (dict in, dict out)."""
+    c = context()
+    keys = [k for k, r in recs.items() if r is not None]
+    return dict(zip(keys, c["H"]["holm"]([recs[k]["nb"] for k in keys])))
+
+
+def table_exam():
+    c = context()
+    exam, _d64, _seeds = v15_records()
+    if any(exam[k] is None for k in ("on", "off", "base", "alone", "alone_off", "pop")):
+        write("tab_exam.tex", table_env("Examination control: not available.", "tab:exam", "l",
+                                        ["Setting"], [[tbd("results/v15 examination-off and stand-alone files")]]))
+        return None
+    diffs = {
+        "on_off": P(exam["on"], exam["off"]),
+        "off_base": P(exam["off"], exam["base"]),
+        "alone_off": P(exam["alone"], exam["alone_off"]),
+        "alone_pop": P(exam["alone"], exam["pop"]),
+    }
+    adj = holm_of(diffs)
+    mean = lambda k: mean_cell(exam[k])
+    rows = [
+        ["LEAF-LGN+DAX, examination on", f"{exam['on']['n_configs']}", mean("on"), "", "", ""],
+        ["LEAF-LGN+DAX, examination off", f"{exam['off']['n_configs']}", mean("off"), "", "", ""],
+        ["LEAF-LGN, same trainings", f"{exam['base']['n_configs']}", mean("base"), "", "", ""],
+        "MIDRULE",
+        ["Examination on minus off", "", "", dif(diffs["on_off"]), pnb(diffs["on_off"]["nb"]), pnb(adj["on_off"])],
+        ["Examination off minus LEAF-LGN", "", "", dif(diffs["off_base"]), pnb(diffs["off_base"]["nb"]),
+         pnb(adj["off_base"])],
+        "MIDRULE",
+        ["DAX alone", f"{exam['alone']['n_configs']}", mean("alone"), "", "", ""],
+        ["Tag-shrunk click rate alone (examination off)", f"{exam['alone_off']['n_configs']}", mean("alone_off"),
+         "", "", ""],
+        ["Popularity (pre-cut click count)", f"{exam['pop']['n_configs']}", mean("pop"), "", "", ""],
+        "MIDRULE",
+        ["DAX alone minus tag-shrunk click rate", "", "", dif(diffs["alone_off"]), pnb(diffs["alone_off"]["nb"]),
+         pnb(adj["alone_off"])],
+        ["DAX alone minus popularity", "", "", dif(diffs["alone_pop"]), pnb(diffs["alone_pop"]["nb"]),
+         pnb(adj["alone_pop"])],
+    ]
+    note = ("Examination on is the full DAX of the ablation search, which reproduces the main test values. Examination off "
+            "sets the user and scenario examination factors to one, so the item score is the tag-shrunk click rate of the "
+            "pre-cut log. Both settings use the same prior strengths, the same post-hoc combination and the same validation "
+            "selection; the examination-off search has fewer configurations because the examination settings collapse. The "
+            "bottom block scores the same candidate lists with the item score alone. Mean: mean of "
+            "the five split means. Difference: mean over the pooled test users of the paired per-user difference, times "
+            "$10^{3}$, with the 95\\% half-width. NB $p$ is the split-level Nadeau-Bengio value; NB $p_{\\mathrm{Holm}}$ is "
+            "Holm correction over the four difference rows.")
+    write("tab_exam.tex", table_env(
+        "Examination control and stand-alone item scores on KuaiRand-27K.", "tab:exam", "lrrrcc",
+        ["Setting or comparison", "Configs", "Mean", r"Difference [95\% hw]", r"NB $p$", r"NB $p_{\mathrm{Holm}}$"],
+        rows, note))
+    return diffs, adj
+
+
+def table_seeds_din():
+    c = context()
+    H = c["H"]
+    _exam, _d64, seeds = v15_records()
+    recs, rows = {}, []
+    for s, (lgn, din) in seeds.items():
+        if lgn is None or din is None:
+            rows.append([f"{s}", tbd(f"seed {s} LEAF-LGN+DAX or DIN+DAX mean"), "", "", "", ""])
+            continue
+        recs[s] = P(lgn, din)
+    adj = holm_of(recs)
+    for s, (lgn, din) in seeds.items():
+        if lgn is None or din is None:
+            continue
+        rows.append([f"{s}", mean_cell(lgn), mean_cell(din), dif(recs[s]), pnb(recs[s]["nb"]), pnb(adj[s])])
+    write("tab_seeds_din.tex", table_env(
+        "Training seeds 1 and 2 on KuaiRand-27K: LEAF-LGN+DAX against DIN+DAX, each re-trained with the same seed.",
+        "tab:seeds-din", "lrrrcc",
+        ["Seed", "LEAF-LGN+DAX", "DIN+DAX", r"Difference [95\% hw]", r"NB $p$", r"NB $p_{\mathrm{Holm}}$"], rows,
+        "Difference: LEAF-LGN+DAX minus DIN+DAX, in units of $10^{-3}$ nDCG@10 per user, with the 95\\% half-width. The "
+        "LEAF-LGN+DAX values are those of Table~\\ref{tab:seeds}; DIN+DAX is searched over its default configuration grid "
+        "in each seed. NB $p$ is split-level. Holm correction runs over the two seeds."))
+    return recs, adj
+
+
 def main():
     c = context()
     H = c["H"]
@@ -1013,6 +1147,22 @@ def main():
     table_1k()
     table_seeds()
     table_deep()
+    ex = table_exam()
+    sd = table_seeds_din()
+    if ex:
+        print("Examination control (diff [hw], NB p, NB p Holm over the four difference rows):")
+        for k, r in ex[0].items():
+            print(summary_line(f"exam {k}", r), f"holm={ex[1][k]:.4f}")
+    print("Seeds, DIN+DAX against LEAF-LGN+DAX:")
+    for s_, r in sd[0].items():
+        print(summary_line(f"seed {s_}", r), f"holm={sd[1][s_]:.4f}")
+    _e, d64, _s = v15_records()
+    dk = [k for k in ("DIN", "DIN+DAX", "SIM", "SIM+DAX") if d64.get(k) is not None]
+    M = c["M"]
+    d_adj = holm_of({k: P(M["LEAF-LGN+DAX"], d64[k]) for k in dk})
+    print("Matched capacity (diff [hw], NB p, NB p Holm over the four rows):")
+    for k in dk:
+        print(summary_line(f"d64 LEAF-LGN+DAX - {k}", P(M["LEAF-LGN+DAX"], d64[k])), f"holm={d_adj[k]:.4f}")
     minus = table_leafctl()
     table_extgrid()
     table_leafctl_lgn()
