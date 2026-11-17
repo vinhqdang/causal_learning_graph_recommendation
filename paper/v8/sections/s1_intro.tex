@@ -51,8 +51,7 @@ training run, and both are corrected for multiple comparisons. The baselines inc
 estimators, PW-LightGCN, a closed-form recommender and two lifelong deep models, and the backbones are also given the DAX module.
 
 \paragraph{Main findings} On KuaiRand-27K, LEAF-LGN+DAX reaches an nDCG@10 of 0.4854, against 0.4634 for PW-LightGCN. Its margins
-over PW-LightGCN and over DIN with DAX, the strongest comparator, are significant but narrow. The margin over DIN with DAX is larger
-under matched model capacity and under two further training seeds, and both checks are significant at split level. DAX improves
+over PW-LightGCN and over DIN with DAX, the strongest comparator, are significant but narrow. Under two further training seeds the margin over PW-LightGCN is unchanged, and the margin over DIN with DAX is larger under matched model capacity and under those seeds, all significant at split level. DAX improves
 per-user nDCG@10 on all six backbones tested, and at split level the increase is significant on five of them. Correcting click
 rates for examination is what makes the item score useful: the examination model adds significantly to the gain, and DAX used alone
 does no better than popularity, so its value lies in complementing a personalised backbone. Section~\ref{sec:results} gives the

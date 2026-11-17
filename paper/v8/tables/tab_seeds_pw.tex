@@ -1,0 +1,20 @@
+\begin{table}[tbp]
+\centering
+\footnotesize
+\caption{Training seeds 1 and 2 on KuaiRand-27K: LEAF-LGN+DAX against PW-LightGCN and PW-LightGCN+DAX, each re-trained with the same seed.}
+\label{tab:seeds-pw}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{llrrrcc}
+\toprule
+Seed & Comparator & LEAF-LGN+DAX & Comparator mean & Difference [95\% hw] & NB $p$ & NB $p_{\mathrm{Holm}}$ \\
+\midrule
+1 & PW-LightGCN & 0.4858 & 0.4635 & +22.60 [1.90] & $<0.001$ & $<0.001$ \\
+1 & PW-LightGCN+DAX & 0.4858 & 0.4721 & +13.76 [1.62] & 0.004 & 0.004 \\
+2 & PW-LightGCN & 0.4856 & 0.4639 & +21.84 [1.93] & $<0.001$ & $<0.001$ \\
+2 & PW-LightGCN+DAX & 0.4856 & 0.4722 & +13.32 [1.62] & $<0.001$ & 0.001 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize Difference: LEAF-LGN+DAX minus the comparator, in units of $10^{-3}$ nDCG@10 per user, with the 95\% half-width. The LEAF-LGN+DAX values are those of Table~\ref{tab:seeds}. Each comparator is re-trained with the configurations chosen in the main run, with the epoch within three of the chosen epoch and the DAX grid and mixing weights as in the main run. NB $p$ is split-level. Holm correction runs over the two seeds of each comparator.\end{minipage}
+\end{table}

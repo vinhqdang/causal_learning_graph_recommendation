@@ -9,7 +9,7 @@ subset of the 27K users, so the 1K results are not an independent replication.
 
 \paragraph{Few splits and low power} The main comparisons use five user-level splits, and the split-level test has low power. Two adjusted values
 are 0.0456, so the two narrow comparisons would need more splits to be firmly established. The per-user test gives far smaller values, but it treats users
-as independent across splits, which they are not.
+as independent across splits, which they are not. The training-seed replicates of PW-LightGCN and DIN+DAX reuse the same five splits, so they check the training run but add no splits.
 
 \paragraph{Examination and user taste} The examination control sets the examination factors to one in a single setting, on one platform,
 and its comparison is one of four in its family. Examination and user taste are also confounded by construction, because the centre of
@@ -30,8 +30,7 @@ $\alpha_i$. The order of $\alpha_i$ is unaffected, but the logit used in the com
 validation hyperparameters.
 
 \paragraph{Reduced runs and separate searches} The ablations and the seeds of LEAF-LGN+DAX use reduced grids (Sections~\ref{sec:res-ablate}
-and~\ref{sec:res-seeds}), so their gains are not compared with the main increment. Two further seeds were run for DIN+DAX as well, and PW-LightGCN
-was not re-trained under other seeds. The LEAF-LGN controls use the separately tuned model, with 12, 12 and 4 configurations against 197 for the
+and~\ref{sec:res-seeds}), so their gains are not compared with the main increment. Two further training seeds were run for PW-LightGCN, its DAX variant and DIN+DAX, and the other comparators (DIN, SIM, SIM+DAX, r-AdjNorm, LightGCN, EASE, the DAX variants of LightGCN and EASE, and the four published estimators) were trained once. The LEAF-LGN controls use the separately tuned model, with 12, 12 and 4 configurations against 197 for the
 reference, which favours the reference. The closed-form controls were run on the closed-form LEAF scorer, not on a graph model. The headline
 LEAF-LGN+DAX backbone selects a policy weight of 0.25 or 0.5, and the DAX increment on LEAF-LGN compares it with a backbone that selects 0.
 

@@ -8,8 +8,7 @@ a logged click as an examination, which depends on the user and the scenario, fo
 attractiveness by expectation-maximisation.
 
 On KuaiRand-27K, under a temporal protocol with five user-level splits, the combined model reaches an nDCG@10 of 0.4854, against 0.4634 for PW-LightGCN.
-It ranks above each of the thirteen comparators of the main family. The margins over PW-LightGCN and over DIN with DAX are significant but narrow. The margin
-over DIN with DAX is larger under matched capacity and under two further training seeds, and both checks are significant at split level. DAX increases per-user nDCG@10 on all six backbones, and at split level on five. The evidence comes
+It ranks above each of the thirteen comparators of the main family. The margins over PW-LightGCN and over DIN with DAX are significant but narrow. The margin over PW-LightGCN is unchanged under two further training seeds, and the margin over DIN with DAX is larger under matched capacity and under those seeds, all significant at split level. DAX increases per-user nDCG@10 on all six backbones, and at split level on five. The evidence comes
 from one platform family, and it is a controlled ranking gain under the stated protocol. The examination model adds to the item score, and the corrected
 item score does no better than popularity when used alone. Open questions are whether the two signals hold on other platforms, whether a wider
 search for the deep baselines narrows the margin further, whether joint training of DAX with the backbone adds to the increment, and whether

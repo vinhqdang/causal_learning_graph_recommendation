@@ -24,7 +24,7 @@ comparisons, and Figure~\ref{fig:forest} shows that the sign of each difference 
 
 The closest comparator is DIN+DAX (0.4796), with a difference of $+5.73$ [1.64] and an adjusted split-level p value of 0.0456. The margin
 is larger under matched capacity (Section~\ref{sec:res-deep}) and under two further training seeds (Section~\ref{sec:res-seeds}). The second narrow
-comparison is PW-LightGCN (0.4634), with a difference of $+22.32$ [1.83] and the same adjusted value of 0.0456 in the family of thirteen. The
+comparison is PW-LightGCN (0.4634), with a difference of $+22.32$ [1.83] and the same adjusted value of 0.0456 in the family of thirteen. Under two further training seeds the margin is unchanged, at about $22\times10^{-3}$, and the split-level p value is below 0.001 (Section~\ref{sec:res-seeds}). The
 pre-specified criterion of the primary family of five, a margin of at least $15\times10^{-3}$ with both adjusted values below 0.05, is met, with an
 adjusted split-level value of 0.023 in that family. The four published estimators are far below LEAF-LGN+DAX. NAVIP (0.4579) is close to LightGCN
 (0.4576), with a difference of $+27.80$ [1.91]. IPS-MF (0.3765), DR-JL (0.3823) and MRDR (0.3826) each use four configurations, and their values are
@@ -137,15 +137,18 @@ LEAF-LGN+DAX (0.4590) is $+37.58$ [11.10] above PW-LightGCN (0.4246, adjusted 0.
 \subsection{Training seeds}
 \label{sec:res-seeds}
 
-We ask whether the result is specific to one training seed. The gain is positive in every seed tested, but the evidence is limited. The LEAF-LGN+DAX mean is
+We ask whether the result is specific to one training seed. The gain is positive in every seed tested, and the two narrow comparisons keep their margins under the same seeds, but the evidence is limited. The LEAF-LGN+DAX mean is
 0.4854 for seed 0, and 0.4858, 0.4856 and 0.4844 for seeds 1 to 3, a spread of $0.4853\pm0.0006$. Seeds 1 to 3 use a reduced backbone search, and their
 bases are lower (0.4714, 0.4708 and 0.4716), so their gains of $+14.67$, $+15.10$ and $+12.89$ are not comparable with the seed-0 gain of $+11.96$ [1.47].
 Their split-level p values are unadjusted, between 0.0009 and 0.0023. Table~\ref{tab:seeds} in \ref{app:supp} gives the seeds.
-%RESULT-PENDING: the PW-LightGCN re-trained under seeds 1 to 3 goes here, as a row of tab:seeds with its own gain.
+
 The closest comparator was also re-trained under seeds 1 and 2, with its default configuration grid, and compared with LEAF-LGN+DAX under
 the same seed (Table~\ref{tab:seeds-din}). LEAF-LGN+DAX, with its reduced backbone search of Table~\ref{tab:seeds}, is higher in both: by $+9.99$ [1.66] under seed 1 (0.4858 against 0.4756, NB $p$
 0.011) and by $+6.76$ [1.79] under seed 2 (0.4856 against 0.4785, NB $p$ 0.004). Both split-level values are below 0.05 unadjusted and after
-Holm correction over the two seeds, so the margin over DIN with DAX is not specific to seed 0. Apart from DIN+DAX, the baselines were not
-re-trained under other seeds.
+Holm correction over the two seeds, so the margin over DIN with DAX is not specific to seed 0. 
 
 \input{tables/tab_seeds_din}
+
+The PW-LightGCN comparator and its DAX variant were also re-trained under seeds 1 and 2, at the configurations chosen in the main run, with the epoch within three of the chosen epoch and the DAX grid and mixing weights of the main run (Table~\ref{tab:seeds-pw}). LEAF-LGN+DAX is higher in both seeds: by $+22.60$ [1.90] under seed 1 (0.4858 against 0.4635) and by $+21.84$ [1.93] under seed 2 (0.4856 against 0.4639). The margin is therefore unchanged from the main comparison, at about $22\times10^{-3}$, and the split-level p values are below 0.001 under both seeds after Holm correction over the two seeds. The DAX variant gives $+13.76$ [1.62] under seed 1 (0.4721 against 0.4858) and $+13.32$ [1.62] under seed 2 (0.4722 against 0.4856), with Holm-adjusted split-level values of 0.004 and 0.001. The other comparators remain single-seed: DIN, SIM, SIM+DAX, r-AdjNorm, LightGCN, EASE, the DAX variants of LightGCN and EASE, and the four published estimators.
+
+\input{tables/tab_seeds_pw}

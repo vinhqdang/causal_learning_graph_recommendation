@@ -1136,6 +1136,48 @@ def table_seeds_din():
     return recs, adj
 
 
+PW_SEED_FILE = "results/v15/pw_s{s}.json"
+
+
+def table_seeds_pw():
+    """Training seeds 1 and 2: LEAF-LGN+DAX against PW-LightGCN and PW-LightGCN+DAX, each re-trained with the same seed
+    at the configurations chosen in the main run (epoch within three of the chosen epoch, DAX grid and mixing weights
+    as in the main run). Holm correction runs over the two seeds of each comparator."""
+    c = context()
+    H = c["H"]
+    mf = H["method_from"]
+    comparators = [("PW-LightGCN", "QP family"), ("PW-LightGCN+DAX", "QP family+DAX")]
+    per = {}
+    for s in (1, 2):
+        lgn = mf(SEED_LGN_FILE.format(s=s), "LEAF-LGN+DAX", f"LEAF-LGN+DAX seed {s}")
+        per[s] = [lgn] + [mf(PW_SEED_FILE.format(s=s), key, f"{label} seed {s}") for label, key in comparators]
+    recs, adj = {}, {}
+    for i, (label, _key) in enumerate(comparators, start=1):
+        pairs = {s: P(per[s][0], per[s][i]) for s in (1, 2) if per[s][0] is not None and per[s][i] is not None}
+        recs[label] = pairs
+        adj[label] = holm_of(pairs)
+    rows = []
+    for s in (1, 2):
+        for i, (label, _key) in enumerate(comparators, start=1):
+            lgn, comp = per[s][0], per[s][i]
+            if lgn is None or comp is None:
+                rows.append([f"{s}", esc(label), tbd(f"seed {s} LEAF-LGN+DAX or {label} mean"), "", "", "", ""])
+                continue
+            r = recs[label][s]
+            rows.append([f"{s}", esc(label), mean_cell(lgn), mean_cell(comp), dif(r), pnb(r["nb"]), pnb(adj[label][s])])
+    write("tab_seeds_pw.tex", table_env(
+        "Training seeds 1 and 2 on KuaiRand-27K: LEAF-LGN+DAX against PW-LightGCN and PW-LightGCN+DAX, each re-trained "
+        "with the same seed.",
+        "tab:seeds-pw", "llrrrcc",
+        ["Seed", "Comparator", "LEAF-LGN+DAX", "Comparator mean", r"Difference [95\% hw]", r"NB $p$",
+         r"NB $p_{\mathrm{Holm}}$"], rows,
+        "Difference: LEAF-LGN+DAX minus the comparator, in units of $10^{-3}$ nDCG@10 per user, with the 95\\% half-width. "
+        "The LEAF-LGN+DAX values are those of Table~\\ref{tab:seeds}. Each comparator is re-trained with the configurations "
+        "chosen in the main run, with the epoch within three of the chosen epoch and the DAX grid and mixing weights as in "
+        "the main run. NB $p$ is split-level. Holm correction runs over the two seeds of each comparator."))
+    return recs, adj
+
+
 def main():
     c = context()
     H = c["H"]
@@ -1149,6 +1191,7 @@ def main():
     table_deep()
     ex = table_exam()
     sd = table_seeds_din()
+    sp = table_seeds_pw()
     if ex:
         print("Examination control (diff [hw], NB p, NB p Holm over the four difference rows):")
         for k, r in ex[0].items():
@@ -1156,6 +1199,10 @@ def main():
     print("Seeds, DIN+DAX against LEAF-LGN+DAX:")
     for s_, r in sd[0].items():
         print(summary_line(f"seed {s_}", r), f"holm={sd[1][s_]:.4f}")
+    print("Seeds, PW-LightGCN and PW-LightGCN+DAX against LEAF-LGN+DAX (Holm over the two seeds):")
+    for label, pairs in sp[0].items():
+        for s_, r in pairs.items():
+            print(summary_line(f"{label} seed {s_}", r), f"holm={sp[1][label][s_]:.4f}")
     _e, d64, _s = v15_records()
     dk = [k for k in ("DIN", "DIN+DAX", "SIM", "SIM+DAX") if d64.get(k) is not None]
     M = c["M"]
