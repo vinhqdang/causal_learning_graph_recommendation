@@ -169,6 +169,16 @@ Inputs missing or not used:
   seed 2: LEAF-LGN+DAX 0.4856, DIN+DAX 0.4785
   LEAF-LGN+DAX - DIN+DAX (seed 2)                 +6.76 [ 1.79]  p=1.49e-13  NB p=0.004  (splits +7.9 +7.2 +6.8 +5.9 +7.5)
 
+5f. PW-LightGCN (QP family) training-seed replicates at the configurations chosen in the main run (+-3 epochs)
+  seed 1: QP family 0.4635 (LEAF-LGN+DAX 0.4858)
+  LEAF-LGN+DAX - QP family (seed 1)              +22.60 [ 1.90]  p=2.66e-118  NB p=0.001  (splits +22.5 +22.0 +21.2 +24.9 +20.8)
+  seed 1: QP family+DAX 0.4721 (LEAF-LGN+DAX 0.4858)
+  LEAF-LGN+DAX - QP family+DAX (seed 1)          +13.76 [ 1.62]  p=1.78e-61  NB p=0.004  (splits +14.1 +13.7 +12.6 +15.8 +12.0)
+  seed 2: QP family 0.4639 (LEAF-LGN+DAX 0.4856)
+  LEAF-LGN+DAX - QP family (seed 2)              +21.84 [ 1.93]  p=1.45e-107  NB p=0.000  (splits +21.2 +22.5 +20.8 +21.5 +22.5)
+  seed 2: QP family+DAX 0.4722 (LEAF-LGN+DAX 0.4856)
+  LEAF-LGN+DAX - QP family+DAX (seed 2)          +13.32 [ 1.62]  p=7.42e-58  NB p=0.001  (splits +12.3 +12.8 +13.0 +14.1 +14.5)
+
 6. Checks and information (not gates)
   info: LEAF-LGN (posthoc run) - LEAF-LGN (stored)    +0.73 [ 0.52]  p=5.38e-03  NB p=0.660  (splits +0.1 +0.0 +1.4 +0.2 +2.4)
   QP family (retrained) - QP family (stored)      +1.70 [ 0.70]  p=1.89e-06  NB p=0.803  (splits -0.0 +2.2 +2.9 -3.8 +7.6)

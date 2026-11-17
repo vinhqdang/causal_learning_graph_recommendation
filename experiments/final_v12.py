@@ -597,6 +597,17 @@ for sd_ in (1, 2):
         out(line(f"LEAF-LGN+DAX - DIN+DAX (seed {sd_})", pair(a, b, EXPECTED_N)))
 out()
 
+out("5f. PW-LightGCN (QP family) training-seed replicates at the configurations chosen in the main run (+-3 epochs)")
+for sd_ in (1, 2):
+    fl, fp = f"{V11}c_seeds/lgn_s{sd_}.json", V15 + f"pw_s{sd_}.json"
+    if os.path.exists(fl) and os.path.exists(fp):
+        a = method_from(fl, "LEAF-LGN+DAX", f"LEAF-LGN+DAX s{sd_}")
+        for k in ("QP family", "QP family+DAX"):
+            b = method_from(fp, k, f"{k} s{sd_}")
+            out(f"  seed {sd_}: {k} {mean_sd(b)[0]:.4f} (LEAF-LGN+DAX {mean_sd(a)[0]:.4f})")
+            out(line(f"LEAF-LGN+DAX - {k} (seed {sd_})", pair(a, b, EXPECTED_N)))
+out()
+
 out("6. Checks and information (not gates)")
 if "LEAF-LGN" in M and "LEAF-LGN(stored)" in M:
     out(line("info: LEAF-LGN (posthoc run) - LEAF-LGN (stored)", pair(M["LEAF-LGN"], M["LEAF-LGN(stored)"], EXPECTED_N)))
