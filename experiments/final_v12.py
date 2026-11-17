@@ -554,6 +554,30 @@ else:
     out("  not run (results/v10/leaf_lgn_ablate.json missing)")
 out()
 
+V15 = "results/v15/"
+out("5d. Examination-off control and stand-alone item scores (v15)")
+out("   no_exam: theta_u = kappa_t = 1, so attractiveness is the tag-shrunk click rate of the pre-cut log")
+NOEX = V15 + "dax_ablate_noexam.json"
+NONE = V15 + "none_noexam.json"
+if os.path.exists(NOEX):
+    full = method_from(NOEX, "LEAF-LGN+DAX", "LEAF-LGN+DAX (reduced setting)")
+    off = method_from(NOEX, "LEAF-LGN+DAX[no_exam]")
+    base = method_from(NOEX, "LEAF-LGN", "LEAF-LGN (same trainings)")
+    for m in (full, off, base):
+        mu, sd = mean_sd(m)
+        out(f"  {m['name']:<36s} {mu:.4f} +- {sd:.4f} ({m['n_configs']} configurations)")
+    out(line("LEAF-LGN+DAX - LEAF-LGN+DAX[no_exam]", pair(full, off, EXPECTED_N)))
+    out(line("LEAF-LGN+DAX[no_exam] - LEAF-LGN", pair(off, base, EXPECTED_N)))
+    out(line("LEAF-LGN+DAX - LEAF-LGN", pair(full, base, EXPECTED_N)))
+if os.path.exists(NONE):
+    ms = [method_from(NONE, k) for k in ("DAX alone", "DAX alone[no_exam]", "Popularity")]
+    for m in ms:
+        mu, sd = mean_sd(m)
+        out(f"  {m['name']:<36s} {mu:.4f} +- {sd:.4f} ({m['n_configs']} configurations)")
+    out(line("DAX alone - DAX alone[no_exam]", pair(ms[0], ms[1], EXPECTED_N)))
+    out(line("DAX alone - Popularity", pair(ms[0], ms[2], EXPECTED_N)))
+out()
+
 out("6. Checks and information (not gates)")
 if "LEAF-LGN" in M and "LEAF-LGN(stored)" in M:
     out(line("info: LEAF-LGN (posthoc run) - LEAF-LGN (stored)", pair(M["LEAF-LGN"], M["LEAF-LGN(stored)"], EXPECTED_N)))

@@ -140,6 +140,20 @@ Inputs missing or not used:
   LEAF-LGN[no_policy] 0.4733 +- 0.0008 (4 configurations)
   LEAF-LGN - LEAF-LGN[no_policy]                  -0.55 [ 0.33]  p=1.13e-03  NB p=0.793  (splits +0.0 +0.0 +0.0 +0.0 -2.4)
 
+5d. Examination-off control and stand-alone item scores (v15)
+   no_exam: theta_u = kappa_t = 1, so attractiveness is the tag-shrunk click rate of the pre-cut log
+  LEAF-LGN+DAX (reduced setting)       0.4854 +- 0.0009 (320 configurations)
+  LEAF-LGN+DAX[no_exam]                0.4767 +- 0.0005 (80 configurations)
+  LEAF-LGN (same trainings)            0.4706 +- 0.0016 (2 configurations)
+  LEAF-LGN+DAX - LEAF-LGN+DAX[no_exam]            +8.80 [ 1.10]  p=5.88e-55  NB p=0.008  (splits +7.9 +9.4 +9.2 +7.0 +9.7)
+  LEAF-LGN+DAX[no_exam] - LEAF-LGN                +6.30 [ 0.95]  p=3.22e-38  NB p=0.023  (splits +4.5 +6.3 +7.4 +5.8 +6.6)
+  LEAF-LGN+DAX - LEAF-LGN                        +15.10 [ 1.42]  p=1.22e-95  NB p=0.009  (splits +12.4 +15.6 +16.6 +12.8 +16.2)
+  DAX alone                            0.4206 +- 0.0009 (320 configurations)
+  DAX alone[no_exam]                   0.3720 +- 0.0005 (80 configurations)
+  Popularity                           0.4194 +- 0.0010 (1 configurations)
+  DAX alone - DAX alone[no_exam]                 +48.56 [ 2.48]  p=0.00e+00  NB p=0.000  (splits +48.5 +47.4 +48.6 +49.8 +48.8)
+  DAX alone - Popularity                          +1.40 [ 2.84]  p=3.36e-01  NB p=0.620  (splits +1.5 -1.1 +1.1 +1.9 +2.5)
+
 6. Checks and information (not gates)
   info: LEAF-LGN (posthoc run) - LEAF-LGN (stored)    +0.73 [ 0.52]  p=5.38e-03  NB p=0.660  (splits +0.1 +0.0 +1.4 +0.2 +2.4)
   QP family (retrained) - QP family (stored)      +1.70 [ 0.70]  p=1.89e-06  NB p=0.803  (splits -0.0 +2.2 +2.9 -3.8 +7.6)
