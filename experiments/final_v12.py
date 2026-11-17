@@ -608,6 +608,31 @@ for sd_ in (1, 2):
             out(line(f"LEAF-LGN+DAX - {k} (seed {sd_})", pair(a, b, EXPECTED_N)))
 out()
 
+V16 = "results/v16/"
+out("5g. Item-term controls on LEAF-LGN (v16): popularity, raw click rate, DAX without user groups, exact-M-step EM; random order")
+CTL = V16 + "lgn_controls.json"
+if os.path.exists(CTL):
+    full = method_from(CTL, "LEAF-LGN+DAX")
+    for k in ("LEAF-LGN", "LEAF-LGN+pop", "LEAF-LGN+ctr", "LEAF-LGN+DAX[no_groups]"):
+        m = method_from(CTL, k)
+        mu, sd = mean_sd(m)
+        out(f"  {k:<28s} {mu:.4f} +- {sd:.4f} ({m['n_configs']} configurations)")
+        out(line(f"LEAF-LGN+DAX - {k}", pair(full, m, EXPECTED_N)))
+    out(f"  LEAF-LGN+DAX (same setting) {mean_sd(full)[0]:.4f}")
+EX = V16 + "lgn_exact_em.json"
+if os.path.exists(EX):
+    res = results_of(EX)
+    ke = [k for k in res if "exact" in k][0]
+    a, b = method_from(EX, "LEAF-LGN+DAX"), method_from(EX, ke)
+    out(f"  {ke:<28s} {mean_sd(b)[0]:.4f} (ratio-form EM {mean_sd(a)[0]:.4f})")
+    out(line(f"LEAF-LGN+DAX - {ke}", pair(a, b, EXPECTED_N)))
+RND = V16 + "none_random.json"
+if os.path.exists(RND):
+    for k in ("Random", "Popularity", "DAX alone"):
+        m = method_from(RND, k)
+        out(f"  {k:<28s} {mean_sd(m)[0]:.4f} +- {mean_sd(m)[1]:.4f}")
+out()
+
 out("6. Checks and information (not gates)")
 if "LEAF-LGN" in M and "LEAF-LGN(stored)" in M:
     out(line("info: LEAF-LGN (posthoc run) - LEAF-LGN (stored)", pair(M["LEAF-LGN"], M["LEAF-LGN(stored)"], EXPECTED_N)))

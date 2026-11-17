@@ -1,0 +1,33 @@
+EM check of DAX (v16, Part 2)
+source: results/v11/dax_lgn_post.json; chosen DAX configurations over 5 splits:
+  4 x {"centre": "tag", "k_life": 100.0, "prior": 80.0, "prior_s": 80.0, "tab": true}
+  1 x {"centre": "content", "k_life": 100.0, "prior": 80.0, "prior_s": 80.0, "tab": true}
+fitted configuration (most frequent, 4 of 5): {"centre": "tag", "k_life": 100.0, "prior": 80.0, "prior_s": 80.0, "tab": true}
+data: 27077 users, 7583 items, 1141300 pre-cut standard impressions, 15 tabs; loaded in 11s
+(0) default (ratio) path vs HEAD module on the full data: bit-identical = True
+ratio fit: 3.0s, kappa (normalised, kappa_1 = 1) = [0.2535, 1.0, 0.9472, 0.0694, 1.1815, 0.5111, 0.4215, 0.6892, 0.1008, 1.3444, 1.2777, 0.006, 0.3313, 0.6796, 0.1724]
+(i) M-steps at the fitted values (same P(E=1) and kappa for both)
+  users 27077, with impressions 26211; P(E=1) over impressions: mean 0.5255
+  theta relative difference |ratio - exact| / exact, all users: median 0.001888, p90 0.01278, max 0.3444
+  theta relative difference, users with impressions: median 0.002057, p90 0.01317, max 0.3444
+  theta absolute difference: median 0.00096, max 0.2562
+  theta at the bounds: ratio 359, exact 52 users
+  Spearman(ratio theta, exact theta) = 0.998017; Pearson = 0.996517
+  fitted theta (last ratio step) vs exact at the same P(E=1): Spearman = 0.998020
+  kappa (normalised) ratio [0.25339, 1.0, 0.94717, 0.06922, 1.18174, 0.51093, 0.42102, 0.68924, 0.10075, 1.34548, 1.27866, 0.00604, 0.33124, 0.67956, 0.17232]
+  kappa (normalised) exact [0.26577, 1.0, 0.97639, 0.07214, 1.0, 0.54325, 0.44774, 0.77789, 0.1046, 1.0, 1.00579, 0.00627, 0.34335, 0.71495, 0.16469]
+  kappa relative difference per tab: [0.04658, 0.0, 0.02993, 0.04051, 0.18174, 0.05949, 0.05966, 0.11396, 0.03674, 0.34548, 0.2713, 0.03672, 0.03526, 0.0495, 0.04634]
+  bounds [(i) fitted values]: tabs with exact kappa on its bracket edge [1, 4, 9, 10] (raw kappa [1.0, 1.0, 1.0, 1.0058], edge [1.0, 1.0, 1.0, 1.0058]); users with exact theta on its edge 1691 (edge 1 for 549, edge (1-1e-9)/max kappa for 1142)
+(ii) exact-M-step fit: 78.3s, kappa = [0.2664, 1.0, 1.0, 0.0739, 1.0232, 0.5626, 0.4803, 0.8095, 0.1044, 1.0232, 1.0232, 0.0063, 0.3443, 0.7463, 0.1652]
+  logit alpha (item level), Spearman(ratio, exact) = 0.998154; Pearson = 0.997721
+  logit alpha (item x stratum), Spearman = 0.998058; Pearson = 0.997016
+  theta: Spearman(ratio fit, exact fit) = 0.999631
+  observed-data Bernoulli log-likelihood of the 1141300 pre-cut impressions: ratio fit -634370.14 (mean -0.555831); exact fit -628211.73 (mean -0.550435); exact - ratio = 6158.40
+  bounds [(ii) exact fit, its own E-step state]: tabs with exact kappa on its bracket edge [1, 2, 4, 9, 10] (raw kappa [1.0, 1.0, 1.0232, 1.0232, 1.0232], edge [1.0, 1.0, 1.0232, 1.0232, 1.0232]); users with exact theta on its edge 1015 (edge 1 for 720, edge (1-1e-9)/max kappa for 295)
+(iii) scenario homogeneity per user (tab = scenario; users with pre-cut impressions)
+  users with impressions 26211; tabs with impressions 15; impressions per user median 31, mean 43.5
+  share of the user's impressions on the user's most common tab: median 0.8824, mean 0.8217, p10 0.5263, p90 1.0000
+  impression-weighted share on the most common tab: 0.8016; users with a single tab: 25.15%
+  tab shares over all pre-cut impressions: [0.1315, 0.7316, 0.0344, 0.0031, 0.0662, 0.003, 0.026, 0.0003, 0.0022, 0.0002, 0.0001, 0.0004, 0.0007, 0.0002, 0.0]
+  pre-cut click rate: 0.46344 (528929 clicks / 1141300 impressions); user click rate median 0.5000
+peak RSS 3598 MB; total 106s

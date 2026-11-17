@@ -27,6 +27,13 @@ joint full = prior {40, 80, 160} x k_life {0, 100}, tab on; joint small = prior 
                                         8 configurations on the full grid (prior x centre x stratum cells)
   additive      MRP-style logistic with tab effects (drup.dax.fit_additive), 32 configurations matched to the DAX
                 grid (additive_grid): item ridge lam_e, tag-effect ridge lam_g, tab on / off
+  no_groups     the DAX grid with the user-group strata switched off (prior_s None), duplicates removed (16 configurations)
+  exact_em      the DAX grid with the exact Bernoulli M-steps of theta and kappa (exact_mstep True, drup.dax.fit_dax);
+                32 configurations
+  popularity    item term log(1 + pre-cut clicks of the item) in place of DAX (one configuration x gammas); arm
+                "<backbone>+pop"
+  raw_ctr       item term (clicks + 1) / (impressions + 2), the raw pre-cut click rate (drup.dax.control_item_term);
+                one configuration x gammas; arm "<backbone>+ctr"
   shuffle_items alpha permuted within tag (the tag mean kept); shuffle_tags alpha permuted across all items
                 (both run once per permutation seed, --perm_seeds). Each seed is its own arm ("...[shuffle_items|p0]"),
                 and "...[shuffle_items]" is the mean of the seeds' per-split test values.
@@ -75,9 +82,9 @@ sys.path.insert(0, HERE)
 import learned_ctx as LC  # noqa: E402
 import run_learned as RL  # noqa: E402
 from drup.data2 import load_kuairand_rich  # noqa: E402
-from drup.dax import (DAXChannel, LEAFLGNDAX, all_perm, dax_variant, fit_additive, fit_dax_dataset,  # noqa: E402
-                      item_content_codes, lifelong_rate, masked_rowstd, pre_cut, tag_codes, user_strata,
-                      within_code_perm)
+from drup.dax import (DAXChannel, LEAFLGNDAX, all_perm, control_item_term, dax_variant, fit_additive,  # noqa: E402
+                      fit_dax_dataset, item_content_codes, lifelong_rate, masked_rowstd, pre_cut, tag_codes,
+                      user_strata, within_code_perm)
 from drup.device import get_device  # noqa: E402
 from drup.estimation import baseline_imputation, clip_propensity, get_propensity  # noqa: E402
 from drup.leaf import (CUT_MS, LEAFLGN, BucketSelector, Layout, LifelongTables, check_temporal_protocol,  # noqa: E402
@@ -90,7 +97,8 @@ SIG_EXCLUDE = ("out", "threads", "device")
 KEY = "ndcg@10"
 GAMMAS = (0.0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.7, 1.0)
 GAMMAS_SMALL = (0.1, 0.25, 0.5, 0.7, 1.0)          # the gamma grid of the ablation setting (--gammas)
-ABLATIONS = ("no_tab", "no_life_prior", "no_tag_prior", "no_exam", "additive", "shuffle_items", "shuffle_tags")
+ABLATIONS = ("no_tab", "no_life_prior", "no_tag_prior", "no_exam", "additive", "shuffle_items", "shuffle_tags",
+             "no_groups", "exact_em", "popularity", "raw_ctr")
 ADD_LAM_E = (5.0, 20.0, 80.0, 320.0)
 ADD_LAM_G = (0.1, 1.0, 10.0, 100.0)
 QP_METHODS = ("DR-BPR-LGN-1", "DR-BPR-LGN-p2", "DR-BPR-LGN-p")
@@ -239,6 +247,7 @@ def dax_arms(d, dax_name, grid, ablate, life, strata, content, tags, perm_seeds)
     cache = {}
     log = pre_cut(d["log"])
     n = len(tags)
+    label = dax_name.split("+DAX")[0]          # "LEAF-LGN", "EASE", "LightGCN", "QP family", "DAX alone"
 
     def fit(kw):
         key = json.dumps(kw, sort_keys=True)
@@ -258,13 +267,18 @@ def dax_arms(d, dax_name, grid, ablate, life, strata, content, tags, perm_seeds)
 
     arms = [(dax_name, [(c, channel(c)) for c in grid])]
     for ab in ablate:
-        if ab in ("no_tab", "no_life_prior", "no_tag_prior", "no_exam"):
+        if ab in ("no_tab", "no_life_prior", "no_tag_prior", "no_exam", "no_groups", "exact_em"):
             kws = []
             for c in grid:
                 kw = dax_variant(c, ab)
                 if kw not in kws:
                     kws.append(kw)
             arms.append((f"{dax_name}[{ab}]", [(kw, channel(kw)) for kw in kws]))
+        elif ab in ("popularity", "raw_ctr"):
+            kw = dict(model=ab)
+            term = control_item_term(log, n, ab)
+            name = f"{label}+{'pop' if ab == 'popularity' else 'ctr'}"
+            arms.append((name, [(kw, DAXChannel(term))]))
         elif ab == "additive":
             cfgs = []
             for c in additive_grid():
@@ -441,13 +455,20 @@ def run_leaf_joint(a, d, sel, state, save, layout, pop, m, n, grid, npz, life, s
 
 def run_none(a, d, post, state, save, layout, n):
     """No backbone: the DAX arms on a zero backbone score (one evaluation over every configuration and gamma; the
-    selection is over DAX x gamma per split), and the popularity method, the pre-cut clicks of each item (the log of
-    fit_dax_dataset, drup.dax.pre_cut), one configuration."""
+    selection is over DAX x gamma per split), the popularity method, the pre-cut clicks of each item (the log of
+    fit_dax_dataset, drup.dax.pre_cut), one configuration, and Random: uniform scores per candidate, torch generator
+    seed 0 (one draw per bucket cell, in bucket order), one configuration."""
     S = post.n_splits
     if "none" not in state["done"]:
         zeros = [torch.zeros(bk["cand"].shape, dtype=torch.float64) for bk in layout.buckets]
         post.add_epoch(zeros, dict(backbone="none"), 0, active=[True] * S)
         state["done"].append("none")
+        save()
+    if "random" not in state["done"]:
+        g = torch.Generator().manual_seed(0)
+        scores = [torch.rand(bk["cand"].shape, generator=g, dtype=torch.float64) for bk in layout.buckets]
+        post.sels["Random"].add(scores, dict(method="Random"), new_config=True)
+        state["done"].append("random")
         save()
     if "popularity" not in state["done"]:
         log = pre_cut(d["log"])
@@ -661,6 +682,7 @@ def main():
                        gammas=a.gammas, cache_z=not a.no_zcache)
         if a.backbone == "none":
             post.sels["Popularity"] = BucketSelector(layout, splits, (10,), KEY, row_ids)
+            post.sels["Random"] = BucketSelector(layout, splits, (10,), KEY, row_ids)
         names = [nm for nm in post.sels if a.backbone != "none" or nm != base_name]
         sels = post.sels
     else:

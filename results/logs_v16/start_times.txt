@@ -1,0 +1,3 @@
+Tue Nov 17 14:24:54 UTC 2026
+restart Tue Nov 17 15:02:29 UTC 2026
+exact_em fresh restart Tue Nov 17 15:22:43 UTC 2026 (first attempt killed at the 30 min background limit before its first checkpoint)

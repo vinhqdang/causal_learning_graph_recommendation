@@ -21,7 +21,10 @@ Pieces:
   content_centre       Fay-Herriot style prior centre: ridge regression of logit alpha on content covariates
   item_content_codes   the content covariates of the pool items (tag, upload type, duration, author history, ...)
   fit_additive         MRP-style additive logistic model with tab effects (the fair additive arm, no detection)
-  dax_variant          the configuration of an ablation arm (no_tab, no_life_prior, no_tag_prior; None = full)
+  exact_theta_kappa    exact Bernoulli M-steps of theta and kappa (fit_dax exact_mstep=True; exact_theta, exact_kappa)
+  control_item_term    item terms of the control arms: log(1 + clicks) (popularity) and the raw click rate (raw_ctr)
+  dax_variant          the configuration of an ablation arm (no_tab, no_life_prior, no_tag_prior, no_exam, no_groups,
+                       exact_em; None = full)
   within_code_perm / all_perm   negative controls of the item appeal (gate B2)
   masked_rowstd        per-row standardisation over the real candidates of a bucket
   DAXChannel           standardised item appeal with the interface of drup.leaf.LifelongTables
@@ -55,7 +58,7 @@ def pre_cut(log, cut=CUT_MS):
 
 
 def fit_dax(log, n_users, n_items, tag_codes, life_rate=None, prior=80.0, k_life=100.0, tab=True, centre="tag",
-            content_codes=None, strata=None, prior_s=None, iters=40, exam=True):
+            content_codes=None, strata=None, prior_s=None, iters=40, exam=True, exact_mstep=False):
     """EM of the detection x attractiveness model on the training impressions `log` (columns u, i, tab, is_click;
     already restricted to the pre-cut period by the caller, see fit_dax_dataset).
 
@@ -68,6 +71,8 @@ def fit_dax(log, n_users, n_items, tag_codes, life_rate=None, prior=80.0, k_life
     strata     optional (n_users,) user strata and prior_s: item x stratum alpha_{i,s} shrunk to alpha_i (MRP cells)
     exam       False = examination off (ablation no_exam): theta_u = kappa_t = 1 for all users and tabs, no updates, so
                P(E=1) = 1, P(R=1) = y and alpha_i = (clicks_i + prior c_i) / (n_i + prior), a tag-shrunk click rate
+    exact_mstep False (default, the ratio M-steps above) or True: theta_u and kappa_t are the exact maximisers of the
+               Bernoulli expected complete log-likelihood given P(E=1) (see exact_theta_kappa); alpha is unchanged
 
     Returns (logit_alpha (n,), theta (m,), kappa (T,), logit_alpha_strata (n, S) or None), float32 except kappa.
     The M-steps are closed form: theta_u = (sum P(E=1) + k c_u) / (sum kappa + k), kappa_t = sum P(E=1) over tab t
@@ -111,16 +116,24 @@ def fit_dax(log, n_users, n_items, tag_codes, life_rate=None, prior=80.0, k_life
             pR = torch.where(y > 0, torch.ones_like(t), (1 - t) * a / den)
             sE = torch.zeros(m, dtype=torch.float64).index_add_(0, u, pE)
             sK = torch.zeros(m, dtype=torch.float64).index_add_(0, u, ka[tb])
-            if k_life > 0:
-                c0 = (lr * (sE.sum() / sK.sum())).clamp(1e-3, 1.0)
-                th = ((sE + k_life * c0) / (sK + k_life)).clamp(1e-3, 1.0)
+            if exact_mstep:
+                if k_life > 0:
+                    c0 = (lr * (sE.sum() / sK.sum())).clamp(1e-3, 1.0)
+                    pos, neg = k_life * c0, k_life * (1.0 - c0)        # Beta-like prior terms of the ratio form
+                else:
+                    pos, neg = 1.0, 1.0
+                th, ka = exact_theta_kappa(pE, u, tb, th, ka, m, T, pos, neg, tab)
             else:
-                th = ((sE + 1.0) / (sK + 2.0)).clamp(1e-3, 1.0)
-            if tab:
-                kE = torch.zeros(T, dtype=torch.float64).index_add_(0, tb, pE)
-                kN = torch.zeros(T, dtype=torch.float64).index_add_(0, tb, th[u])
-                ka = (kE + 1.0) / (kN + 1.0)
-                ka = ka / ka[1]                                        # tab 1 (the test scenario) is the reference
+                if k_life > 0:
+                    c0 = (lr * (sE.sum() / sK.sum())).clamp(1e-3, 1.0)
+                    th = ((sE + k_life * c0) / (sK + k_life)).clamp(1e-3, 1.0)
+                else:
+                    th = ((sE + 1.0) / (sK + 2.0)).clamp(1e-3, 1.0)
+                if tab:
+                    kE = torch.zeros(T, dtype=torch.float64).index_add_(0, tb, pE)
+                    kN = torch.zeros(T, dtype=torch.float64).index_add_(0, tb, th[u])
+                    ka = (kE + 1.0) / (kN + 1.0)
+                    ka = ka / ka[1]                                    # tab 1 (the test scenario) is the reference
         else:
             pE = torch.ones_like(y)                                    # no examination: every impression is seen
             pR = y.clone()                                             # so a click is the attraction itself
@@ -139,6 +152,78 @@ def fit_dax(log, n_users, n_items, tag_codes, life_rate=None, prior=80.0, k_life
             als = ((sRs + prior_s * al[:, None]) / (nis + prior_s)).clamp(1e-4, 1 - 1e-4)
     la_s = torch.logit(als).float() if use_s else None
     return torch.logit(al).float(), th.float(), ka, la_s
+
+
+def exact_theta(pE, u, kj, m, pos, neg, iters=60):
+    """Exact Bernoulli M-step of theta_u given P(E=1) = pE_j and the examination kappa_j of every impression j of user
+    u_j (kj = kappa_{tb_j}): the maximiser of sum_{j in u} [pE_j log(theta kappa_j) + (1 - pE_j) log(1 - theta kappa_j)]
+    + pos log theta + neg log(1 - theta) over theta in [1e-3, hi_u], hi_u = min(1, (1 - 1e-9) / max_{j in u} kappa_j)
+    (p_j < 1). Concave, so bisection on the derivative (iters halvings) gives the unique maximiser. Returns (m,) float64."""
+    mk = torch.zeros(m, dtype=torch.float64).index_reduce_(0, u, kj, "amax", include_self=False)
+    hi = torch.minimum(torch.ones(m, dtype=torch.float64), (1 - 1e-9) / mk.clamp_min(1e-12))
+    lo = torch.full((m,), 1e-3, dtype=torch.float64).minimum(hi * 0.5)
+    for _ in range(iters):
+        mid = 0.5 * (lo + hi)
+        tm = mid[u]
+        d = pE / tm - (1 - pE) * kj / (1 - tm * kj)
+        g = torch.zeros(m, dtype=torch.float64).index_add_(0, u, d) + pos / mid - neg / (1 - mid)
+        up = g > 0
+        lo = torch.where(up, mid, lo)
+        hi = torch.where(up, hi, mid)
+    return 0.5 * (lo + hi)
+
+
+def exact_kappa(pE, tb, tu, T, iters=60):
+    """Exact Bernoulli M-step of the tab factors kappa_t given P(E=1) = pE_j and the user's theta_j = tu_j of every
+    impression j: the maximiser of sum_{j in t} [pE_j log(kappa theta_j) + (1 - pE_j) log(1 - kappa theta_j)]
+    + log kappa - kappa over kappa in [1e-6, hi_t], hi_t = (1 - 1e-9) / max_{j in t} theta_j. Not normalised.
+    Returns (T,) float64."""
+    mt = torch.zeros(T, dtype=torch.float64).index_reduce_(0, tb, tu, "amax", include_self=False)
+    lo = torch.full((T,), 1e-6, dtype=torch.float64)
+    hi = (1 - 1e-9) / mt.clamp_min(1e-12)
+    for _ in range(iters):
+        mid = 0.5 * (lo + hi)
+        km = mid[tb]
+        d = pE / km - (1 - pE) * tu / (1 - tu * km)
+        g = torch.zeros(T, dtype=torch.float64).index_add_(0, tb, d) + 1.0 / mid - 1.0
+        up = g > 0
+        lo = torch.where(up, mid, lo)
+        hi = torch.where(up, hi, mid)
+    return 0.5 * (lo + hi)
+
+
+def exact_theta_kappa(pE, u, tb, th, ka, m, T, pos, neg, tab=True, iters=60, normalise=True):
+    """Exact Bernoulli M-steps of theta and kappa (fit_dax with exact_mstep=True), given the posterior P(E=1) = pE of
+    every impression (u_j, tb_j). With p_j = theta_{u_j} kappa_{tb_j}, the theta step maximises (see exact_theta)
+
+        sum_{j in u} [pE_j log p_j + (1 - pE_j) log(1 - p_j)] + pos log theta_u + neg log(1 - theta_u),
+
+    and the kappa step (see exact_kappa, with the theta of this step) maximises the same sum over j in t plus the prior
+    log kappa_t - kappa_t. pos = neg = 1 is the Beta(2, 2) prior of the no-lifelong-prior variant; otherwise pos = k c_u,
+    neg = k (1 - c_u) are the pseudo-counts of the lifelong prior (their ratio form is (sum pE + pos) / (sum kappa + k)).
+    The kappa term log kappa - kappa reproduces the +1 / +1 pseudo-counts of the ratio form kappa_t = (sum pE + 1) /
+    (sum theta + 1). Returns (theta (m,), kappa (T,)) in float64; kappa is divided by kappa_1 when tab is on and normalise
+    is True, as in the ratio form. With tab off kappa is returned unchanged.
+    """
+    theta = exact_theta(pE, u, ka[tb], m, pos, neg, iters)
+    if not tab:
+        return theta, ka
+    kappa = exact_kappa(pE, tb, theta[u], T, iters)
+    return theta, (kappa / kappa[1] if normalise else kappa)
+
+
+def control_item_term(log, n, kind):
+    """Item term of the two control arms, in place of the DAX logit alpha (the pre-cut standard log only):
+    kind "popularity": log(1 + clicks_i); kind "raw_ctr": (clicks_i + 1) / (impressions_i + 2), the raw click rate with
+    the (1, 2) pseudo-count of the lifelong rates. No tag shrinkage and no examination. Items without impressions get 0
+    (popularity) and 1/2 (raw_ctr). The caller standardises it like DAX (DAXChannel)."""
+    clicks = np.bincount(log.i.values[log.is_click.values > 0], minlength=n).astype(np.float64)
+    if kind == "popularity":
+        return np.log1p(clicks)
+    if kind == "raw_ctr":
+        imps = np.bincount(log.i.values, minlength=n).astype(np.float64)
+        return (clicks + 1.0) / (imps + 2.0)
+    raise ValueError(f"unknown control item term {kind!r}")
 
 
 def content_centre(al, ni, cov, ridge=10.0):
@@ -234,7 +319,9 @@ def dax_variant(cfg, ablation=None):
     configuration is returned unchanged, so the arm is the full DAX arm. Otherwise the named switch takes its off value:
     no_tab (no examination factor kappa_t), no_life_prior (k_life = 0, no lifelong prior on theta_u), no_tag_prior
     (alpha_i centred on the global mean, not on its tag), no_exam (no examination at all: exam False, which implies
-    tab False and k_life 0; the arm is the tag-shrunk click rate). Only no_exam adds a key to the configuration."""
+    tab False and k_life 0; the arm is the tag-shrunk click rate), no_groups (the user-group strata switch off:
+    prior_s None) and exact_em (exact Bernoulli M-steps of theta and kappa, exact_mstep True). Only no_exam and
+    exact_em add a key to the configuration."""
     if ablation is None:
         return dict(cfg)
     if ablation == "no_tab":
@@ -245,6 +332,10 @@ def dax_variant(cfg, ablation=None):
         return dict(cfg, centre="global")
     if ablation == "no_exam":
         return dict(cfg, exam=False, tab=False, k_life=0.0)
+    if ablation == "no_groups":
+        return dict(cfg, prior_s=None)
+    if ablation == "exact_em":
+        return dict(cfg, exact_mstep=True)
     raise ValueError(f"unknown DAX ablation {ablation!r}")
 
 

@@ -4,7 +4,8 @@
     c_i = (clicks of the tag + 1) / (impressions of the tag + 2), theta = kappa = 1 (the tab factor has no effect);
 (b) dax_variant(cfg, "no_exam") switches exam, tab and k_life off, and only that arm carries an "exam" key;
 (c) the no_exam arm of the post-hoc grid has 8 distinct configurations (prior x centre x stratum cells);
-(d) --backbone none runs end to end on a small subset: the methods, their configuration counts and value ranges.
+(d) --backbone none runs end to end on a small subset (with the popularity, raw_ctr, no_groups arms and Random):
+    the methods, their configuration counts and value ranges.
 (d) needs the KuaiRand-Pure inputs (skipped without them).
 """
 
@@ -96,14 +97,18 @@ KUAIRAND = os.path.join(ROOT, "data", "raw", "KuaiRand-Pure", "data", "video_fea
 def test_backbone_none_runs_end_to_end(tmp_path):
     out = tmp_path / "none.json"
     cmd = [sys.executable, os.path.join(ROOT, "experiments", "run_dax.py"), "--backbone", "none",
-           "--ablate", "no_exam", "--n_users", "60", "--seeds", "2", "--dax_grid", "small", "--gammas", "0.5", "1.0",
-           "--threads", "2", "--out", str(out)]
+           "--ablate", "no_exam", "popularity", "raw_ctr", "no_groups", "--n_users", "60", "--seeds", "2",
+           "--dax_grid", "small", "--gammas", "0.5", "1.0", "--threads", "2", "--out", str(out)]
     r = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=900)
     assert r.returncode == 0, r.stderr[-2000:]
     res = json.load(open(out))["results"]
-    assert set(res) == {"DAX alone", "DAX alone[no_exam]", "Popularity"}
-    assert res["Popularity"]["n_configs"] == 1
+    assert set(res) == {"DAX alone", "DAX alone[no_exam]", "DAX alone[no_groups]", "DAX alone+pop", "DAX alone+ctr",
+                        "Popularity", "Random"}
+    assert res["Popularity"]["n_configs"] == 1 and res["Random"]["n_configs"] == 1
     assert res["DAX alone"]["n_configs"] == 2 and res["DAX alone[no_exam]"]["n_configs"] == 2   # 1 config x 2 gammas
+    assert res["DAX alone+pop"]["n_configs"] == 2 and res["DAX alone+ctr"]["n_configs"] == 2
+    assert res["Random"]["chosen"][0] == {"method": "Random"}
+    assert res["DAX alone+pop"]["chosen"][0]["dax"] == {"model": "popularity"}
     for nm, r_ in res.items():
         assert len(r_["per_split"]) == 2 and len(r_["chosen"]) == 2 and len(r_["val_best"]) == 2
         assert all(0.0 <= v <= 1.0 for p in r_["per_user"] for v in p.values())

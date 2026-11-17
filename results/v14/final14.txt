@@ -179,6 +179,22 @@ Inputs missing or not used:
   seed 2: QP family+DAX 0.4722 (LEAF-LGN+DAX 0.4856)
   LEAF-LGN+DAX - QP family+DAX (seed 2)          +13.32 [ 1.62]  p=7.42e-58  NB p=0.001  (splits +12.3 +12.8 +13.0 +14.1 +14.5)
 
+5g. Item-term controls on LEAF-LGN (v16): popularity, raw click rate, DAX without user groups, exact-M-step EM; random order
+  LEAF-LGN                     0.4706 +- 0.0016 (2 configurations)
+  LEAF-LGN+DAX - LEAF-LGN                        +15.10 [ 1.42]  p=1.26e-95  NB p=0.009  (splits +12.4 +15.6 +16.6 +12.8 +16.2)
+  LEAF-LGN+pop                 0.4711 +- 0.0014 (10 configurations)
+  LEAF-LGN+DAX - LEAF-LGN+pop                    +14.68 [ 1.37]  p=5.93e-97  NB p=0.005  (splits +12.1 +15.1 +15.7 +13.0 +15.6)
+  LEAF-LGN+ctr                 0.4744 +- 0.0012 (10 configurations)
+  LEAF-LGN+DAX - LEAF-LGN+ctr                    +11.27 [ 1.26]  p=1.81e-68  NB p=0.002  (splits +9.5 +10.8 +11.7 +10.9 +11.8)
+  LEAF-LGN+DAX[no_groups]      0.4844 +- 0.0005 (160 configurations)
+  LEAF-LGN+DAX - LEAF-LGN+DAX[no_groups]          +1.13 [ 0.53]  p=3.07e-05  NB p=0.377  (splits +0.4 +1.6 +1.2 +0.2 +1.5)
+  LEAF-LGN+DAX (same setting) 0.4854
+  LEAF-LGN+DAX[exact_em]       0.4859 (ratio-form EM 0.4854)
+  LEAF-LGN+DAX - LEAF-LGN+DAX[exact_em]           -0.44 [ 0.42]  p=4.06e-02  NB p=0.153  (splits -0.6 -0.7 -0.6 -0.2 -0.5)
+  Random                       0.3307 +- 0.0008
+  Popularity                   0.4194 +- 0.0010
+  DAX alone                    0.4206 +- 0.0009
+
 6. Checks and information (not gates)
   info: LEAF-LGN (posthoc run) - LEAF-LGN (stored)    +0.73 [ 0.52]  p=5.38e-03  NB p=0.660  (splits +0.1 +0.0 +1.4 +0.2 +2.4)
   QP family (retrained) - QP family (stored)      +1.70 [ 0.70]  p=1.89e-06  NB p=0.803  (splits -0.0 +2.2 +2.9 -3.8 +7.6)
