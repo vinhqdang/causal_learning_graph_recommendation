@@ -38,8 +38,8 @@ how a randomly chosen user would respond to an item and that is evaluated on ran
 \item \emph{DAX} (detection-adjusted attractiveness) describes the item. It models each logged impression as an examination, whose
   probability depends on the user and the scenario, followed by an attraction, whose probability depends on the item. Occupancy
   models in ecology \citep{mackenzie2002occupancy} use the same separation between presence and detection. A non-click therefore
-  counts against an item only in proportion to the chance that the item was examined. The attractiveness is fitted by
-  expectation-maximisation, with shrinkage towards the mean of the item's tag, and added to any trained recommender with a weight
+  counts against an item only in proportion to the chance that the item was examined. The attractiveness is fitted by an
+  approximate expectation-maximisation, with shrinkage towards the mean of the item's tag, and added to any trained recommender with a weight
   chosen on validation users.
 \end{itemize}
 The combined model, LEAF-LGN+DAX, adds the DAX score to the LEAF-LGN score of each candidate.
@@ -50,12 +50,15 @@ over five user-level splits. Each comparison is tested per user and at split lev
 training run, and both are corrected for multiple comparisons. The baselines include graph recommenders, four published debiased
 estimators, PW-LightGCN, a closed-form recommender and two lifelong deep models, and the backbones are also given the DAX module.
 
-\paragraph{Main findings} On KuaiRand-27K, LEAF-LGN+DAX reaches an nDCG@10 of 0.4854, against 0.4634 for PW-LightGCN. Its margins
-over PW-LightGCN and over DIN with DAX, the strongest comparator, are significant but narrow. Under two further training seeds the margin over PW-LightGCN is unchanged, and the margin over DIN with DAX is larger under matched model capacity and under those seeds, all significant at split level. DAX improves
-per-user nDCG@10 on all six backbones tested, and at split level the increase is significant on five of them. Correcting click
-rates for examination is what makes the item score useful: the examination model adds significantly to the gain, and DAX used alone
-does no better than popularity, so its value lies in complementing a personalised backbone. Section~\ref{sec:results} gives the
-controls and the KuaiRand-1K replication.
+\paragraph{Main findings} On KuaiRand-27K, LEAF-LGN+DAX reaches an nDCG@10 of 0.4854, against 0.4634 for PW-LightGCN, our
+unpublished propensity-weighted LightGCN. Its margins over PW-LightGCN and over DIN with DAX, the strongest comparator, are
+significant at split level after Holm correction, though the split-level test is close to the 0.05 threshold in the main comparison. The
+PW-LightGCN margin is unchanged under two further training seeds. The DIN margin is consistent in sign and significant in each
+re-run, under matched model capacity and under those seeds. DAX improves per-user nDCG@10 on all six backbones tested, and at split
+level on five of them. Adding log popularity or the raw click rate to the backbone gives much smaller gains than DAX, and removing
+the examination factors lowers the gain at split level, although neither factor alone does. Used alone, DAX does no better than
+popularity, so its value lies in complementing a personalised backbone. Section~\ref{sec:results} gives the controls and the
+KuaiRand-1K replication.
 
 \paragraph{Contributions}
 \begin{itemize}
@@ -64,7 +67,7 @@ controls and the KuaiRand-1K replication.
 \item We propose LEAF, exposure-conditional affinities computed from each user's history outside the evaluated pool and transferred
   through content keys, and LEAF-LGN, which learns how much each affinity counts inside a graph recommender.
 \item We propose DAX, a generative model of logged clicks that separates user and scenario examination from item attractiveness,
-  with an expectation-maximisation estimator and priors that pool information over tags and over each user's lifelong history.
+  with an approximate expectation-maximisation estimator and priors that pool information over tags and over each user's lifelong history.
 \item We give an evaluation with split-level and per-user tests, baselines that receive the same DAX module, and permutation controls
   for both signals.
 \end{itemize}

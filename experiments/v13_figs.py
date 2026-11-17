@@ -114,6 +114,7 @@ def fig_seeds(c):
     a1.set_xticks([0, 1, 2, 3])
     a1.set_xlabel("training seed")
     a1.set_ylabel("LEAF-LGN+DAX nDCG@10 (mean, SD over splits)")
+    a1.set_ylim(0.45, 0.50)  # natural range of the metric; the seed spread is about 1e-3 and is not magnified
     a1.grid(axis="y", color="#e5e5e5", lw=0.5)
     a2.axhline(0, color=INK, lw=0.7)
     a2.set_xticks([0, 1, 2, 3])

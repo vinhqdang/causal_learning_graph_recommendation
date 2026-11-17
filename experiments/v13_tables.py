@@ -552,7 +552,7 @@ def table_leafctl_lgn():
                                               ["Variant"], [[tbd("results/v10/leaf_lgn.json LEAF-LGN")]]))
         return {}
     ref, res, hol = rec["ref"], rec["res"], rec["hol"]
-    counts = ", ".join(str(res[a][0]["n_configs"]) for a in LGN_ARMS if res[a][0] is not None)
+    counts = ", ".join(str(res[a][0]["n_configs"]) for a in ("no_lifelong", "shuffle_users") if res[a][0] is not None)
 
     def arm_row(arm):
         m, r = res[arm]
@@ -566,6 +566,14 @@ def table_leafctl_lgn():
             f"{ref['n_configs']} configurations, which favours the reference. Per-user $p$: two-sided paired t test over the "
             "pooled test users. NB $p$: Nadeau-Bengio test over the five split means. NB $p_{\\mathrm{Holm}}$: Holm adjustment "
             "over the three controls of this table and of Table~\\ref{tab:policy} in Appendix~D.")
+    pol = res["no_policy"][0]
+    pol_n = str(pol["n_configs"]) if pol is not None else "n/a"
+    policy_note = ("Difference: the reference minus the variant, so a positive value means that the removed signal helps. "
+                   "The variant is selected on validation users over its own grid of " + pol_n + " configurations, and the "
+                   "reference over " + str(ref["n_configs"]) + " configurations, which favours the reference. Per-user $p$: "
+                   "two-sided paired t test over the pooled test users. NB $p$: Nadeau-Bengio test over the five split "
+                   "means. NB $p_{\\mathrm{Holm}}$: Holm adjustment over the three controls of Table~\\ref{tab:leafctl-lgn} "
+                   "and this one.")
     write("tab_leafctl_lgn.tex", table_env(
         "LEAF-LGN controls on KuaiRand-27K: the reference against the same model with the lifelong channels removed, and "
         "with the lifelong tables shuffled across users (nDCG@10).",
@@ -577,7 +585,7 @@ def table_leafctl_lgn():
         "(nDCG@10). Selected weight: zero in four of the five splits.",
         "tab:policy", "lrrrrrr",
         ["Variant", "Configurations", "Mean", r"Difference [95\% hw]", r"Per-user $p$", r"NB $p$", r"NB $p_{\mathrm{Holm}}$"],
-        [head, "MIDRULE", arm_row("no_policy")], note))
+        [head, "MIDRULE", arm_row("no_policy")], policy_note))
     return {a: res[a][1] for a in LGN_ARMS}
 
 
@@ -596,7 +604,7 @@ def table_1k():
             rows.append([esc(label), tbd(src + " mean"), "", "", "", "", ""])
         else:
             mu, sd = H["mean_sd"](m)
-            rows.append([esc(label), f"{mu:.4f}", f"{sd:.4f}", f"{m['n_configs']}", "", "", ""])
+            rows.append([esc(label), f"{mu:.4f}", f"{sd:.4f}", f"{m['n_configs']:,}", "", "", ""])
     cmp_defs = [("LEAF-LGN+DAX minus QP family", lg, qp), ("LEAF-LGN+DAX minus QP family+DAX", lg, qd),
                 ("QP family+DAX minus QP family", qd, qp)]
     res = [P1k(a, b) for _, a, b in cmp_defs]
@@ -609,7 +617,7 @@ def table_1k():
         if r is None:
             rows.append([esc(label), "", "", "", tbd("results/v11 KuaiRand-1K paired difference"), "", ""])
             continue
-        rows.append([esc(label), "", "", "", dif(r), pnb(r["nb"]), sci(nh[j])])
+        rows.append([esc(label), "", "", "", dif(r), pnb(r["nb"]), pnb(nh[j])])
         split_notes.append(f"{label}: " + " ".join(f"{x:+.1f}" for x in r["split_diffs"]))
         j += 1
     n1k = len(H["pooled_users"](lg)) if lg is not None else None
@@ -1055,6 +1063,70 @@ def v15_records():
     return exam, d64, seeds
 
 
+V16_LGN_FILE = "results/v16/lgn_controls.json"
+V16_EXACT_FILE = "results/v16/lgn_exact_em.json"
+V16_RANDOM_FILE = "results/v16/none_random.json"
+
+
+def v16_records():
+    """Item-term controls on LEAF-LGN (popularity, raw click rate, DAX without user groups), the exact-M-step fit and the
+    random-order reference (None when a file is missing)."""
+    c = context()
+    mf = c["H"]["method_from"]
+    return {
+        "lgn": mf(V16_LGN_FILE, "LEAF-LGN", "LEAF-LGN (item-term controls)"),
+        "dax": mf(V16_LGN_FILE, "LEAF-LGN+DAX", "LEAF-LGN+DAX (item-term controls)"),
+        "pop": mf(V16_LGN_FILE, "LEAF-LGN+pop", "LEAF-LGN + log popularity"),
+        "ctr": mf(V16_LGN_FILE, "LEAF-LGN+ctr", "LEAF-LGN + raw click rate"),
+        "nogroups": mf(V16_LGN_FILE, "LEAF-LGN+DAX[no_groups]", "LEAF-LGN+DAX without user groups"),
+        "exact": mf(V16_EXACT_FILE, "LEAF-LGN+DAX[exact_em]", "LEAF-LGN+DAX with exact M-steps"),
+        "random": mf(V16_RANDOM_FILE, "Random", "random order"),
+    }
+
+
+def table_item():
+    """Item-term controls: the same post-hoc combination with log popularity or the raw click rate in place of DAX."""
+    c = context()
+    rec = v16_records()
+    need = ("lgn", "dax", "pop", "ctr", "nogroups")
+    if any(rec[k] is None for k in need):
+        write("tab_item.tex", table_env("Item-term controls: not available.", "tab:item", "l",
+                                        ["Setting"], [[tbd("results/v16 item-term control files")]]))
+        return None
+    diffs = {"pop": P(rec["dax"], rec["pop"]), "ctr": P(rec["dax"], rec["ctr"]),
+             "nogroups": P(rec["dax"], rec["nogroups"])}
+    adj = holm_of(diffs)
+    rows = [
+        ["LEAF-LGN, same trainings", f"{rec['lgn']['n_configs']}", mean_cell(rec["lgn"]), "", "", ""],
+        ["LEAF-LGN + log popularity", f"{rec['pop']['n_configs']}", mean_cell(rec["pop"]), "", "", ""],
+        ["LEAF-LGN + raw pre-cut click rate", f"{rec['ctr']['n_configs']}", mean_cell(rec["ctr"]), "", "", ""],
+        "MIDRULE",
+        ["LEAF-LGN+DAX", f"{rec['dax']['n_configs']:,}", mean_cell(rec["dax"]), "", "", ""],
+        ["LEAF-LGN+DAX without user groups", f"{rec['nogroups']['n_configs']:,}", mean_cell(rec["nogroups"]), "", "", ""],
+        "MIDRULE",
+        ["LEAF-LGN+DAX minus LEAF-LGN + log popularity", "", "", dif(diffs["pop"]), pnb(diffs["pop"]["nb"]),
+         pnb(adj["pop"])],
+        ["LEAF-LGN+DAX minus LEAF-LGN + raw click rate", "", "", dif(diffs["ctr"]), pnb(diffs["ctr"]["nb"]),
+         pnb(adj["ctr"])],
+        ["LEAF-LGN+DAX minus LEAF-LGN+DAX without user groups", "", "", dif(diffs["nogroups"]),
+         pnb(diffs["nogroups"]["nb"]), pnb(adj["nogroups"])],
+    ]
+    note = ("Log popularity is $\\log(1+x)$, where $x$ is the number of clicks on the item before the cut-off. The raw "
+            "click rate is $(x+1)/(n+2)$, where $n$ is the number of pre-cut impressions of the item. Each item term enters "
+            "the same post-hoc combination as DAX, with the same trainings, the same weight grid and the same validation "
+            "selection. The last row removes the user-group refinement of DAX and keeps everything else. Mean: mean of the "
+            "five split means. Difference: mean over the pooled test users of the paired per-user difference, times "
+            "$10^{3}$, with the 95\\% half-width. NB $p$ is the split-level Nadeau-Bengio value; NB $p_{\\mathrm{Holm}}$ is "
+            "Holm correction over the three difference rows.")
+    write("tab_item.tex", table_env(
+        "Item-term controls on KuaiRand-27K: LEAF-LGN with log popularity or the raw click rate of each item in place of DAX, "
+        "and DAX without user groups (nDCG@10).",
+        "tab:item", "lrrrcc",
+        ["Setting or comparison", "Configs", "Mean", r"Difference [95\% hw]", r"NB $p$", r"NB $p_{\mathrm{Holm}}$"],
+        rows, note))
+    return diffs, adj
+
+
 def holm_of(recs):
     """Holm adjustment of the split-level NB p values of the records that are present (dict in, dict out)."""
     c = context()
@@ -1076,6 +1148,7 @@ def table_exam():
         "alone_pop": P(exam["alone"], exam["pop"]),
     }
     adj = holm_of(diffs)
+    rnd = v16_records()["random"]
     mean = lambda k: mean_cell(exam[k])
     rows = [
         ["LEAF-LGN+DAX, examination on", f"{exam['on']['n_configs']}", mean("on"), "", "", ""],
@@ -1086,6 +1159,8 @@ def table_exam():
         ["Examination off minus LEAF-LGN", "", "", dif(diffs["off_base"]), pnb(diffs["off_base"]["nb"]),
          pnb(adj["off_base"])],
         "MIDRULE",
+        ["Random order (reference, no model)", "", (mean_cell(rnd) if rnd is not None
+                                                    else tbd("results/v16 random-order file")), "", "", ""],
         ["DAX alone", f"{exam['alone']['n_configs']}", mean("alone"), "", "", ""],
         ["Tag-shrunk click rate alone (examination off)", f"{exam['alone_off']['n_configs']}", mean("alone_off"),
          "", "", ""],
@@ -1100,7 +1175,8 @@ def table_exam():
             "sets the user and scenario examination factors to one, so the item score is the tag-shrunk click rate of the "
             "pre-cut log. Both settings use the same prior strengths, the same post-hoc combination and the same validation "
             "selection; the examination-off search has fewer configurations because the examination settings collapse. The "
-            "bottom block scores the same candidate lists with the item score alone. Mean: mean of "
+            "bottom block scores the same candidate lists with the item score alone, and the random-order row ranks each list at "
+            "random. Mean: mean of "
             "the five split means. Difference: mean over the pooled test users of the paired per-user difference, times "
             "$10^{3}$, with the 95\\% half-width. NB $p$ is the split-level Nadeau-Bengio value; NB $p_{\\mathrm{Holm}}$ is "
             "Holm correction over the four difference rows.")
@@ -1141,8 +1217,8 @@ PW_SEED_FILE = "results/v15/pw_s{s}.json"
 
 def table_seeds_pw():
     """Training seeds 1 and 2: LEAF-LGN+DAX against PW-LightGCN and PW-LightGCN+DAX, each re-trained with the same seed
-    at the configurations chosen in the main run (epoch within three of the chosen epoch, DAX grid and mixing weights
-    as in the main run). Holm correction runs over the two seeds of each comparator."""
+    at the configurations chosen in the main comparison (epoch within three of the chosen epoch, DAX grid and mixing weights
+    as in the main comparison). Holm correction runs over the two seeds of each comparator."""
     c = context()
     H = c["H"]
     mf = H["method_from"]
@@ -1173,8 +1249,8 @@ def table_seeds_pw():
          r"NB $p_{\mathrm{Holm}}$"], rows,
         "Difference: LEAF-LGN+DAX minus the comparator, in units of $10^{-3}$ nDCG@10 per user, with the 95\\% half-width. "
         "The LEAF-LGN+DAX values are those of Table~\\ref{tab:seeds}. Each comparator is re-trained with the configurations "
-        "chosen in the main run, with the epoch within three of the chosen epoch and the DAX grid and mixing weights as in "
-        "the main run. NB $p$ is split-level. Holm correction runs over the two seeds of each comparator."))
+        "chosen in the main comparison, with the epoch within three of the chosen epoch and the DAX grid and mixing weights as in "
+        "the main comparison. NB $p$ is split-level. Holm correction runs over the two seeds of each comparator."))
     return recs, adj
 
 
@@ -1190,6 +1266,11 @@ def main():
     table_seeds()
     table_deep()
     ex = table_exam()
+    it = table_item()
+    if it:
+        print("Item-term controls (diff [hw], NB p, NB p Holm over the three rows):")
+        for k, r in it[0].items():
+            print(summary_line(f"item {k}", r), f"holm={it[1][k]:.4f}")
     sd = table_seeds_din()
     sp = table_seeds_pw()
     if ex:

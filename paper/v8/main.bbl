@@ -1,4 +1,4 @@
-\begin{thebibliography}{36}
+\begin{thebibliography}{35}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\href}[2]{#2}
@@ -138,14 +138,6 @@
 \newblock \bibinfo{journal}{IEEE Transactions on Knowledge and Data
   Engineering} \bibinfo{volume}{37}, \bibinfo{pages}{3781--3793}.
 \newblock \DOIprefix\doi{10.1109/TKDE.2025.3552658}.
-%Type = Inproceedings
-\bibitem[{Hu et~al.(2008)Hu, Koren and Volinsky}]{hu2008ials}
-\bibinfo{author}{Hu, Y.}, \bibinfo{author}{Koren, Y.},
-  \bibinfo{author}{Volinsky, C.}, \bibinfo{year}{2008}.
-\newblock \bibinfo{title}{Collaborative filtering for implicit feedback
-  datasets}, in: \bibinfo{booktitle}{2008 Eighth IEEE International Conference
-  on Data Mining (ICDM)}, pp. \bibinfo{pages}{263--272}.
-\newblock \DOIprefix\doi{10.1109/ICDM.2008.22}.
 %Type = Inproceedings
 \bibitem[{Joachims et~al.(2017)Joachims, Swaminathan and
   Schnabel}]{joachims2017unbiased}

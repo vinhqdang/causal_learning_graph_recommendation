@@ -8,7 +8,7 @@ Holm adjustment and the training seeds.
 \subsection{Other DAX options}\label{app:fh}
 
 The main experiment uses the switches described in Section~\ref{sec:method-dax}. The remaining values of the search grid are a prior strength of 160, a
-lifelong strength of zero, the scenario factors switched off and no user groups. The main experiment did not select any of these in any split. The
+lifelong strength of zero, the scenario factors switched off and no user groups. The main experiment did not select any of these in any split, so the user-group refinement is on in all five splits. The
 ablation without a tag prior replaces the centre by one global mean. The grid tables in \ref{app:grids} give the chosen values.
 
 \subsection{Detailed settings of LEAF, LEAF-LGN and DAX}\label{app:impl}
@@ -161,13 +161,12 @@ same $\gamma$ grid as LEAF-LGN.
 \label{tab:baselines}
 \footnotesize
 \begin{adjustbox}{max width=\textwidth}
-\begin{tabular}{p{0.27\textwidth}p{0.47\textwidth}r}
+\begin{tabular}{p{0.22\textwidth}p{0.62\textwidth}r}
 \toprule
 Method & Search grid & Configurations \\
 \midrule
 \raggedright LightGCN \citep{he2020lightgcn} & \raggedright learning rate $\{10^{-2},3\cdot10^{-3}\}$, $\rho\in\{10^{-5},10^{-4}\}$; $d=64$, 2 layers, at most 40 epochs, patience 3 & 4 \\
 \raggedright r-AdjNorm \citep{zhao2022radjnorm} & \raggedright LightGCN grid with normalisation exponent $r\in\{0.3,0.7\}$ & 8 \\
-\raggedright iALS \citep{hu2008ials} (development comparison only) & \raggedright confidence weight in $\{3,10,30\}$, regularisation $\in\{1,10,100,1000\}$ & 12 \\
 \raggedright PW-LightGCN (\ref{app:qp}) & \raggedright DR-BPR-LGN-1, -p2 and -p with their own grids; per split the best of the three & 20 \\
 \raggedright PW-LightGCN + DAX & \raggedright the 10 distinct (method, configuration) trainings chosen by any split of the PW-LightGCN search, with the DAX grid & 3,200 \\
 \raggedright EASE \citep{steck2019ease} & \raggedright closed form, $\lambda_{\mathrm{EASE}}\in\{1000,3000,10000\}$, $w\in\{0,0.25,0.5\}$, popularity weight $\beta\in\{0,0.25,0.5\}$ & 27 \\
@@ -191,7 +190,7 @@ Method & Search grid & Configurations \\
 
 \subsection{Closed-form LEAF scorer controls}\label{app:leafctl}
 
-These controls use a closed-form LEAF scorer, with the same six channels and no graph training, from the development comparison (Table~\ref{tab:leafctl}). They are secondary to the
+These controls use a closed-form LEAF scorer, with the same six channels and no graph training, (Table~\ref{tab:leafctl}). They are secondary to the
 controls on LEAF-LGN of Section~\ref{sec:res-controls}. Shuffling the users' lifelong tables across users gives the largest loss, $+18.90$ [1.99] (Holm
 adjusted over the eight arms $4.90\times10^{-76}$; Nadeau-Bengio adjusted $4.60\times10^{-3}$), and removing all lifelong channels gives $+17.88$ [2.04]. The
 policy channel contributes $+5.01$ [1.20] per user, but its split-level value is not significant after Holm adjustment (Nadeau-Bengio adjusted 0.132). The
@@ -215,7 +214,7 @@ Training seeds 1 to 3 for LEAF-LGN+DAX, with the reduced search described in Sec
 \begin{figure}[tbp]
 \centering
 \includegraphics[width=0.85\linewidth]{figs/fig_seeds.pdf}
-\caption{Training seeds 0 to 3 on KuaiRand-27K. Left: LEAF-LGN+DAX mean nDCG@10 with the standard deviation over splits. Right:
+\caption{Training seeds 0 to 3 on KuaiRand-27K. Left: LEAF-LGN+DAX mean nDCG@10 with the standard deviation over splits, on an axis from 0.45 to 0.50. Right:
 within-seed gain over LEAF-LGN, in units of $10^{-3}$, with the 95\% half-width.}
 \label{fig:seeds}
 \end{figure}

@@ -19,11 +19,10 @@ the item level, and this diagnostic does not separate the two.
 \label{sec:res-main}
 
 We ask whether LEAF-LGN+DAX is more accurate than each baseline. The answer is yes on the per-user test against all thirteen comparators, and on the
-split-level test against all thirteen after Holm correction. Two of these margins are significant but narrow. Table~\ref{tab:main} gives the paired
+split-level test against all thirteen after Holm correction. Two of these margins are significant but narrow (adjusted split-level value 0.0456). Table~\ref{tab:main} gives the paired
 comparisons, and Figure~\ref{fig:forest} shows that the sign of each difference is positive in every split.
 
-The closest comparator is DIN+DAX (0.4796), with a difference of $+5.73$ [1.64] and an adjusted split-level p value of 0.0456. The margin
-is larger under matched capacity (Section~\ref{sec:res-deep}) and under two further training seeds (Section~\ref{sec:res-seeds}). The second narrow
+The closest comparator is DIN+DAX (0.4796), with a difference of $+5.73$ [1.64] and an adjusted split-level p value of 0.0456. The margin is consistent in sign and significant in each re-run, under matched capacity (Section~\ref{sec:res-deep}) and under two further training seeds (Section~\ref{sec:res-seeds}): $+9.67$ under matched capacity and $+9.99$ and $+6.76$ under the two seeds, against $+5.73$ in the main comparison. The second narrow
 comparison is PW-LightGCN (0.4634), with a difference of $+22.32$ [1.83] and the same adjusted value of 0.0456 in the family of thirteen. Under two further training seeds the margin is unchanged, at about $22\times10^{-3}$, and the split-level p value is below 0.001 (Section~\ref{sec:res-seeds}). The
 pre-specified criterion of the primary family of five, a margin of at least $15\times10^{-3}$ with both adjusted values below 0.05, is met, with an
 adjusted split-level value of 0.023 in that family. The four published estimators are far below LEAF-LGN+DAX. NAVIP (0.4579) is close to LightGCN
@@ -66,12 +65,9 @@ row uses its own base, so the increments are not comparable with the main differ
 \subsection{Ablations of DAX}
 \label{sec:res-ablate}
 
-We ask which parts of DAX matter. The answer is that the full DAX gain over its base is significant (adjusted 0.037), that permuting attractiveness across
-items removes it, and that permuting within tags keeps 41.6\% of it. Across items the gain is $-0.27$ [0.36], which is not distinguishable from zero (adjusted
+We ask which parts of DAX matter. The answer is that the full DAX gain over its base is significant (adjusted 0.037), that permuting attractiveness across items reduces it to zero per user, and that permuting within tags keeps 41.6\% of it. Across items the gain is $-0.27$ [0.36], which is not distinguishable from zero (adjusted
 0.754). Within tags it is $+6.28$ [1.10] (adjusted 0.007). Over the three permutation seeds the across-item gains lie between $-0.44$ and $-0.16$, and the
-within-tag gains between $+5.66$ and $+6.84$ (Table~\ref{tab:ablate}, lower block). Each removal of a DAX component lowers the per-user score. Removing the
-scenario factors costs $+1.51$ [0.79], removing the lifelong prior costs $+1.78$ [0.61], removing the tag prior costs $+3.41$ [0.99], and the additive model
-costs $+6.09$ [0.96]. None of these six full-minus-variant differences is significant at split level: the smallest adjusted value over the six is 0.088.
+within-tag gains between $+5.66$ and $+6.84$ (Table~\ref{tab:ablate}, lower block). Each removal of a DAX component lowers the per-user score. Removing the scenario factors lowers the score by $1.51$ [0.79], removing the lifelong prior by $1.78$ [0.61], removing the tag prior by $3.41$ [0.99], and the additive model by $6.09$ [0.96]. None of these six full-minus-variant differences is significant at split level: the smallest adjusted value over the six is 0.088.
 The per-user evidence therefore favours full DAX over each variant, but the split-level evidence does not separate the three switches or the additive
 model from full DAX.
 
@@ -88,15 +84,25 @@ does no better than popularity, so its value lies in complementing a personalise
 
 The control sets the user and scenario examination factors to one, so that the item score becomes the tag-shrunk click rate of the pre-cut
 log, with the same prior strengths, post-hoc combination and validation selection (Table~\ref{tab:exam}). Its search has 80 configurations
-against 320, because the examination settings collapse. Setting the factors to one lowers the score by $+8.80$ [1.10] against full DAX (NB
-$p$ 0.008, adjusted 0.025). The control is still $+6.30$ [0.95] above LEAF-LGN trained on the same runs (adjusted 0.045, significant but
+against 320, because the examination settings collapse. Setting the factors to one lowers the score by $8.80$ [1.10] against full DAX (NB
+$p$ 0.008, adjusted 0.025). The control is still $6.30$ [0.95] above LEAF-LGN trained on the same runs (adjusted 0.045, significant but
 narrow). The adjusted values are Holm corrections over the four difference rows of the table.
 
 As stand-alone item scores on the same candidate lists, DAX reaches 0.4206, the tag-shrunk click rate 0.3720 and popularity, the pre-cut click
-count, 0.4194. DAX alone is $+48.56$ [2.48] above the click rate (NB $p$ below 0.001). Against popularity the difference is $+1.40$ [2.84],
+count, 0.4194, and a random order 0.3307. DAX alone is $+48.56$ [2.48] above the click rate (NB $p$ below 0.001). Against popularity the difference is $+1.40$ [2.84],
 which is not significant (NB $p$ 0.620).
 
 \input{tables/tab_exam}
+
+Two simpler item scores serve as controls: log popularity, the logarithm of one plus the pre-cut clicks of an item, and the raw
+pre-cut click rate. Added to LEAF-LGN in the same post-hoc combination, with the same trainings, weights and validation selection,
+log popularity gives 0.4711 and the raw click rate 0.4744, against 0.4706 for LEAF-LGN alone and 0.4854 for LEAF-LGN+DAX in the same
+setting (Table~\ref{tab:item}). The gain of DAX over these two item scores is $+14.68$ [1.37] and $+11.27$ [1.26] per user, with
+split-level p values 0.005 and 0.002 (adjusted 0.011 and 0.005 over the three difference rows of the table). The gain therefore does
+not come from popularity or from click rate alone. The user-group refinement is optional: without it, DAX scores 0.4844, a difference
+of $+1.13$ [0.53] with split-level p 0.377, which is no detectable contribution.
+
+\input{tables/tab_item}
 
 \subsection{Lifelong deep baselines}
 \label{sec:res-deep}
@@ -110,19 +116,17 @@ With matched capacity the deep models still fall short. We ran DIN and SIM-hard 
 with patience 2, a learning rate of $10^{-2}$ and two weight decays, with and without DAX. DIN reaches 0.4624 and SIM-hard 0.4573, and their
 +DAX variants reach 0.4759 and 0.4688. LEAF-LGN+DAX is $+23.35$ [1.97] above DIN, $+9.67$ [1.83] above DIN+DAX, $+28.17$ [2.24] above SIM-hard
 and $+16.86$ [1.88] above SIM+DAX. The split-level p values in Table~\ref{tab:deep} are unadjusted, and Holm correction over these four
-comparisons keeps every one below 0.05. Larger capacity therefore does not close the gap, and the margin over DIN with DAX is larger than under
-the default search.
+comparisons keeps every one below 0.05. The larger dimension did not help the deep models in these runs (DIN falls from 0.4675 to 0.4624, and DIN+DAX from 0.4796 to 0.4759), so capacity alone does not close the gap, although these runs are less tuned (Section~\ref{sec:limits}).
 
 \input{tables/tab_deep}
 
 \subsection{Controls}
 \label{sec:res-controls}
 
-We ask whether the signals depend on what they are meant to capture. The lifelong channels do. Removing them from LEAF-LGN lowers the score by $+11.46$ [1.71] (Table~\ref{tab:leafctl-lgn})
-(adjusted 0.036 over the three controls). Shuffling the users' lifelong tables across users lowers it by $+10.65$ [1.77] (adjusted 0.005), to a level
+We ask whether the signals depend on what they are meant to capture. The lifelong channels do. Removing them from LEAF-LGN lowers the score by $11.46$ [1.71] (Table~\ref{tab:leafctl-lgn})
+(adjusted 0.036 over the three controls). Shuffling the users' lifelong tables across users lowers it by $10.65$ [1.77] (adjusted 0.005), to a level
 close to the model without lifelong channels. The gain therefore depends on each user's own history rather than on lifelong features in general.
-Removing the policy channel does not lower the score. The variant without it is $-0.55$ [0.33] (adjusted 0.793), and it gives identical test scores in
-four of the five splits. These controls use the separately tuned LEAF-LGN, not LEAF-LGN+DAX. The controls on a closed-form scorer in \ref{app:leafctl} agree
+Removing the policy channel does not lower the score. The variant without it scores $0.55$ [0.33] higher (adjusted 0.793) and gives identical test scores in four of the five splits. These controls use the separately tuned LEAF-LGN, not LEAF-LGN+DAX. The controls on a closed-form scorer in \ref{app:leafctl} agree
 in direction.
 
 \input{tables/tab_leafctl_lgn}
@@ -149,6 +153,6 @@ Holm correction over the two seeds, so the margin over DIN with DAX is not speci
 
 \input{tables/tab_seeds_din}
 
-The PW-LightGCN comparator and its DAX variant were also re-trained under seeds 1 and 2, at the configurations chosen in the main run, with the epoch within three of the chosen epoch and the DAX grid and mixing weights of the main run (Table~\ref{tab:seeds-pw}). LEAF-LGN+DAX is higher in both seeds: by $+22.60$ [1.90] under seed 1 (0.4858 against 0.4635) and by $+21.84$ [1.93] under seed 2 (0.4856 against 0.4639). The margin is therefore unchanged from the main comparison, at about $22\times10^{-3}$, and the split-level p values are below 0.001 under both seeds after Holm correction over the two seeds. The DAX variant gives $+13.76$ [1.62] under seed 1 (0.4721 against 0.4858) and $+13.32$ [1.62] under seed 2 (0.4722 against 0.4856), with Holm-adjusted split-level values of 0.004 and 0.001. The other comparators remain single-seed: DIN, SIM, SIM+DAX, r-AdjNorm, LightGCN, EASE, the DAX variants of LightGCN and EASE, and the four published estimators.
+The PW-LightGCN comparator and its DAX variant were also re-trained under seeds 1 and 2, at the configurations chosen in the main comparison, with the epoch within three of the chosen epoch and the DAX grid and mixing weights of the main comparison (Table~\ref{tab:seeds-pw}). LEAF-LGN+DAX is higher in both seeds: by $+22.60$ [1.90] under seed 1 (0.4858 against 0.4635) and by $+21.84$ [1.93] under seed 2 (0.4856 against 0.4639). The margin is therefore unchanged from the main comparison, at about $22\times10^{-3}$, and the split-level p values are below 0.001 under both seeds after Holm correction over the two seeds. The margin of LEAF-LGN+DAX over the DAX variant of PW-LightGCN is $+13.76$ [1.62] under seed 1 (0.4858 against 0.4721) and $+13.32$ [1.62] under seed 2 (0.4856 against 0.4722), with Holm-adjusted split-level values of 0.004 and 0.001. The other comparators remain single-seed: DIN, SIM, SIM+DAX, r-AdjNorm, LightGCN, EASE, the DAX variants of LightGCN and EASE, and the four published estimators.
 
 \input{tables/tab_seeds_pw}

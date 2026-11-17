@@ -37,15 +37,39 @@ and all $\kappa_t$ are divided by the value of the evaluation scenario after eac
 \]
 clipped to $[10^{-4},1-10^{-4}]$, where $n_i$ is the number of pre-cut rows of item $i$.
 
-\paragraph{Approximation and clamps} The updates for $\theta_u$ and $\kappa_t$ are the maximisers under the Poisson approximation of
-Section~\ref{sec:method-dax}. They are not the exact maximisers of the expected complete-data log-likelihood under the stated priors. The exact
-stationarity condition has $(1-P(E=1\mid y))\kappa_t/(1-\tau)$ in place of $\kappa_t$ in the denominator, and the update counts every row. The
-$\theta_u$ update is therefore an approximate closed form and not the MAP estimate of the Beta prior. The updates also clamp the values: the E-step
-product $\tau$ to $[10^{-6},1-10^{-6}]$, the E-step denominator $1-\tau\alpha_i$ from below at $10^{-9}$, $\theta_u$, $\kappa_t$ and the lifelong centre
-to $[10^{-3},1]$, and $\alpha_i$ to $[10^{-4},1-10^{-4}]$.
+\paragraph{Exactness of the closed-form updates} Let $a_u$ and $b_u$ be the prior pseudo-counts of $\theta_u$, with $a_u=\lambda\tilde c_u$ and
+$b_u=\lambda(1-\tilde c_u)$ when $\lambda>0$, and $a_u=b_u=1$ when $\lambda=0$. The $\theta_u$ update above is then
+$(S^E_u+a_u)/(K_u+a_u+b_u)$. Its stationarity condition for the expected complete-data log-likelihood is
+\[
+\sum_{r:\,u_r=u}\Bigl[\frac{P(E_r=1)}{\theta_u}-\frac{\kappa_{t_r}\bigl(1-P(E_r=1)\bigr)}{1-\theta_u\kappa_{t_r}}\Bigr]+\frac{a_u}{\theta_u}-\frac{b_u}{1-\theta_u}=0.
+\]
+Without the pseudo-counts, this reduces to $\sum_r P(E_r=1)=\theta_u\sum_r\kappa_{t_r}$ when $\kappa_{t_r}$ is the same for every row of $u$, which holds
+when all of a user's impressions come from one scenario, and then the ratio form is exact. The $\kappa_t$ update has the same property: without the
+pseudo-counts it is exact only when $\theta_{u_r}$ is the same for every row of the scenario $t$. In general both updates are approximations, and
+the pseudo-counts move them further from the stationary point. The updates also clamp the values: the E-step product $\tau$ to
+$[10^{-6},1-10^{-6}]$, the E-step denominator $1-\tau\alpha_i$ from below at $10^{-9}$, $\theta_u$, $\kappa_t$ and the lifelong centre to
+$[10^{-3},1]$, and $\alpha_i$ to $[10^{-4},1-10^{-4}]$.
 
-\paragraph{User-group switch} When the user-group switch is on, the cells $\alpha_{i,s}$ of Equation~\eqref{eq:group-alpha} use the same update with
-$\alpha_i$ as the centre and cell strength $\nu_{\mathrm g}=80$.
+\paragraph{Check of the closed-form updates} We checked the updates on the full pre-cut data of KuaiRand-27K at the configuration chosen most
+often on validation (prior 80, tag centre, lifelong strength 100, scenario factors on), recomputing the examination probabilities at the fitted
+values. The median user has 88\% of her pre-cut impressions in one scenario (impression-weighted 80\%, and 25\% of users see one scenario). For
+$\theta_u$, the ratio and exact updates differ by a median relative amount of 0.2\% (90th percentile 1.3\%), and their Spearman correlation is
+0.998. For $\kappa_t$ they differ by 4.7\% for a non-evaluation scenario with 13\% of the pre-cut impressions, by 18\% for one with 6.6\%, and by up
+to 35\% for scenarios with under 0.1\% of the impressions. Fitting the whole model with exact M-steps for $\theta$ and $\kappa$ raises the
+observed-data log-likelihood of the pre-cut impressions from $-0.5558$ to $-0.5504$ per impression. The item scores hardly change (Spearman
+correlation 0.998 for the logit attractiveness). LEAF-LGN+DAX reaches 0.4859 with exact M-steps against 0.4854 with the ratio updates, a paired
+difference of $-0.44$ [0.42] with split-level $p$ 0.153, so the approximation does not change the ranking significantly.
+
+\paragraph{User-group refinement} The attractiveness may also be estimated separately for six groups of users: five quantile groups of the lifelong
+base rate $r_u$, and a group without lifelong history. Each group's attractiveness is shrunk towards the overall attractiveness,
+\[
+\alpha_{i,s}=\frac{\sum_{r:\,i_r=i,\ s(u_r)=s}P(R_r=1)+\nu_{\mathrm g}\,\alpha_i}{n_{is}+\nu_{\mathrm g}},
+\]
+where $s(u)$ is the group of $u$, $n_{is}$ counts the pre-cut impressions of $i$ to group $s$, and $\nu_{\mathrm g}=80$ is a fixed strength (it is not
+tuned). A candidate then uses the attractiveness of its user's group, $\zeta_{ui}=(\operatorname{logit}\alpha_{i,s(u)}-\mu_\alpha)/\sigma_\alpha$, with the same
+$\mu_\alpha$ and $\sigma_\alpha$ as in Equation~\eqref{eq:zeta}. The refinement was on in all five splits of the reported model. Without it, DAX
+scores 0.4844 against 0.4854 (Section~\ref{sec:res-exam}), so it adds no measurable gain, and it is kept only because it was selected on validation users.
 
 \paragraph{Output} The fit returns $\operatorname{logit}\alpha_i$, $\theta_u$ and $\kappa_t$. The combined score of Section~\ref{sec:method-combine} uses
-$\operatorname{logit}\alpha_i$ standardised over the pool, as in Equation~\eqref{eq:zeta}.
+$\operatorname{logit}\alpha_i$ standardised over the pool, as in Equation~\eqref{eq:zeta}, or the group attractiveness of the user when the
+user-group refinement is used.

@@ -3,7 +3,7 @@
 
 This section defines the ranking problem and the data, the two signals and their combination. LEAF summarises what a user's
 long-term behaviour on other videos says about a candidate (Sections~\ref{sec:method-leaf} and~\ref{sec:method-leaflgn}). DAX
-estimates how attractive a video is once it has been looked at, by separating examination from attraction in the logged clicks
+aims to estimate how attractive a video is once it has been looked at, by separating examination from attraction in the logged clicks
 (Section~\ref{sec:method-dax}). Section~\ref{sec:method-combine} gives the combination, and Section~\ref{sec:method-identify} states
 what the attractiveness does and does not measure. Settings and search grids are in \ref{app:impl} and~\ref{app:grids}.
 Throughout, one running example is used: a viewer who regularly watches cooking videos, and a short cooking clip by a little-known
@@ -135,9 +135,9 @@ relative to the collaborative signal.
 where $B$ is a mini-batch of triples $(u,i,j)$ in which $i$ is a clicked pair, $\sigma$ is the logistic function and $\rho$ the weight
 decay. The negative $j$ is drawn uniformly from the items that $u$ was not shown before $T_0$ (or, when the policy channel is off, did not click).
 
-A policy-log channel, which adds shown but unclicked pairs as weak positives with a weight $w$, was also tried. The separately tuned
-LEAF-LGN selects $w=0$ in four of five splits and does not lose score without the channel (Section~\ref{sec:res-controls}), but the
-backbone selected for LEAF-LGN+DAX uses $w=0.25$ or $0.5$ in every split, so the channel is part of that model. Its definition and
+A policy-log channel, which adds shown but unclicked pairs as weak positives with a weight $w$, was also tried. The LEAF-LGN of the separate search (Section~\ref{sec:protocol-baselines}) selects $w=0$ in four of five splits and
+does not lose score without the channel (Section~\ref{sec:res-controls}). The backbone selected for LEAF-LGN+DAX uses $w=0.25$ or
+$0.5$ in every split, so the channel is part of that model. Its definition and
 its control are in \ref{app:supp}.
 
 \subsection{DAX: detection-adjusted attractiveness}
@@ -199,9 +199,10 @@ click. The M-step re-estimates the factors in the order $\theta$, $\kappa$, $\al
   \label{eq:m-alpha}
 \end{align}
 where $n_i$ is the number of impressions of item $i$. The attractiveness of an item is its expected number of attractions per impression,
-with $\nu$ pseudo-impressions at the tag level added. The updates for $\theta$ and $\kappa$ are closed-form maximisers under a Poisson
-approximation to the examination indicator, which is accurate when examination probabilities are small. \ref{app:em} gives the
-approximation and the clamps. The fit runs for a fixed number of iterations from fixed initial values, without a convergence test (\ref{app:em}).
+with $\nu$ pseudo-impressions at the tag level added. The ratio-form update for $\theta$ is the exact M-step of the likelihood term when all of a user's impressions come from one
+scenario, and the update for $\kappa$ is exact only when examination is constant within a scenario; otherwise both are approximations.
+At the fitted values the ratio and exact updates for $\theta$ agree closely, and fitting with exact M-steps does not change the ranking
+significantly (\ref{app:em} gives the check and the clamps). The fit runs for a fixed number of iterations from fixed initial values, without a convergence test (\ref{app:em}).
 
 The two prior centres are re-estimated at every iteration. The tag centre is the pooled attraction rate of the tag,
 \begin{equation}
@@ -222,28 +223,25 @@ factors. The item score passed on is the standardised logit
   \zeta_i=\frac{\operatorname{logit}\alpha_i-\mu_\alpha}{\sigma_\alpha},
   \label{eq:zeta}
 \end{equation}
-where $\mu_\alpha$ and $\sigma_\alpha$ are the mean and standard deviation of $\operatorname{logit}\alpha$ over $\mathcal I$. In the running
+where $\mu_\alpha$ and $\sigma_\alpha$ are the mean and standard deviation of $\operatorname{logit}\alpha$ over $\mathcal I$. The score
+$\zeta_{ui}$ of a candidate in Section~\ref{sec:method-combine} equals $\zeta_i$, unless the user-group refinement is used, in which case
+it is the score of the user's group (\ref{app:em}). In the running
 example, if most of the clip's non-clicks came from users with a low lifelong click rate or from a scenario with a small factor $\kappa_t$, DAX
 attributes them mostly to missed examination, and the clip receives a higher attractiveness than its raw click rate suggests.
 
-\paragraph{Two switches of the search} Two options of the DAX module are selected in some splits. The tag centre may be replaced, after a fixed number of initial iterations, by a ridge regression on content codes in the spirit of small-area estimation \citep{fay1979smallarea}:
+\paragraph{Optional refinements} The DAX module has two refinements, chosen on validation users. The first replaces the tag centre, after a fixed number of initial iterations, by a ridge regression on content codes in the spirit of small-area estimation \citep{fay1979smallarea}:
 \begin{equation}
   c_i=\sigma\bigl(\mu_0+\mathbf x_i^{\top}\boldsymbol\beta\bigr),\qquad
   \boldsymbol\beta=\bigl(\mathbf X^{\top}W\mathbf X+\xi\,I\bigr)^{-1}\mathbf X^{\top}W\bigl(\mathbf y-\mu_0\mathbf 1\bigr),
   \label{eq:content-centre}
 \end{equation}
 where $\mathbf y$ is the vector of $\operatorname{logit}\alpha_i$ over the pool, $\mathbf X$ stacks the one-hot content codes $\mathbf x_i$ of the
-pool videos, $W=\operatorname{diag}(w_i)$ with $w_i=\sqrt{n_i+1}$, $\mu_0$ is the weighted mean of $\mathbf y$, and $\xi$ is a fixed ridge penalty.
-The attractiveness may also be estimated in six groups of users: five quantile groups of the lifelong base rate $r_u$, and a group without
-lifelong history. Each group's attractiveness is shrunk towards the overall attractiveness,
-\begin{equation}
-  \alpha_{i,s}=\frac{\sum_{r:\,i_r=i,\ s(u_r)=s}p_{R,r}+\nu_{\mathrm g}\,\alpha_i}{n_{is}+\nu_{\mathrm g}},
-  \label{eq:group-alpha}
-\end{equation}
-where $s(u)$ is the group of $u$, $n_{is}$ counts the pre-cut impressions of $i$ to group $s$, and $\nu_{\mathrm g}$ is a fixed strength when this switch is on
-(it is not tuned). A candidate then uses the attractiveness of its user's group, $\zeta_{ui}=(\operatorname{logit}\alpha_{i,s(u)}-\mu_\alpha)/\sigma_\alpha$,
-with the same $\mu_\alpha$ and $\sigma_\alpha$ as in Equation~\eqref{eq:zeta}. Each switch, and each of the lifelong, tag and scenario
-components, can be turned off in the ablations (Section~\ref{sec:res-ablate}).
+pool videos, $W=\operatorname{diag}(w_i)$ with $w_i=\sqrt{n_i+1}$, $\mu_0$ is the weighted mean of $\mathbf y$, and $\xi$ is a fixed ridge penalty. The validation selection chose this centre in one of the
+five splits.
+The second refinement estimates the attractiveness separately for six groups of users, defined by the lifelong base rate. It was on in
+all five splits of the reported model, but it is optional and adds no measurable gain (Section~\ref{sec:res-exam}),
+and its description is in \ref{app:em}. Each lifelong, tag and scenario component can be turned off in the ablations
+(Section~\ref{sec:res-ablate}).
 
 \subsection{Combining LEAF-LGN and DAX}
 \label{sec:method-combine}

@@ -2,27 +2,25 @@
 \label{sec:discussion}
 
 \paragraph{Why the multiplicative form} The additive alternative keeps the same covariates and scenario effects, but replaces the product of
-examination and attractiveness by an additive logit. It is the weakest variant in the ablations, at $+6.09$ per user, but its split-level
+examination and attractiveness by an additive logit. It is the weakest variant in the ablations, $6.09$ [0.96] per user below full DAX, but its split-level
 difference is not significant after Holm correction. For the cooking clip the difference is easy to state. Under the multiplicative model, a
 non-click from a viewer who rarely examines videos barely lowers the estimated attractiveness of the clip, because such a non-click is weak
 evidence. Under the additive model, once the user effect is absorbed, the same non-click lowers the item effect as much as any other
 non-click. This is a fit comparison under one protocol, and it does not show that the multiplicative form is correct.
 
-\paragraph{Item-level and tag-level parts} Permuting attractiveness within tags keeps 41.6\% of the gain, and permuting it across items
-removes the gain. A tag mean alone captures part of the signal (\ref{app:controls}), and the rest lies in item deviations from that
+\paragraph{Item-level and tag-level parts} Permuting attractiveness within tags keeps 41.6\% of the gain, and permuting it across items reduces the gain to zero per user. A tag mean alone captures part of the signal (\ref{app:controls}), and the rest lies in item deviations from that
 mean. The permutations keep the marginal distribution of attractiveness fixed, so the decomposition is only as strong as these controls.
 
-\paragraph{Lifelong channels} Shuffling the lifelong tables across users removes the lifelong gain of LEAF-LGN, and removing the policy channel
+\paragraph{Lifelong channels} Shuffling the lifelong tables across users brings LEAF-LGN back to the level of a model without lifelong channels, and removing the policy channel
 does not lower its score. Whether the policy channel adds to LEAF-LGN+DAX was not tested. The signal that transfers to randomly exposed items
 is therefore the users' own lifelong affinities for content keys.
 
 \paragraph{Published and deep baselines} The published estimators were each tuned over four configurations, and NAVIP is close to LightGCN, so
-the comparison says little about these estimators in general. The closest comparator is DIN+DAX. Its margin is narrow under the default
-search, but it is larger under matched capacity and under two further training seeds, so the default margin is not the whole picture. The margin over PW-LightGCN is also unchanged under two further training seeds.
+the comparison says little about these estimators in general. The closest comparator is DIN+DAX. Its adjusted split-level value is 0.0456 under the default search, and its margin is positive and significant in each matched-capacity and seed re-run, so the default margin is not the whole picture. The margin over PW-LightGCN is also unchanged under two further training seeds.
 Whether a wider search for the deep models would change the order of the deep and published baselines is open.
 
 \paragraph{Examination and item appeal} The examination control shows that the examination model adds to the item score, and that the
-tag-shrunk click rate is a weaker item score than DAX. Used alone, DAX matches popularity, so the corrected item score does not on its own
+tag-shrunk click rate is a weaker item score than DAX. Adding popularity or the raw click rate to the backbone gives much less than DAX, so the gain is not explained by either alone. Used alone, DAX matches popularity, so the corrected item score does not on its own
 outrank popularity. Its value in these results lies in complementing a personalised backbone. This is a reading of one platform
 and one protocol, and it does not show that the item score recovers item quality.
 

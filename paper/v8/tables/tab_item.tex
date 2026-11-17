@@ -1,0 +1,26 @@
+\begin{table}[tbp]
+\centering
+\footnotesize
+\caption{Item-term controls on KuaiRand-27K: LEAF-LGN with log popularity or the raw click rate of each item in place of DAX, and DAX without user groups (nDCG@10).}
+\label{tab:item}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrrcc}
+\toprule
+Setting or comparison & Configs & Mean & Difference [95\% hw] & NB $p$ & NB $p_{\mathrm{Holm}}$ \\
+\midrule
+LEAF-LGN, same trainings & 2 & 0.4706 &  &  &  \\
+LEAF-LGN + log popularity & 10 & 0.4711 &  &  &  \\
+LEAF-LGN + raw pre-cut click rate & 10 & 0.4744 &  &  &  \\
+\midrule
+LEAF-LGN+DAX & 320 & 0.4854 &  &  &  \\
+LEAF-LGN+DAX without user groups & 160 & 0.4844 &  &  &  \\
+\midrule
+LEAF-LGN+DAX minus LEAF-LGN + log popularity &  &  & +14.68 [1.37] & 0.005 & 0.011 \\
+LEAF-LGN+DAX minus LEAF-LGN + raw click rate &  &  & +11.27 [1.26] & 0.002 & 0.005 \\
+LEAF-LGN+DAX minus LEAF-LGN+DAX without user groups &  &  & +1.13 [0.53] & 0.377 & 0.377 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize Log popularity is $\log(1+x)$, where $x$ is the number of clicks on the item before the cut-off. The raw click rate is $(x+1)/(n+2)$, where $n$ is the number of pre-cut impressions of the item. Each item term enters the same post-hoc combination as DAX, with the same trainings, the same weight grid and the same validation selection. The last row removes the user-group refinement of DAX and keeps everything else. Mean: mean of the five split means. Difference: mean over the pooled test users of the paired per-user difference, times $10^{3}$, with the 95\% half-width. NB $p$ is the split-level Nadeau-Bengio value; NB $p_{\mathrm{Holm}}$ is Holm correction over the three difference rows.\end{minipage}
+\end{table}

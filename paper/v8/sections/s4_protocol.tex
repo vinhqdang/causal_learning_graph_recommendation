@@ -124,7 +124,7 @@ LightGCN is measured against a LightGCN trained in the same run as its DAX varia
 same search. The LEAF-LGN of the main table (0.4736) is selected from twelve trainings over the learning rate, the weight decay and the policy
 weight $w\in\{0,0.25,0.5\}$. That grid includes $w=0$, and the selected $w$ is zero in every split, whereas the LEAF-LGN+DAX backbone selects
 $w=0.25$ or $0.5$ in every split. The DAX increment on LEAF-LGN therefore also contains the difference between these two backbone trainings. A
-separate search of 197 configurations of the backbone alone gives 0.4728 (LEAF-LGN with a separate search, a development comparison). 
+second search, run separately over the backbone alone with 197 configurations (the separate search), gives 0.4728 for LEAF-LGN.
 
 \subsection{Ablation design}
 \label{sec:protocol-ablation}
