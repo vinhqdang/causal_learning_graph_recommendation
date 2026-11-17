@@ -136,9 +136,11 @@ class DIN(nn.Module):
 
 
 @torch.no_grad()
-def score_rows(model, rows, cand, tok, valid, chunk=16, device="cpu"):
+def score_rows(model, rows, cand, tok, valid, chunk=None, device="cpu"):
     """(U, C) scores of the candidate matrix cand (U, C) of the users rows (U,), chunked over users. tok and valid
     must be on device; the scores are returned on the CPU (the evaluation runs there)."""
+    if chunk is None:
+        chunk = max(1, 256 // int(model.d))   # 16 users at d = 16; fewer at larger d keeps the (B, C, L, 4d) tensor bounded
     out = torch.empty(cand.shape, dtype=torch.float32)
     for r0 in range(0, len(rows), chunk):
         sl = slice(r0, r0 + chunk)
