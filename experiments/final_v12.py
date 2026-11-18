@@ -651,6 +651,8 @@ if ref is not None:
             rows.append(_ms(V17 + f, k, k + (" (v17)" if k == "LightGCN" else "")))
     for k in ("r-AdjNorm", "LightGCN"):
         rows.append(_ms(STORED_BASE, k, k + " (stored)"))
+    if "QP family" in M:
+        rows.append({"name": "QP family (stored)", "per_split": M["QP family"]["per_split"]})
     for k in ("NAVIP", "IPS-MF", "DR-JL", "MRDR"):
         rows.append(_ms(PUB, k))
     rows = [r for r in rows if r is not None]
