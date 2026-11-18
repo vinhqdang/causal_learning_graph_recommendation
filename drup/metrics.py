@@ -89,6 +89,11 @@ class UserMetrics:
             ideal = cum[(torch.clamp(self.npos, max=k).long() - 1)]
             out[f"ndcg@{k}"] = dcg / ideal
             out[f"recall@{k}"] = top.sum(1) / self.npos
+        # MRR: 1 / (rank of the first relevant candidate in the nDCG order; every kept user has one)
+        L_ = rs.shape[1]
+        first_hit = torch.where(rs > 0, torch.arange(L_, device=rs.device).expand_as(rs),
+                                torch.full_like(rs, L_, dtype=torch.long)).min(1).values
+        out["mrr"] = 1.0 / (first_hit.double() + 1.0)
         # AUC with ties counted one half = tie-averaged rank sum
         ss = torch.gather(s, 1, order)
         L = ss.shape[1]

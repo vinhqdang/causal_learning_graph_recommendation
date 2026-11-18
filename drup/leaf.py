@@ -335,14 +335,20 @@ class Layout:
                                  "cand": cand})
 
 
+EXTRA_METRICS = ("ndcg@5", "ndcg@10", "ndcg@20", "recall@10", "recall@20", "mrr")
+
+
 class BucketSelector:
     """Validation selection of one (configuration, epoch) per split, on bucketed score matrices (see Layout). A score
-    argument is a list with one (U_b x L_b) matrix per bucket. Test values of the selected configuration are kept per
-    user. Same values as drup.metrics.evaluate (checked against the probes)."""
+    argument is a list with one (U_b x L_b) matrix per bucket. The test values of the running best of every split are
+    kept per user, for every metric of EXTRA_METRICS (ndcg@5/10/20, recall@10/20, mrr); the selection uses key only.
+    Same values as drup.metrics.evaluate (checked against the probes)."""
 
     def __init__(self, layout, splits, ks, key, row_ids):
         from drup.metrics import UserMetrics
+        assert key in EXTRA_METRICS, key
         self.layout, self.key, self.row_ids, self.n, self.nc = layout, key, np.asarray(row_ids), 0, 0
+        ks = tuple(sorted(set(ks) | {5, 10, 20}))        # the test metrics need k = 5, 10, 20
         nb = len(layout.buckets)
 
         def parts(lst):
@@ -352,7 +358,7 @@ class BucketSelector:
                     groups[layout.bucket_of[k]].append((int(layout.local_of[k]), it, rel))
             return [UserMetrics(g, ks, None, "cpu") if g else None for g in groups]
         self.parts = [(parts(v), parts(t)) for v, t in splits]
-        self.best = [{"val": -1.0, "cfg": None, "test": None, "per_user": None} for _ in splits]
+        self.best = [{"val": -1.0, "cfg": None, "test": None, "ids": None, "vals": None} for _ in splits]
 
     def add(self, S, cfg, active=None, new_config=True):
         """Adds one evaluation (a configuration, or one epoch of it); returns the validation value of every split
@@ -372,38 +378,64 @@ class BucketSelector:
             v = tot / max(cnt, 1)
             vals.append(v)
             if v > self.best[s]["val"]:
-                per_user = {}
+                # test values of the new best only (the running best is all that is kept): one row per metric
+                ids, mats = [], []
                 for b, um in enumerate(tp):
                     if um is None:
                         continue
-                    pu = um.compute(S[b])[self.key].tolist()
-                    per_user.update(zip(self.layout.buckets[b]["k"][um.users].tolist(), pu))
-                self.best[s] = {"val": v, "cfg": dict(cfg), "test": float(np.mean(list(per_user.values()))),
-                                "per_user": per_user}
+                    out = um.compute(S[b])
+                    ids.append(np.asarray(self.layout.buckets[b]["k"])[um.users])
+                    mats.append(torch.stack([out[m] for m in EXTRA_METRICS]).cpu().numpy())
+                ids = np.concatenate(ids) if ids else np.zeros(0, dtype=np.int64)
+                V = np.concatenate(mats, axis=1) if mats else np.zeros((len(EXTRA_METRICS), 0))
+                self.best[s] = {"val": v, "cfg": dict(cfg), "test": float(np.mean(V[EXTRA_METRICS.index(self.key)])),
+                                "ids": ids, "vals": V}
         return vals
+
+    def split_metrics(self, s):
+        """{metric: test mean over the users of split s} of the running best of split s."""
+        V = self.best[s]["vals"]
+        return {m: float(np.mean(V[i])) for i, m in enumerate(EXTRA_METRICS)}
 
     def result(self):
         tests = [b["test"] for b in self.best]
+        S_ = range(len(self.best))
+        mets = [self.split_metrics(s) for s in S_]
+        per_user_extra = {}
+        for i, m in enumerate(EXTRA_METRICS):
+            per_user_extra[m] = [{str(int(self.row_ids[k])): float(x) for k, x in zip(self.best[s]["ids"].tolist(),
+                                                                                       self.best[s]["vals"][i].tolist())}
+                                 for s in S_]
+        test_metrics = {m: [float(np.mean([p[m] for p in mets])), float(np.std([p[m] for p in mets]))]
+                        for m in EXTRA_METRICS}
         return {"test_mean": float(np.mean(tests)), "test_sd": float(np.std(tests)),
+                "test_metrics": test_metrics,
                 "val_mean": float(np.mean([b["val"] for b in self.best])),
                 "chosen": [b["cfg"] for b in self.best],
-                "per_split": [{self.key: b["test"]} for b in self.best],
+                "per_split": mets,
                 "val_best": [b["val"] for b in self.best],
-                "per_user": [{str(int(self.row_ids[k])): v for k, v in b["per_user"].items()} for b in self.best],
+                "per_user": per_user_extra[self.key],
+                "per_user_extra": per_user_extra,
                 "n_evals": self.n, "n_configs": self.nc}
 
     def state(self):
-        return {"n": self.n, "nc": self.nc, "best": [{"val": b["val"], "cfg": b["cfg"], "test": b["test"],
-                                       "per_user": None if b["per_user"] is None else
-                                       [[int(k), v] for k, v in b["per_user"].items()]} for b in self.best]}
+        return {"n": self.n, "nc": self.nc,
+                "best": [{"val": b["val"], "cfg": b["cfg"], "test": b["test"],
+                          "ids": None if b["ids"] is None else b["ids"].tolist(),
+                          "vals": None if b["vals"] is None else b["vals"].tolist()} for b in self.best]}
 
     def load_state(self, st):
         self.n = st["n"]
         # partial files written before nc existed count evaluations only: exact for the tied variant (one evaluation
         # per configuration), an upper bound for LEAF-LGN (epochs)
         self.nc = st.get("nc", st["n"])
+        for b in st["best"]:
+            if b.get("vals") is None and b.get("cfg") is not None:
+                raise ValueError("partial selector state without the per-metric test values (written before "
+                                 "EXTRA_METRICS): rerun this arm from scratch")
         self.best = [{"val": b["val"], "cfg": b["cfg"], "test": b["test"],
-                      "per_user": None if b["per_user"] is None else {k: v for k, v in b["per_user"]}}
+                      "ids": None if b["ids"] is None else np.asarray(b["ids"], dtype=np.int64),
+                      "vals": None if b["vals"] is None else np.asarray(b["vals"], dtype=np.float64)}
                      for b in st["best"]]
 
 

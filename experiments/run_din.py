@@ -11,7 +11,8 @@ validation per split, exactly as for LEAF-LGN + DAX (run_dax.Posthoc, selection 
 
 Grid (defaults, 4 CPU cores): lr {1e-2, 3e-3} x wd {1e-4, 1e-5}, dim 16, hidden 16, 12 epochs at most, patience 2 per
 split (run_dax's patience rule, on the best value over the epoch's configurations). Output: the run_dax format,
-results {"DIN", "DIN+DAX"} (or "SIM", "SIM+DAX") with per_user keyed by dataset row ids, n_configs = trainings x DAX
+results {"DIN", "DIN+DAX"} (or "SIM", "SIM+DAX") with per_user keyed by dataset row ids (and test / per_split /
+per_user_extra holding every metric of run_dax.EXTRA_METRICS at the selected point, see run_dax), n_configs = trainings x DAX
 configurations x gammas for the DAX arm (trainings for the base), n_evals = validation evaluations. Resumable through
 OUT.partial.json (written after every training).
 
@@ -162,6 +163,8 @@ def main():
         print(f"{nm}: test {r['test']['ndcg@10'][0]:.4f} +- {r['test']['ndcg@10'][1]:.4f} "
               f"(val {np.mean(r['val_best']):.4f}, {r['n_configs']} configurations, {r['n_evals']} evaluations) "
               f"chosen {r['chosen'][0]}", flush=True)
+        print("    all test metrics: " + " ".join(f"{m} {v[0]:.4f}+-{v[1]:.4f}" for m, v in r["test"].items()),
+              flush=True)
     with open(a.out, "w") as f:
         json.dump({"args": sig, "results": res, "plan": None, "dataset": a.dataset}, f)
     if os.path.exists(path):

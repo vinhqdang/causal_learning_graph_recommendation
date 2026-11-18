@@ -50,7 +50,9 @@ every epoch instead of caching it (memory: the cache holds one 2.3M-cell matrix 
 Output: the run_learned / run_leaf format, results[name] = {test, chosen, per_split, val_best, per_user, n_configs,
 n_evals}, plus "plan" (the trainings and the epoch windows read by each split) and "dataset". n_configs counts
 configurations (backbone training x DAX configuration x gamma), n_evals the validation evaluations (configuration x
-epoch). per_user keys are dataset row ids. Resumable: OUT.partial.json is written after every training block (one
+epoch). per_user keys are dataset row ids. The test entries hold every metric of EXTRA_METRICS (ndcg@5/10/20, recall@10/20,
+mrr) at the selected point of each split: test[metric] = [mean, sd], per_split[s][metric], per_user_extra[metric][s]
+= {row id: value}; the selection is on validation ndcg@10 as before. Resumable: OUT.partial.json is written after every training block (one
 LEAF-LGN training, one joint training, one learned-backbone training, or one EASE w).
 
 The DAX table is fitted on the pre-cut standard log only (drup.dax.fit_dax_dataset). The learned backbones use the
@@ -87,9 +89,9 @@ from drup.dax import (DAXChannel, LEAFLGNDAX, all_perm, control_item_term, dax_v
                       user_strata, within_code_perm)
 from drup.device import get_device  # noqa: E402
 from drup.estimation import baseline_imputation, clip_propensity, get_propensity  # noqa: E402
-from drup.leaf import (CUT_MS, LEAFLGN, BucketSelector, Layout, LifelongTables, check_temporal_protocol,  # noqa: E402
-                       collective_gram, collective_solve, compact_base, fit_bpr_policy, make_lightgcn,
-                       protocol_split)
+from drup.leaf import (CUT_MS, EXTRA_METRICS, LEAFLGN, BucketSelector, Layout, LifelongTables,  # noqa: E402
+                       check_temporal_protocol, collective_gram, collective_solve, compact_base, fit_bpr_policy,
+                       make_lightgcn, protocol_split)
 
 DATA = os.path.join(ROOT, "data", "raw")
 V10 = os.path.join(ROOT, "results", "v10")
@@ -546,31 +548,40 @@ def run_learned_posthoc(a, d, post, state, save, layout, jobs):
 
 
 def average_arms(rs):
-    """Mean over the permutation seeds of one shuffle arm. Per split the per-user test values are averaged over the
-    seeds (every seed selects its own configuration on validation); the arm's test value is the mean over users, as in
-    BucketSelector. n_configs and n_evals are summed over the seeds."""
+    """Mean over the permutation seeds of one shuffle arm. Per split and metric the per-user test values are averaged
+    over the seeds (every seed selects its own configuration on validation); the arm's test value is the mean over
+    users, as in BucketSelector. n_configs and n_evals are summed over the seeds. Every metric of EXTRA_METRICS is
+    averaged when the seeds' results have per_user_extra (else only KEY, from per_user)."""
     S = len(rs[0]["per_split"])
-    per_user, per_split = [], []
+    metrics = EXTRA_METRICS if all("per_user_extra" in r for r in rs) else (KEY,)
+
+    def pu_of(r, m, s):
+        return r["per_user"][s] if m == KEY else r["per_user_extra"][m][s]
+    extra = {m: [] for m in metrics}
+    per_split = []
     for s in range(S):
-        acc = {}
-        for r in rs:
-            for u, v in r["per_user"][s].items():
-                acc.setdefault(u, []).append(v)
-        pu = {u: float(np.mean(v)) for u, v in acc.items()}
-        per_user.append(pu)
-        per_split.append({KEY: float(np.mean(list(pu.values())))})
-    tests = [p[KEY] for p in per_split]
-    return {"test": {KEY: [float(np.mean(tests)), float(np.std(tests))]}, "chosen": rs[0]["chosen"],
+        for m in metrics:
+            acc = {}
+            for r in rs:
+                for u, v in pu_of(r, m, s).items():
+                    acc.setdefault(u, []).append(v)
+            extra[m].append({u: float(np.mean(v)) for u, v in acc.items()})
+        per_split.append({m: float(np.mean(list(extra[m][s].values()))) for m in metrics})
+    test = {m: [float(np.mean([p[m] for p in per_split])), float(np.std([p[m] for p in per_split]))] for m in metrics}
+    return {"test": test, "chosen": rs[0]["chosen"],
             "chosen_by_perm_seed": [r["chosen"] for r in rs], "per_split": per_split,
             "val_best": [float(np.mean([r["val_best"][s] for r in rs])) for s in range(S)],
-            "per_user": per_user, "n_configs": sum(r["n_configs"] for r in rs),
+            "per_user": extra[KEY], "per_user_extra": extra, "n_configs": sum(r["n_configs"] for r in rs),
             "n_evals": sum(r["n_evals"] for r in rs)}
 
 
 def result_of(r):
-    return {"test": {KEY: [r["test_mean"], r["test_sd"]]}, "chosen": r["chosen"], "per_split": r["per_split"],
-            "val_best": r["val_best"], "per_user": r["per_user"], "n_configs": r["n_configs"],
-            "n_evals": r["n_evals"]}
+    """The run's result entry: test = {metric: [mean, sd]} over the splits for every metric of EXTRA_METRICS (ndcg@10
+    as before); per_user = ndcg@10 per dataset row (kept for final_v12); per_user_extra = {metric: [{row: value} per
+    split]} for every metric."""
+    return {"test": r["test_metrics"], "chosen": r["chosen"], "per_split": r["per_split"],
+            "val_best": r["val_best"], "per_user": r["per_user"], "per_user_extra": r["per_user_extra"],
+            "n_configs": r["n_configs"], "n_evals": r["n_evals"]}
 
 
 def main():
@@ -736,6 +747,8 @@ def main():
         print(f"{nm}: test {r['test']['ndcg@10'][0]:.4f} +- {r['test']['ndcg@10'][1]:.4f} "
               f"(val {np.mean(r['val_best']):.4f}, {r['n_configs']} configurations, {r['n_evals']} evaluations) "
               f"chosen {r['chosen'][0]}", flush=True)
+        print("    all test metrics: " + " ".join(f"{m} {v[0]:.4f}+-{v[1]:.4f}" for m, v in r["test"].items()),
+              flush=True)
     plan_out = None if plans is None else [dict(lr=p["lr"], wd=p["wd"], w=p["w"], splits=p["splits"],
                                                  lo={str(k): v for k, v in p["lo"].items()},
                                                  hi={str(k): (None if v == INF else v) for k, v in p["hi"].items()})
