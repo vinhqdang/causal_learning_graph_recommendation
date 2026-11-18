@@ -1,0 +1,7 @@
+lgn rc=0 secs=1696
+ease rc=0 secs=1990
+din rc=0 secs=3003
+lightgcn rc=0 secs=2060
+pw rc=0 secs=1677
+sim rc=0 secs=7869
+ALL_DONE
