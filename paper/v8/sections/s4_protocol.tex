@@ -53,10 +53,21 @@ validation and 18,954 test users in each split. The backbones are trained once f
 every split reads the same training trajectory. The splits change only which users select the epoch, the configuration and $\gamma$, and which
 users are scored. This is why a split-level test is reported next to the per-user test.
 
+\subsection{Ranking metrics}
+\label{sec:protocol-metrics}
+
+Six ranking metrics are reported for every method: nDCG@5, nDCG@10, nDCG@20, Recall@10, Recall@20 and the mean reciprocal rank (MRR). Each is
+computed for each test user on that user's candidate list, in which the clicked candidates are the relevant items. Users without a clicked
+candidate are excluded, since nDCG and recall are then undefined. nDCG@$k$ discounts the candidate at rank $r$ by $1/\log_2(r+1)$ and divides the
+discounted gain of the top $k$ by the largest gain attainable with the same number of relevant items in $k$ positions. Recall@$k$ is the share of
+the user's clicked candidates that appear in the top $k$. MRR is the reciprocal of the rank of the first clicked candidate. The split value of each
+metric is the mean over the users of that split, and the table entries are means over the five splits.
+
 \subsection{Selection and search budgets}
 \label{sec:protocol-selection}
 
-For each split the selected configuration is the one with the largest validation nDCG@10. The test labels are read only for the configuration
+For each split the selected configuration is the one with the largest validation nDCG@10, and no other metric enters the choice of any
+configuration; the other five metrics are read at the configuration so selected. The test labels are read only for the configuration
 that is best on validation so far, and no test label influences the choice of any configuration. The configurations searched are the backbone
 trainings times the DAX configurations times the values of $\gamma$; epochs are selected inside each training and counted as evaluations, not
 as configurations. LEAF-LGN+DAX searches $12\times32\times10=3{,}840$ configurations, PW-LightGCN+DAX $10\times32\times10=3{,}200$, DIN+DAX 1,280,

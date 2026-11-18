@@ -2,7 +2,7 @@
 \label{app:supp}
 
 This appendix holds the material that the argument does not need: the other DAX options, the detailed settings, the policy-log channel and its
-control, run times, the algorithms, the checks of the pipeline, the search grids of the baselines, the closed-form controls, the sensitivity of the
+control, run times, the algorithms, the checks of the pipeline, the search grids of the baselines, the closed-form controls, the six ranking metrics, the sensitivity of the
 Holm adjustment and the training seeds.
 
 \subsection{Other DAX options}\label{app:fh}
@@ -197,6 +197,13 @@ policy channel contributes $+5.01$ [1.20] per user, but its split-level value is
 variant without music channels gives identical rankings.
 
 \input{tables/tab_leafctl}
+
+\subsection{Six ranking metrics}\label{app:metrics}
+
+Table~\ref{tab:metrics} gives the means of the six ranking metrics for LEAF-LGN+DAX and each comparator, at the configurations selected on validation
+nDCG@10, with the split-level test of each difference from LEAF-LGN+DAX. The definitions are in Section~\ref{sec:protocol-metrics}.
+
+\input{tables/tab_metrics}
 
 \subsection{Sensitivity of the Holm adjustment}\label{app:sens}
 

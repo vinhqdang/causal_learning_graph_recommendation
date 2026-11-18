@@ -1254,10 +1254,98 @@ def table_seeds_pw():
     return recs, adj
 
 
+# ---------------------------------------------------------------------------------------------
+# Table 9: six ranking metrics at the validation-selected configurations (selection on validation nDCG@10)
+# ---------------------------------------------------------------------------------------------
+METRICS = ("ndcg@5", "ndcg@10", "ndcg@20", "recall@10", "recall@20", "mrr")
+METRIC_HEAD = ["nDCG@5", "nDCG@10", "nDCG@20", "Recall@10", "Recall@20", "MRR"]
+V17 = {"lgn": "results/v17/lgn.json", "pw": "results/v17/pw.json", "din": "results/v17/din.json",
+       "sim": "results/v17/sim.json", "ease": "results/v17/ease.json", "lightgcn": "results/v17/lightgcn.json"}
+
+
+def table_metrics():
+    """Means over the five splits of the six ranking metrics, and the split-level Nadeau-Bengio p of LEAF-LGN+DAX
+    minus each row (unadjusted). The DAX runs and the EASE and DIN/SIM runs come from results/v17; PW-LightGCN and the
+    four-configuration LightGCN come from the stored family of the main table; r-AdjNorm and the published estimators
+    come from their stored files. MRR is absent where the stored runs did not record it."""
+    c = context()
+    H, M = c["H"], c["M"]
+    alpha, frac = 0.05, H["FRAC_VAL"]
+
+    def v17(key, name, label=None):
+        return H["method_from"](V17[key], name, label or name)
+
+    ref = v17("lgn", "LEAF-LGN+DAX")
+    rows_spec = [
+        ("LEAF-LGN+DAX", ref), ("LEAF-LGN", v17("lgn", "LEAF-LGN")),
+        ("PW-LightGCN", M.get("QP family")), ("PW-LightGCN+DAX", v17("pw", "QP family+DAX")),
+        ("DIN", v17("din", "DIN")), ("DIN+DAX", v17("din", "DIN+DAX")),
+        ("SIM", v17("sim", "SIM")), ("SIM+DAX", v17("sim", "SIM+DAX")),
+        ("EASE", v17("ease", "EASE")), ("EASE+DAX", v17("ease", "EASE+DAX")),
+        ("LightGCN", M.get("LightGCN")), ("LightGCN+DAX", v17("lightgcn", "LightGCN+DAX")),
+        ("r-AdjNorm", M.get("r-AdjNorm")),
+        ("NAVIP", M.get("NAVIP")), ("IPS-MF", M.get("IPS-MF")), ("DR-JL", M.get("DR-JL")), ("MRDR", M.get("MRDR")),
+    ]
+    break_after = {"LEAF-LGN", "PW-LightGCN+DAX", "EASE+DAX", "r-AdjNorm"}
+    rows, verify, daggers = [], [], []
+    for label, rec in rows_spec:
+        if rec is None:
+            rows.append([esc(label)] + [tbd(f"{label} {METRIC_HEAD[i]}") for i in range(6)])
+            if label in break_after:
+                rows.append("MIDRULE")
+            continue
+        cells, vcells = [esc(label)], []
+        for i, k in enumerate(METRICS):
+            vals = [s.get(k) for s in rec["per_split"]]
+            if any(v is None for v in vals):
+                cells.append("n/a")
+                vcells.append(f"{'n/a':>13s}")
+                continue
+            mu = float(np.mean(vals))
+            txt = f"{mu:.4f}"
+            if rec is ref:
+                vcells.append(f"{mu:.4f}")
+            else:
+                diff = 1000 * float(np.mean([a[k] - b[k] for a, b in zip(ref["per_split"], rec["per_split"])]))
+                p = nadeau_bengio(ref, rec, k, frac)
+                vcells.append(f"{diff:+7.2f}/{p:.3f}")
+                if p >= alpha:
+                    txt += r"$^{\dagger}$"
+                    daggers.append((label, METRIC_HEAD[i], p))
+            cells.append(txt)
+        rows.append(cells)
+        verify.append((label, vcells))
+        if label in break_after:
+            rows.append("MIDRULE")
+    if rows and rows[-1] == "MIDRULE":
+        rows.pop()
+    note = (
+        "Entries are means over the five splits. Each configuration is the one "
+        "selected on validation nDCG@10 in its split; the other metrics are not used for selection. "
+        "$^{\\dagger}$: the split-level difference LEAF-LGN+DAX minus this row is not significant at 0.05 "
+        "(Nadeau-Bengio corrected resampled t test over the five split differences, not adjusted for the number of "
+        "comparisons or metrics); unmarked entries of comparator rows are significant at 0.05 on that test. "
+        "MRR is not available for r-AdjNorm, LightGCN, PW-LightGCN or the published estimators, whose runs did not "
+        "record it. PW-LightGCN and LightGCN are the baselines of the main table (nDCG@10 0.4634 and 0.4576). LightGCN+DAX "
+        "comes from a rerun whose own LightGCN base has nDCG@10 0.4597."
+    )
+    write("tab_metrics.tex", table_env(
+        "Six ranking metrics on KuaiRand-27K for LEAF-LGN+DAX and each comparator, at the configurations selected on "
+        "validation nDCG@10.",
+        "tab:metrics", "lcccccc", ["Method"] + METRIC_HEAD, rows, note))
+    print("Metrics table, split-level difference x1e-3 / NB p (LEAF-LGN+DAX minus row):")
+    print("  " + f"{'method':<16s}" + "".join(f"{m:>14s}" for m in METRIC_HEAD))
+    for label, vcells in verify:
+        print("  " + f"{label:<16s}" + "".join(f"{x:>14s}" for x in vcells))
+    print("  unadjusted non-significant cells (dagger):", [(a, b, round(p, 3)) for a, b, p in daggers])
+    return daggers
+
+
 def main():
     c = context()
     H = c["H"]
     table_methods()
+    table_metrics()
     res, ph, nh = table_main()
     table_fair()
     table_backbone()

@@ -1,0 +1,37 @@
+\begin{table}[tbp]
+\centering
+\footnotesize
+\caption{Six ranking metrics on KuaiRand-27K for LEAF-LGN+DAX and each comparator, at the configurations selected on validation nDCG@10.}
+\label{tab:metrics}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lcccccc}
+\toprule
+Method & nDCG@5 & nDCG@10 & nDCG@20 & Recall@10 & Recall@20 & MRR \\
+\midrule
+LEAF-LGN+DAX & 0.4247 & 0.4854 & 0.5473 & 0.5664 & 0.7632 & 0.5753 \\
+LEAF-LGN & 0.4068 & 0.4706 & 0.5346 & 0.5578 & 0.7572 & 0.5581 \\
+\midrule
+PW-LightGCN & 0.4024 & 0.4634 & 0.5284 & 0.5459 & 0.7493 & n/a \\
+PW-LightGCN+DAX & 0.4118 & 0.4733 & 0.5369 & 0.5536 & 0.7544 & 0.5655$^{\dagger}$ \\
+\midrule
+DIN & 0.4039 & 0.4675 & 0.5323 & 0.5552 & 0.7559 & 0.5549 \\
+DIN+DAX & 0.4179$^{\dagger}$ & 0.4796 & 0.5427$^{\dagger}$ & 0.5624$^{\dagger}$ & 0.7610$^{\dagger}$ & 0.5684$^{\dagger}$ \\
+SIM & 0.3928 & 0.4581 & 0.5240 & 0.5478 & 0.7512 & 0.5426 \\
+SIM+DAX & 0.4072 & 0.4701 & 0.5343 & 0.5546 & 0.7555 & 0.5565 \\
+EASE & 0.3907 & 0.4507 & 0.5182 & 0.5309 & 0.7420 & 0.5454 \\
+EASE+DAX & 0.4003 & 0.4623 & 0.5277 & 0.5446 & 0.7485 & 0.5536 \\
+\midrule
+LightGCN & 0.3950 & 0.4576 & 0.5234 & 0.5427 & 0.7475 & n/a \\
+LightGCN+DAX & 0.4096 & 0.4709 & 0.5352 & 0.5519 & 0.7542 & 0.5625 \\
+r-AdjNorm & 0.3993 & 0.4620 & 0.5275 & 0.5460 & 0.7501 & n/a \\
+\midrule
+NAVIP & 0.3955 & 0.4579 & 0.5238 & 0.5425 & 0.7472 & n/a \\
+IPS-MF & 0.3050 & 0.3765 & 0.4546 & 0.4743 & 0.7064 & n/a \\
+DR-JL & 0.3077 & 0.3823 & 0.4598 & 0.4876 & 0.7150 & n/a \\
+MRDR & 0.3082 & 0.3826 & 0.4603 & 0.4876 & 0.7153 & n/a \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip
+\begin{minipage}{\linewidth}\raggedright\footnotesize Entries are means over the five splits. Each configuration is the one selected on validation nDCG@10 in its split; the other metrics are not used for selection. $^{\dagger}$: the split-level difference LEAF-LGN+DAX minus this row is not significant at 0.05 (Nadeau-Bengio corrected resampled t test over the five split differences, not adjusted for the number of comparisons or metrics); unmarked entries of comparator rows are significant at 0.05 on that test. MRR is not available for r-AdjNorm, LightGCN, PW-LightGCN or the published estimators, whose runs did not record it. PW-LightGCN and LightGCN are the baselines of the main table (nDCG@10 0.4634 and 0.4576). LightGCN+DAX comes from a rerun whose own LightGCN base has nDCG@10 0.4597.\end{minipage}
+\end{table}

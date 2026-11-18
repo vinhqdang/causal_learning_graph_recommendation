@@ -31,7 +31,7 @@ for evaluation. The data are three logs, which are placed in time in Figure~\ref
 at random for $u$ after $T_0$, with every pair that $u$ was shown before $T_0$ removed. The label of a candidate is the click
 indicator of its random impression. Validation users select the configuration and test users are scored. A user without a click among
 the candidates has no defined nDCG@10 and is not scored. For each user the recommender must rank $C_u$ so that clicked candidates come
-first, and accuracy is nDCG@10 averaged over users. The policy log, the lifelong log and statistics derived from them may be used for
+first, and accuracy is nDCG@10 averaged over users (the other ranking metrics are defined in Section~\ref{sec:protocol-metrics}). The policy log, the lifelong log and statistics derived from them may be used for
 training. The random-exposure log may not: its candidates and labels serve only to select hyperparameters and to measure accuracy.
 
 \paragraph{Content keys} Each video carries three content keys, $\mathcal K=\{\mathrm{tag},\mathrm{author},\mathrm{music}\}$. For

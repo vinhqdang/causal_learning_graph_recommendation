@@ -40,6 +40,16 @@ conditional on that budget. Adding EASE and EASE+DAX to the family (\ref{app:sen
 \label{fig:forest}
 \end{figure}
 
+\subsection{Other ranking metrics}
+\label{sec:res-metrics}
+
+We ask whether the ordering of the methods depends on the metric. The leader does not change: LEAF-LGN+DAX is highest on all six metrics, and
+DIN+DAX is second on all six. Table~\ref{tab:metrics} in \ref{app:metrics} gives the six means and marks each cell whose split-level difference from LEAF-LGN+DAX
+is not significant at 0.05. Without adjustment for the number of metrics, every other difference is significant at split level. Against DIN+DAX only nDCG@10
+is significant, and narrowly (p 0.043); the other five metrics give p values between 0.079 and 0.192. Against PW-LightGCN+DAX the MRR difference is
+not significant (p 0.070). Below the leading two, the order shifts with the metric: under the two recall metrics LEAF-LGN and DIN rank above the DAX
+variants of PW-LightGCN and LightGCN, and under the other four metrics they rank below them.
+
 \subsection{Comparison with the same DAX module}
 \label{sec:res-fair}
 

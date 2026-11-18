@@ -51,7 +51,7 @@ training run, and both are corrected for multiple comparisons. The baselines inc
 estimators, PW-LightGCN, a closed-form recommender and two lifelong deep models, and the backbones are also given the DAX module.
 
 \paragraph{Main findings} On KuaiRand-27K, LEAF-LGN+DAX reaches an nDCG@10 of 0.4854, against 0.4634 for PW-LightGCN, our
-unpublished propensity-weighted LightGCN. Its margins over PW-LightGCN and over DIN with DAX, the strongest comparator, are
+unpublished propensity-weighted LightGCN. It is also highest on the other five ranking metrics (Section~\ref{sec:res-metrics}). Its margins over PW-LightGCN and over DIN with DAX, the strongest comparator, are
 significant at split level after Holm correction, though the split-level test is close to the 0.05 threshold in the main comparison. The
 PW-LightGCN margin is unchanged under two further training seeds. The DIN margin is consistent in sign and significant in each
 re-run, under matched model capacity and under those seeds. DAX improves per-user nDCG@10 on all six backbones tested, and at split
