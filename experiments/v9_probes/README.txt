@@ -1,4 +1,4 @@
-v9 probes (KuaiRand). Outputs go to results/v9_probes/. Design and results: paper/v6/DESIGN.md.
+v9 probes (KuaiRand). Outputs go to results/v9_probes/. Exploratory diagnostics behind the manuscript.
 
 Raw-log diagnostics, run from the repository root
 (argument 1: data/raw/KuaiRand-Pure/data, argument 2: output text file):
