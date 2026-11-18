@@ -1,0 +1,29 @@
+\documentclass[11pt]{letter}
+\usepackage[a4paper,margin=2.2cm]{geometry}
+\usepackage{hyperref}
+\signature{Quang-Vinh Dang\\British University Vietnam}
+\address{Quang-Vinh Dang\\British University Vietnam\\Hung Yen, Vietnam\\\href{mailto:vinh.dq4@buv.edu.vn}{vinh.dq4@buv.edu.vn}}
+\date{\today}
+\begin{document}
+\begin{letter}{The Editor-in-Chief\\Knowledge-Based Systems}
+\opening{Dear Editor,}
+
+I am pleased to submit the manuscript entitled \emph{``Examination before attraction: lifelong affinities and detection-adjusted item appeal for recommendation under randomised exposure''} for consideration as a research article in \emph{Knowledge-Based Systems}.
+
+Recommender systems are trained on logs that their own policy produced, so a click reflects both whether an item was noticed and whether it appealed. The manuscript asks how to predict users' responses to items placed at random, using only data logged before the random exposure started. It contributes two components:
+\begin{itemize}
+\item \textbf{LEAF} summarises each user's long-term, exposure-conditional click behaviour on tags, authors and music into lifelong affinity channels that feed a graph recommender.
+\item \textbf{DAX} borrows the separation of detection from occupancy used in ecology and of examination from attraction used in click models: it factorises a click into user examination, scenario examination and item attractiveness, fits the factors by expectation-maximisation, and adds the item score to any recommender.
+\end{itemize}
+
+The evaluation on KuaiRand-27K uses a strict temporal protocol: training uses only data before a cut-off, and validation and test use only the randomised-exposure log after it. Against thirteen comparators, including published debiasing estimators (IPS, doubly robust, MRDR, NAVIP), lifelong deep models (DIN, SIM) and their DAX variants, the combined model ranks highest on six ranking metrics. Split-level tests with Holm correction, controls that switch off examination or shuffle the lifelong statistics, matched-capacity and re-seeded baselines, and a replication on KuaiRand-1K show where the gains come from and where the evidence is weaker. The limitations, including the single platform, are stated explicitly.
+
+I believe the work fits the scope of \emph{Knowledge-Based Systems}: it carries structured knowledge from click models and ecological detection models into a learning-based recommender, and it reports a reproducible protocol. The code and scripts that reproduce every experiment are publicly available at \url{https://github.com/vinhqdang/causal_learning_graph_recommendation}.
+
+This manuscript is original, has not been published previously, and is not under consideration for publication elsewhere. AI-assisted tools were used to support the writing; the author reviewed and edited all content and takes full responsibility for the manuscript.
+
+Thank you for considering this submission.
+
+\closing{Yours sincerely,}
+\end{letter}
+\end{document}
