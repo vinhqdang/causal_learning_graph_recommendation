@@ -633,6 +633,48 @@ if os.path.exists(RND):
         out(f"  {k:<28s} {mean_sd(m)[0]:.4f} +- {mean_sd(m)[1]:.4f}")
 out()
 
+V17 = "results/v17/"
+EXTRA = ("ndcg@5", "ndcg@10", "ndcg@20", "recall@10", "recall@20", "mrr")
+out("5h. Further ranking metrics at the validation-selected configurations (selection on validation nDCG@10; v17 reruns")
+out("    for the DAX runs, stored learned-model files for the rest); split-level Nadeau-Bengio p of LEAF-LGN+DAX minus each")
+def _ms(path, key, label=None):
+    if not os.path.exists(path):
+        return None
+    res = results_of(path)
+    return None if key not in res else {"name": label or key, "per_split": res[key]["per_split"]}
+ref = _ms(V17 + "lgn.json", "LEAF-LGN+DAX")
+if ref is not None:
+    rows = [ref, _ms(V17 + "lgn.json", "LEAF-LGN")]
+    for f, ks in (("pw.json", ("QP family", "QP family+DAX")), ("din.json", ("DIN", "DIN+DAX")), ("sim.json", ("SIM", "SIM+DAX")),
+                  ("ease.json", ("EASE", "EASE+DAX")), ("lightgcn.json", ("LightGCN", "LightGCN+DAX"))):
+        for k in ks:
+            rows.append(_ms(V17 + f, k, k + (" (v17)" if k == "LightGCN" else "")))
+    for k in ("r-AdjNorm", "LightGCN"):
+        rows.append(_ms(STORED_BASE, k, k + " (stored)"))
+    for k in ("NAVIP", "IPS-MF", "DR-JL", "MRDR"):
+        rows.append(_ms(PUB, k))
+    rows = [r for r in rows if r is not None]
+    out("  " + f"{'method':<24s}" + "".join(f"{m:>11s}" for m in EXTRA))
+    for r in rows:
+        cells = []
+        for mtr in EXTRA:
+            v = [p.get(mtr) for p in r["per_split"]]
+            cells.append(f"{np.mean(v):11.4f}" if all(x is not None for x in v) else f"{'n/a':>11s}")
+        out(f"  {r['name']:<24s}" + "".join(cells))
+    out("  NB p (LEAF-LGN+DAX minus row), per metric:")
+    for r in rows[1:]:
+        cells = []
+        for mtr in EXTRA:
+            if all(mtr in p for p in r["per_split"]):
+                a = {"per_split": [{KEY: p[mtr]} for p in ref["per_split"]]}
+                b = {"per_split": [{KEY: p[mtr]} for p in r["per_split"]]}
+                d = np.mean([x[mtr] - y[mtr] for x, y in zip(ref["per_split"], r["per_split"])]) * 1000
+                cells.append(f"{d:+7.2f}/{nadeau_bengio(a, b, KEY, FRAC_VAL):.3f}")
+            else:
+                cells.append(f"{'n/a':>13s}")
+        out(f"  {r['name']:<24s} " + " ".join(f"{c:>13s}" for c in cells))
+out()
+
 out("6. Checks and information (not gates)")
 if "LEAF-LGN" in M and "LEAF-LGN(stored)" in M:
     out(line("info: LEAF-LGN (posthoc run) - LEAF-LGN (stored)", pair(M["LEAF-LGN"], M["LEAF-LGN(stored)"], EXPECTED_N)))

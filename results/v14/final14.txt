@@ -195,6 +195,30 @@ Inputs missing or not used:
   Popularity                   0.4194 +- 0.0010
   DAX alone                    0.4206 +- 0.0009
 
+5h. Further ranking metrics at the validation-selected configurations (selection on validation nDCG@10; v17 reruns
+    for the DAX runs, stored learned-model files for the rest); split-level Nadeau-Bengio p of LEAF-LGN+DAX minus each
+  method                       ndcg@5    ndcg@10    ndcg@20  recall@10  recall@20        mrr
+  LEAF-LGN+DAX                 0.4247     0.4854     0.5473     0.5664     0.7632     0.5753
+  LEAF-LGN                     0.4068     0.4706     0.5346     0.5578     0.7572     0.5581
+  EASE                         0.3907     0.4507     0.5182     0.5309     0.7420     0.5454
+  EASE+DAX                     0.4003     0.4623     0.5277     0.5446     0.7485     0.5536
+  r-AdjNorm (stored)           0.3993     0.4620     0.5275     0.5460     0.7501        n/a
+  LightGCN (stored)            0.3950     0.4576     0.5234     0.5427     0.7475        n/a
+  NAVIP                        0.3955     0.4579     0.5238     0.5425     0.7472        n/a
+  IPS-MF                       0.3050     0.3765     0.4546     0.4743     0.7064        n/a
+  DR-JL                        0.3077     0.3823     0.4598     0.4876     0.7150        n/a
+  MRDR                         0.3082     0.3826     0.4603     0.4876     0.7153        n/a
+  NB p (LEAF-LGN+DAX minus row), per metric:
+  LEAF-LGN                  +17.98/0.012  +14.74/0.009  +12.74/0.010   +8.55/0.022   +6.07/0.010  +17.27/0.016
+  EASE                      +34.00/0.000  +34.68/0.000  +29.16/0.000  +35.51/0.000  +21.25/0.000  +29.95/0.004
+  EASE+DAX                  +24.48/0.001  +23.08/0.001  +19.65/0.001  +21.81/0.000  +14.76/0.000  +21.76/0.013
+  r-AdjNorm (stored)        +25.38/0.000  +23.32/0.000  +19.83/0.000  +20.40/0.000  +13.18/0.000           n/a
+  LightGCN (stored)         +29.77/0.010  +27.78/0.008  +23.93/0.010  +23.67/0.001  +15.77/0.002           n/a
+  NAVIP                     +29.19/0.005  +27.40/0.003  +23.56/0.003  +23.93/0.000  +16.02/0.000           n/a
+  IPS-MF                   +119.68/0.000 +108.87/0.000  +92.71/0.000  +92.07/0.000  +56.85/0.000           n/a
+  DR-JL                    +116.99/0.000 +103.07/0.000  +87.50/0.000  +78.80/0.000  +48.20/0.000           n/a
+  MRDR                     +116.50/0.000 +102.75/0.000  +86.98/0.000  +78.77/0.000  +47.94/0.000           n/a
+
 6. Checks and information (not gates)
   info: LEAF-LGN (posthoc run) - LEAF-LGN (stored)    +0.73 [ 0.52]  p=5.38e-03  NB p=0.660  (splits +0.1 +0.0 +1.4 +0.2 +2.4)
   QP family (retrained) - QP family (stored)      +1.70 [ 0.70]  p=1.89e-06  NB p=0.803  (splits -0.0 +2.2 +2.9 -3.8 +7.6)
